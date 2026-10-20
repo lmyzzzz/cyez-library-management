@@ -1,0 +1,401 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device" version="24.7.17">
+  <diagram id="architecture" name="总体架构">
+    <mxGraphModel dx="1480" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="server" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f1f5fb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="1400" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f1f8f5;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="570" width="625" height="465" as="geometry" />
+        </mxCell>
+        <mxCell id="student" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f6f3fb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="570" width="625" height="465" as="geometry" />
+        </mxCell>
+        <mxCell id="api-registry" edge="1" parent="1" source="api" target="registry" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.11363636363636363;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="245" as="sourcePoint" />
+            <mxPoint x="230" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="api-business" edge="1" parent="1" source="api" target="business" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.3712121212121212;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="570" y="245" as="sourcePoint" />
+            <mxPoint x="570" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="business-data" edge="1" parent="1" source="business" target="database" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="720" y="340" as="sourcePoint" />
+            <mxPoint x="760" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="api-updates" edge="1" parent="1" source="api" target="updates" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.8863636363636364;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1250" y="245" as="sourcePoint" />
+            <mxPoint x="1250" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hardware-core" edge="1" parent="1" source="hardware" target="teacher-core" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="706" as="sourcePoint" />
+            <mxPoint x="300" y="706" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="core-ui" edge="1" parent="1" source="teacher-core" target="teacher-ui" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.4984126984126984;exitY=1.0;exitPerimeter=0;entryX=0.7046728971962617;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="457" y="752" as="sourcePoint" />
+            <mxPoint x="457" y="815" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="guard-electron" edge="1" parent="1" source="guard" target="electron" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.23853211009174313;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="985" y="755" as="sourcePoint" />
+            <mxPoint x="985" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="guard-outbox" edge="1" parent="1" source="guard" target="outbox" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.7614678899082569;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="755" as="sourcePoint" />
+            <mxPoint x="1270" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="teacher-server" edge="1" parent="1" source="teacher" target="server" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.488;exitY=0.0;exitPerimeter=0;entryX=0.21785714285714286;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="345" y="570" as="sourcePoint" />
+            <mxPoint x="345" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="student-server" edge="1" parent="1" source="student" target="server" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.504;exitY=0.0;exitPerimeter=0;entryX=0.7785714285714286;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1130" y="570" as="sourcePoint" />
+            <mxPoint x="1130" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peer-link" edge="1" parent="1" source="teacher" target="student" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.5268817204301075;exitPerimeter=0;entryX=0.0;entryY=0.5268817204301075;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="665" y="815" as="sourcePoint" />
+            <mxPoint x="815" y="815" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="总体架构" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1430" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="多机房 · 200 台学生机 · 2 个教师端｜服务器统一授权与存储，教师与学生直接传递命令和画面" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1430" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="server-title" value="服务端 · 固定 IP｜模块化单体服务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="135" width="1360" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="HTTPS / WSS 接口 · 设备身份与教师账号鉴权" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#dbe8fa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="190" width="1320" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="registry" value="设备角色 / 地址发现&#10;操作权仲裁 / 在线状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="300" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="business" value="档案 / Session / 命令授权&#10;事件接收 / 日志查询" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="420" y="300" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="database" value="PostgreSQL&#10;档案、人脸、Session、日志" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e5eefc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="760" y="300" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="updates" value="策略与签名更新包&#10;安装包仓库 / 备份管理" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="300" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-title" value="教师端 × 2 · 动态 IP" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="583" width="585" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="hardware" value="读卡器 / 摄像头&#10;人脸算法适配" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="660" width="180" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-core" value="Electron 主进程&#10;设备身份 / 直连接口 / 命令" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ddf0e7;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="300" y="660" width="315" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-ui" value="录入登记 · 屏幕墙与设备操作 · 服务器管理&#10;UI 组件库后续接入" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="815" width="535" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-note" value="可共同查看；同一学生机仅有一名控制教师&#10;屏幕墙默认每端最多订阅 60 个可见缩略图" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="945" width="565" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="student-title" value="学生端 × 200 · Windows 10+" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="835" y="583" width="585" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="guard" value="Rust Windows 服务（Session 0）&#10;通信 / 心跳 / 进程监督 / 日志 / 锁定策略 / 关机" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e9e1f6;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="855" y="650" width="545" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="electron" value="用户会话中的 Electron&#10;锁机界面 / 屏幕采集" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="855" y="820" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="outbox" value="本地 SQLite&#10;待发送事件 / 恢复状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="820" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="ipc-label" value="受限 IPC · 本地心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f6f3fb;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=16;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="850" y="769" width="275" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="db-label" value="先落盘，再上报" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#f6f3fb;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=16;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="769" width="260" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="required" value="由 Rust 监督的必需进程集合：退出即锁机" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="855" y="945" width="545" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-server-label" value="HTTPS / WSS&#10;注册、录入、查询、授权、心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="445" width="535" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="student-server-label" value="HTTPS / WSS&#10;注册、教师发现、事件、心跳、更新" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="855" y="445" width="545" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="peer-label" value="直连 HTTPS/WSS&#10;命令 / 回执&#10;心跳 / 画面" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=16;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="668" y="687" width="145" height="113" as="geometry" />
+        </mxCell>
+        <mxCell id="peer-label2" value="画面采用&#10;独立通道" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=16;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="674" y="835" width="132" height="77" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="服务层尽力防护：不开发驱动，不能保证阻止本地管理员绕过；所有解锁必须有有效授权。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1053" width="1400" height="45" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="registration-sequence" name="登记解锁时序">
+    <mxGraphModel dx="1440" dy="1170" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="1170" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lifeline-teacher" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200.0" y="215" as="sourcePoint" />
+            <mxPoint x="200.0" y="1050" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lifeline-server" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560.0" y="215" as="sourcePoint" />
+            <mxPoint x="560.0" y="1050" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lifeline-guard" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920.0" y="215" as="sourcePoint" />
+            <mxPoint x="920.0" y="1050" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lifeline-electron" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1265.0" y="215" as="sourcePoint" />
+            <mxPoint x="1265.0" y="1050" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-0" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200.0" y="290" as="sourcePoint" />
+            <mxPoint x="560.0" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-1" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560.0" y="390" as="sourcePoint" />
+            <mxPoint x="200.0" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-2" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200.0" y="490" as="sourcePoint" />
+            <mxPoint x="920.0" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-3" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920.0" y="600" as="sourcePoint" />
+            <mxPoint x="1265.0" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-4" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1265.0" y="710" as="sourcePoint" />
+            <mxPoint x="920.0" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-5" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920.0" y="820" as="sourcePoint" />
+            <mxPoint x="560.0" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-6" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920.0" y="920" as="sourcePoint" />
+            <mxPoint x="200.0" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="message-7" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560.0" y="1020" as="sourcePoint" />
+            <mxPoint x="200.0" y="1020" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="登记解锁时序" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1390" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="授权、发送和执行分别确认；解锁成功事件由学生直接写入服务端，重复命令不得重复执行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1390" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher" value="教师端" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="145" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="server" value="服务端" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="430" y="145" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="guard" value="Rust 学生服务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="790" y="145" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="electron" value="Electron 界面" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="145" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-0" value="1. 识别确认学生，登记并预留机器" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="208.0" y="224" width="344.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-1" value="2. 返回 Session、操作权与命令授权" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="208.0" y="324" width="344.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-2" value="3. 直连发送解锁命令（commandId / controlEpoch）" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="208.0" y="424" width="704.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-3" value="4. 校验健康与授权，持久化意图&#10;通过本地 IPC 执行解锁" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="928.0" y="534" width="329.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-4" value="5. 确认界面实际切换成功" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="928.0" y="644" width="329.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-5" value="6. 持久化并直接上报&#10;UNLOCK_SUCCEEDED 事件" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="568.0" y="754" width="344.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-6" value="7. 返回同一命令的执行回执" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="208.0" y="854" width="704.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="message-label-7" value="8. 更新 Session，提供已确认状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="208.0" y="954" width="344.0" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="sequence-note" value="解锁超时：保留预留并查询学生实际状态；不可直接假定失败后释放机器。&#10;失联、进程退出或授权失效：拒绝解锁；恢复使用需要教师再次授权。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1080" width="1340" height="65" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="failure-handling" name="故障处置">
+    <mxGraphModel dx="1400" dy="1160" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1160" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="network-lock" edge="1" parent="1" source="network" target="lock" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.25;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="295" as="sourcePoint" />
+            <mxPoint x="430" y="400" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="240" y="350" />
+              <mxPoint x="430" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="process-lock" edge="1" parent="1" source="process" target="lock" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.6854838709677419;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="295" as="sourcePoint" />
+            <mxPoint x="700" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lock-confirm" edge="1" parent="1" source="lock" target="lock-result" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="585" y="490" as="sourcePoint" />
+            <mxPoint x="585" y="555" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="confirmed-pause" edge="1" parent="1" source="lock-result" target="pause" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="585" y="640" as="sourcePoint" />
+            <mxPoint x="585" y="745" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pause-resume" edge="1" parent="1" source="pause" target="resume" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="585" y="840" as="sourcePoint" />
+            <mxPoint x="585" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="failed-shutdown" edge="1" parent="1" source="lock-result" target="shutdown" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.49411764705882355;exitPerimeter=0;entryX=0.0;entryY=0.49523809523809526;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="895" y="597" as="sourcePoint" />
+            <mxPoint x="965" y="762" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="930" y="597" />
+              <mxPoint x="930" y="762" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ui-shutdown" edge="1" parent="1" source="ui-failure" target="shutdown" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1160" y="295" as="sourcePoint" />
+            <mxPoint x="1160" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="shutdown-evidence" edge="1" parent="1" source="shutdown" target="evidence" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1160" y="815" as="sourcePoint" />
+            <mxPoint x="1160" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="故障处置" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1350" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="网络故障与本地进程故障分别检测；自动恢复连接不等于自动解锁" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1350" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="network" value="网络监督 · 每 1 秒心跳&#10;服务端或当前控制教师&#10;连续 20 秒无有效回应" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="45" y="170" width="390" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="process" value="必需进程监督&#10;退出或身份校验失败&#10;检测后立即触发" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="505" y="170" width="390" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="ui-failure" value="Electron 防护故障&#10;非预期退出，或&#10;本地心跳连续 3 秒无响应" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="965" y="170" width="390" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="lock" value="立即请求锁定&#10;无活跃 Session 也必须保持锁定" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e9e1f6;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="275" y="400" width="620" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lock-result" value="3 秒内是否确认锁定成功？" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e9e1f6;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="275" y="555" width="620" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="pause" value="锁机已确认 · Session 暂停&#10;记录原因与暂停起点，保留机器绑定" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ddf0e7;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="275" y="745" width="620" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="resume" value="连接与必需进程恢复，教师重新授权&#10;校验通过后恢复原 Session" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ddf0e7;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="275" y="930" width="620" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="shutdown" value="持久化防护故障&#10;请求系统关机" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="965" y="710" width="390" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence" value="记录关机请求与可得证据&#10;终态未知则待确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="965" y="930" width="390" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="yes" value="是" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="540" y="675" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="reauthorize" value="禁止因重连或进程重启自动放行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="365" y="863" width="440" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="no" value="否" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="887" y="646" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ui-shutdown-label" value="系统关机或受控维护中的&#10;预期退出不重复触发" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="984" y="450" width="352" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="shutdown-note" value="请求关机 ≠ 已经断电" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="981" y="846" width="358" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="fault-note" value="断电或长按电源可能无法上报：先记原因待确认，后续核对。&#10;若管理员同时停用服务与界面，上述本地动作无法得到保证。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="45" y="1060" width="1310" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

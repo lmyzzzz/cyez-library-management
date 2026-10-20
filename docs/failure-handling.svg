@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1160" viewBox="0 0 1400 1160" role="img" aria-labelledby="title desc">
+<title id="title">故障处置</title><desc id="desc">网络故障与本地进程故障分别检测；自动恢复连接不等于自动解锁</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1400" height="1160" fill="#ffffff"/>
+<polyline points="240,295 240,350 430,350 430,400" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="700,295 700,400" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="585,490 585,555" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="585,640 585,745" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="585,840 585,930" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="895,597 930,597 930,762 965,762" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1160,295 1160,710" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1160,815 1160,930" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">故障处置</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">网络故障与本地进程故障分别检测；自动恢复连接不等于自动解锁</text>
+<rect x="45" y="170" width="390" height="125" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="240.0" y="210.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">网络监督 · 每 1 秒心跳</text>
+<text x="240.0" y="239.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">服务端或当前控制教师</text>
+<text x="240.0" y="268.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连续 20 秒无有效回应</text>
+<rect x="505" y="170" width="390" height="125" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="700.0" y="210.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">必需进程监督</text>
+<text x="700.0" y="239.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">退出或身份校验失败</text>
+<text x="700.0" y="268.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">检测后立即触发</text>
+<rect x="965" y="170" width="390" height="125" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1160.0" y="210.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Electron 防护故障</text>
+<text x="1160.0" y="239.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">非预期退出，或</text>
+<text x="1160.0" y="268.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本地心跳连续 3 秒无响应</text>
+<rect x="275" y="400" width="620" height="90" rx="10" fill="#e9e1f6" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="585.0" y="436.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">立即请求锁定</text>
+<text x="585.0" y="468.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">无活跃 Session 也必须保持锁定</text>
+<rect x="275" y="555" width="620" height="85" rx="10" fill="#e9e1f6" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="585.0" y="605.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">3 秒内是否确认锁定成功？</text>
+<rect x="275" y="745" width="620" height="95" rx="10" fill="#ddf0e7" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="585.0" y="784.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">锁机已确认 · Session 暂停</text>
+<text x="585.0" y="815.075" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">记录原因与暂停起点，保留机器绑定</text>
+<rect x="275" y="930" width="620" height="95" rx="10" fill="#ddf0e7" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="585.0" y="969.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">连接与必需进程恢复，教师重新授权</text>
+<text x="585.0" y="1000.075" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">校验通过后恢复原 Session</text>
+<rect x="965" y="710" width="390" height="105" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1160.0" y="754.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">持久化防护故障</text>
+<text x="1160.0" y="786.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">请求系统关机</text>
+<rect x="965" y="930" width="390" height="95" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1160.0" y="970.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">记录关机请求与可得证据</text>
+<text x="1160.0" y="999.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">终态未知则待确认</text>
+<rect x="540" y="675" width="90" height="40" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="585.0" y="702.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">是</text>
+<rect x="365" y="863" width="440" height="40" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="585.0" y="888.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">禁止因重连或进程重启自动放行</text>
+<rect x="887" y="646" width="80" height="40" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="927.0" y="673.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">否</text>
+<rect x="984" y="450" width="352" height="95" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1160.0" y="490.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">系统关机或受控维护中的</text>
+<text x="1160.0" y="516.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">预期退出不重复触发</text>
+<rect x="981" y="846" width="358" height="55" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1160.0" y="880.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">请求关机 ≠ 已经断电</text>
+<rect x="45" y="1060" width="1310" height="70" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="700.0" y="1088.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">断电或长按电源可能无法上报：先记原因待确认，后续核对。</text>
+<text x="700.0" y="1114.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">若管理员同时停用服务与界面，上述本地动作无法得到保证。</text>
+</svg>
