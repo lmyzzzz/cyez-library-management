@@ -1,48 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1170" viewBox="0 0 1440 1170" role="img" aria-labelledby="title desc">
-<title id="title">登记解锁时序</title><desc id="desc">授权、发送和执行分别确认；解锁成功事件由学生直接写入服务端，重复命令不得重复执行</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1540" height="1510" viewBox="0 0 1540 1510" role="img" aria-labelledby="title desc">
+<title id="title">登记解锁时序</title><desc id="desc">Electron 负责业务校验、Session 和上报；Rust 只通过本地 IPC 审核保护状态并执行固定动作</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1440" height="1170" fill="#ffffff"/>
-<polyline points="200.0,215 200.0,1050" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="560.0,215 560.0,1050" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="920.0,215 920.0,1050" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="1265.0,215 1265.0,1050" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="200.0,290 560.0,290" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="560.0,390 200.0,390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="200.0,490 920.0,490" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="920.0,600 1265.0,600" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="1265.0,710 920.0,710" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="920.0,820 560.0,820" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="920.0,920 200.0,920" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="560.0,1020 200.0,1020" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect width="1540" height="1510" fill="#ffffff"/>
+<polyline points="180.0,200 180.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="550.0,200 550.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="920.0,200 920.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1315.0,200 1315.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="180.0,275 550.0,275" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="550.0,370 180.0,370" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="180.0,465 920.0,465" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="920.0,655 1315.0,655" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1315.0,750 920.0,750" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="920.0,940 1315.0,940" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1315.0,1035 920.0,1035" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="920.0,1140 550.0,1140" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="920.0,1245 180.0,1245" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="550.0,1350 180.0,1350" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">登记解锁时序</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">授权、发送和执行分别确认；解锁成功事件由学生直接写入服务端，重复命令不得重复执行</text>
-<rect x="70" y="145" width="260" height="70" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="200.0" y="187.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">教师端</text>
-<rect x="430" y="145" width="260" height="70" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="560.0" y="187.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">服务端</text>
-<rect x="790" y="145" width="260" height="70" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="920.0" y="187.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">Rust 学生服务</text>
-<rect x="1150" y="145" width="230" height="70" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1265.0" y="187.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">Electron 界面</text>
-<rect x="208.0" y="224" width="344.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="380.0" y="258.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">1. 识别确认学生，登记并预留机器</text>
-<rect x="208.0" y="324" width="344.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="380.0" y="358.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">2. 返回 Session、操作权与命令授权</text>
-<rect x="208.0" y="424" width="704.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="560.0" y="458.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">3. 直连发送解锁命令（commandId / controlEpoch）</text>
-<rect x="928.0" y="534" width="329.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="1092.5" y="556.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">4. 校验健康与授权，持久化意图</text>
-<text x="1092.5" y="580.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">通过本地 IPC 执行解锁</text>
-<rect x="928.0" y="644" width="329.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="1092.5" y="678.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">5. 确认界面实际切换成功</text>
-<rect x="568.0" y="754" width="344.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="740.0" y="776.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">6. 持久化并直接上报</text>
-<text x="740.0" y="800.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">UNLOCK_SUCCEEDED 事件</text>
-<rect x="208.0" y="854" width="704.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="560.0" y="888.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">7. 返回同一命令的执行回执</text>
-<rect x="208.0" y="954" width="344.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="380.0" y="988.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">8. 更新 Session，提供已确认状态</text>
-<rect x="50" y="1080" width="1340" height="65" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="720.0" y="1105.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">解锁超时：保留预留并查询学生实际状态；不可直接假定失败后释放机器。</text>
-<text x="720.0" y="1131.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">失联、进程退出或授权失效：拒绝解锁；恢复使用需要教师再次授权。</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Electron 负责业务校验、Session 和上报；Rust 只通过本地 IPC 审核保护状态并执行固定动作</text>
+<rect x="55" y="135" width="250" height="65" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="180.0" y="175.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">教师端</text>
+<rect x="425" y="135" width="250" height="65" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="550.0" y="175.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">服务端</text>
+<rect x="795" y="135" width="250" height="65" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="920.0" y="175.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">学生 Electron</text>
+<rect x="1165" y="135" width="300" height="65" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1315.0" y="175.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">Rust 离线守护</text>
+<rect x="188.0" y="209" width="354.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="365.0" y="243.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">1. 识别确认学生，登记并预留机器</text>
+<rect x="188.0" y="304" width="354.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="365.0" y="338.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">2. 返回 Session、操作权与命令授权</text>
+<rect x="188.0" y="399" width="724.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="550.0" y="433.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">3. 直连发送解锁命令（commandId / controlEpoch）</text>
+<rect x="928.0" y="589" width="379.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1117.5" y="623.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">5. 本地 IPC：请求解锁许可</text>
+<rect x="928.0" y="684" width="379.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1117.5" y="706.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">6. 本地健康 / 保护代次检查</text>
+<text x="1117.5" y="730.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">进入 UNLOCK_PENDING，返回许可</text>
+<rect x="928.0" y="874" width="379.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1117.5" y="908.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">8. 实际界面切换成功确认</text>
+<rect x="928.0" y="969" width="379.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1117.5" y="1003.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">9. 本地状态进入 UNLOCKED 并确认</text>
+<rect x="558.0" y="1074" width="354.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="735.0" y="1096.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10. Electron 持久化并直接上报</text>
+<text x="735.0" y="1120.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">UNLOCK_SUCCEEDED 业务事件</text>
+<rect x="188.0" y="1179" width="724.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="550.0" y="1213.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">11. 返回同一命令的执行回执</text>
+<rect x="188.0" y="1284" width="354.0" height="57" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="365.0" y="1318.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">12. 更新 Session，提供已确认状态</text>
+<rect x="720" y="495" width="410" height="85" rx="10" fill="#f0eafa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="925.0" y="531.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">4. Electron 校验授权、控制代次和网络</text>
+<text x="925.0" y="555.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">复用 TS 规则，持久化命令意图</text>
+<rect x="720" y="780" width="410" height="85" rx="10" fill="#f0eafa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="925.0" y="816.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">7. Electron 主进程切换渲染界面</text>
+<text x="925.0" y="840.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">等待实际 UI 状态确认</text>
+<rect x="50" y="1410" width="1440" height="75" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="770.0" y="1440.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">Rust 不连接教师或服务端，不处理学生档案、业务 Session 与网络授权。</text>
+<text x="770.0" y="1466.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">解锁超时保留机器预留；故障恢复需要教师重新授权，旧本地确认不能覆盖新锁定要求。</text>
 </svg>
