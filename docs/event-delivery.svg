@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1735" viewBox="0 0 1800 1735" role="img" aria-labelledby="title desc">
+<title id="title">08 · 守护事实、业务事件与可靠补报</title><desc id="desc">两级本地持久化与服务端去重：所有网络上报由 Electron 完成，守护从不直接连接服务器。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1800" height="1735" fill="#ffffff"/>
+<polyline points="270.0,225 270.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="690.0,225 690.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1110.0,225 1110.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1530.0,225 1530.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="690.0,410 270.0,410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="270.0,510 690.0,510" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="690.0,610 1110.0,610" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1110.0,710 690.0,710" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="690.0,810 270.0,810" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="690.0,910 1110.0,910" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="690.0,1010 1530.0,1010" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1530.0,1210 690.0,1210" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="690.0,1310 1110.0,1310" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">08 · 守护事实、业务事件与可靠补报</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">两级本地持久化与服务端去重：所有网络上报由 Electron 完成，守护从不直接连接服务器。</text>
+<rect x="70.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="270.0" y="192.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600" fill="#172b4d">Rust / 本地守护日志</text>
+<rect x="490.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="690.0" y="192.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600" fill="#172b4d">Electron / 事件适配</text>
+<rect x="910.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1110.0" y="192.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600" fill="#172b4d">SQLite outbox</text>
+<rect x="1330.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1530.0" y="192.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600" fill="#172b4d">服务端 / PostgreSQL</text>
+<rect x="135.0" y="242" width="270" height="58" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="270.0" y="264.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">1. 产生本地事实</text>
+<text x="270.0" y="289.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">写 guardianEventId / bootId</text>
+<rect x="278.0" y="340" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="364.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">2. ReadEvents(cursor)</text>
+<text x="480.0" y="389.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">启动或重连后拉取</text>
+<rect x="278.0" y="440" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="464.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">3. 返回本地事实与原观测时间</text>
+<text x="480.0" y="489.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Session 仅可有不透明关联</text>
+<rect x="698.0" y="540" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="564.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">4. 事务导入：稳定 eventId</text>
+<text x="900.0" y="589.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">保留来源，唯一约束去重</text>
+<rect x="698.0" y="640" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="676.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">5. 本地提交成功</text>
+<rect x="278.0" y="740" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="764.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">6. AckEvents(cursor)</text>
+<text x="480.0" y="789.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">仅此时可回收守护记录</text>
+<rect x="698.0" y="840" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="864.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">7. 业务自身事件也先落盘</text>
+<text x="900.0" y="889.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">命令意图 / 结果 / 状态</text>
+<rect x="698.0" y="940" width="824.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1110.0" y="976.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">8. HTTPS 批量上报；断网重试复用原 eventId</text>
+<rect x="1395.0" y="1042" width="270" height="58" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1530.0" y="1064.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">9. 事务：事件去重</text>
+<text x="1530.0" y="1089.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">更新状态投影并提交</text>
+<rect x="698.0" y="1140" width="824.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1110.0" y="1176.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10. 提交后返回确认集合；未确认项保留重试</text>
+<rect x="698.0" y="1240" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1264.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">11. 按确认 eventId 回收</text>
+<text x="900.0" y="1289.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">发送队列，保留恢复所需状态</text>
+<rect x="60" y="1425" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1455.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">任一步崩溃后可重放：守护 ACK 丢失由导入去重处理；网络 ACK 丢失由服务端去重处理。</text>
+<rect x="60" y="1480" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1510.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">业务 eventId 与 guardianEventId 保留来源映射；迟到事件按 bootId / Session / 序号归属。</text>
+<rect x="60" y="1535" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1565.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">无法落盘不承诺可靠日志：禁止新解锁并锁机；故障日志失败不能无限阻塞关机。</text>
+</svg>

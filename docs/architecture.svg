@@ -1,93 +1,96 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1350" viewBox="0 0 1480 1350" role="img" aria-labelledby="title desc">
-<title id="title">总体架构</title><desc id="desc">客户端数量不设产品上限｜首轮负载测试：200 学生端 + 2 教师端｜TypeScript 统一主要业务逻辑</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1640" viewBox="0 0 1800 1640" role="img" aria-labelledby="title desc">
+<title id="title">01 · 系统总体架构</title><desc id="desc">TypeScript / Electron 承担业务；Rust 只做离线守护｜设备与教师按集合管理，数量不设产品上限</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1480" height="1350" fill="#ffffff"/>
-<rect x="40" y="130" width="1400" height="280" rx="10" fill="#f1f5fb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="740.0" y="276.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<rect x="40" y="560" width="600" height="525" rx="10" fill="#f1f8f5" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="340.0" y="828.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<rect x="810" y="560" width="630" height="525" rx="10" fill="#f6f3fb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1125.0" y="828.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<polyline points="230,245 230,300" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="570,245 570,300" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="720,340 760,340" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="1250,245 1250,300" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="340,740 340,805" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="80,982 60,982 60,705 80,705" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="980,760 980,830" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="1270,760 1270,830" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="1125,760 1125,970" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="340,640 340,410 400,410 400,245" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="1125,635 1125,410 1080,410 1080,245" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<polyline points="600,695 850,695" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">总体架构</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">客户端数量不设产品上限｜首轮负载测试：200 学生端 + 2 教师端｜TypeScript 统一主要业务逻辑</text>
-<text x="740.0" y="163.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">服务端 · 固定 IP｜Node.js / TypeScript 模块化单体</text>
-<rect x="80" y="190" width="1320" height="55" rx="10" fill="#dbe8fa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="740.0" y="224.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">HTTPS / WSS 接口 · 设备身份与教师账号鉴权</text>
-<rect x="80" y="300" width="300" height="80" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="230.0" y="332.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备角色 / 地址发现</text>
-<text x="230.0" y="360.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">操作权仲裁 / 在线状态</text>
-<rect x="420" y="300" width="300" height="80" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="570.0" y="332.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">档案 / Session / 命令授权</text>
-<text x="570.0" y="360.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">事件接收 / 日志查询</text>
-<rect x="760" y="300" width="300" height="80" rx="10" fill="#e5eefc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="910.0" y="332.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">PostgreSQL</text>
-<text x="910.0" y="360.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">档案、人脸、Session、日志</text>
-<rect x="1100" y="300" width="300" height="80" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1250.0" y="332.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">策略与签名更新包</text>
-<text x="1250.0" y="360.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">安装包仓库 / 备份管理</text>
-<rect x="60" y="573" width="560" height="42" rx="10" fill="#f1f8f5" stroke="none" stroke-width="1.5"/>
-<text x="340.0" y="602.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">教师端 · 动态 IP · TypeScript</text>
-<rect x="80" y="640" width="520" height="100" rx="10" fill="#ddf0e7" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="340.0" y="682.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Electron 主进程</text>
-<text x="340.0" y="711.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">身份 / 直连接口 / 命令 / 录入与查询</text>
-<rect x="80" y="805" width="520" height="85" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="340.0" y="840.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">录入登记 · 屏幕墙与设备操作 · 服务器管理</text>
-<text x="340.0" y="867.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">UI 组件库适配</text>
-<rect x="80" y="950" width="520" height="65" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="340.0" y="989.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">读卡器 / 摄像头 / 人脸算法适配</text>
-<text x="340.0" y="1053.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">多教师可查看；同机仅一名控制教师</text>
-<rect x="830" y="573" width="590" height="42" rx="10" fill="#f6f3fb" stroke="none" stroke-width="1.5"/>
-<text x="1125.0" y="601.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600" fill="#172b4d">学生端 · Windows 10+ · 主要逻辑在 Electron</text>
-<rect x="850" y="635" width="550" height="125" rx="10" fill="#e9e1f6" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1125.0" y="676.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Electron 主进程 / 工作进程 · TypeScript</text>
-<text x="1125.0" y="704.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">通信 / 网络心跳 / Session / 命令校验</text>
-<text x="1125.0" y="731.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">日志补报 / 画面传输 / 更新协调</text>
-<rect x="850" y="830" width="260" height="75" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="980.0" y="860.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">Electron 渲染进程</text>
-<text x="980.0" y="886.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">锁机界面 / 屏幕采集</text>
-<rect x="1140" y="830" width="260" height="75" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1270.0" y="861.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Electron 管理的 SQLite</text>
-<text x="1270.0" y="885.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">业务事件 / 恢复状态</text>
-<rect x="855" y="778" width="250" height="32" rx="10" fill="#f6f3fb" stroke="none" stroke-width="1.5"/>
-<text x="980.0" y="799.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">受限 preload / IPC</text>
-<rect x="1140" y="778" width="260" height="32" rx="10" fill="#f6f3fb" stroke="none" stroke-width="1.5"/>
-<text x="1270.0" y="799.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">先落盘，再上报</text>
-<rect x="850" y="970" width="550" height="85" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1125.0" y="992.6999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">Rust 离线守护 · Session 0 · 无网络连接</text>
-<text x="1125.0" y="1018.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">进程监督 / 本地状态机 / 固定系统动作</text>
-<text x="1125.0" y="1044.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">独立守护日志：由 Electron 导入并补报</text>
-<rect x="855" y="923" width="540" height="34" rx="10" fill="#f6f3fb" stroke="none" stroke-width="1.5"/>
-<text x="1125.0" y="945.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">本地命名管道：心跳 / 健康期限 / 动作 / 守护事件</text>
-<rect x="80" y="445" width="520" height="80" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="340.0" y="477.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">HTTPS / WSS</text>
-<text x="340.0" y="506.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">注册、录入、查询、授权、心跳</text>
-<rect x="850" y="445" width="550" height="80" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="1125.0" y="477.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">HTTPS / WSS · 由 Electron 连接</text>
-<text x="1125.0" y="506.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">注册、发现、事件、心跳、更新</text>
-<rect x="643" y="615" width="164" height="66" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="725.0" y="642.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="15" font-weight="400" fill="#172b4d">直连 HTTPS/WSS</text>
-<text x="725.0" y="664.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="15" font-weight="400" fill="#172b4d">两端 Electron 通信</text>
-<text x="725.0" y="749.9" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">命令 / 回执 / 心跳</text>
-<text x="725.0" y="773.1" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">画面独立通道</text>
-<text x="725.0" y="796.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="16" font-weight="400" fill="#172b4d">Rust 不参与</text>
-<rect x="40" y="1115" width="1400" height="120" rx="10" fill="#eef2ff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="740.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">现代 Yarn 4.x workspaces · 构建时复用（非运行时服务）</text>
-<text x="740.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">apps/server · apps/teacher · apps/student 按需引用 protocol / domain / client-sdk / ui</text>
-<text x="740.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">workspace:^ 内部依赖 / 单一 yarn.lock / nodeLinker: node-modules</text>
-<text x="740.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">guardian-contract 只定义本地 IPC；Rust 使用 Cargo 独立构建</text>
-<rect x="40" y="1260" width="1400" height="65" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="740.0" y="1285.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">进程守护为尽力防护，不保证阻止本地管理员绕过。</text>
-<text x="740.0" y="1311.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">200 + 2 仅为测试负载；实际部署容量由硬件、网络和压测结果决定。</text>
+<rect width="1800" height="1640" fill="#ffffff"/>
+<rect x="50" y="145" width="1700" height="460" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="381.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="50" y="810" width="730" height="680" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="415.0" y="1156.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="1020" y="810" width="730" height="680" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1385.0" y="1156.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<polyline points="285,285 285,345" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="695,285 695,345" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1105,285 1105,345" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1515,285 1515,345" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1105,440 1105,470 490,470 490,505" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1515,440 1515,480 1315,480 1315,505" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="415.0,975 415.0,1040" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="240,1210 240,1140" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="590,1210 590,1140" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1210,1035 1210,1110" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="1560,1035 1560,1110" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="1060,980 1040,980 1040,1280 1385,1280 1385,1330" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="415,810 415,605" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="1385,810 1385,605" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="780,1060 1020,1060" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">01 · 系统总体架构</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">TypeScript / Electron 承担业务；Rust 只做离线守护｜设备与教师按集合管理，数量不设产品上限</text>
+<text x="900.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">固定地址服务端 · Node.js / TypeScript 模块化单体</text>
+<rect x="95" y="220" width="1610" height="65" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="259.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">HTTPS / WSS 接入：TLS、设备凭证、教师账号、运行时 schema、请求关联与限流</text>
+<rect x="95" y="345" width="380" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="285.0" y="385.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">入网与设备目录</text>
+<text x="285.0" y="412.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">角色 / 机房 / 地址 / 启动标识</text>
+<rect x="505" y="345" width="380" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="695.0" y="385.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">账号权限与操作权</text>
+<text x="695.0" y="412.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">控制租约 / controlEpoch / 授权</text>
+<rect x="915" y="345" width="380" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1105.0" y="385.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Session 与命令</text>
+<text x="1105.0" y="412.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">占用事务 / 幂等 / 状态校准</text>
+<rect x="1325" y="345" width="380" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1515.0" y="385.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生与识别接入</text>
+<text x="1515.0" y="412.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">UID / 档案 / 人脸适配</text>
+<rect x="95" y="505" width="790" height="65" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="490.0" y="544.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PostgreSQL：业务实体、事件审计、策略版本、唯一约束</text>
+<rect x="925" y="505" width="780" height="65" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1315.0" y="544.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">文件仓库：人脸资料 / 签名更新包 / 备份</text>
+<text x="415.0" y="850.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">教师 Electron · 动态 IP · 多实例</text>
+<rect x="90" y="890" width="650" height="85" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="415.0" y="925.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">渲染界面 + @cyez/ui</text>
+<text x="415.0" y="954.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">录入登记 / 屏幕墙 / 管理操作 / 服务器管理</text>
+<rect x="90" y="1040" width="650" height="100" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="415.0" y="1082.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">主进程：身份与 SDK、授权申请、直连监听</text>
+<text x="415.0" y="1111.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">操作权 / 命令路由 / 画面订阅与新鲜度</text>
+<rect x="245.0" y="984.5" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="415.0" y="1013.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">受限 preload / IPC</text>
+<rect x="90" y="1210" width="300" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="240.0" y="1250.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">读卡器 / 摄像头</text>
+<text x="240.0" y="1277.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">UID 与人脸供应方适配</text>
+<rect x="440" y="1210" width="300" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="590.0" y="1250.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">只读画面订阅</text>
+<text x="590.0" y="1277.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">与设备控制权分离</text>
+<text x="410.0" y="1388.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">分页与订阅预算可配置</text>
+<text x="410.0" y="1414.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">首轮压测：2 个教师端，每端 60 个可见缩略图</text>
+<text x="1385.0" y="850.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">学生端 · Windows 10+ · 多实例</text>
+<rect x="1060" y="890" width="650" height="145" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1385.0" y="939.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">Electron 主进程 + 应用内 worker</text>
+<text x="1385.0" y="969.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">全部网络、鉴权、Session、策略、事件与 SQLite</text>
+<text x="1385.0" y="1000.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">截图传输、健康报告、更新下载与协调</text>
+<rect x="1060" y="1110" width="300" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1210.0" y="1150.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">渲染器 + preload</text>
+<text x="1210.0" y="1176.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">锁机 / 采集 / 状态确认</text>
+<rect x="1410" y="1110" width="300" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1560.0" y="1150.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">SQLite / 凭证存储</text>
+<text x="1560.0" y="1176.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">事件队列 / 命令结果</text>
+<rect x="1060" y="1330" width="650" height="100" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1385.0" y="1372.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Rust 离线 Windows 服务 · Session 0</text>
+<text x="1385.0" y="1401.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">进程监督 / 本地状态机 / 系统关机 / 守护日志</text>
+<rect x="1125" y="1245" width="520" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1385.0" y="1273.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">带 ACL 的本地命名管道</text>
+<rect x="100" y="655" width="630" height="95" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="415.0" y="695.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">HTTPS / WSS</text>
+<text x="415.0" y="724.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">注册、档案、授权、查询、策略管理、心跳</text>
+<rect x="1070" y="655" width="630" height="95" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1385.0" y="695.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Electron → HTTPS / WSS</text>
+<text x="1385.0" y="724.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">启动、发现、事件补报、策略、更新、心跳</text>
+<rect x="795" y="905" width="210" height="130" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="950.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">直连 HTTPS / WSS</text>
+<text x="900.0" y="976.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">命令 / 回执 / 心跳</text>
+<text x="900.0" y="1002.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">画面使用独立通道</text>
+<text x="900.0" y="1213.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Rust 无网络链路</text>
+<text x="900.0" y="1238.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">不持有业务身份</text>
+<text x="900.0" y="1263.1" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">不计算 Session</text>
+<rect x="40" y="1545" width="1720" height="70" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1573.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">200 学生端 + 2 教师端仅为首轮负载测试基线；容量随部署实测。</text>
+<text x="900.0" y="1599.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">学生持有管理员权限：服务层尽力防护，不开发驱动，不承诺不可绕过。</text>
 </svg>

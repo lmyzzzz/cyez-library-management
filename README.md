@@ -8,9 +8,22 @@
 
 ## 文档与架构图
 
-- [完整架构设计](docs/architecture.md)：模块职责、通信协议、Session、故障处置、更新与验收。
-- [可编辑架构图](docs/architecture.drawio)：使用 diagrams.net / draw.io 打开，包含总体架构、登记解锁时序、故障处置三个页面。
-- [总体架构](docs/architecture.svg) · [登记解锁时序](docs/registration-sequence.svg) · [故障处置](docs/failure-handling.svg)：可直接预览的图片。
+- [完整架构设计](docs/architecture.md)：职责矩阵、共享包、网络与本地 IPC、状态机、持久化、更新和验收。
+- [可编辑架构图册](docs/architecture.drawio)：使用 diagrams.net / draw.io 打开，包含下列十个详细页面。
+- [图册索引与维护方法](docs/diagrams.md)：各页说明、阅读顺序、图源同步与再生成命令。
+
+| 图 | 重点 |
+| --- | --- |
+| [01 总体架构](docs/architecture.svg) | 三端模块、数据仓库、远端通信与 Rust 离线边界 |
+| [02 学生端内部职责](docs/student-runtime.svg) | Electron 主逻辑、渲染器、worker、存储与 Rust 的 IPC |
+| [03 入网与教师发现](docs/device-discovery.svg) | 动态 IP、角色验证、操作权接管与完成确认 |
+| [04 登记解锁时序](docs/registration-sequence.svg) | 从登记、授权到界面实际切换及服务端确认 |
+| [05 Rust 守护状态机](docs/guardian-state.svg) | 本地状态、期限、故障优先、维护与关机 |
+| [06 故障处置](docs/failure-handling.svg) | 网络与进程故障的动作、暂停与证据归属 |
+| [07 Session 状态机](docs/session-state.svg) | 占用、使用、暂停、结束与计时边界 |
+| [08 事件持久化与补报](docs/event-delivery.svg) | 守护日志导入、SQLite、服务端去重与分级确认 |
+| [09 更新与回滚](docs/update-lifecycle.svg) | Electron 下载、执行器安装、Rust 维护配合 |
+| [10 Yarn 工作区依赖](docs/workspace-dependencies.svg) | 应用、共享 TypeScript 包、Cargo 与构建顺序 |
 
 ![系统总体架构](docs/architecture.svg)
 

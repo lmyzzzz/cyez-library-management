@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1320" viewBox="0 0 1800 1320" role="img" aria-labelledby="title desc">
+<title id="title">07 · Session 生命周期与计时</title><desc id="desc">服务端是业务真值来源；学生 Electron 提供实际执行事件，Rust 不持有业务 Session 状态。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1800" height="1320" fill="#ffffff"/>
+<polyline points="510,222 680,222" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1120,222 1290,222" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="290.0,275 290.0,550" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1510.0,275 1510.0,550" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1730,602 1770,602 1770,222 1730,222" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1330,275 1330,460 900,460 900,550" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1290,602 1120,602" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900.0,655 900.0,930" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">07 · Session 生命周期与计时</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">服务端是业务真值来源；学生 Electron 提供实际执行事件，Rust 不持有业务 Session 状态。</text>
+<rect x="70" y="170" width="440" height="105" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="290.0" y="214.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">REGISTERED</text>
+<text x="290.0" y="246.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">登记成功 / 等待机器</text>
+<rect x="680" y="170" width="440" height="105" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="214.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">UNLOCK_PENDING</text>
+<text x="900.0" y="246.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">机器预留 / 等待实际解锁</text>
+<rect x="1290" y="170" width="440" height="105" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1510.0" y="214.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">ACTIVE</text>
+<text x="1510.0" y="246.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">已确认解锁 / 累计可用时长</text>
+<rect x="70" y="550" width="440" height="105" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="290.0" y="594.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">CANCELLED</text>
+<text x="290.0" y="626.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">尚未使用的登记取消</text>
+<rect x="680" y="550" width="440" height="105" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="594.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">END_PENDING</text>
+<text x="900.0" y="626.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">结束待确认 / 证据不足</text>
+<rect x="1290" y="550" width="440" height="105" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1510.0" y="594.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">PAUSED</text>
+<text x="1510.0" y="626.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">已确认锁机 / 保留占用</text>
+<rect x="680" y="930" width="440" height="105" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="974.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">ENDED</text>
+<text x="900.0" y="1006.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">记录结论与证据等级</text>
+<rect x="515" y="160" width="160" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="595.0" y="188.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">占用事务通过</text>
+<rect x="1125" y="160" width="160" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1205.0" y="188.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">学生成功事件</text>
+<rect x="120.0" y="389.5" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="290.0" y="418.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">未开始使用时取消</text>
+<rect x="1340.0" y="389.5" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1510.0" y="418.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">锁机实际确认</text>
+<rect x="1545" y="450" width="215" height="70" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1652.5" y="478.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">新教师授权</text>
+<text x="1652.5" y="504.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">+ 实际恢复事件</text>
+<rect x="760" y="370" width="470" height="55" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="995.0" y="403.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">结束请求 / 关机或重启线索</text>
+<rect x="1125" y="540" width="160" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1205.0" y="568.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">显式结束</text>
+<rect x="730.0" y="769.5" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="798.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">终态证据或追加审计结论</text>
+<rect x="70" y="815" width="440" height="220" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="290.0" y="876.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">超时不等于执行失败</text>
+<text x="290.0" y="904.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预留与暂停都算占用</text>
+<text x="290.0" y="931.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">迟到事件按 Session / bootId 归属</text>
+<text x="290.0" y="959.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不得污染新 Session</text>
+<text x="290.0" y="986.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">恢复实际使用须重新授权</text>
+<rect x="1290" y="815" width="440" height="220" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1510.0" y="876.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">登记总时长：登记 → 最终结束</text>
+<text x="1510.0" y="904.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">可用时长：已确认解锁区间之和</text>
+<text x="1510.0" y="931.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">暂停区间排除</text>
+<text x="1510.0" y="959.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">UTC 用于展示 / 单调时钟计时</text>
+<text x="1510.0" y="986.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知结束点保留区间而非伪造</text>
+<rect x="40" y="1225" width="1720" height="70" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1253.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">一个学生 / 一台设备最多对应一个未结束的使用 Session；预留、暂停和结束待确认均占用。</text>
+<text x="900.0" y="1279.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">网络失联先标连接与证据状态，锁机事件才确认暂停；故障恢复不自动解锁，人工更正追加审计。</text>
+</svg>

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1550" viewBox="0 0 1800 1550" role="img" aria-labelledby="title desc">
+<title id="title">10 · 现代 Yarn workspaces 与复用边界</title><desc id="desc">Node.js 服务端与 Electron 使用 TypeScript；同一代码库不代表同一权限，Rust 仅共享本地协议。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1800" height="1550" fill="#ffffff"/>
+<rect x="60" y="600" width="1680" height="395" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="803.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<polyline points="320,250 320,350" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900,250 900,350" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1480,250 1480,350" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="320,490 320,600" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900,490 900,600" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1480,490 1480,600" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1460,690 1460,670 340,670 340,690" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="480.0,950 480.0,1110" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="865,1170 935,1170" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">10 · 现代 Yarn workspaces 与复用边界</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Node.js 服务端与 Electron 使用 TypeScript；同一代码库不代表同一权限，Rust 仅共享本地协议。</text>
+<rect x="60" y="145" width="1680" height="105" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="188.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#172b4d">私有 monorepo 根：packageManager 固定 Yarn 4 精确版本 · 单一 yarn.lock</text>
+<text x="900.0" y="222.225" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#172b4d">workspaces: apps/* + packages/* · nodeLinker: node-modules · CI: yarn install --immutable</text>
+<rect x="60" y="350" width="520" height="140" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="320.0" y="398.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">apps/server · @cyez/server</text>
+<text x="320.0" y="427.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">protocol + domain</text>
+<text x="320.0" y="456.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">服务端最终鉴权 / 占用事务</text>
+<rect x="640" y="350" width="520" height="140" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="398.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">apps/teacher · @cyez/teacher</text>
+<text x="900.0" y="427.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">protocol + domain + client-sdk + ui</text>
+<text x="900.0" y="456.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">教师权限 / 直连操作 / 订阅</text>
+<rect x="1220" y="350" width="520" height="140" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1480.0" y="398.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">apps/student · @cyez/student</text>
+<text x="1480.0" y="427.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">protocol + domain + client-sdk</text>
+<text x="1480.0" y="456.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">+ guardian-contract + ui</text>
+<text x="900.0" y="640.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">共享工作区 · 内部显式依赖 workspace:^ · 通过 exports 访问编译产物</text>
+<rect x="95" y="690" width="490" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="340.0" y="725.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">@cyez/protocol</text>
+<text x="340.0" y="754.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">网络 DTO / 运行时 schema</text>
+<text x="340.0" y="783.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不含设备私钥或服务端数据库</text>
+<rect x="655" y="690" width="490" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="725.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">@cyez/domain</text>
+<text x="900.0" y="754.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Session 纯规则 / 状态转换</text>
+<text x="900.0" y="783.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不依赖 Electron、数据库或 I/O</text>
+<rect x="1215" y="690" width="490" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1460.0" y="725.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">@cyez/client-sdk</text>
+<text x="1460.0" y="754.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">依赖 protocol：认证封装 / 重连</text>
+<text x="1460.0" y="783.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">用于应用主进程与 worker</text>
+<rect x="95" y="850" width="770" height="100" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="480.0" y="892.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">@cyez/guardian-contract</text>
+<text x="480.0" y="921.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本地 IPC schema / 版本 / 序列化测试向量</text>
+<rect x="935" y="850" width="770" height="100" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1320.0" y="892.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">@cyez/ui</text>
+<text x="1320.0" y="921.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">组件库适配 / 共享界面；不包含系统权限或服务端逻辑</text>
+<rect x="170" y="520" width="300" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="320.0" y="548.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">工作区依赖</text>
+<rect x="750" y="520" width="300" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="548.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">工作区依赖</text>
+<rect x="1330" y="520" width="300" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="1480.0" y="548.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">工作区依赖</text>
+<rect x="95" y="1110" width="770" height="120" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="480.0" y="1146.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">native/guardian · Cargo / Rust</text>
+<text x="480.0" y="1177.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">仅从 guardian-contract 生成或校验 IPC 类型</text>
+<text x="480.0" y="1207.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">不导入 domain、client-sdk 或任何网络业务包</text>
+<rect x="310.0" y="1007.0" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="1035.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">schema / fixtures，不执行 TypeScript</text>
+<rect x="935" y="1110" width="770" height="120" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1320.0" y="1146.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">构建与交付</text>
+<text x="1320.0" y="1177.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">共享包按拓扑构建 → 应用 → 安装包</text>
+<text x="1320.0" y="1207.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">Cargo 独立编译 → 装配守护二进制</text>
+<rect x="95" y="1290" width="1610" height="115" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1325.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">禁止：跨包相对目录导入、复制 DTO、服务端依赖 UI、Rust 重写业务状态机。</text>
+<text x="900.0" y="1354.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">依赖声明与 exports 作为边界；Electron 原生模块按目标 ABI 重建，不能混用服务器编译产物。</text>
+<text x="900.0" y="1383.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全量工作区脚本排除根包，防止递归；Cargo 不冒充 Yarn workspace。</text>
+<rect x="40" y="1455" width="1720" height="70" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1496.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">本页规定编码阶段目录与依赖关系；当前仓库交付文档与图，不代表应用骨架或运行时已经实现。</text>
+</svg>
