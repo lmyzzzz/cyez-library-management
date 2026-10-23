@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1835" viewBox="0 0 1800 1835" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1990" viewBox="0 0 1800 1990" role="img" aria-labelledby="title desc">
 <title id="title">09 · 更新下载、受控维护与回滚</title><desc id="desc">Electron 负责版本决策与联网；独立受限执行器完成注销后的切换，Rust 仅配合本地维护状态。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1800" height="1835" fill="#ffffff"/>
-<polyline points="270.0,225 270.0,1490" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="690.0,225 690.0,1490" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="1110.0,225 1110.0,1490" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="1530.0,225 1530.0,1490" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<rect width="1800" height="1990" fill="#ffffff"/>
+<polyline points="270.0,225 270.0,1590" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="690.0,225 690.0,1590" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1110.0,225 1110.0,1590" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1530.0,225 1530.0,1590" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
 <polyline points="690.0,310 270.0,310" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="270.0,410 690.0,410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
 <polyline points="690.0,610 1110.0,610" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
@@ -14,7 +14,8 @@
 <polyline points="1110.0,1110 1530.0,1110" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1530.0,1210 690.0,1210" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="690.0,1310 1110.0,1310" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
-<polyline points="690.0,1410 270.0,1410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="690.0,1410 1110.0,1410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="690.0,1510 270.0,1510" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">09 · 更新下载、受控维护与回滚</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Electron 负责版本决策与联网；独立受限执行器完成注销后的切换，Rust 仅配合本地维护状态。</text>
 <rect x="70.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -58,13 +59,18 @@
 <rect x="698.0" y="1240" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="1264.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">11. 返回版本与本地健康结果</text>
 <text x="900.0" y="1289.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">与服务器可达性分别判断</text>
-<rect x="278.0" y="1340" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="480.0" y="1364.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">12. 上报更新结果并校准业务</text>
-<text x="480.0" y="1389.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">无网络时保持锁定并待补报</text>
-<rect x="60" y="1525" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1555.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">本地健康失败或超时：执行器回滚至已验证版本并重新默认锁定；无用户时等待验证，不伪造成功。</text>
-<rect x="60" y="1580" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1610.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">停电恢复读取更新计划日志；身份、业务 outbox、守护日志与恢复状态全部保留。</text>
-<rect x="60" y="1635" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1665.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">教师端安装前先结束或转交控制任务；签名私钥不部署到客户端，Rust 从不下载或选择更新版本。</text>
+<rect x="698.0" y="1340" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1364.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">12. 按来源 / 游标导入全部日志</text>
+<text x="900.0" y="1389.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">诊断、失败、回滚也进入 outbox</text>
+<rect x="278.0" y="1440" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="1464.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">13. 上传全部更新日志与结果</text>
+<text x="480.0" y="1489.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">无网络时保持锁定并待补传</text>
+<rect x="60" y="1625" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1655.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">本地健康失败或超时：执行器回滚至已验证版本并重新默认锁定；无用户时等待验证，不伪造成功。</text>
+<rect x="60" y="1680" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1710.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">安装日志独立于版本目录；停电据计划恢复。身份、全部日志 outbox、未交接的守护/安装日志全部保留。</text>
+<rect x="60" y="1735" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1765.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">初次安装尚未入网或应用无法启动：日志继续留盘，恢复后导入补传；不能只上报最终更新结果。</text>
+<rect x="60" y="1790" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1820.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">教师端安装前先结束或转交控制任务；签名私钥不部署到客户端，Rust 从不下载或选择更新版本。</text>
 </svg>

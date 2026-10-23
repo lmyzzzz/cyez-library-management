@@ -147,13 +147,13 @@ def footer(p, text):
 def overview():
     p = page('architecture','01 · 系统总体架构','TypeScript / Electron 承担业务；Rust 只做离线守护｜设备与教师按集合管理，数量不设产品上限',1800,1640)
     panel(p,'server',50,145,1700,460,'固定地址服务端 · Node.js / TypeScript 模块化单体',BLUE)
-    p.box('api',95,220,1610,65,'HTTPS / WSS 接入：TLS、设备凭证、教师账号、运行时 schema、请求关联与限流',size=21)
+    p.box('api',95,220,1610,65,'HTTPS / WSS：设备与教师鉴权、业务 API、全部日志批传 / 持久确认；服务器自身日志内部归集',size=21)
     modules=[('registry','入网与设备目录\n角色 / 机房 / 地址 / 启动标识'),('auth','账号权限与操作权\n控制租约 / controlEpoch / 授权'),('session','Session 与命令\n占用事务 / 幂等 / 状态校准'),('profile','学生与识别接入\nUID / 档案 / 人脸适配')]
     for i,(ident,text) in enumerate(modules):
         x=95+i*410
         p.box(ident,x,345,380,95,text,size=19)
         route(p,'api-'+ident,'api',ident,[(x+190,285),(x+190,345)])
-    p.box('pg',95,505,790,65,'PostgreSQL：业务实体、事件审计、策略版本、唯一约束',GREEN,size=20)
+    p.box('pg',95,505,790,65,'PostgreSQL：全部日志 / 审计、业务实体、策略与去重',GREEN,size=20)
     p.box('files',925,505,780,65,'文件仓库：人脸资料 / 签名更新包 / 备份',GREEN,size=20)
     route(p,'store','session','pg',[(1105,440),(1105,470),(490,470),(490,505)])
     route(p,'media','profile','files',[(1515,440),(1515,480),(1315,480),(1315,505)])
@@ -165,19 +165,20 @@ def overview():
     p.box('t-screen',440,1210,300,95,'只读画面订阅\n与设备控制权分离',size=19)
     route(p,'hardware-input','hardware','t-main',[(240,1210),(240,1140)])
     route(p,'screen-view','t-screen','t-main',[(590,1210),(590,1140)])
-    p.label('teacher-budget',85,1350,650,90,'分页与订阅预算可配置\n首轮压测：2 个教师端，每端 60 个可见缩略图',18)
+    p.box('t-logs',90,1350,650,95,'全部应用 / SDK / 安装更新日志\nSQLite outbox → 服务端；离线补传 / 确认后回收',GREEN,size=19)
+    route(p,'teacher-logs','t-main','t-logs',[(90,1100),(75,1100),(75,1397),(90,1397)])
     panel(p,'student',1020,810,730,680,'学生端 · Windows 10+ · 多实例',PURPLE)
-    p.box('s-app',1060,890,650,145,'Electron 主进程 + 应用内 worker\n全部网络、鉴权、Session、策略、事件与 SQLite\n截图传输、健康报告、更新下载与协调',size=21)
+    p.box('s-app',1060,890,650,145,'Electron 主进程 + 应用内 worker\n网络、鉴权、Session、策略、全部日志与事件\n导入守护 / 安装日志；截图、健康与更新',size=21)
     p.box('s-render',1060,1110,300,95,'渲染器 + preload\n锁机 / 采集 / 状态确认',size=18)
-    p.box('s-store',1410,1110,300,95,'SQLite / 凭证存储\n事件队列 / 命令结果',size=18)
+    p.box('s-store',1410,1110,300,95,'SQLite / 凭证存储\n全量日志 outbox / 命令',size=18)
     route(p,'s-ipc','s-app','s-render',[(1210,1035),(1210,1110)],both=True)
     route(p,'s-persist','s-app','s-store',[(1560,1035),(1560,1110)],both=True)
-    p.box('rust',1060,1330,650,100,'Rust 离线 Windows 服务 · Session 0\n进程监督 / 本地状态机 / 系统关机 / 守护日志',RED,size=20)
+    p.box('rust',1060,1330,650,100,'Rust 离线 Windows 服务 · Session 0\n监督 / 状态机 / 关机；全部日志交由 Electron 上传',RED,size=20)
     route(p,'guardian-ipc','s-app','rust',[(1060,980),(1040,980),(1040,1280),(1385,1280),(1385,1330)],'带 ACL 的本地命名管道',(1125,1245,520,45),both=True)
     route(p,'t-server','teacher','server',[(415,810),(415,605)],both=True)
-    p.label('t-link',100,655,630,95,'HTTPS / WSS\n注册、档案、授权、查询、策略管理、心跳',20,fill='#ffffff')
+    p.label('t-link',100,655,630,95,'HTTPS / WSS\n全部日志上传 / 查询；注册、授权、管理、心跳',20,fill='#ffffff')
     route(p,'s-server','student','server',[(1385,810),(1385,605)],both=True)
-    p.label('s-link',1070,655,630,95,'Electron → HTTPS / WSS\n启动、发现、事件补报、策略、更新、心跳',20,fill='#ffffff')
+    p.label('s-link',1070,655,630,95,'Electron → HTTPS / WSS\n全部日志 / 事件上传；发现、策略、更新、心跳',20,fill='#ffffff')
     route(p,'direct','teacher','student',[(780,1060),(1020,1060)],both=True)
     p.label('direct-label',795,905,210,130,'直连 HTTPS / WSS\n命令 / 回执 / 心跳\n画面使用独立通道',18,fill='#ffffff')
     p.label('rust-no-network',795,1175,210,115,'Rust 无网络链路\n不持有业务身份\n不计算 Session',17)
@@ -198,8 +199,8 @@ def runtime():
     down(p,'net-coordinate','network','coordinator')
     route(p,'biz-coordinate','business','coordinator',[(880,535),(880,620)])
     p.box('render',100,805,300,120,'渲染器 + preload\n多屏锁机 / 实际确认\n响应健康挑战',size=20)
-    p.box('workers',460,805,300,120,'应用内 worker\n截图压缩 / 日志 I/O\n下载与更新校验',size=20)
-    p.box('database',820,805,300,120,'单写者存储模块\nSQLite outbox / 去重\n命令与恢复状态',GREEN,size=20)
+    p.box('workers',460,805,300,120,'应用内 worker\n全部日志归集 / 批传\n截图 / 更新校验',size=20)
+    p.box('database',820,805,300,120,'SQLite 单写者\n全部日志 / 事件 outbox\n命令与恢复状态',GREEN,size=20)
     for ident,cx in [('render',250),('workers',610),('database',970)]:
         route(p,'coordinate-'+ident,'coordinator',ident,[(cx,705),(cx,805)],both=True)
     p.box('health',100,1020,1020,100,'本地健康报告：主逻辑 + 锁机渲染器都要响应\n两路远端 ack 才可更新网络健康期限；普通 IPC 心跳不可续期',size=20)
@@ -207,13 +208,14 @@ def runtime():
     p.box('pipe',1280,425,420,110,'受限命名管道\n绑定子进程 / 用户会话\nIPC 版本 / 请求序号 / 保护代次',size=19)
     p.box('machine',1280,620,420,110,'本地保护状态机\nSTARTING / LOCKED / UNLOCKED\nLOCKING / MAINTENANCE 等',size=19)
     p.box('supervisor',1280,815,420,110,'监督与定时器\n进程句柄 / 必需进程实例\n本地健康截止时间',size=19)
-    p.box('journal',1280,1010,420,110,'本地守护日志\n只记事实 / 不计算 Session\nElectron 持久接收后确认回收',GREEN,size=19)
+    p.box('journal',1280,1010,420,110,'全部守护日志：运行 / 诊断 / 事实\nReadLogs → Electron 持久导入\nAckLogs 后转交上传责任',GREEN,size=19)
     p.box('actions',1280,1210,420,115,'固定系统动作\n启动应用 / 请求锁定 / 关机\n配合受控维护',size=19)
     down(p,'pipe-machine','pipe','machine')
     down(p,'machine-supervisor','machine','supervisor')
     down(p,'supervisor-journal','supervisor','journal')
     down(p,'journal-actions','journal','actions')
     route(p,'local-boundary','coordinator','pipe',[(1120,662),(1200,662),(1200,480),(1280,480)],both=True)
+    route(p,'journal-import','journal','database',[(1280,1065),(1190,1065),(1190,955),(970,955),(970,925)],dashed=True)
     footer(p,'Rust 不创建 HTTP/WSS 连接、不监听远端、不处理人脸/Session/截图、不下载更新。\n本地报告可被管理员篡改，因此其健康期限不能作为远端连接真实性的强证明。')
     return p
 
@@ -362,23 +364,29 @@ def session_state():
 
 
 def events():
-    return sequence('event-delivery','08 · 守护事实、业务事件与可靠补报','两级本地持久化与服务端去重：所有网络上报由 Electron 完成，守护从不直接连接服务器。',
-      [('guard','Rust / 本地守护日志'),('electron','Electron / 事件适配'),('sqlite','SQLite outbox'),('server','服务端 / PostgreSQL')],[
-      ('guard','guard','1. 产生本地事实\n写 guardianEventId / bootId'),
-      ('electron','guard','2. ReadEvents(cursor)\n启动或重连后拉取'),
-      ('guard','electron','3. 返回本地事实与原观测时间\nSession 仅可有不透明关联',True),
-      ('electron','sqlite','4. 事务导入：稳定 eventId\n保留来源，唯一约束去重'),
-      ('sqlite','electron','5. 本地提交成功',True),
-      ('electron','guard','6. AckEvents(cursor)\n仅此时可回收守护记录'),
-      ('electron','sqlite','7. 业务自身事件也先落盘\n命令意图 / 结果 / 状态'),
-      ('electron','server','8. HTTPS 批量上报；断网重试复用原 eventId'),
-      ('server','server','9. 事务：事件去重\n更新状态投影并提交'),
-      ('server','electron','10. 提交后返回确认集合；未确认项保留重试',True),
-      ('electron','sqlite','11. 按确认 eventId 回收\n发送队列，保留恢复所需状态')
+    return sequence('event-delivery','08 · 全量日志上传、持久确认与可靠补传','所有组件、所有已生成级别均须归集；包含 debug / trace。Rust 与安装器保持离线，由 Electron 转发。',
+      [('source','离线源：Rust / 安装器'),('electron','教师 / 学生 Electron'),('sqlite','各端 SQLite outbox'),('server','统一接收 / PostgreSQL')],[
+      ('source','source','1. 全部日志本地持久化\n含诊断 / 错误 / 更新回滚'),
+      ('electron','sqlite','2. 应用全部日志先落盘\nmain / renderer / worker / SDK'),
+      ('electron','source','3. ReadLogs / 安装日志游标\n启动及运行中持续导入'),
+      ('source','electron','4. logId / 来源实例 / 序号\n原始时间 / 级别 / 脱敏内容',True),
+      ('electron','sqlite','5. 导入日志与游标同一事务\n保留原 ID，唯一约束去重'),
+      ('sqlite','electron','6. 本地持久提交成功',True),
+      ('electron','source','7. AckLogs / 确认日志段\n仅转交保管责任，可回收源副本'),
+      ('electron','server','8. HTTPS 批传全部日志；业务事件附关联 logId，分别经 logs / events 接口'),
+      ('server','server','9. 并行归集自身/配套日志\n持久缓冲 → 内部接入'),
+      ('server','server','10. 普通日志：去重落盘\n不驱动 Session 状态'),
+      ('server','server','11. 业务事件：事务提交\n事件 + 日志 + 状态投影'),
+      ('server','electron','12. 提交后返回已持久化 ID 集合；部分失败不确认失败项',True),
+      ('electron','sqlite','13. 只回收最终确认的项\n未确认 / 隔离项继续保留'),
+      ('electron','electron','14. 断网 / 重启后补传\n复用原 ID，退避重试'),
+      ('source','source','15. 应用退出时继续留盘\n恢复后由 Electron 导入')
       ],notes=[
-      '任一步崩溃后可重放：守护 ACK 丢失由导入去重处理；网络 ACK 丢失由服务端去重处理。',
-      '业务 eventId 与 guardianEventId 保留来源映射；迟到事件按 bootId / Session / 序号归属。',
-      '无法落盘不承诺可靠日志：禁止新解锁并锁机；故障日志失败不能无限阻塞关机。'])
+      '来源：两类 Electron 的主进程、renderer、worker、SDK、网络；Rust；初次安装、更新及回滚；服务器与配套服务。',
+      '本地 ACK 只转移保管责任；服务端持久 ACK 才算完成。两级 ACK 丢失均可重放，不生成新的日志或业务事件。',
+      '去重保留 logId / 来源 / bootId / 原始时间；业务 eventId 单独关联。服务端自身日志走内部归集，不需 HTTP 回环。',
+      '不采样漏传，不清理未确认日志；无效项隔离告警，长记录分片。后台批传不阻塞心跳，日志接收不递归放大。',
+      '存储故障禁止新使用并保护锁机；关机不等待网络。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。'])
 
 
 def updates():
@@ -395,10 +403,12 @@ def updates():
       ('installer','guard','9. 重启守护 / 退出维护\n等待用户应用健康验证'),
       ('guard','electron','10. 用户会话启动应用\n默认锁定，重新握手'),
       ('electron','installer','11. 返回版本与本地健康结果\n与服务器可达性分别判断',True),
-      ('electron','server','12. 上报更新结果并校准业务\n无网络时保持锁定并待补报')
+      ('electron','installer','12. 按来源 / 游标导入全部日志\n诊断、失败、回滚也进入 outbox'),
+      ('electron','server','13. 上传全部更新日志与结果\n无网络时保持锁定并待补传')
       ],notes=[
       '本地健康失败或超时：执行器回滚至已验证版本并重新默认锁定；无用户时等待验证，不伪造成功。',
-      '停电恢复读取更新计划日志；身份、业务 outbox、守护日志与恢复状态全部保留。',
+      '安装日志独立于版本目录；停电据计划恢复。身份、全部日志 outbox、未交接的守护/安装日志全部保留。',
+      '初次安装尚未入网或应用无法启动：日志继续留盘，恢复后导入补传；不能只上报最终更新结果。',
       '教师端安装前先结束或转交控制任务；签名私钥不部署到客户端，Rust 从不下载或选择更新版本。'])
 
 
@@ -410,7 +420,7 @@ def workspaces():
         p.box(ident,x,350,520,140,title+'\n'+body,GREEN,size=20)
         route(p,'root-'+ident,'root',ident,[(x+260,250),(x+260,350)])
     panel(p,'shared',60,600,1680,395,'共享工作区 · 内部显式依赖 workspace:^ · 通过 exports 访问编译产物',PURPLE)
-    pkgs=[('protocol',95,690,490,115,'@cyez/protocol\n网络 DTO / 运行时 schema\n不含设备私钥或服务端数据库'),('domain',655,690,490,115,'@cyez/domain\nSession 纯规则 / 状态转换\n不依赖 Electron、数据库或 I/O'),('sdk',1215,690,490,115,'@cyez/client-sdk\n依赖 protocol：认证封装 / 重连\n用于应用主进程与 worker'),('contract',95,850,770,100,'@cyez/guardian-contract\n本地 IPC schema / 版本 / 序列化测试向量'),('ui',935,850,770,100,'@cyez/ui\n组件库适配 / 共享界面；不包含系统权限或服务端逻辑')]
+    pkgs=[('protocol',95,690,490,115,'@cyez/protocol\n网络 / 日志 / 事件 DTO 与 schema\n不含设备私钥或服务端数据库'),('domain',655,690,490,115,'@cyez/domain\nSession 纯规则 / 状态转换\n不依赖 Electron、数据库或 I/O'),('sdk',1215,690,490,115,'@cyez/client-sdk\n依赖 protocol：认证 / 重连\n全部日志批传 / 确认 / 重试'),('contract',95,850,770,100,'@cyez/guardian-contract\n本地 IPC schema / ReadLogs、AckLogs / 序列化测试向量'),('ui',935,850,770,100,'@cyez/ui\n组件库适配 / 共享界面；不包含系统权限或服务端逻辑')]
     for ident,x,y,w,h,text in pkgs:p.box(ident,x,y,w,h,text,size=20)
     for ident,x in [('server',320),('teacher',900),('student',1480)]:
         route(p,ident+'-imports',ident,'shared',[(x,490),(x,600)],'工作区依赖',(x-150,520,300,45))

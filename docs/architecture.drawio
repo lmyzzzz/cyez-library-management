@@ -76,6 +76,16 @@
             <mxPoint x="590" y="1140" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="teacher-logs" edge="1" parent="1" source="t-main" target="t-logs" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.0;exitY=0.6;exitPerimeter=0;entryX=0.0;entryY=0.49473684210526314;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="1100" as="sourcePoint" />
+            <mxPoint x="90" y="1397" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="75" y="1100" />
+              <mxPoint x="75" y="1397" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="s-ipc" edge="1" parent="1" source="s-app" target="s-render" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=0.23076923076923078;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1210" y="1035" as="sourcePoint" />
@@ -126,7 +136,7 @@
         <mxCell id="server-title" value="固定地址服务端 · Node.js / TypeScript 模块化单体" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="65" y="155" width="1670" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="api" value="HTTPS / WSS 接入：TLS、设备凭证、教师账号、运行时 schema、请求关联与限流" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="api" value="HTTPS / WSS：设备与教师鉴权、业务 API、全部日志批传 / 持久确认；服务器自身日志内部归集" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="95" y="220" width="1610" height="65" as="geometry" />
         </mxCell>
         <mxCell id="registry" value="入网与设备目录&#10;角色 / 机房 / 地址 / 启动标识" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -141,7 +151,7 @@
         <mxCell id="profile" value="学生与识别接入&#10;UID / 档案 / 人脸适配" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1325" y="345" width="380" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="pg" value="PostgreSQL：业务实体、事件审计、策略版本、唯一约束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="pg" value="PostgreSQL：全部日志 / 审计、业务实体、策略与去重" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="95" y="505" width="790" height="65" as="geometry" />
         </mxCell>
         <mxCell id="files" value="文件仓库：人脸资料 / 签名更新包 / 备份" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -165,31 +175,31 @@
         <mxCell id="t-screen" value="只读画面订阅&#10;与设备控制权分离" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="440" y="1210" width="300" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="teacher-budget" value="分页与订阅预算可配置&#10;首轮压测：2 个教师端，每端 60 个可见缩略图" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="85" y="1350" width="650" height="90" as="geometry" />
+        <mxCell id="t-logs" value="全部应用 / SDK / 安装更新日志&#10;SQLite outbox → 服务端；离线补传 / 确认后回收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1350" width="650" height="95" as="geometry" />
         </mxCell>
         <mxCell id="student-title" value="学生端 · Windows 10+ · 多实例" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1035" y="820" width="700" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="s-app" value="Electron 主进程 + 应用内 worker&#10;全部网络、鉴权、Session、策略、事件与 SQLite&#10;截图传输、健康报告、更新下载与协调" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="s-app" value="Electron 主进程 + 应用内 worker&#10;网络、鉴权、Session、策略、全部日志与事件&#10;导入守护 / 安装日志；截图、健康与更新" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1060" y="890" width="650" height="145" as="geometry" />
         </mxCell>
         <mxCell id="s-render" value="渲染器 + preload&#10;锁机 / 采集 / 状态确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1060" y="1110" width="300" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="s-store" value="SQLite / 凭证存储&#10;事件队列 / 命令结果" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="s-store" value="SQLite / 凭证存储&#10;全量日志 outbox / 命令" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1410" y="1110" width="300" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="rust" value="Rust 离线 Windows 服务 · Session 0&#10;进程监督 / 本地状态机 / 系统关机 / 守护日志" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="rust" value="Rust 离线 Windows 服务 · Session 0&#10;监督 / 状态机 / 关机；全部日志交由 Electron 上传" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1060" y="1330" width="650" height="100" as="geometry" />
         </mxCell>
         <mxCell id="guardian-ipc-label" value="带 ACL 的本地命名管道" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1125" y="1245" width="520" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="t-link" value="HTTPS / WSS&#10;注册、档案、授权、查询、策略管理、心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="t-link" value="HTTPS / WSS&#10;全部日志上传 / 查询；注册、授权、管理、心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="100" y="655" width="630" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="s-link" value="Electron → HTTPS / WSS&#10;启动、发现、事件补报、策略、更新、心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="s-link" value="Electron → HTTPS / WSS&#10;全部日志 / 事件上传；发现、策略、更新、心跳" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1070" y="655" width="630" height="95" as="geometry" />
         </mxCell>
         <mxCell id="direct-label" value="直连 HTTPS / WSS&#10;命令 / 回执 / 心跳&#10;画面使用独立通道" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -295,6 +305,17 @@
             </Array>
           </mxGeometry>
         </mxCell>
+        <mxCell id="journal-import" edge="1" parent="1" source="journal" target="database" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.0;exitY=0.5;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1280" y="1065" as="sourcePoint" />
+            <mxPoint x="970" y="925" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1190" y="1065" />
+              <mxPoint x="1190" y="955" />
+              <mxPoint x="970" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="title" value="02 · 学生端内部职责与信任边界" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
         </mxCell>
@@ -325,10 +346,10 @@
         <mxCell id="render" value="渲染器 + preload&#10;多屏锁机 / 实际确认&#10;响应健康挑战" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="100" y="805" width="300" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="workers" value="应用内 worker&#10;截图压缩 / 日志 I/O&#10;下载与更新校验" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="workers" value="应用内 worker&#10;全部日志归集 / 批传&#10;截图 / 更新校验" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="460" y="805" width="300" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="database" value="单写者存储模块&#10;SQLite outbox / 去重&#10;命令与恢复状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="database" value="SQLite 单写者&#10;全部日志 / 事件 outbox&#10;命令与恢复状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="820" y="805" width="300" height="120" as="geometry" />
         </mxCell>
         <mxCell id="health" value="本地健康报告：主逻辑 + 锁机渲染器都要响应&#10;两路远端 ack 才可更新网络健康期限；普通 IPC 心跳不可续期" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -346,7 +367,7 @@
         <mxCell id="supervisor" value="监督与定时器&#10;进程句柄 / 必需进程实例&#10;本地健康截止时间" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1280" y="815" width="420" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="journal" value="本地守护日志&#10;只记事实 / 不计算 Session&#10;Electron 持久接收后确认回收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="journal" value="全部守护日志：运行 / 诊断 / 事实&#10;ReadLogs → Electron 持久导入&#10;AckLogs 后转交上传责任" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1280" y="1010" width="420" height="110" as="geometry" />
         </mxCell>
         <mxCell id="actions" value="固定系统动作&#10;启动应用 / 请求锁定 / 关机&#10;配合受控维护" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -1101,69 +1122,69 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="event-delivery" name="08 · 守护事实、业务事件与可靠补报">
-    <mxGraphModel dx="1800" dy="1735" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1735" math="0" shadow="0">
+  <diagram id="event-delivery" name="08 · 全量日志上传、持久确认与可靠补传">
+    <mxGraphModel dx="1800" dy="2245" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2245" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="lifeline-guard" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
+        <mxCell id="lifeline-source" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="270.0" y="225" as="sourcePoint" />
-            <mxPoint x="270.0" y="1390" as="targetPoint" />
+            <mxPoint x="270.0" y="1790" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-electron" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="225" as="sourcePoint" />
-            <mxPoint x="690.0" y="1390" as="targetPoint" />
+            <mxPoint x="690.0" y="1790" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-sqlite" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1110.0" y="225" as="sourcePoint" />
-            <mxPoint x="1110.0" y="1390" as="targetPoint" />
+            <mxPoint x="1110.0" y="1790" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-server" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1530.0" y="225" as="sourcePoint" />
-            <mxPoint x="1530.0" y="1390" as="targetPoint" />
+            <mxPoint x="1530.0" y="1790" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="msg-1" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="410" as="sourcePoint" />
-            <mxPoint x="270.0" y="410" as="targetPoint" />
+            <mxPoint x="1110.0" y="410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-2" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
+        <mxCell id="msg-2" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="270.0" y="510" as="sourcePoint" />
-            <mxPoint x="690.0" y="510" as="targetPoint" />
+            <mxPoint x="690.0" y="510" as="sourcePoint" />
+            <mxPoint x="270.0" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-3" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+        <mxCell id="msg-3" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="690.0" y="610" as="sourcePoint" />
-            <mxPoint x="1110.0" y="610" as="targetPoint" />
+            <mxPoint x="270.0" y="610" as="sourcePoint" />
+            <mxPoint x="690.0" y="610" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-4" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
+        <mxCell id="msg-4" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1110.0" y="710" as="sourcePoint" />
-            <mxPoint x="690.0" y="710" as="targetPoint" />
+            <mxPoint x="690.0" y="710" as="sourcePoint" />
+            <mxPoint x="1110.0" y="710" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-5" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+        <mxCell id="msg-5" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="690.0" y="810" as="sourcePoint" />
-            <mxPoint x="270.0" y="810" as="targetPoint" />
+            <mxPoint x="1110.0" y="810" as="sourcePoint" />
+            <mxPoint x="690.0" y="810" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="msg-6" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="910" as="sourcePoint" />
-            <mxPoint x="1110.0" y="910" as="targetPoint" />
+            <mxPoint x="270.0" y="910" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="msg-7" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
@@ -1172,108 +1193,126 @@
             <mxPoint x="1530.0" y="1010" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-9" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
+        <mxCell id="msg-11" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1530.0" y="1210" as="sourcePoint" />
-            <mxPoint x="690.0" y="1210" as="targetPoint" />
+            <mxPoint x="1530.0" y="1410" as="sourcePoint" />
+            <mxPoint x="690.0" y="1410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="msg-10" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+        <mxCell id="msg-12" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="690.0" y="1310" as="sourcePoint" />
-            <mxPoint x="1110.0" y="1310" as="targetPoint" />
+            <mxPoint x="690.0" y="1510" as="sourcePoint" />
+            <mxPoint x="1110.0" y="1510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="title" value="08 · 守护事实、业务事件与可靠补报" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="title" value="08 · 全量日志上传、持久确认与可靠补传" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle" value="两级本地持久化与服务端去重：所有网络上报由 Electron 完成，守护从不直接连接服务器。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="subtitle" value="所有组件、所有已生成级别均须归集；包含 debug / trace。Rust 与安装器保持离线，由 Electron 转发。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
         </mxCell>
-        <mxCell id="guard" value="Rust / 本地守护日志" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="source" value="离线源：Rust / 安装器" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="70.0" y="145" width="400.0" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="electron" value="Electron / 事件适配" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="electron" value="教师 / 学生 Electron" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="490.0" y="145" width="400.0" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="sqlite" value="SQLite outbox" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="sqlite" value="各端 SQLite outbox" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="910.0" y="145" width="400.0" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="server" value="服务端 / PostgreSQL" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="server" value="统一接收 / PostgreSQL" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1330.0" y="145" width="400.0" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="self-0" value="1. 产生本地事实&#10;写 guardianEventId / bootId" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="self-0" value="1. 全部日志本地持久化&#10;含诊断 / 错误 / 更新回滚" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="135.0" y="242" width="270" height="58" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-1" value="2. ReadEvents(cursor)&#10;启动或重连后拉取" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="278.0" y="340" width="404.0" height="62" as="geometry" />
+        <mxCell id="msg-text-1" value="2. 应用全部日志先落盘&#10;main / renderer / worker / SDK" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="340" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-2" value="3. 返回本地事实与原观测时间&#10;Session 仅可有不透明关联" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-text-2" value="3. ReadLogs / 安装日志游标&#10;启动及运行中持续导入" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="278.0" y="440" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-3" value="4. 事务导入：稳定 eventId&#10;保留来源，唯一约束去重" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="698.0" y="540" width="404.0" height="62" as="geometry" />
+        <mxCell id="msg-text-3" value="4. logId / 来源实例 / 序号&#10;原始时间 / 级别 / 脱敏内容" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="540" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-4" value="5. 本地提交成功" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-text-4" value="5. 导入日志与游标同一事务&#10;保留原 ID，唯一约束去重" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="640" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-5" value="6. AckEvents(cursor)&#10;仅此时可回收守护记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="278.0" y="740" width="404.0" height="62" as="geometry" />
+        <mxCell id="msg-text-5" value="6. 本地持久提交成功" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="740" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-6" value="7. 业务自身事件也先落盘&#10;命令意图 / 结果 / 状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="698.0" y="840" width="404.0" height="62" as="geometry" />
+        <mxCell id="msg-text-6" value="7. AckLogs / 确认日志段&#10;仅转交保管责任，可回收源副本" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="840" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-7" value="8. HTTPS 批量上报；断网重试复用原 eventId" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-text-7" value="8. HTTPS 批传全部日志；业务事件附关联 logId，分别经 logs / events 接口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="940" width="824.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="self-8" value="9. 事务：事件去重&#10;更新状态投影并提交" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="self-8" value="9. 并行归集自身/配套日志&#10;持久缓冲 → 内部接入" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1395.0" y="1042" width="270" height="58" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-9" value="10. 提交后返回确认集合；未确认项保留重试" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="698.0" y="1140" width="824.0" height="62" as="geometry" />
+        <mxCell id="self-9" value="10. 普通日志：去重落盘&#10;不驱动 Session 状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1395.0" y="1142" width="270" height="58" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-10" value="11. 按确认 eventId 回收&#10;发送队列，保留恢复所需状态" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="698.0" y="1240" width="404.0" height="62" as="geometry" />
+        <mxCell id="self-10" value="11. 业务事件：事务提交&#10;事件 + 日志 + 状态投影" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1395.0" y="1242" width="270" height="58" as="geometry" />
         </mxCell>
-        <mxCell id="note-0" value="任一步崩溃后可重放：守护 ACK 丢失由导入去重处理；网络 ACK 丢失由服务端去重处理。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1425" width="1680" height="48" as="geometry" />
+        <mxCell id="msg-text-11" value="12. 提交后返回已持久化 ID 集合；部分失败不确认失败项" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="1340" width="824.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="note-1" value="业务 eventId 与 guardianEventId 保留来源映射；迟到事件按 bootId / Session / 序号归属。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1480" width="1680" height="48" as="geometry" />
+        <mxCell id="msg-text-12" value="13. 只回收最终确认的项&#10;未确认 / 隔离项继续保留" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="1440" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="note-2" value="无法落盘不承诺可靠日志：禁止新解锁并锁机；故障日志失败不能无限阻塞关机。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1535" width="1680" height="48" as="geometry" />
+        <mxCell id="self-13" value="14. 断网 / 重启后补传&#10;复用原 ID，退避重试" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="555.0" y="1542" width="270" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="self-14" value="15. 应用退出时继续留盘&#10;恢复后由 Electron 导入" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="135.0" y="1642" width="270" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="来源：两类 Electron 的主进程、renderer、worker、SDK、网络；Rust；初次安装、更新及回滚；服务器与配套服务。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1825" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-1" value="本地 ACK 只转移保管责任；服务端持久 ACK 才算完成。两级 ACK 丢失均可重放，不生成新的日志或业务事件。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1880" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-2" value="去重保留 logId / 来源 / bootId / 原始时间；业务 eventId 单独关联。服务端自身日志走内部归集，不需 HTTP 回环。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1935" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-3" value="不采样漏传，不清理未确认日志；无效项隔离告警，长记录分片。后台批传不阻塞心跳，日志接收不递归放大。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1990" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-4" value="存储故障禁止新使用并保护锁机；关机不等待网络。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="2045" width="1680" height="48" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="update-lifecycle" name="09 · 更新下载、受控维护与回滚">
-    <mxGraphModel dx="1800" dy="1835" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1835" math="0" shadow="0">
+    <mxGraphModel dx="1800" dy="1990" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1990" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="lifeline-server" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="270.0" y="225" as="sourcePoint" />
-            <mxPoint x="270.0" y="1490" as="targetPoint" />
+            <mxPoint x="270.0" y="1590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-electron" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="225" as="sourcePoint" />
-            <mxPoint x="690.0" y="1490" as="targetPoint" />
+            <mxPoint x="690.0" y="1590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-installer" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1110.0" y="225" as="sourcePoint" />
-            <mxPoint x="1110.0" y="1490" as="targetPoint" />
+            <mxPoint x="1110.0" y="1590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-guard" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1530.0" y="225" as="sourcePoint" />
-            <mxPoint x="1530.0" y="1490" as="targetPoint" />
+            <mxPoint x="1530.0" y="1590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="msg-0" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
@@ -1327,7 +1366,13 @@
         <mxCell id="msg-11" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="1410" as="sourcePoint" />
-            <mxPoint x="270.0" y="1410" as="targetPoint" />
+            <mxPoint x="1110.0" y="1410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-12" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690.0" y="1510" as="sourcePoint" />
+            <mxPoint x="270.0" y="1510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="title" value="09 · 更新下载、受控维护与回滚" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -1381,17 +1426,23 @@
         <mxCell id="msg-text-10" value="11. 返回版本与本地健康结果&#10;与服务器可达性分别判断" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="1240" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-11" value="12. 上报更新结果并校准业务&#10;无网络时保持锁定并待补报" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="278.0" y="1340" width="404.0" height="62" as="geometry" />
+        <mxCell id="msg-text-11" value="12. 按来源 / 游标导入全部日志&#10;诊断、失败、回滚也进入 outbox" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="1340" width="404.0" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-text-12" value="13. 上传全部更新日志与结果&#10;无网络时保持锁定并待补传" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="1440" width="404.0" height="62" as="geometry" />
         </mxCell>
         <mxCell id="note-0" value="本地健康失败或超时：执行器回滚至已验证版本并重新默认锁定；无用户时等待验证，不伪造成功。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1525" width="1680" height="48" as="geometry" />
+          <mxGeometry x="60" y="1625" width="1680" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="note-1" value="停电恢复读取更新计划日志；身份、业务 outbox、守护日志与恢复状态全部保留。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1580" width="1680" height="48" as="geometry" />
+        <mxCell id="note-1" value="安装日志独立于版本目录；停电据计划恢复。身份、全部日志 outbox、未交接的守护/安装日志全部保留。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1680" width="1680" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="note-2" value="教师端安装前先结束或转交控制任务；签名私钥不部署到客户端，Rust 从不下载或选择更新版本。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1635" width="1680" height="48" as="geometry" />
+        <mxCell id="note-2" value="初次安装尚未入网或应用无法启动：日志继续留盘，恢复后导入补传；不能只上报最终更新结果。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1735" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-3" value="教师端安装前先结束或转交控制任务；签名私钥不部署到客户端，Rust 从不下载或选择更新版本。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1790" width="1680" height="48" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
@@ -1483,16 +1534,16 @@
         <mxCell id="shared-title" value="共享工作区 · 内部显式依赖 workspace:^ · 通过 exports 访问编译产物" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="75" y="610" width="1650" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="protocol" value="@cyez/protocol&#10;网络 DTO / 运行时 schema&#10;不含设备私钥或服务端数据库" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="protocol" value="@cyez/protocol&#10;网络 / 日志 / 事件 DTO 与 schema&#10;不含设备私钥或服务端数据库" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="95" y="690" width="490" height="115" as="geometry" />
         </mxCell>
         <mxCell id="domain" value="@cyez/domain&#10;Session 纯规则 / 状态转换&#10;不依赖 Electron、数据库或 I/O" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="655" y="690" width="490" height="115" as="geometry" />
         </mxCell>
-        <mxCell id="sdk" value="@cyez/client-sdk&#10;依赖 protocol：认证封装 / 重连&#10;用于应用主进程与 worker" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="sdk" value="@cyez/client-sdk&#10;依赖 protocol：认证 / 重连&#10;全部日志批传 / 确认 / 重试" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1215" y="690" width="490" height="115" as="geometry" />
         </mxCell>
-        <mxCell id="contract" value="@cyez/guardian-contract&#10;本地 IPC schema / 版本 / 序列化测试向量" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="contract" value="@cyez/guardian-contract&#10;本地 IPC schema / ReadLogs、AckLogs / 序列化测试向量" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="95" y="850" width="770" height="100" as="geometry" />
         </mxCell>
         <mxCell id="ui" value="@cyez/ui&#10;组件库适配 / 共享界面；不包含系统权限或服务端逻辑" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">

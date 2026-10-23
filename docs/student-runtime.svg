@@ -18,6 +18,7 @@
 <polyline points="1490.0,925 1490.0,1010" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1490.0,1120 1490.0,1210" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1120,662 1200,662 1200,480 1280,480" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="1280,1065 1190,1065 1190,955 970,955 970,925" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">02 · 学生端内部职责与信任边界</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">Electron 应用内共享 TypeScript 业务；Rust 只接受有限本地动作，渲染器不能直接访问系统服务</text>
 <rect x="60" y="145" width="1100" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -42,11 +43,11 @@
 <text x="250.0" y="901.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">响应健康挑战</text>
 <rect x="460" y="805" width="300" height="120" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="610.0" y="843.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">应用内 worker</text>
-<text x="610.0" y="872.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">截图压缩 / 日志 I/O</text>
-<text x="610.0" y="901.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">下载与更新校验</text>
+<text x="610.0" y="872.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全部日志归集 / 批传</text>
+<text x="610.0" y="901.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">截图 / 更新校验</text>
 <rect x="820" y="805" width="300" height="120" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="970.0" y="843.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">单写者存储模块</text>
-<text x="970.0" y="872.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">SQLite outbox / 去重</text>
+<text x="970.0" y="843.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">SQLite 单写者</text>
+<text x="970.0" y="872.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全部日志 / 事件 outbox</text>
 <text x="970.0" y="901.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">命令与恢复状态</text>
 <rect x="100" y="1020" width="1020" height="100" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="610.0" y="1062.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本地健康报告：主逻辑 + 锁机渲染器都要响应</text>
@@ -68,9 +69,9 @@
 <text x="1490.0" y="876.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">进程句柄 / 必需进程实例</text>
 <text x="1490.0" y="904.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地健康截止时间</text>
 <rect x="1280" y="1010" width="420" height="110" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1490.0" y="1044.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地守护日志</text>
-<text x="1490.0" y="1071.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">只记事实 / 不计算 Session</text>
-<text x="1490.0" y="1099.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Electron 持久接收后确认回收</text>
+<text x="1490.0" y="1044.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">全部守护日志：运行 / 诊断 / 事实</text>
+<text x="1490.0" y="1071.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">ReadLogs → Electron 持久导入</text>
+<text x="1490.0" y="1099.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">AckLogs 后转交上传责任</text>
 <rect x="1280" y="1210" width="420" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="1246.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定系统动作</text>
 <text x="1490.0" y="1274.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">启动应用 / 请求锁定 / 关机</text>
