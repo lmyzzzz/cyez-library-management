@@ -195,7 +195,7 @@ def runtime():
     p.box('business',640,425,480,110,'命令与 Session 模块\n签名 / 幂等 / 控制代次\n共享 domain 规则与业务投影',size=20)
     route(p,'remote-network','remote','network',[(340,225),(340,425)],'只有 Electron 访问网络',(155,264,370,48),both=True)
     route(p,'net-business','network','business',[(580,480),(640,480)],both=True)
-    p.box('coordinator',100,620,1020,85,'应用协调器：请求保护动作、确认实际界面状态、合并守护事实、故障优先',PURPLE,size=20)
+    p.box('coordinator',100,620,1020,85,'应用协调器：请求保护动作、确认界面状态、汇总守护进程状态与事件；故障优先',PURPLE,size=20)
     down(p,'net-coordinate','network','coordinator')
     route(p,'biz-coordinate','business','coordinator',[(880,535),(880,620)])
     p.box('render',100,805,300,120,'渲染器 + preload\n多屏锁机 / 实际确认\n响应健康挑战',size=20)
@@ -208,7 +208,7 @@ def runtime():
     p.box('pipe',1280,425,420,110,'受限命名管道\n绑定子进程 / 用户会话\nIPC 版本 / 请求序号 / 保护代次',size=19)
     p.box('machine',1280,620,420,110,'本地保护状态机\nSTARTING / LOCKED / UNLOCKED\nLOCKING / MAINTENANCE 等',size=19)
     p.box('supervisor',1280,815,420,110,'监督与定时器\n进程句柄 / 必需进程实例\n本地健康截止时间',size=19)
-    p.box('journal',1280,1010,420,110,'全部守护日志：运行 / 诊断 / 事实\nReadLogs → Electron 持久导入\nAckLogs 后转交上传责任',GREEN,size=19)
+    p.box('journal',1280,1010,420,110,'全部守护日志：状态 / 事件 / 诊断\nReadLogs → Electron 持久导入\nAckLogs 后转交上传责任',GREEN,size=19)
     p.box('actions',1280,1210,420,115,'固定系统动作\n启动应用 / 请求锁定 / 关机\n配合受控维护',size=19)
     down(p,'pipe-machine','pipe','machine')
     down(p,'machine-supervisor','machine','supervisor')
@@ -248,23 +248,29 @@ def sequence(ident,title,subtitle,actors,steps,notes=(),height=None):
 
 
 def discovery():
-    return sequence('device-discovery','03 · 入网、地址发现与教师接管','设备 ID 是身份；IP 是地址。教师数量不限，控制权以每台学生机为单位仲裁。',
+    return sequence('device-discovery','03 · 入网、地址发现、教师接管与画面订阅','设备 ID 是身份；IP 是地址。学生主动建立控制与画面连接；只读教师的画面订阅不赋予控制权。',
       [('teacher','教师 Electron'),('server','服务端 / 设备目录'),('student','学生 Electron'),('guardian','Rust 离线守护')],[
       ('guardian','student','1. 用户登录后启动应用\n等待首次锁定与 IPC 就绪'),
       ('student','server','2. 设备凭证认证 + bootId\n上报版本，获取策略'),
-      ('teacher','server','3. 注册角色与监听端点\n额外校验教师登录权限'),
+      ('teacher','server','3. 教师设备注册 / 报告端点\n业务操作另验账号权限'),
       ('student','server','4. 查询控制教师\n机房 / deviceId / controlEpoch'),
       ('server','student','5. 返回认证身份、地址\n端口、有效期与控制代次',True),
-      ('student','teacher','6. 学生主动建立认证直连；控制和画面分通道'),
+      ('student','teacher','6. 学生主动建立控制 WSS；画面需另行授权建连'),
       ('student','guardian','7. 有效远端 ack → 本地健康报告\n不把网络职责交给 Rust'),
       ('teacher','server','8. IP 变化：更新端点\n或其他教师请求接管'),
       ('server','student','9. 下发新目录 / 新控制代次\n数据库变更不等于接管完成'),
       ('student','teacher','10. 验证新身份，建立新控制连接，拒绝旧代次命令'),
-      ('student','server','11. 确认新代次与连接\n服务器才显示接管成功',True)
+      ('student','server','11. 确认新代次与连接\n服务器才显示接管成功',True),
+      ('teacher','server','12. 独立流程：申请画面订阅\n控制教师或只读教师均需授权'),
+      ('server','teacher','13. 返回短期订阅授权\n绑定设备 / 账号 / 范围 / 期限',True),
+      ('server','student','14. 下发订阅授权\n教师身份 / 端点 / 有效期'),
+      ('student','teacher','15. 学生建立独立画面 WSS；校验身份与订阅，教师指定授权内参数'),
+      ('student','teacher','16. 学生直接传画面；取消、撤销或到期停止，不经服务端中转')
       ],notes=[
       '首次入网须一次性注册码或审批；客户端自报 role=teacher 不会获得教师权限。',
       '地址重试、发现请求及接管过程不重置失联期限；任一必需连接 20 秒无有效回应即锁机。',
-      '无控制教师或目录无效时保持锁定；跨机房需实际放通学生到服务器和教师的指定端口。'])
+      '无控制教师或目录无效时保持锁定；跨机房需实际放通学生到服务器和教师的指定端口。',
+      '步骤 12–16 为独立订阅流程；只读教师画面连接不续期控制心跳。离线撤销以短期授权有效期兜底。'])
 
 
 def unlock():
@@ -300,7 +306,7 @@ def guardian():
       ('unlocked',690,730,450,110,'UNLOCKED\n界面确认解锁\n持续监督进程与本地健康',GREEN),
       ('locking',1280,450,430,110,'LOCKING\n提高保护代次 / 要求锁定\n3 秒内等待界面确认',PURPLE),
       ('maintenance',90,730,450,110,'MAINTENANCE\n只由受控维护流程进入\n限定对象 / 期限 / 安装计划',YELLOW),
-      ('shutdown',1280,1080,430,110,'SHUTTING_DOWN\n本地记事实 / 请求系统关机\n拒绝全部解锁请求',RED),
+      ('shutdown',1280,1080,430,110,'SHUTTING_DOWN\n记录关机请求 / 调用系统接口\n拒绝全部解锁请求',RED),
       ('fatal',90,1080,1050,110,'全局保护故障（运行就绪后）\nElectron 非预期退出 / 渲染故障 / 本地有效心跳缺失 3 秒\n或 STARTING 超时：直接请求关机，不依赖网络',RED)]
     for ident,x,y,w,h,text,fill in boxes:p.box(ident,x,y,w,h,text,fill,size=20)
     route(p,'boot-ready','start','locked',[(540,225),(690,225)],'锁机已确认',(540,170,150,45))

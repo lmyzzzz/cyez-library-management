@@ -340,7 +340,7 @@
         <mxCell id="remote-network-label" value="只有 Electron 访问网络" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="155" y="264" width="370" height="48" as="geometry" />
         </mxCell>
-        <mxCell id="coordinator" value="应用协调器：请求保护动作、确认实际界面状态、合并守护事实、故障优先" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="coordinator" value="应用协调器：请求保护动作、确认界面状态、汇总守护进程状态与事件；故障优先" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="100" y="620" width="1020" height="85" as="geometry" />
         </mxCell>
         <mxCell id="render" value="渲染器 + preload&#10;多屏锁机 / 实际确认&#10;响应健康挑战" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -367,7 +367,7 @@
         <mxCell id="supervisor" value="监督与定时器&#10;进程句柄 / 必需进程实例&#10;本地健康截止时间" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1280" y="815" width="420" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="journal" value="全部守护日志：运行 / 诊断 / 事实&#10;ReadLogs → Electron 持久导入&#10;AckLogs 后转交上传责任" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="journal" value="全部守护日志：状态 / 事件 / 诊断&#10;ReadLogs → Electron 持久导入&#10;AckLogs 后转交上传责任" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1280" y="1010" width="420" height="110" as="geometry" />
         </mxCell>
         <mxCell id="actions" value="固定系统动作&#10;启动应用 / 请求锁定 / 关机&#10;配合受控维护" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -379,33 +379,33 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="device-discovery" name="03 · 入网、地址发现与教师接管">
-    <mxGraphModel dx="1800" dy="1735" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1735" math="0" shadow="0">
+  <diagram id="device-discovery" name="03 · 入网、地址发现、教师接管与画面订阅">
+    <mxGraphModel dx="1800" dy="2290" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2290" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="lifeline-teacher" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="270.0" y="225" as="sourcePoint" />
-            <mxPoint x="270.0" y="1390" as="targetPoint" />
+            <mxPoint x="270.0" y="1890" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-server" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="690.0" y="225" as="sourcePoint" />
-            <mxPoint x="690.0" y="1390" as="targetPoint" />
+            <mxPoint x="690.0" y="1890" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-student" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1110.0" y="225" as="sourcePoint" />
-            <mxPoint x="1110.0" y="1390" as="targetPoint" />
+            <mxPoint x="1110.0" y="1890" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="lifeline-guardian" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=none;endFill=1;startArrow=none;startFill=1;dashed=1;">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1530.0" y="225" as="sourcePoint" />
-            <mxPoint x="1530.0" y="1390" as="targetPoint" />
+            <mxPoint x="1530.0" y="1890" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="msg-0" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
@@ -474,10 +474,40 @@
             <mxPoint x="690.0" y="1310" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="title" value="03 · 入网、地址发现与教师接管" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-11" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270.0" y="1410" as="sourcePoint" />
+            <mxPoint x="690.0" y="1410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-12" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690.0" y="1510" as="sourcePoint" />
+            <mxPoint x="270.0" y="1510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-13" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690.0" y="1610" as="sourcePoint" />
+            <mxPoint x="1110.0" y="1610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-14" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1110.0" y="1710" as="sourcePoint" />
+            <mxPoint x="270.0" y="1710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-15" edge="1" parent="1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1110.0" y="1810" as="sourcePoint" />
+            <mxPoint x="270.0" y="1810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="03 · 入网、地址发现、教师接管与画面订阅" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle" value="设备 ID 是身份；IP 是地址。教师数量不限，控制权以每台学生机为单位仲裁。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="subtitle" value="设备 ID 是身份；IP 是地址。学生主动建立控制与画面连接；只读教师的画面订阅不赋予控制权。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
         </mxCell>
         <mxCell id="teacher" value="教师 Electron" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -498,7 +528,7 @@
         <mxCell id="msg-text-1" value="2. 设备凭证认证 + bootId&#10;上报版本，获取策略" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="340" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-2" value="3. 注册角色与监听端点&#10;额外校验教师登录权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-text-2" value="3. 教师设备注册 / 报告端点&#10;业务操作另验账号权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="278.0" y="440" width="404.0" height="62" as="geometry" />
         </mxCell>
         <mxCell id="msg-text-3" value="4. 查询控制教师&#10;机房 / deviceId / controlEpoch" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -507,7 +537,7 @@
         <mxCell id="msg-text-4" value="5. 返回认证身份、地址&#10;端口、有效期与控制代次" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="640" width="404.0" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="msg-text-5" value="6. 学生主动建立认证直连；控制和画面分通道" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="msg-text-5" value="6. 学生主动建立控制 WSS；画面需另行授权建连" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="278.0" y="740" width="824.0" height="62" as="geometry" />
         </mxCell>
         <mxCell id="msg-text-6" value="7. 有效远端 ack → 本地健康报告&#10;不把网络职责交给 Rust" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -525,14 +555,32 @@
         <mxCell id="msg-text-10" value="11. 确认新代次与连接&#10;服务器才显示接管成功" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="698.0" y="1240" width="404.0" height="62" as="geometry" />
         </mxCell>
+        <mxCell id="msg-text-11" value="12. 独立流程：申请画面订阅&#10;控制教师或只读教师均需授权" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="1340" width="404.0" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-text-12" value="13. 返回短期订阅授权&#10;绑定设备 / 账号 / 范围 / 期限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="1440" width="404.0" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-text-13" value="14. 下发订阅授权&#10;教师身份 / 端点 / 有效期" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="698.0" y="1540" width="404.0" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-text-14" value="15. 学生建立独立画面 WSS；校验身份与订阅，教师指定授权内参数" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="1640" width="824.0" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-text-15" value="16. 学生直接传画面；取消、撤销或到期停止，不经服务端中转" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="278.0" y="1740" width="824.0" height="62" as="geometry" />
+        </mxCell>
         <mxCell id="note-0" value="首次入网须一次性注册码或审批；客户端自报 role=teacher 不会获得教师权限。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1425" width="1680" height="48" as="geometry" />
+          <mxGeometry x="60" y="1925" width="1680" height="48" as="geometry" />
         </mxCell>
         <mxCell id="note-1" value="地址重试、发现请求及接管过程不重置失联期限；任一必需连接 20 秒无有效回应即锁机。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1480" width="1680" height="48" as="geometry" />
+          <mxGeometry x="60" y="1980" width="1680" height="48" as="geometry" />
         </mxCell>
         <mxCell id="note-2" value="无控制教师或目录无效时保持锁定；跨机房需实际放通学生到服务器和教师的指定端口。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
-          <mxGeometry x="60" y="1535" width="1680" height="48" as="geometry" />
+          <mxGeometry x="60" y="2035" width="1680" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="note-3" value="步骤 12–16 为独立订阅流程；只读教师画面连接不续期控制心跳。离线撤销以短期授权有效期兜底。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="2090" width="1680" height="48" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
@@ -836,7 +884,7 @@
         <mxCell id="maintenance" value="MAINTENANCE&#10;只由受控维护流程进入&#10;限定对象 / 期限 / 安装计划" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="90" y="730" width="450" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="shutdown" value="SHUTTING_DOWN&#10;本地记事实 / 请求系统关机&#10;拒绝全部解锁请求" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="shutdown" value="SHUTTING_DOWN&#10;记录关机请求 / 调用系统接口&#10;拒绝全部解锁请求" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1280" y="1080" width="430" height="110" as="geometry" />
         </mxCell>
         <mxCell id="fatal" value="全局保护故障（运行就绪后）&#10;Electron 非预期退出 / 渲染故障 / 本地有效心跳缺失 3 秒&#10;或 STARTING 超时：直接请求关机，不依赖网络" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">

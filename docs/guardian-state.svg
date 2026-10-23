@@ -40,7 +40,7 @@
 <text x="315.0" y="821.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">限定对象 / 期限 / 安装计划</text>
 <rect x="1280" y="1080" width="430" height="110" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1495.0" y="1113.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">SHUTTING_DOWN</text>
-<text x="1495.0" y="1142.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本地记事实 / 请求系统关机</text>
+<text x="1495.0" y="1142.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">记录关机请求 / 调用系统接口</text>
 <text x="1495.0" y="1171.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">拒绝全部解锁请求</text>
 <rect x="90" y="1080" width="1050" height="110" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="615.0" y="1113.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全局保护故障（运行就绪后）</text>

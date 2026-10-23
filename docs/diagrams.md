@@ -4,11 +4,13 @@
 
 [下载或打开可编辑 draw.io 图册](architecture.drawio)。图册共有十页，每页均有可直接预览、放大的 SVG。先看总体架构和学生端内部职责，再按需要阅读时序与状态机。
 
+逐项核对三端收发内容与身份要求时，参阅[网络通信清单](network-communication.md)。
+
 | 页面 | 图 | 说明 |
 | --- | --- | --- |
 | 01 | [总体架构](architecture.svg) | 服务端、教师与学生模块；Electron 远端链路；Rust 离线边界；存储与包仓库 |
 | 02 | [学生端内部职责](student-runtime.svg) | 主逻辑、渲染器、worker、SQLite、命名管道、保护状态机及系统动作 |
-| 03 | [入网与教师发现](device-discovery.svg) | 设备身份、动态 IP、教师端点、操作权代次、接管完成条件 |
+| 03 | [入网与教师发现](device-discovery.svg) | 设备身份、动态 IP、教师端点、操作权代次、接管完成条件与独立画面订阅 |
 | 04 | [登记解锁时序](registration-sequence.svg) | UID/人脸登记、预留、授权、本地许可、实际界面确认、事件提交与回执 |
 | 05 | [Rust 离线状态机](guardian-state.svg) | 启动、锁定、解锁许可、使用、故障锁定、维护和关机；本地期限与保护代次 |
 | 06 | [故障处置](failure-handling.svg) | 两路网络、必需进程、应用故障分流；本地动作与服务器认知的区别 |

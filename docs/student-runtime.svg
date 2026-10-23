@@ -36,7 +36,7 @@
 <rect x="155" y="264" width="370" height="48" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="340.0" y="293.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">只有 Electron 访问网络</text>
 <rect x="100" y="620" width="1020" height="85" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="610.0" y="669.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">应用协调器：请求保护动作、确认实际界面状态、合并守护事实、故障优先</text>
+<text x="610.0" y="669.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">应用协调器：请求保护动作、确认界面状态、汇总守护进程状态与事件；故障优先</text>
 <rect x="100" y="805" width="300" height="120" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="250.0" y="843.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">渲染器 + preload</text>
 <text x="250.0" y="872.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">多屏锁机 / 实际确认</text>
@@ -69,7 +69,7 @@
 <text x="1490.0" y="876.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">进程句柄 / 必需进程实例</text>
 <text x="1490.0" y="904.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地健康截止时间</text>
 <rect x="1280" y="1010" width="420" height="110" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1490.0" y="1044.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">全部守护日志：运行 / 诊断 / 事实</text>
+<text x="1490.0" y="1044.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">全部守护日志：状态 / 事件 / 诊断</text>
 <text x="1490.0" y="1071.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">ReadLogs → Electron 持久导入</text>
 <text x="1490.0" y="1099.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">AckLogs 后转交上传责任</text>
 <rect x="1280" y="1210" width="420" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>

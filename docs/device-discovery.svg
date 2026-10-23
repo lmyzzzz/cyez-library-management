@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1735" viewBox="0 0 1800 1735" role="img" aria-labelledby="title desc">
-<title id="title">03 · 入网、地址发现与教师接管</title><desc id="desc">设备 ID 是身份；IP 是地址。教师数量不限，控制权以每台学生机为单位仲裁。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2290" viewBox="0 0 1800 2290" role="img" aria-labelledby="title desc">
+<title id="title">03 · 入网、地址发现、教师接管与画面订阅</title><desc id="desc">设备 ID 是身份；IP 是地址。学生主动建立控制与画面连接；只读教师的画面订阅不赋予控制权。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1800" height="1735" fill="#ffffff"/>
-<polyline points="270.0,225 270.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="690.0,225 690.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="1110.0,225 1110.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
-<polyline points="1530.0,225 1530.0,1390" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<rect width="1800" height="2290" fill="#ffffff"/>
+<polyline points="270.0,225 270.0,1890" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="690.0,225 690.0,1890" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1110.0,225 1110.0,1890" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<polyline points="1530.0,225 1530.0,1890" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 5"/>
 <polyline points="1530.0,310 1110.0,310" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1110.0,410 690.0,410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="270.0,510 690.0,510" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
@@ -17,8 +17,13 @@
 <polyline points="690.0,1110 1110.0,1110" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1110.0,1210 270.0,1210" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1110.0,1310 690.0,1310" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
-<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">03 · 入网、地址发现与教师接管</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">设备 ID 是身份；IP 是地址。教师数量不限，控制权以每台学生机为单位仲裁。</text>
+<polyline points="270.0,1410 690.0,1410" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="690.0,1510 270.0,1510" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="690.0,1610 1110.0,1610" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1110.0,1710 270.0,1710" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1110.0,1810 270.0,1810" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">03 · 入网、地址发现、教师接管与画面订阅</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">设备 ID 是身份；IP 是地址。学生主动建立控制与画面连接；只读教师的画面订阅不赋予控制权。</text>
 <rect x="70.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="270.0" y="192.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600" fill="#172b4d">教师 Electron</text>
 <rect x="490.0" y="145" width="400.0" height="80" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -34,8 +39,8 @@
 <text x="900.0" y="364.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">2. 设备凭证认证 + bootId</text>
 <text x="900.0" y="389.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">上报版本，获取策略</text>
 <rect x="278.0" y="440" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="480.0" y="464.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">3. 注册角色与监听端点</text>
-<text x="480.0" y="489.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">额外校验教师登录权限</text>
+<text x="480.0" y="464.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">3. 教师设备注册 / 报告端点</text>
+<text x="480.0" y="489.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">业务操作另验账号权限</text>
 <rect x="698.0" y="540" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="564.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">4. 查询控制教师</text>
 <text x="900.0" y="589.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">机房 / deviceId / controlEpoch</text>
@@ -43,7 +48,7 @@
 <text x="900.0" y="664.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">5. 返回认证身份、地址</text>
 <text x="900.0" y="689.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">端口、有效期与控制代次</text>
 <rect x="278.0" y="740" width="824.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="690.0" y="776.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">6. 学生主动建立认证直连；控制和画面分通道</text>
+<text x="690.0" y="776.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">6. 学生主动建立控制 WSS；画面需另行授权建连</text>
 <rect x="1118.0" y="840" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="1320.0" y="864.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">7. 有效远端 ack → 本地健康报告</text>
 <text x="1320.0" y="889.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">不把网络职责交给 Rust</text>
@@ -58,10 +63,25 @@
 <rect x="698.0" y="1240" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="1264.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">11. 确认新代次与连接</text>
 <text x="900.0" y="1289.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">服务器才显示接管成功</text>
-<rect x="60" y="1425" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1455.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">首次入网须一次性注册码或审批；客户端自报 role=teacher 不会获得教师权限。</text>
-<rect x="60" y="1480" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1510.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">地址重试、发现请求及接管过程不重置失联期限；任一必需连接 20 秒无有效回应即锁机。</text>
-<rect x="60" y="1535" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1565.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">无控制教师或目录无效时保持锁定；跨机房需实际放通学生到服务器和教师的指定端口。</text>
+<rect x="278.0" y="1340" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="1364.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">12. 独立流程：申请画面订阅</text>
+<text x="480.0" y="1389.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">控制教师或只读教师均需授权</text>
+<rect x="278.0" y="1440" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="480.0" y="1464.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">13. 返回短期订阅授权</text>
+<text x="480.0" y="1489.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">绑定设备 / 账号 / 范围 / 期限</text>
+<rect x="698.0" y="1540" width="404.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1564.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">14. 下发订阅授权</text>
+<text x="900.0" y="1589.275" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">教师身份 / 端点 / 有效期</text>
+<rect x="278.0" y="1640" width="824.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="690.0" y="1676.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">15. 学生建立独立画面 WSS；校验身份与订阅，教师指定授权内参数</text>
+<rect x="278.0" y="1740" width="824.0" height="62" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
+<text x="690.0" y="1776.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">16. 学生直接传画面；取消、撤销或到期停止，不经服务端中转</text>
+<rect x="60" y="1925" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1955.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">首次入网须一次性注册码或审批；客户端自报 role=teacher 不会获得教师权限。</text>
+<rect x="60" y="1980" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2010.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">地址重试、发现请求及接管过程不重置失联期限；任一必需连接 20 秒无有效回应即锁机。</text>
+<rect x="60" y="2035" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2065.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">无控制教师或目录无效时保持锁定；跨机房需实际放通学生到服务器和教师的指定端口。</text>
+<rect x="60" y="2090" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2120.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">步骤 12–16 为独立订阅流程；只读教师画面连接不续期控制心跳。离线撤销以短期授权有效期兜底。</text>
 </svg>

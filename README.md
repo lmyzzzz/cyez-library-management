@@ -11,6 +11,7 @@
 ## 文档与架构图
 
 - [完整架构设计](docs/architecture.md)：职责矩阵、共享包、网络与本地 IPC、状态机、持久化、更新和验收。
+- [按身份整理的网络通信](docs/network-communication.md)：三端收发清单、设备与账号权限、建连方向、只读屏幕订阅、确认规则与端口放通。
 - [可编辑架构图册](docs/architecture.drawio)：使用 diagrams.net / draw.io 打开，包含下列十个详细页面。
 - [图册索引与维护方法](docs/diagrams.md)：各页说明、阅读顺序、图源同步与再生成命令。
 
