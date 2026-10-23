@@ -45,17 +45,18 @@
 <text x="1652.5" y="478.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">新教师授权</text>
 <text x="1652.5" y="504.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">+ 实际恢复事件</text>
 <rect x="760" y="370" width="470" height="55" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
-<text x="995.0" y="403.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">结束请求 / 关机或重启线索</text>
+<text x="995.0" y="403.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">结束请求 / 关机或整机重启线索</text>
 <rect x="1125" y="540" width="160" height="45" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="1205.0" y="568.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">显式结束</text>
 <rect x="730.0" y="769.5" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="798.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">终态证据或追加审计结论</text>
 <rect x="70" y="815" width="440" height="220" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="290.0" y="876.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">超时不等于执行失败</text>
-<text x="290.0" y="904.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预留与暂停都算占用</text>
-<text x="290.0" y="931.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">迟到事件按 Session / bootId 归属</text>
-<text x="290.0" y="959.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不得污染新 Session</text>
-<text x="290.0" y="986.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">恢复实际使用须重新授权</text>
+<text x="290.0" y="862.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">超时不等于执行失败</text>
+<text x="290.0" y="890.3249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预留与暂停都算占用</text>
+<text x="290.0" y="917.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">迟到事件按 Session / bootId 归属</text>
+<text x="290.0" y="945.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">应用重启不等于整机重启</text>
+<text x="290.0" y="972.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">防护故障不自动结束 Session</text>
+<text x="290.0" y="1000.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">恢复实际使用须重新授权</text>
 <rect x="1290" y="815" width="440" height="220" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1510.0" y="876.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">登记总时长：登记 → 最终结束</text>
 <text x="1510.0" y="904.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">可用时长：已确认解锁区间之和</text>

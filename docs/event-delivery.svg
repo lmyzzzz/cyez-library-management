@@ -76,5 +76,5 @@
 <rect x="60" y="1990" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="2020.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">不采样漏传，不清理未确认日志；无效项隔离告警，长记录分片。后台批传不阻塞心跳，日志接收不递归放大。</text>
 <rect x="60" y="2045" width="1680" height="48" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="2075.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">存储故障禁止新使用并保护锁机；关机不等待网络。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。</text>
+<text x="900.0" y="2075.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">存储故障禁止新使用、尽力锁定并告警，不自动关机。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。</text>
 </svg>

@@ -173,7 +173,7 @@ def overview():
     p.box('s-store',1410,1110,300,95,'SQLite / 凭证存储\n全量日志 outbox / 命令',size=18)
     route(p,'s-ipc','s-app','s-render',[(1210,1035),(1210,1110)],both=True)
     route(p,'s-persist','s-app','s-store',[(1560,1035),(1560,1110)],both=True)
-    p.box('rust',1060,1330,650,100,'Rust 离线 Windows 服务 · Session 0\n监督 / 状态机 / 关机；全部日志交由 Electron 上传',RED,size=20)
+    p.box('rust',1060,1330,650,100,'Rust 离线 Windows 服务 · Session 0\n监督 / 状态机 / 故障恢复；全部日志由 Electron 上传',RED,size=20)
     route(p,'guardian-ipc','s-app','rust',[(1060,980),(1040,980),(1040,1280),(1385,1280),(1385,1330)],'带 ACL 的本地命名管道',(1125,1245,520,45),both=True)
     route(p,'t-server','teacher','server',[(415,810),(415,605)],both=True)
     p.label('t-link',100,655,630,95,'HTTPS / WSS\n全部日志上传 / 查询；注册、授权、管理、心跳',20,fill='#ffffff')
@@ -206,10 +206,10 @@ def runtime():
     p.box('health',100,1020,1020,100,'本地健康报告：主逻辑 + 锁机渲染器都要响应\n两路远端 ack 才可更新网络健康期限；普通 IPC 心跳不可续期',size=20)
     p.box('app-boundary',100,1210,1020,115,'不向 renderer 暴露私钥、业务数据库或守护管道\n画面与更新任务不得阻塞主业务 / 锁机确认；有界队列丢弃过时帧\nElectron 持有远端授权，Rust 不重新实现业务鉴权',YELLOW,size=19)
     p.box('pipe',1280,425,420,110,'受限命名管道\n绑定子进程 / 用户会话\nIPC 版本 / 请求序号 / 保护代次',size=19)
-    p.box('machine',1280,620,420,110,'本地保护状态机\nSTARTING / LOCKED / UNLOCKED\nLOCKING / MAINTENANCE 等',size=19)
+    p.box('machine',1280,620,420,110,'本地保护状态机\nLOCKED / UNLOCKED / LOCKING\nRECOVERING：故障时尝试恢复',size=19)
     p.box('supervisor',1280,815,420,110,'监督与定时器\n进程句柄 / 必需进程实例\n本地健康截止时间',size=19)
     p.box('journal',1280,1010,420,110,'全部守护日志：状态 / 事件 / 诊断\nReadLogs → Electron 持久导入\nAckLogs 后转交上传责任',GREEN,size=19)
-    p.box('actions',1280,1210,420,115,'固定系统动作\n启动应用 / 请求锁定 / 关机\n配合受控维护',size=19)
+    p.box('actions',1280,1210,420,115,'固定系统动作\n应用恢复 / 锁定 / 显式关机\n故障不自动关机；配合受控维护',size=19)
     down(p,'pipe-machine','pipe','machine')
     down(p,'machine-supervisor','machine','supervisor')
     down(p,'supervisor-journal','supervisor','journal')
@@ -298,7 +298,7 @@ def unlock():
 
 
 def guardian():
-    p=page('guardian-state','05 · Rust 离线守护状态机','这是本地保护状态，不是学生 Session；远端鉴权、用户资料和使用时长都留在 Electron。',1800,1530)
+    p=page('guardian-state','05 · Rust 离线守护状态机','防护故障转恢复，不自动关机；告警由可用的 Electron 转发，本地保护状态与 Session 分开。',1800,1900)
     boxes=[
       ('start',90,170,450,110,'STARTING\n启动用户应用 / 首次锁定\n首次就绪期限 30 秒',BLUE),
       ('locked',690,170,450,110,'LOCKED\n锁机确认 / 保持监督\n等待新的本地解锁请求',GREEN),
@@ -306,8 +306,10 @@ def guardian():
       ('unlocked',690,730,450,110,'UNLOCKED\n界面确认解锁\n持续监督进程与本地健康',GREEN),
       ('locking',1280,450,430,110,'LOCKING\n提高保护代次 / 要求锁定\n3 秒内等待界面确认',PURPLE),
       ('maintenance',90,730,450,110,'MAINTENANCE\n只由受控维护流程进入\n限定对象 / 期限 / 安装计划',YELLOW),
-      ('shutdown',1280,1080,430,110,'SHUTTING_DOWN\n记录关机请求 / 调用系统接口\n拒绝全部解锁请求',RED),
-      ('fatal',90,1080,1050,110,'全局保护故障（运行就绪后）\nElectron 非预期退出 / 渲染故障 / 本地有效心跳缺失 3 秒\n或 STARTING 超时：直接请求关机，不依赖网络',RED)]
+      ('recovering',1280,1080,430,150,'RECOVERING\n保留可用锁机 / 恢复应用\n限时尝试 / 退避 / 失败提示人工\n本地健康 + 锁定确认后回 LOCKED',RED),
+      ('fault',90,1080,1050,150,'防护故障 → 尽力恢复，不自动关机\nElectron 退出 / 渲染故障 / 本地健康缺失 3 秒\nSTARTING 超时 / 锁定 3 秒未确认也走恢复\n撤销旧许可；故障和恢复记录交由 Electron 转发',RED),
+      ('explicit',90,1430,1050,125,'独立的显式关机流程\n正常结束或教师明确命令，由 Electron 校验后请求关机\n已观测到系统正常关机时也抑制应用重启；故障不触发此路径',BLUE),
+      ('shutdown',1280,1430,430,125,'SHUTTING_DOWN\n记录关机请求 / 调用系统接口\n预期退出不触发故障恢复',BLUE)]
     for ident,x,y,w,h,text,fill in boxes:p.box(ident,x,y,w,h,text,fill,size=20)
     route(p,'boot-ready','start','locked',[(540,225),(690,225)],'锁机已确认',(540,170,150,45))
     down(p,'request-unlock','locked','pending','请求 + 本地条件通过')
@@ -315,19 +317,24 @@ def guardian():
     route(p,'network-fault','unlocked','locking',[(1140,785),(1495,785),(1495,560)],'期限届满 / 进程退出\n或 Electron 请求锁机',(1170,640,530,65))
     route(p,'unlock-failed','pending','locking',[(1140,505),(1280,505)],'超时 / 失败',(1145,440,130,60))
     route(p,'lock-confirmed','locking','locked',[(1495,450),(1495,225),(1140,225)],'锁定确认\n不自动解锁',(1270,285,430,70))
-    route(p,'lock-timeout','locking','shutdown',[(1710,505),(1750,505),(1750,1135),(1710,1135)])
-    p.label('lock-timeout-label',1470,930,270,60,'锁定 3 秒未确认',18,fill='#ffffff')
+    route(p,'lock-timeout','locking','recovering',[(1710,505),(1740,505),(1740,1155),(1710,1155)])
+    p.label('lock-timeout-label',1460,850,270,60,'锁定 3 秒未确认',18,fill='#ffffff')
     route(p,'maint-enter','locked','maintenance',[(690,245),(595,245),(595,670),(315,670),(315,730)],'受控维护授权',(345,590,245,45))
     route(p,'maint-exit','maintenance','start',[(90,785),(55,785),(55,225),(90,225)])
-    p.label('maint-exit-label',100,410,430,125,'退出维护 → 重新启动并锁定\n到期：按实际健康触发锁定/关机\n无用户会话时等待登录',19,fill='#ffffff')
-    route(p,'fatal-shutdown','fatal','shutdown',[(1140,1135),(1280,1135)],'优先处置',(1145,1070,130,45))
-    p.box('rules',90,1260,1620,130,'转换规则：故障锁定优先于解锁确认；每次保护故障 / 守护重启 / 新用户会话都使旧许可失效。\n请求关机是固定本地动作，可由已校验的 Electron 请求或守护故障触发；不代表系统已经断电。\n无交互式用户时保持待机，不启动 30 秒就绪期限；正常系统关机中的预期退出不重复触发故障。',size=20)
-    footer(p,'Rust 仅信任受约束的本地应用报告，不验证远端身份；普通心跳不得续期网络健康期限。\n同一动作使用请求 ID 去重，晚到结果不能覆盖较新的保护代次。')
+    p.label('maint-exit-label',100,410,430,125,'退出维护 → 重新启动并锁定\n到期：尝试锁定；不健康则恢复\n无用户会话时等待登录',19,fill='#ffffff')
+    route(p,'fault-recover','fault','recovering',[(1140,1155),(1280,1155)],'记录并恢复',(1145,1090,130,45))
+    route(p,'recover-retry','recovering','recovering',[(1445,1080),(1445,1020),(1620,1020),(1620,1080)])
+    p.label('retry-note',1280,935,430,65,'尝试失败 → 保持恢复\n退避 / 限频 / 提示人工处理',18,fill='#ffffff')
+    route(p,'recovered-locked','recovering','locked',[(1495,1230),(1495,1295),(1780,1295),(1780,125),(915,125),(915,170)])
+    p.label('recovered-note',1230,1260,510,65,'确认恢复后仅回到 LOCKED\n继续使用仍须教师重新授权',18,fill='#ffffff')
+    route(p,'explicit-shutdown','explicit','shutdown',[(1140,1492),(1280,1492)],'明确请求',(1145,1430,130,45))
+    p.box('rules',90,1620,1620,135,'故障恢复必须使旧解锁许可失效；本地健康和全部锁机窗口重新确认后，才标记已恢复防护。\n恢复失败持续告警 / 降低重试频率，不自动关机、不清空日志、不结束 Session 或释放占用。\nRust 不联网：Electron 不可用时，教师 / 服务端先按心跳告警失联，应用恢复后补传详细记录。',size=20)
+    footer(p,'每次启动就绪期限 30 秒，每次锁定确认期限 3 秒；维护或系统正常关机中的预期退出不触发恢复。\n同一故障保留 faultId、累计尝试与保护代次；应用重启不能重置退避预算。')
     return p
 
 
 def failures():
-    p=page('failure-handling','06 · 故障检测、动作与证据','Electron 负责网络判断与业务记账；Rust 在离线情况下独立执行本地故障动作。',1800,1420)
+    p=page('failure-handling','06 · 故障检测、教师告警与尽力恢复','故障时尝试锁定、警告教师并恢复应用；不自动关机，不以重启进程代替实际锁定确认。',1800,1840)
     triggers=[('net',60,'网络健康故障\nElectron 每 1 秒收有效 ack\n任一路连续 20 秒失联',BLUE),('proc',640,'必需进程故障\nRust 监督句柄与实例\n退出 / 身份不符立即触发',BLUE),('dead',1220,'应用保护故障\n非预期退出 / 渲染器故障\n本地有效心跳缺失 3 秒',RED)]
     for ident,x,text,fill in triggers:p.box(ident,x,165,520,130,text,fill,size=21)
     p.box('lock',350,450,810,100,'Rust 进入 LOCKING，递增保护代次\n通过本地 IPC 要求 Electron 显示所有锁机窗口',PURPLE,size=22)
@@ -337,15 +344,22 @@ def failures():
     down(p,'lock-confirm','lock','confirmed')
     p.box('pause',350,880,810,110,'是：保护状态 LOCKED\nElectron 记录 Session 暂停 + 事件落盘 / 补报\n无 Session 则只记录设备状态',GREEN,size=21)
     down(p,'yes-pause','confirmed','pause','是')
-    p.box('resume',350,1100,810,100,'连接与必需进程恢复 + 教师重新授权\n重新通过业务校验与本地许可后恢复使用',GREEN,size=21)
+    p.box('resume',350,1130,810,110,'连接与必需进程恢复 + 教师重新授权\n重新通过业务校验与本地许可后恢复使用\n告警已读 / 进程拉起都不等于解锁',GREEN,size=21)
     down(p,'resume-check','pause','resume','仅恢复连接或进程仍保持锁定')
-    p.box('shutdown',1280,660,460,110,'本地记录守护故障\n请求系统关机\n不等待网络确认',RED,size=21)
-    route(p,'dead-shutdown','dead','shutdown',[(1480,295),(1480,660)])
-    route(p,'not-confirmed','confirmed','shutdown',[(1160,705),(1280,705)],'否',(1170,650,100,45))
-    p.box('reconcile',1280,960,460,140,'Electron 可用时直接上报\n已退出则下次启动导入守护日志\n服务端保留结束待确认状态\n不把崩溃自动判为恶意',YELLOW,size=19)
-    down(p,'shutdown-evidence','shutdown','reconcile','关机请求 ≠ 已断电')
-    p.label('offline-server',45,725,270,210,'服务器仅看到失联时\n显示“锁机待确认”\n不能伪造本地执行成功\n也不能释放未确认占用',18,fill=YELLOW)
-    footer(p,'突然断电 / 长按电源可能无任何上报：先标原因待确认，保留最后确认时间与可能结束区间。\n管理员若同时停止服务与界面，本地故障动作无法得到保证。')
+    p.box('recover',1280,660,460,150,'记录故障 / RECOVERING\n警告教师（链路可用时）\n重建窗口 / 受控拉起应用\n不自动关机',RED,size=21)
+    route(p,'dead-recover','dead','recover',[(1480,295),(1480,660)])
+    route(p,'not-confirmed','confirmed','recover',[(1160,705),(1280,705)],'否',(1170,650,100,45))
+    p.box('retry',1280,965,460,155,'每次尝试有截止时间\n失败后退避，持续失败提示人工\n保留故障与全部恢复记录\n本地健康 + 锁机确认后回左侧',YELLOW,size=19)
+    down(p,'recover-retry','recover','retry','持续尽力恢复；不重启整机')
+    route(p,'recovered-pause','retry','pause',[(1280,1042),(1220,1042),(1220,935),(1160,935)],'确认',(1170,970,100,45))
+    p.label('offline-server',45,725,270,210,'服务器仅看到失联时\n显示“防护状态待确认”\n不能伪造锁机执行成功\n也不能释放未确认占用',18,fill=YELLOW)
+    p.label('session-evidence',45,1040,270,200,'故障不自动结束 Session\n锁定未确认区间待核实\n实际锁机后才确认暂停\n恢复后仍需教师授权',18,fill=YELLOW)
+    panel(p,'alerts',50,1370,1700,300,'教师告警：能送达时立即提示；不可达时保留记录并补报',BLUE)
+    p.box('live-alert',90,1460,500,145,'Electron 可通信\n直连提示当前教师\n事件 → 服务端 → 有权限教师\nfaultId 去重；直连不替代日志上传',size=19)
+    p.box('offline-alert',650,1460,500,145,'Electron 不可用\nRust 本地恢复，无远端连接\n教师 / 服务端 20 秒失联告警\n应用恢复后补传具体原因与尝试',size=19)
+    p.box('failed-alert',1210,1460,500,145,'恢复持续失败\n保持故障提示 / 低频尝试 / 人工处理\n不能确认锁机须明确标注\n教师已读不能解除故障或解锁',size=19)
+    route(p,'recover-alerts','recover','alerts',[(1740,735),(1780,735),(1780,1325),(900,1325),(900,1370)])
+    footer(p,'防护故障不自动关机，也不自动结束 Session / 释放占用；故障消息不能直接认定学生恶意操作。\n锁机无法确认时明确显示防护状态未确认；管理员同时停止服务与界面时，恢复与日志仍可能失败。')
     return p
 
 
@@ -360,10 +374,10 @@ def session_state():
     route(p,'resume-session','paused','active',[(1730,602),(1770,602),(1770,222),(1730,222)])
     p.label('resume-session-label',1545,450,215,70,'新教师授权\n+ 实际恢复事件',18,fill='#ffffff')
     route(p,'active-ending','active','end-pending',[(1330,275),(1330,460),(900,460),(900,550)])
-    p.label('end-note',760,370,470,55,'结束请求 / 关机或重启线索',18,fill='#ffffff')
+    p.label('end-note',760,370,470,55,'结束请求 / 关机或整机重启线索',18,fill='#ffffff')
     route(p,'paused-end','paused','end-pending',[(1290,602),(1120,602)],'显式结束',(1125,540,160,45))
     down(p,'end-confirm','end-pending','ended','终态证据或追加审计结论')
-    p.box('uncertain',70,815,440,220,'超时不等于执行失败\n预留与暂停都算占用\n迟到事件按 Session / bootId 归属\n不得污染新 Session\n恢复实际使用须重新授权',YELLOW,size=19)
+    p.box('uncertain',70,815,440,220,'超时不等于执行失败\n预留与暂停都算占用\n迟到事件按 Session / bootId 归属\n应用重启不等于整机重启\n防护故障不自动结束 Session\n恢复实际使用须重新授权',YELLOW,size=19)
     p.box('timing',1290,815,440,220,'登记总时长：登记 → 最终结束\n可用时长：已确认解锁区间之和\n暂停区间排除\nUTC 用于展示 / 单调时钟计时\n未知结束点保留区间而非伪造',BLUE,size=19)
     footer(p,'一个学生 / 一台设备最多对应一个未结束的使用 Session；预留、暂停和结束待确认均占用。\n网络失联先标连接与证据状态，锁机事件才确认暂停；故障恢复不自动解锁，人工更正追加审计。')
     return p
@@ -392,7 +406,7 @@ def events():
       '本地 ACK 只转移保管责任；服务端持久 ACK 才算完成。两级 ACK 丢失均可重放，不生成新的日志或业务事件。',
       '去重保留 logId / 来源 / bootId / 原始时间；业务 eventId 单独关联。服务端自身日志走内部归集，不需 HTTP 回环。',
       '不采样漏传，不清理未确认日志；无效项隔离告警，长记录分片。后台批传不阻塞心跳，日志接收不递归放大。',
-      '存储故障禁止新使用并保护锁机；关机不等待网络。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。'])
+      '存储故障禁止新使用、尽力锁定并告警，不自动关机。断电或磁盘损坏可能留下缺口，恢复后报告，不伪造日志。'])
 
 
 def updates():

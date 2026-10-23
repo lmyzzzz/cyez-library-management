@@ -62,8 +62,8 @@
 <text x="1490.0" y="514.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">IPC 版本 / 请求序号 / 保护代次</text>
 <rect x="1280" y="620" width="420" height="110" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="654.1" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地保护状态机</text>
-<text x="1490.0" y="681.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">STARTING / LOCKED / UNLOCKED</text>
-<text x="1490.0" y="709.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">LOCKING / MAINTENANCE 等</text>
+<text x="1490.0" y="681.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">LOCKED / UNLOCKED / LOCKING</text>
+<text x="1490.0" y="709.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">RECOVERING：故障时尝试恢复</text>
 <rect x="1280" y="815" width="420" height="110" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="849.1" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">监督与定时器</text>
 <text x="1490.0" y="876.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">进程句柄 / 必需进程实例</text>
@@ -74,8 +74,8 @@
 <text x="1490.0" y="1099.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">AckLogs 后转交上传责任</text>
 <rect x="1280" y="1210" width="420" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="1246.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定系统动作</text>
-<text x="1490.0" y="1274.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">启动应用 / 请求锁定 / 关机</text>
-<text x="1490.0" y="1301.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">配合受控维护</text>
+<text x="1490.0" y="1274.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">应用恢复 / 锁定 / 显式关机</text>
+<text x="1490.0" y="1301.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">故障不自动关机；配合受控维护</text>
 <rect x="40" y="1415" width="1720" height="70" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="1443.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">Rust 不创建 HTTP/WSS 连接、不监听远端、不处理人脸/Session/截图、不下载更新。</text>
 <text x="900.0" y="1469.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">本地报告可被管理员篡改，因此其健康期限不能作为远端连接真实性的强证明。</text>
