@@ -1,5 +1,20 @@
 # 学校图书馆机房管理系统
 
+**当前优先阶段：刷卡登记版（record-only）正式设计。** 最新草图已整理为[需求与业务规格](record-only/docs/specification.md)、[技术决策与依据](record-only/docs/decisions.md)、[Docker 部署](record-only/docs/deployment.md)、[两端测试计划](record-only/docs/testing.md)和 [cyez-ui 接入](record-only/docs/ui.md)。当前尚未实现应用。
+
+这一阶段由教师 Electron、Docker 化 Fastify 服务端和 PostgreSQL 组成，处理刷卡登记、设备分配与使用记录；不部署学生端、Rust、锁机或人脸识别。业务判断在服务端，界面采用已确定的 [cyez-ui](https://github.com/lmyzzzz/cyez-ui)，工程使用现代 Yarn 4 workspaces。
+
+- [刷卡登记版设计入口](record-only/README.md)
+- [八页正式图册与维护说明](record-only/docs/diagrams.md)
+- [可编辑 draw.io 图册](record-only/docs/architecture.drawio)
+- 原始草图：[record-only/docs/draft/draft.drawio](record-only/docs/draft/draft.drawio)，保持原样；问题决策和待定需求均可追踪。
+
+![当前刷卡登记版架构](record-only/docs/architecture.svg)
+
+## 后续完整三端方案
+
+以下为原有完整机房控制方案，作为后续扩展保留；其中“首版”指完整三端方案的首版，不是当前 record-only 阶段。两者的卡身份、Session 与通信规则不可直接混用。当前阶段以 `record-only/docs/` 为准。
+
 面向多机房的管理系统设计，不设置学生端或教师端数量的产品上限。服务端部署在固定 IP 的机房服务器，教师端通过动态地址注册；学生端主要逻辑位于 Electron 应用内，Rust Windows 服务仅作为具有固定功能和本地状态机的离线守护进程。
 
 服务端与 Electron 应用统一使用 TypeScript，采用现代 Yarn 4.x workspaces 组织共享协议、运行时校验和业务规则。首轮负载测试使用 200 台学生机、2 个教师端，该规模不是客户端数量限制，也不是无限容量的性能承诺。
@@ -44,7 +59,7 @@
 | 故障恢复 | 保留原 Session 与占用，实际锁定确认后暂停计时；保护状态未确认的区间待核实，恢复后仍须教师重新授权 |
 | 锁机程序故障 | 记录故障、告警教师端并尽可能恢复窗口/应用；退避重试，持续失败提示人工处理，不因故障自动关机 |
 | 首版监控 | 低帧率屏幕墙、单机放大、解锁、锁定、结束使用和关机；不含远程键鼠 |
-| 后续接入 | 人脸算法与 Electron UI 组件库通过适配接口接入 |
+| 后续接入 | 人脸算法通过适配接口接入；UI 库已确定为 cyez-ui，接入边界见 record-only/docs/ui.md |
 
 ## 防护能力边界
 
@@ -52,4 +67,4 @@
 
 断电或长按电源可能来不及上报。此类情况先记录“原因待确认”，不能仅凭失联认定正常结束或恶意使用。详细规则见[故障处置与关机证据](docs/architecture.md#故障处置与关机证据)。
 
-原始讨论草图保留在仓库根目录，正式设计以 `docs/architecture.md` 为准。本文描述的是设计目标，实机防护、兼容性与容量结果须在实现后另行验证。
+完整三端原始讨论草图保留在仓库根目录，该扩展方案以 `docs/architecture.md` 为准；当前登记版以 `record-only/docs/` 为准。本文描述的是设计目标，实机防护、兼容性与容量结果须在实现后另行验证。

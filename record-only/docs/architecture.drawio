@@ -1,0 +1,1144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="architecture" name="01 · 刷卡登记版总体架构">
+    <mxGraphModel dx="1800" dy="1660" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1660" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="teacher" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="145" width="520" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="server" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="640" y="145" width="1120" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="ui-ipc" edge="1" parent="1" source="renderer" target="preload" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300.0" y="570" as="sourcePoint" />
+            <mxPoint x="300.0" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ipc-main" edge="1" parent="1" source="preload" target="main" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300.0" y="735" as="sourcePoint" />
+            <mxPoint x="300.0" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="main-logs" edge="1" parent="1" source="main" target="outbox" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300.0" y="970" as="sourcePoint" />
+            <mxPoint x="300.0" y="1065" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="reader-main" edge="1" parent="1" source="reader" target="main" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.375;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="75" y="285" as="sourcePoint" />
+            <mxPoint x="75" y="870" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="57" y="285" />
+              <mxPoint x="57" y="870" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="api-services" edge="1" parent="1" source="api" target="services" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1200.0" y="345" as="sourcePoint" />
+            <mxPoint x="920.0" y="455" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1200.0" y="400.0" />
+              <mxPoint x="920.0" y="400.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="provider-call" edge="1" parent="1" source="services" target="provider" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.4444444444444444;exitPerimeter=0;entryX=0.0;entryY=0.4444444444444444;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1160" y="535" as="sourcePoint" />
+            <mxPoint x="1260" y="535" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="services-db" edge="1" parent="1" source="services" target="db" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920" y="635" as="sourcePoint" />
+            <mxPoint x="1200" y="955" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="920" y="690" />
+              <mxPoint x="1195" y="690" />
+              <mxPoint x="1195" y="920" />
+              <mxPoint x="1200" y="920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="provider-preview" edge="1" parent="1" source="provider" target="previews" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="635" as="sourcePoint" />
+            <mxPoint x="1490.0" y="725" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="business-http" edge="1" parent="1" source="main" target="api" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.375;exitPerimeter=0;entryX=0.0;entryY=0.5217391304347826;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="525" y="870" as="sourcePoint" />
+            <mxPoint x="680" y="290" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="600" y="870" />
+              <mxPoint x="600" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="log-upload" edge="1" parent="1" source="outbox" target="api" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.782608695652174;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="525" y="1140" as="sourcePoint" />
+            <mxPoint x="680" y="320" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="620" y="1140" />
+              <mxPoint x="620" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="01 · 刷卡登记版总体架构" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="当前实施范围：教师 Electron + Docker 服务端；设备仅是登记资源。箭头表示调用或数据流，虚线表示日志归集。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-title" value="教师 Windows · 可有多个客户端" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="55" y="155" width="490" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="reader" value="USB → CardReader 适配器&#10;scanId / 来源 / UID 字节&#10;TBD-03：协议、驱动、字节序" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="225" width="450" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="renderer" value="React renderer + cyez-ui&#10;设备列表 / 登记 / 结束 / 管理&#10;页面门控、确认、倒计时&#10;无原 UID、token 或数据库权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="420" width="450" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="preload" value="受限 preload IPC&#10;sender + schema 校验，隔离 renderer" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="640" width="450" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="main" value="Electron main · TypeScript&#10;读卡防抖 / 认证 / REST SDK&#10;原 UID 仅短期内存 → 服务端&#10;持久提交意图 / 操作结果恢复" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="810" width="450" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="outbox" value="本地 SQLite 日志 outbox&#10;main / UI / reader / SDK / 安装日志&#10;稳定 logId，断网留盘&#10;服务端持久 ACK 后回收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="1065" width="450" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="server-title" value="学校固定地址 · Linux Docker Compose" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="655" y="155" width="1090" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="HTTPS :443 → gateway → Fastify REST /api/v1&#10;注册 / 登录 / 预览 / 业务命令 / 查询 / 日志 ACK&#10;身份与机房权限、schema、限流；教师 IP 变化不影响主动请求" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="230" width="1040" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="services" value="业务模块 · 服务端最终判断&#10;学生与卡凭证 / 设备与标签&#10;开始 / 结束 / 批量固定集合&#10;预览 TTL / 幂等 / 版本 / 事务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="455" width="480" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="provider" value="外部校园卡 API · 服务端独占&#10;仅未知卡需要查询&#10;提取白名单后释放完整响应&#10;TBD-01 字段 / TBD-02 接口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="455" width="460" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="credentials" value="身份与账号边界&#10;客户端身份：入网 / 日志 / 启动报告&#10;operator / admin：业务与机房授权" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="725" width="480" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="previews" value="短期候选 · 有界内存&#10;previewId 绑定账号 + 客户端&#10;默认 2 分钟；重启需重刷" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="725" width="460" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL · 仅 Compose 内网 :5432 · pgdata 持久卷&#10;学生 / 卡 HMAC / 机房 / 设备 / 标签 / 使用记录&#10;操作结果 + 审计同事务；全部应用与部署日志统一存储&#10;活动记录条件唯一索引防止一人或一机重复占用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="955" width="1040" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="log-label" value="客户端日志也经 HTTPS API → 去重持久提交 → 逐项 ACK&#10;服务端 / gateway / DB 日志另经本地 spool → 内部 log-ingest" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="690" y="1150" width="1010" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="scope" value="范围边界&#10;本版无学生端、Rust、人脸识别、锁机或屏幕墙&#10;“结束使用”仅结束记录，故障不控制或关闭电脑&#10;不限制设备总数；有限分页/批次用于资源保护" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1330" width="840" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="privacy" value="统一规则&#10;业务失败不伪造成功；响应丢失用原 requestId 恢复&#10;所有已产生日志归集；无原卡号、token 或完整资料响应&#10;技术决策 / 来源 / 待定项详见 decisions.md" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1330" width="840" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="黄色：尚待外部确认的需求。蓝/绿：已决定的结构。后续三端扩展方案保留于根 docs/，不混用本版状态机。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1588" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="data-model" name="02 · 数据模型、关系与一致性约束">
+    <mxGraphModel dx="1800" dy="1920" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1920" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="support" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1150" width="1680" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="record-student" edge="1" parent="1" source="records" target="students" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.0;exitY=0.4897959183673469;exitPerimeter=0;entryX=1.0;entryY=0.4897959183673469;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="280" as="sourcePoint" />
+            <mxPoint x="560" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="record-device" edge="1" parent="1" source="records" target="devices" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.4897959183673469;exitPerimeter=0;entryX=0.0;entryY=0.4897959183673469;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="280" as="sourcePoint" />
+            <mxPoint x="1240" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="card-student" edge="1" parent="1" source="card" target="students" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=0.0;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="500" as="sourcePoint" />
+            <mxPoint x="310" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="device-room" edge="1" parent="1" source="devices" target="rooms" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="405" as="sourcePoint" />
+            <mxPoint x="1490.0" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="record-rules" edge="1" parent="1" source="records" target="rules" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="405" as="sourcePoint" />
+            <mxPoint x="900" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="join-device" edge="1" parent="1" source="device-tags" target="devices" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.94;exitY=0.0;exitPerimeter=0;entryX=1.0;entryY=0.8367346938775511;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1710" y="845" as="sourcePoint" />
+            <mxPoint x="1740" y="365" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1770" y="845" />
+              <mxPoint x="1770" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="join-tag" edge="1" parent="1" source="device-tags" target="tags" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.0;exitY=0.5;exitPerimeter=0;entryX=1.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1240" y="935" as="sourcePoint" />
+            <mxPoint x="1150" y="935" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="card-hmac" edge="1" parent="1" source="card" target="hmac" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="745" as="sourcePoint" />
+            <mxPoint x="310" y="845" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="02 · 数据模型、关系与一致性约束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="实线从外键引用方指向被引用方，边旁写明基数；虚线为约束/算法说明。活动占用只从 usage_records 派生。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="students" value="students · 学生当前档案&#10;PK id: UUID / version / archived_at&#10;姓名、班级、校内学号：候选字段&#10;TBD-01：必填项与稳定人物键&#10;不存 is_using / 原 UID / 资料快照" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="160" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="records" value="usage_records · 一次使用一条&#10;PK id / FK student_id / FK device_id&#10;started_at / ended_at nullable&#10;notes / end_reason / version&#10;voided_at + reason / actor / timestamps" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="160" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="devices" value="devices · 可登记的设备资源&#10;PK id / FK room_id / unique code&#10;display_name / notes / version&#10;is_disabled / archived_at&#10;占用状态来自活动记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="160" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="student-many" value="N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="570" y="200" width="70" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="device-many" value="N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="200" width="70" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="card" value="student_credentials · 卡凭证别名&#10;PK id / FK student_id / issuer&#10;key_version / uid_hmac / revoked_at&#10;有效 issuer + keyVersion + hmac 唯一&#10;同卡轮换别名归属同一 studentId" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="500" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="rules" value="一致性约束&#10;活动 = ended_at 空 且 voided_at 空&#10;活动 student_id / device_id 各自唯一&#10;ended_at ≥ started_at；FK 限制删除&#10;事务持对象锁检查有效时间区间不重叠" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="500" width="500" height="245" as="geometry" />
+        </mxCell>
+        <mxCell id="rooms" value="rooms · 机房权限范围&#10;PK id / display_name / archived_at&#10;标签只作筛选，不授予机房权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="500" width="500" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="card-many" value="N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="325" y="427" width="200" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="room-many" value="N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="427" width="200" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="hmac" value="HMAC-SHA-256 · 服务端秘密键&#10;domain / issuer / length / UID 字节&#10;长度编码、字节序与前导零不能丢失&#10;key 不与业务库明文放在一起&#10;轮换保留旧键，重刷后加新别名" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="845" width="500" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="tags" value="tags · 平面标签&#10;PK id / normalized_name UNIQUE&#10;display_name / archived_at / version&#10;不另存 deviceIds 数组" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="845" width="500" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="device-tags" value="device_tags · 唯一多对多关联&#10;PK (device_id, tag_id) + 两个 FK&#10;反向索引 (tag_id, device_id)&#10;设备 DTO 的 tagIds 由此投影" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="845" width="500" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="tag-many" value="N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="865" width="70" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="join-many" value="关联表 → 设备：N : 1" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1410" y="740" width="290" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="support-title" value="业务提交与可追踪性 · 逻辑关联使用对象 ID，业务更新与审计/操作结果同事务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="1160" width="1650" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="ops" value="operations&#10;actorId + requestId UNIQUE&#10;intent_id 唯一，预览只能成功消费一次&#10;路由 / payload 摘要 / 持久结果&#10;重试先查结果再判断 preview" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1230" width="510" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="audit" value="audit_events · 追加写入&#10;eventId / actor / client / requestId&#10;对象 ID / batchId / 时间 / 原因&#10;字段名和必要变更元数据&#10;不保存完整旧学生资料" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="645" y="1230" width="510" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="logs" value="app_logs · 全部来源日志&#10;认证 source + logId UNIQUE&#10;level / 时间 / 关联 ID / 脱敏消息&#10;持久提交后 ACK&#10;TBD-05：保留期与查询权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1205" y="1230" width="510" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="history" value="已确定：历史展示当前资料&#10;usage_records 只保存 student_id&#10;修改班级/姓名后旧记录也展示新资料&#10;归档保留历史 FK；更正/作废需 admin + 原因&#10;TBD-01：上线前确认字段白名单" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1520" width="800" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="identity" value="NEXT-01 · 明确延期：跨卡身份合并&#10;首版换卡视为另一位学生，不按姓名班级合并&#10;HMAC 是化名化，不能防克隆卡或代刷&#10;TBD-05：资料/记录/日志留存与导出规则&#10;JSON 用 Unix 毫秒整数；DB 用 timestamptz" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1520" width="820" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="可分配 = 未归档 + 未禁用 + 无活动记录。禁用与占用可并存；禁止维护第二套占用真值。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1848" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="registration-flow" name="03 · 刷卡、登记和结束的完整流程">
+    <mxGraphModel dx="1800" dy="2100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="scan-gate" edge="1" parent="1" source="scan" target="gate" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="230" as="sourcePoint" />
+            <mxPoint x="650" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gate-ignore" edge="1" parent="1" source="gate" target="ignored" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="230" as="sourcePoint" />
+            <mxPoint x="1240" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gate-preview" edge="1" parent="1" source="gate" target="preview" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="305" as="sourcePoint" />
+            <mxPoint x="900.0" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="preview-provider" edge="1" parent="1" source="preview" target="provider" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.4838709677419355;exitPerimeter=0;entryX=0.0;entryY=0.4838709677419355;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="470" as="sourcePoint" />
+            <mxPoint x="1240" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="preview-fail" edge="1" parent="1" source="preview" target="failed-preview" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.0;exitY=0.4838709677419355;exitPerimeter=0;entryX=1.0;entryY=0.4838709677419355;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="470" as="sourcePoint" />
+            <mxPoint x="560" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="preview-mode" edge="1" parent="1" source="preview" target="mode" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="550" as="sourcePoint" />
+            <mxPoint x="900.0" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="to-start" edge="1" parent="1" source="mode" target="register-form" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.2;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="750" y="760" as="sourcePoint" />
+            <mxPoint x="450" y="865" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="750" y="810" />
+              <mxPoint x="450" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="to-end" edge="1" parent="1" source="mode" target="end-form" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.8;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1050" y="760" as="sourcePoint" />
+            <mxPoint x="1350" y="865" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1050" y="810" />
+              <mxPoint x="1350" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="form-picker" edge="1" parent="1" source="register-form" target="picker" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450.0" y="1050" as="sourcePoint" />
+            <mxPoint x="450.0" y="1140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="form-check" edge="1" parent="1" source="end-form" target="end-check" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1350.0" y="1050" as="sourcePoint" />
+            <mxPoint x="1350.0" y="1140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="picker-start" edge="1" parent="1" source="picker" target="start-command" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450.0" y="1295" as="sourcePoint" />
+            <mxPoint x="450.0" y="1385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="check-end" edge="1" parent="1" source="end-check" target="end-command" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1350.0" y="1295" as="sourcePoint" />
+            <mxPoint x="1350.0" y="1385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="start-tx" edge="1" parent="1" source="start-command" target="transaction" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.23214285714285715;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450" y="1510" as="sourcePoint" />
+            <mxPoint x="450" y="1615" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end-tx" edge="1" parent="1" source="end-command" target="transaction" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.7678571428571429;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1350" y="1510" as="sourcePoint" />
+            <mxPoint x="1350" y="1615" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="03 · 刷卡、登记和结束的完整流程" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="实线为事件/请求/状态流；每次提交都重新校验权限、占用和版本。教师客户端显示成功必须以服务端提交结果为准。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="scan" value="① USB 事件 → main&#10;防抖 / scanId / 短期持有 UID&#10;renderer 只收到 scan 元数据&#10;TBD-03：协议 / 驱动 / UID 格式" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="155" width="500" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="gate" value="② 页面门控&#10;在设备列表主页面？&#10;无 Modal / 无提交 / 无 scan 处理中？&#10;全部满足才继续" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="155" width="500" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ignored" value="否 → 只显示 Toast&#10;“请返回主页面以触发登记”&#10;释放卡号；不调用 provider&#10;不排队稍后自动重放" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="155" width="500" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="preview" value="③ main → POST /scan-previews&#10;服务端记录 scanAtMs&#10;HMAC 查找凭证 / 当前学生 / 活动记录&#10;创建账号+客户端绑定的短期 preview" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="395" width="500" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="gate-preview-label" value="是" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="730.0" y="327.0" width="340" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="provider" value="仅未知卡 → 校园卡 API&#10;超时/有限重试；白名单候选资料&#10;TBD-02 接口；TBD-01 字段&#10;失败不创建学生/记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="395" width="500" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="failed-preview" value="预览失败 / 资料不足&#10;显示可恢复错误，允许重刷或取消&#10;无卡号磁盘缓存，无离线登记&#10;已知可用档案无需每次访问 provider" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="395" width="500" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="mode" value="④ 服务端明确返回 mode&#10;是否有该学生的活动记录？&#10;禁止以客户端缓存决定切换" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="640" width="500" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="register-form" value="无活动记录 → 登记页&#10;显示当前资料、刷卡时间、备注和 DevicePicker&#10;未知学生仅填写白名单补充字段；TBD-01 最终 schema&#10;资料和界面就绪后 5 秒自动取消；可立即确认&#10;取消只释放 preview，不创建档案或占用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="865" width="780" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="end-form" value="有活动记录 → 刷卡结束页&#10;固定 recordId + expectedVersion&#10;当前资料、设备、原开始与本次刷卡时间&#10;备注预填已有值；默认 5 秒自动确认&#10;可立即确认或取消，不结束后来新开的记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="960" y="865" width="780" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="picker" value="选择设备 · 只能选可分配设备&#10;占用设备：先单独确认结束，服务端成功后刷新再选&#10;若释放晚于本次刷卡，须重刷以避免使用时间重叠&#10;禁用不可选；无设备/资料缺失不可提交；冲突重新确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1140" width="780" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="end-check" value="提交门闩 · 按钮与计时器共用&#10;编辑 / 失焦 / 后台 / 网络故障 → 暂停自动动作&#10;回到前台需显式继续或确认&#10;手动单结束 / 批量 Modal 没有自动确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="960" y="1140" width="780" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="start-command" value="POST /usage-records/start&#10;previewId + deviceId + notes + requestId&#10;未知学生与使用记录同事务创建，endedAtMs = null" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1385" width="780" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="end-command" value="POST /usage-records/{id}/end&#10;previewId + recordId + expectedVersion + notes + requestId&#10;endedAtMs 取本次 scanAtMs；提交时再验 end ≥ start" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="960" y="1385" width="780" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="transaction" value="⑤ 服务端事务 → 数据 + 审计 + 持久操作结果一起提交&#10;成功返回设备列表并刷新；409 冲突需重新确认，410 预览失效需重刷&#10;已发请求超时：保留同一 requestId 查询/重试，不把超时当失败另开新请求" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1615" width="1680" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="preview-rule" value="预览生命期&#10;默认 2 分钟；有界内存；取消释放 / TTL 兜底&#10;重启失效；已提交结果不随 preview 失效而消失&#10;成功事务持久消费 intentId，换请求键也不可复用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1825" width="800" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="time-rule" value="时间规则&#10;scanAtMs = 服务端接收刷卡请求的时刻&#10;createdAtMs / updatedAtMs = 实际提交时间&#10;JSON 为 Unix 毫秒整数；客户端时钟不定历史" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1825" width="820" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="自动动作仅发生在可交互的刷卡页面；离开页面清理旧计时器。收到新刷卡不替换正在编辑的学生。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2028" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="record-transactions" name="04 · 业务事务、并发、幂等与批量结束">
+    <mxGraphModel dx="1800" dy="2050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="dispatch-start" edge="1" parent="1" source="entry" target="start-title" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.1488095238095238;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="300" as="sourcePoint" />
+            <mxPoint x="310" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dispatch-end" edge="1" parent="1" source="entry" target="end-title" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="300" as="sourcePoint" />
+            <mxPoint x="900" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dispatch-batch" edge="1" parent="1" source="entry" target="batch-title" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.8511904761904762;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490" y="300" as="sourcePoint" />
+            <mxPoint x="1490" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="start-step-0" edge="1" parent="1" source="start-title" target="start-0" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310.0" y="465" as="sourcePoint" />
+            <mxPoint x="310.0" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="start-step-1" edge="1" parent="1" source="start-0" target="start-1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310.0" y="710" as="sourcePoint" />
+            <mxPoint x="310.0" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="start-step-2" edge="1" parent="1" source="start-1" target="start-2" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310.0" y="955" as="sourcePoint" />
+            <mxPoint x="310.0" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="start-step-3" edge="1" parent="1" source="start-2" target="start-3" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310.0" y="1200" as="sourcePoint" />
+            <mxPoint x="310.0" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end-step-0" edge="1" parent="1" source="end-title" target="end-0" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="465" as="sourcePoint" />
+            <mxPoint x="900.0" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end-step-1" edge="1" parent="1" source="end-0" target="end-1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="710" as="sourcePoint" />
+            <mxPoint x="900.0" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end-step-2" edge="1" parent="1" source="end-1" target="end-2" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="955" as="sourcePoint" />
+            <mxPoint x="900.0" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="end-step-3" edge="1" parent="1" source="end-2" target="end-3" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="1200" as="sourcePoint" />
+            <mxPoint x="900.0" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="batch-step-0" edge="1" parent="1" source="batch-title" target="batch-0" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="465" as="sourcePoint" />
+            <mxPoint x="1490.0" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="batch-step-1" edge="1" parent="1" source="batch-0" target="batch-1" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="710" as="sourcePoint" />
+            <mxPoint x="1490.0" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="batch-step-2" edge="1" parent="1" source="batch-1" target="batch-2" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="955" as="sourcePoint" />
+            <mxPoint x="1490.0" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="batch-step-3" edge="1" parent="1" source="batch-2" target="batch-3" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1490.0" y="1200" as="sourcePoint" />
+            <mxPoint x="1490.0" y="1280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="04 · 业务事务、并发、幂等与批量结束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="数据库是唯一权威；列表与 preview 都是快照。图中每列执行过程均服从底部统一锁顺序及条件唯一约束。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="entry" value="确认提交入口：验证账号 / client / 机房范围 / schema → 查 operations(actorId, requestId)&#10;已有同路由同摘要：返回原结果；同键异请求拒绝；preview / batchUnit 只成功消费一次&#10;新请求：验证预览绑定/TTL，开始事务并占用幂等键；先查结果再检查过期 preview" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="1680" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="start-title" value="A · 开始使用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="395" width="500" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="end-title" value="B · 单条结束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="395" width="500" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-title" value="C · 批量结束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="395" width="500" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="start-0" value="目标明确&#10;previewId / deviceId / notes&#10;未知学生补充字段仅限白名单&#10;不从姓名班级猜测身份" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="545" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="start-1" value="锁定与验证&#10;设备可分配；学生未归档且无占用&#10;未知卡：同事务插入学生/凭证&#10;任一凭证别名冲突整笔回滚" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="790" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="start-2" value="写入&#10;创建 usage_record，结束时间为空&#10;写审计 + committed 操作结果&#10;条件唯一索引保证一人/一机一条" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1035" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="start-3" value="提交后返回&#10;返回记录 ID、版本与操作 ID&#10;竞争失败 409；无孤儿档案&#10;同键重试不重复创建" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1280" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="end-0" value="目标明确&#10;recordId + expectedVersion&#10;预览候选结束时间 / 完整备注值&#10;手动结束需显式确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="545" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="end-1" value="锁定与验证&#10;先读关联 ID，按统一顺序取锁&#10;重验关联、权限、版本、仍活动&#10;校验结束时间不早于开始" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="790" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="end-2" value="写入&#10;结束时间 / 原因 / 备注 / version++&#10;写审计 + committed 操作结果&#10;不重新按学生寻找另一条记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1035" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="end-3" value="提交后返回&#10;同键重复：返回原结果&#10;其他键已结束/改版：409&#10;不静默覆盖刚编辑的备注" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1280" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-0" value="确认前已预览固定集合&#10;服务器解析有权机房与筛选范围&#10;保存 recordIds + versions + endedAtMs&#10;明确数量/机房，之后新增不纳入" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="545" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-1" value="显式确认 → 单批事务&#10;按固定 ID 排序取锁并重验每条&#10;任一变更：整批 409 回滚&#10;过期/重启失效须重新预览" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="790" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-2" value="写入与公共备注&#10;空备注：保留每条原文&#10;非空：原文 + 换行 + 批量结束备注&#10;同事务审计 / batchId / 操作结果" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="1035" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-3" value="单批全成或全败&#10;默认最多 500 条，可配置&#10;超过：固定分批计划 + 逐批状态&#10;跨批部分完成不能显示全局成功" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="1280" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="locks" value="统一锁顺序：设备 IDs 升序 → 学生 IDs 升序 → 记录 IDs 升序&#10;开始、结束、归档、更正、批量都遵守；关联被改则回滚重预览，不临时反向加锁&#10;未知卡在设备锁后创建新学生；凭证/活动唯一冲突整笔回滚；死锁有限重试沿用原 requestId" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1555" width="1680" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="recovery" value="提交结果未知 · 网络中断 / 应用重启&#10;main 先持久保存不含 UID 的提交意图&#10;GET /operations/{requestId} 查询结果&#10;未找到不证明没执行；重试仍用原键" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1775" width="800" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-scope" value="范围和备注必须可解释&#10;“结束全部”= 账号授权范围全部活动记录&#10;“结束筛选结果”/“结束选中”使用不同按钮&#10;批量初始备注为空；追加由服务端执行一次" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1775" width="820" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="失败事务不会留下半个学生/使用记录；不允许 raw CRUD 绕过业务命令。归档、历史更正、作废均保留审计。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1978" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="docker-deployment" name="05 · Docker 服务端部署与运维拓扑">
+    <mxGraphModel dx="1800" dy="2260" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2260" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="host" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="420" width="1680" height="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-tls" edge="1" parent="1" source="client" target="gateway" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="300" as="sourcePoint" />
+            <mxPoint x="315" y="530" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="420" y="365" />
+              <mxPoint x="315" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="proxy" edge="1" parent="1" source="gateway" target="api" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.48484848484848486;exitPerimeter=0;entryX=0.0;entryY=0.48484848484848486;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="610" as="sourcePoint" />
+            <mxPoint x="650" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sql" edge="1" parent="1" source="api" target="db" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.48484848484848486;exitPerimeter=0;entryX=0.0;entryY=0.48484848484848486;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1150" y="610" as="sourcePoint" />
+            <mxPoint x="1270" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="campus-outbound" edge="1" parent="1" source="api" target="campus" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=0.0;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="530" as="sourcePoint" />
+            <mxPoint x="1380" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="900" y="495" />
+              <mxPoint x="1755" y="495" />
+              <mxPoint x="1755" y="365" />
+              <mxPoint x="1380" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="migration-db" edge="1" parent="1" source="migrate" target="db" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=0.0;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1485" y="800" as="sourcePoint" />
+            <mxPoint x="1485" y="695" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="api-spool" edge="1" parent="1" source="api" target="spool" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="695" as="sourcePoint" />
+            <mxPoint x="900.0" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="secret-api" edge="1" parent="1" source="secrets" target="api" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=1.0;exitY=0.47058823529411764;exitPerimeter=0;entryX=0.1;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="880" as="sourcePoint" />
+            <mxPoint x="700" y="695" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="585" y="880" />
+              <mxPoint x="585" y="720" />
+              <mxPoint x="700" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="spool-ingest" edge="1" parent="1" source="spool" target="ingest" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.2;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="750" y="970" as="sourcePoint" />
+            <mxPoint x="315" y="1090" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="750" y="1030" />
+              <mxPoint x="315" y="1030" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="logs-db" edge="1" parent="1" source="ingest" target="db" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.13953488372093023;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="315" y="1260" as="sourcePoint" />
+            <mxPoint x="1330" y="695" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="315" y="1290" />
+              <mxPoint x="1195" y="1290" />
+              <mxPoint x="1195" y="735" />
+              <mxPoint x="1330" y="735" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backup-db" edge="1" parent="1" source="backup" target="db" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=1.0;entryY=0.7272727272727273;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1700" y="1175" as="sourcePoint" />
+            <mxPoint x="1700" y="650" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1720" y="1175" />
+              <mxPoint x="1720" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="05 · Docker 服务端部署与运维拓扑" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="目标是学校 Linux Docker Engine / Compose 单节点；Windows 宿主可使用 Linux VM。图中端口是设计约定，非已部署事实。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="client" value="教师 Windows Electron&#10;受信任校内证书 / client 身份 + 操作账号&#10;只访问固定服务器 HTTPS :443" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="155" width="720" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="campus" value="外部校园卡 API&#10;仅 api 受控出口可访问，凭证仅服务端持有&#10;TBD-02：主机 / 认证 / 限额 / 错误与 SLA" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="155" width="720" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="host-title" value="Compose 项目 · frontend / backend 网络隔离 · 不发布 PostgreSQL 端口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="430" width="1650" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway" value="gateway · Nginx 非特权容器&#10;宿主 443 → 容器 8443&#10;TLS / body 上限 / 限速&#10;覆写代理头 / 访问日志脱敏" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="100" y="530" width="430" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="api · Fastify 生产镜像&#10;仅内部 :3000 / 非 root&#10;业务 + 账号鉴权 + runtime schema&#10;运行账号仅必要数据库 DML" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="530" width="500" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="db · PostgreSQL&#10;backend 内部 :5432&#10;pgdata 命名卷 / 独立角色&#10;不向 LAN 发布端口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="530" width="430" height="165" as="geometry" />
+        </mxCell>
+        <mxCell id="secrets" value="secrets · /run/secrets/*&#10;DB / HMAC / provider / TLS&#10;宿主文件挂载，不自带加密&#10;镜像/日志/源码中没有秘密" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="100" y="800" width="430" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="spool" value="持久日志 spool · 多个来源卷&#10;API / gateway / DB / 运维日志&#10;数据库不可写继续留盘&#10;stdout 仅作额外运维输出" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="800" width="500" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="migrate" value="migrate · 一次性任务&#10;与 API 同版镜像 / 独立 DDL 账号&#10;迁移锁 + 版本化 migration&#10;成功退出后 API 才启动" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="800" width="430" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ingest" value="log-ingest · 内部工作进程&#10;读 spool / 来源游标 / 去重&#10;提交 app_logs 后确认回收&#10;无公开端口、无 Docker socket" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="100" y="1090" width="430" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="runtime" value="容器基线&#10;只读根 FS / 有界 tmpfs / 可写日志卷&#10;cap_drop / no-new-privileges&#10;固定镜像版本与 digest，SIGTERM 排空" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1090" width="500" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="backup" value="backup · 运维 profile / 调度&#10;独立凭证 / 匹配 PG 版本&#10;一致备份 + 必要 WAL/PITR&#10;加密发送校外或异盘目的地" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="1090" width="430" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="network-note" value="frontend：gateway 与 api；backend：api / db / migrate / log-ingest / backup&#10;同宿主受控网络内部 HTTP；跨不可信网络改为 TLS。容器重启不能代替业务恢复和数据库迁移。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="100" y="1310" width="1600" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="build" value="镜像构建契约 · 多阶段&#10;固定 Node LTS / Yarn 4；install --immutable&#10;共享包 → server 构建；workspaces focus 生产依赖&#10;复制 dist + 依赖工作区产物，Linux 原生模块重建&#10;不把 UI 包、Windows node_modules 或秘密放进镜像" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1515" width="800" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="persist" value="持久化与备份契约&#10;pgdata / 各来源 spool / 收集游标独立卷&#10;业务、审计、日志、操作结果都须可恢复&#10;备份包含加密密钥材料和未交接日志；恢复实测&#10;普通升级严禁 down -v；同盘副本不是灾备" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1515" width="820" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="startup" value="启动门禁：db healthy → migrate 成功 → api ready → gateway 接入&#10;/health/live：事件循环；/health/ready：DB、schema、必要写入条件；运行中仍处理 DB 断线&#10;迁移失败阻断；发布前备份，扩展—迁移—收缩；回旧镜像不等于撤销数据库迁移" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1780" width="1680" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="pending" value="TBD-04：Linux 发行版 / 架构 / TLS 发放 / API 放通 / 备份位置 / RPO / RTO&#10;TBD-05：资料、记录、日志保留期和授权导出 / 归档规则&#10;单节点不承诺零停机；停机时禁止新业务，已发请求沿用 requestId，日志保留到恢复补传" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1990" width="1680" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="本轮交付部署设计，Dockerfile / Compose / migration 与容器测试在业务实现阶段落地；没有虚构可运行的应用镜像。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2188" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="teacher-ui" name="06 · 教师界面结构与交互细节">
+    <mxGraphModel dx="1800" dy="2220" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2220" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="list-screen" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="1680" height="690" as="geometry" />
+        </mxCell>
+        <mxCell id="registration" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1015" width="520" height="775" as="geometry" />
+        </mxCell>
+        <mxCell id="device-picker" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1015" width="520" height="775" as="geometry" />
+        </mxCell>
+        <mxCell id="modal" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1015" width="520" height="775" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="06 · 教师界面结构与交互细节" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="正式结构线框图：以 cyez-ui 实现主题、导航、表单和 Modal；数字与设备名仅作示意，最终学生字段仍待定。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="list-screen-title" value="A · 设备列表主页面 · 唯一接收刷卡自动跳转的页面" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="160" width="1650" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="shell" value="图书馆登记   |   当前账号 / 角色   |   有权机房范围   |   在线 / 离线   |   数据更新时间" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="230" width="1620" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="navigation" value="导航&#10;设备列表&#10;使用记录&#10;学生管理&#10;设备 / 标签&#10;账号与机房&#10;设置 / 诊断&#10;&#10;管理入口按角色显示" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="330" width="260" height="450" as="geometry" />
+        </mxCell>
+        <mxCell id="filters" value="使用中  |  未使用     机房 ▼   标签 ▼   搜索   刷新     结束选中…   结束全部记录…" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="390" y="330" width="1320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="list" value="选择    设备 / 机房 / 标签     学生摘要     开始时间 / 时长     备注     操作&#10;□        A-001 / 图书馆       当前资料       10:20 / 18 分钟       查看     手动结束…&#10;□        A-002 / 图书馆       当前资料       10:25 / 13 分钟       编辑…    手动结束…&#10;使用中且禁用：仍显示占用，同时标注“已禁用，不可再次分配”&#10;未使用选项卡：空闲可分配与禁用明确区分，状态不只使用颜色" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="390" y="440" width="1320" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="list-status" value="已选条数 / 总条数 · 分页     |     断线保留过期视图，禁用业务写入，恢复后刷新" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="390" y="700" width="1320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="list-modal-note" value="刷卡门控：主页面 + 无 Modal + 无提交 + 无 scan 处理中；其余场景只 Toast，要求回主页面重新刷卡。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="865" width="1680" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="registration-title" value="B · 登记页 / 刷卡结束页" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="1025" width="490" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="summary" value="StudentSummary&#10;姓名 / 班级 / 校内学号：候选&#10;TBD-01：最终字段与必填项&#10;未知学生仅补充允许的字段" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1100" width="470" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="times" value="时间与备注&#10;开始：本次刷卡时间，备注可空&#10;结束：原开始/本次结束，已有备注" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1285" width="470" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="choice" value="登记：打开 DevicePicker →&#10;结束：固定设备 / recordId / version&#10;不自动替换成另一条新记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1430" width="470" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="timer" value="取消   |   确认&#10;登记：5 秒后自动取消&#10;刷卡结束：5 秒后自动确认&#10;编辑/失焦暂停；回前台显式继续&#10;资料缺失/未选设备不可确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="1570" width="470" height="175" as="geometry" />
+        </mxCell>
+        <mxCell id="device-picker-title" value="C · DevicePicker · 可搜索分页" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="655" y="1025" width="490" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="picker-filter" value="机房 / 标签 / 搜索 / 状态筛选" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="665" y="1100" width="470" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="free" value="○ A-003 · 空闲 · 可选择&#10;显示设备名、机房、标签&#10;选择状态明确，键盘可操作" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="665" y="1220" width="470" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="busy" value="A-004 · 使用中 · 不可直接选&#10;[结束占用…] → 独立确认 Modal&#10;提交成功 → 刷新；释放晚于刷卡须重刷&#10;登记和结束是两个明确动作" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="665" y="1370" width="470" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="disabled" value="A-005 · 禁用 · 不可选&#10;显示原因，不与空闲混淆&#10;提交时服务端再次检查" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="665" y="1555" width="470" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="picker-hint" value="没有可分配设备 → 提示并禁用确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="665" y="1690" width="470" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="modal-title" value="D · 手动 / 批量结束 Modal" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="1025" width="490" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="single-modal" value="手动单结束&#10;复用结束页表单，加载已有备注&#10;固定记录版本；显式确认&#10;没有 5 秒自动提交" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="1100" width="470" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-modal" value="批量结束 · 范围 / 条数 / 机房&#10;紧凑设备 + 学生 + 开始时间列表&#10;公共备注初始为空，只追加不覆盖&#10;后续新增不入固定集合&#10;取消   |   明确确认结束 N 条" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="1285" width="470" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-status" value="冲突：整批回滚，重新预览确认&#10;超批次上限：显示逐批状态&#10;已成功批次不重复执行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="1520" width="470" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="focus" value="焦点限制 / 关闭恢复 / 刷卡只 Toast" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="1680" width="470" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" value="其他管理页面&#10;记录：筛选、分页、导出；更正/作废需 admin + 原因&#10;学生 / 设备 / 标签：单条与批量预览、归档、版本冲突&#10;TBD-01：学生表单和 CSV 模板；TBD-05：权限与保留&#10;旧记录显示学生最新资料，不保存学生快照" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1870" width="800" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="diagnostics" value="诊断与界面安全&#10;服务器 / TLS / 版本 / reader 状态 / 待传日志数&#10;TBD-03：实际 reader 协议、驱动与型号&#10;不显示 UID / HMAC / token；不执行任意 shell&#10;Loading / 空态 / 错误 / 冲突 / 离线都提供清晰反馈" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1870" width="820" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="线框图不声称已实现 cyez-ui 页面。主题与窗口能力由库提供，登记规则、权限和业务组件由本项目实现与测试。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2148" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-workspaces" name="07 · Yarn 工作区、cyez-ui 与 Electron 权限边界">
+    <mxGraphModel dx="1800" dy="2120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="packages" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="670" width="1680" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="ipc-boundary" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1430" width="1680" height="275" as="geometry" />
+        </mxCell>
+        <mxCell id="root-server" edge="1" parent="1" source="root" target="server-app" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.23809523809523808;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="290" as="sourcePoint" />
+            <mxPoint x="460" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="root-teacher" edge="1" parent="1" source="root" target="teacher-app" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.7619047619047619;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="290" as="sourcePoint" />
+            <mxPoint x="1340" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-domain" edge="1" parent="1" source="server-app" target="domain" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.25;exitY=1.0;exitPerimeter=0;entryX=0.5012987012987012;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="560" as="sourcePoint" />
+            <mxPoint x="278" y="755" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="260" y="620" />
+              <mxPoint x="278" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-protocol" edge="1" parent="1" source="server-app" target="protocol" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.7875;exitY=1.0;exitPerimeter=0;entryX=0.4935064935064935;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="690" y="560" as="sourcePoint" />
+            <mxPoint x="690" y="755" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="teacher-sdk" edge="1" parent="1" source="teacher-app" target="sdk" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.20625;exitY=1.0;exitPerimeter=0;entryX=0.4935064935064935;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1105" y="560" as="sourcePoint" />
+            <mxPoint x="1105" y="755" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="teacher-ui" edge="1" parent="1" source="teacher-app" target="ui" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.73125;exitY=1.0;exitPerimeter=0;entryX=0.5064935064935064;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1525" y="560" as="sourcePoint" />
+            <mxPoint x="1525" y="755" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sdk-protocol" edge="1" parent="1" source="sdk" target="protocol" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=1;exitX=0.4935064935064935;exitY=1.0;exitPerimeter=0;entryX=0.5012987012987012;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1105" y="925" as="sourcePoint" />
+            <mxPoint x="693" y="925" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1105" y="945" />
+              <mxPoint x="693" y="945" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="artifact" edge="1" parent="1" source="ui-upstream" target="vendor" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=1.0;exitY=0.4888888888888889;exitPerimeter=0;entryX=0.0;entryY=0.4888888888888889;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="860" y="1210" as="sourcePoint" />
+            <mxPoint x="940" y="1210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ui-tarball" edge="1" parent="1" source="ui" target="vendor" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5012987012987012;exitY=1.0;exitPerimeter=0;entryX=0.72875;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1523" y="925" as="sourcePoint" />
+            <mxPoint x="1523" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="renderer-preload" edge="1" parent="1" source="renderer-boundary" target="preload-boundary" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="1585" as="sourcePoint" />
+            <mxPoint x="655" y="1585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="preload-main" edge="1" parent="1" source="preload-boundary" target="main-boundary" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;dashed=0;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1145" y="1585" as="sourcePoint" />
+            <mxPoint x="1220" y="1585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="07 · Yarn 工作区、cyez-ui 与 Electron 权限边界" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="上部为工作区组织与使用方→依赖；中部为上游→tarball 构建流；下部为本地 IPC。内部包使用 workspace:^。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="root" value="项目根 · 私有 monorepo · Yarn 4 精确版本 · 单一 yarn.lock · nodeLinker: node-modules&#10;workspaces 明确覆盖 record-only/apps/* + record-only/packages/*&#10;CI install --immutable；共享包 exports + 编译产物；禁止跨包相对导入与双份 DTO" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="1680" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="server-app" value="record-only/apps/server · Node / Fastify&#10;依赖 protocol + domain；最终业务判断在服务端&#10;认证 / HMAC / preview / 占用事务 / provider / 日志&#10;不依赖 Electron / React / UI 包" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="390" width="800" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="teacher-app" value="record-only/apps/teacher · Electron / React&#10;依赖 protocol + client-sdk + ui&#10;renderer：页面；preload：受限桥；main：读卡/网络&#10;不导入服务端数据库或复制占用业务事务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="940" y="390" width="800" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="packages-label" value="共享包&#10;workspace:^" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="685" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="domain" value="domain&#10;纯业务规则 / 时间 / 备注&#10;server 使用；无 I/O&#10;不混入后续三端 Session" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="85" y="755" width="385" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="protocol" value="protocol&#10;DTO / schema / 错误码&#10;毫秒整数 / 版本 / 幂等&#10;不含秘密或数据库连接" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="500" y="755" width="385" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="sdk" value="client-sdk&#10;REST / 认证 / 查询恢复&#10;日志批传 / ACK / 重试&#10;依赖 protocol" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="915" y="755" width="385" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" value="ui · 项目适配包&#10;主题 / 路由 / 业务组件&#10;依赖 @series/ui&#10;不包含特权系统调用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="755" width="385" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ui-upstream" value="cyez-ui 已选定 · 上游 pnpm 工程&#10;@series/ui@0.1.0：. / theme / bootstrap / styles.css&#10;app.css / appearance-init.js；React 19 + router 7&#10;@series/electron@0.1.0：main / preload / shared&#10;Electron peer：&gt;=39 &lt;45；本项目固定实测兼容版本" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1100" width="800" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="vendor" value="受信任构建 → 固定 tarball → 本项目消费&#10;源提交 0a1d4f4… + 校验和 + LICENSE / NOTICE&#10;上游 pnpm 构建不改变本项目 Yarn 选择&#10;file: / 受控制品固定依赖；不依赖上游 node_modules&#10;干净安装、单份 React、preload 分包、打包运行验收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1100" width="800" height="225" as="geometry" />
+        </mxCell>
+        <mxCell id="ipc-boundary-title" value="Electron 权限边界 · cyez-ui 的窗口封装不授权业务 IPC" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="1440" width="1650" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="renderer-boundary" value="renderer + @series/ui&#10;sandbox / contextIsolation = true&#10;nodeIntegration = false&#10;无 raw UID / token / Node 系统权限" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1515" width="490" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="preload-boundary" value="preload + @series/electron/preload&#10;有限 typed API / sender 校验&#10;刷卡元数据 / 业务意图 / 日志&#10;不暴露任意 channel / URL / shell" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="655" y="1515" width="490" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="main-boundary" value="main + @series/electron/main&#10;系统安全存储 / REST / reader&#10;本地 SQLite 意图与日志&#10;provider 凭证只在服务端" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1515" width="490" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="release" value="TBD-06 · 发布输入&#10;库选择已确定；代码/二进制使用分发许可需留证&#10;上游 LICENSE/NOTICE 保留权利，未重新开源&#10;Windows 签名材料、安装/卸载与 DPI 实机验收&#10;本轮不复制上游源码，不声明已经集成通过" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1810" width="800" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="phase" value="范围和后续扩展&#10;本阶段不引入学生端 / Rust / 完整 Session 状态机&#10;NEXT-01：跨卡合并与历史迁移明确延期&#10;当前卡是唯一业务身份，内部 UUID 不等于跨卡识别&#10;后续共享包复用须审查业务语义是否相同" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1810" width="800" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="上游提交与包入口已核对；应用目录和脚本为实施契约，当前文档仓库尚未创建运行中的工作区或应用。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2048" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="testing-pipeline" name="08 · 服务端与客户端测试分层、联调及发布门禁">
+    <mxGraphModel dx="1800" dy="2250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2250" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="server-tests" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="385" width="800" height="830" as="geometry" />
+        </mxCell>
+        <mxCell id="client-tests" value="" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="940" y="385" width="800" height="830" as="geometry" />
+        </mxCell>
+        <mxCell id="su-si" edge="1" parent="1" source="su" target="si" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460.0" y="715" as="sourcePoint" />
+            <mxPoint x="460.0" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cu-ci" edge="1" parent="1" source="cu" target="ci" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340.0" y="715" as="sourcePoint" />
+            <mxPoint x="1340.0" y="820" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="source-server" edge="1" parent="1" source="source" target="server-tests" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.23809523809523808;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="280" as="sourcePoint" />
+            <mxPoint x="460" y="385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="source-client" edge="1" parent="1" source="source" target="client-tests" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.7619047619047619;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="280" as="sourcePoint" />
+            <mxPoint x="1340" y="385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="server-e2e" edge="1" parent="1" source="server-tests" target="e2e" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.23809523809523808;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="1215" as="sourcePoint" />
+            <mxPoint x="460" y="1320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="client-e2e" edge="1" parent="1" source="client-tests" target="e2e" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.7619047619047619;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="1215" as="sourcePoint" />
+            <mxPoint x="1340" y="1320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2e-coverage" edge="1" parent="1" source="e2e" target="coverage" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900.0" y="1505" as="sourcePoint" />
+            <mxPoint x="460.0" y="1610" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="900.0" y="1557.5" />
+              <mxPoint x="460.0" y="1557.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2e-hardware" edge="1" parent="1" source="e2e" target="hardware" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.7619047619047619;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="1505" as="sourcePoint" />
+            <mxPoint x="1340" y="1610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gate-release" edge="1" parent="1" source="coverage" target="release" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.23809523809523808;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="1830" as="sourcePoint" />
+            <mxPoint x="460" y="1935" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hardware-release" edge="1" parent="1" source="hardware" target="release" style="edgeStyle=none;rounded=0;html=0;strokeColor=#475569;strokeWidth=2;endArrow=block;endFill=1;startArrow=none;startFill=1;dashed=0;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.7619047619047619;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1340" y="1830" as="sourcePoint" />
+            <mxPoint x="1340" y="1935" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="08 · 服务端与客户端测试分层、联调及发布门禁" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="两端分别具备单元与集成测试；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。当前均为待实施验收计划。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="source" value="提交 → 文档/图源一致性 → Yarn 不可变安装 → 类型/格式 → 四类独立测试报告&#10;服务端 S-U / S-I 与客户端 C-U / C-I 均为必需；缺少桌面或 DB 环境不能静默跳过并标绿" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="1680" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="server-tests-title" value="服务端 · Linux CI · Vitest / Fastify / PostgreSQL" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="75" y="395" width="770" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="client-tests-title" value="客户端 · Windows CI · Vitest / 真实 Electron" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="955" y="395" width="770" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="su" value="S-U · 单元测试 / 确定性 fake&#10;UID 规范化 / HMAC / keyVersion / 不泄漏敏感输入&#10;毫秒整数、时区、结束 ≥ 开始&#10;活动/禁用/归档、权限、白名单与当前资料&#10;批量备注精确追加、空备注、请求摘要和错误映射&#10;Vitest；假时钟/ID/provider，不连接真实校园资料" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="485" width="740" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="cu" value="C-U · 纯规则与 React 组件单元测试&#10;主页面 / Modal / 提交中刷卡门控&#10;同卡重复、双卡交错、防抖和异常帧&#10;5 秒默认动作、失焦暂停、按钮/计时器竞争&#10;DevicePicker / 批量范围 / DTO / IPC schema&#10;Vitest + Testing Library；fake clock / reader / network" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="970" y="485" width="740" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="si" value="S-I · 真实 PostgreSQL + 路由 / TLS 集成&#10;Fastify inject → 服务 → repository → 临时 PG&#10;并发占用 / 时间重叠 / 锁顺序 / HMAC 轮换&#10;响应丢失 / 重启重试 / 预览单次消费 / 版本冲突&#10;固定批量集合、后来新增、单条变更整批回滚&#10;provider 失败、权限越界、日志 ACK / DB 不可写&#10;空库/升级 migration、备份还原、真实 gateway 请求" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="820" width="740" height="315" as="geometry" />
+        </mxCell>
+        <mxCell id="ci" value="C-I · 真实 Electron main / preload / renderer&#10;Windows + 固定 Playwright Electron（实验性）&#10;临时 userData + 实际 SQLite + 可控 HTTP 服务&#10;FakeCardReader 经真实 IPC / Modal 焦点 / 路由&#10;断网、token 过期、kill/restart 后查询提交结果&#10;日志重启补传 / ACK 丢失 / 磁盘失败 / IPC 越权&#10;tarball 干净消费与打包可执行文件运行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="970" y="820" width="740" height="315" as="geometry" />
+        </mxCell>
+        <mxCell id="e2e" value="E2E · 打包教师应用 + Docker gateway / API / PostgreSQL + FakeProvider&#10;未知卡 → 补充资料 → 选设备 → 登记 → 再刷卡结束；已知卡、取消、手动/批量结束&#10;两教师争用、后建记录排除、断网/重启/补传、迁移、SIGTERM、卷持久性与备份恢复&#10;测试环境唯一 project/db/userData，禁止指向生产；记录 seed、版本、trace 与失败截图" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1320" width="1680" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="coverage" value="自动门禁 · 两端独立统计&#10;lines / statements / functions ≥85%，branches ≥80%&#10;身份 / 占用 / 幂等 / 权限 / 计时 / 备注 branches ≥90%&#10;P0 场景全通过，无静默跳过；flaky 重试仍须报告&#10;阈值是项目选择；不以覆盖率代替集成行为清单" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1610" width="800" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="hardware" value="真实硬件与发布门禁&#10;TBD-02：真实校园 API 契约 / 配额 / 错误&#10;TBD-03：USB 协议 / 拔插 / 驱动 / UID 实机验证&#10;TBD-04：Linux / TLS / 备份恢复目标环境&#10;TBD-06：许可 / Windows 签名 / 安装卸载 / DPI" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1610" width="800" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="release" value="发布候选：测试报告 + 两端 coverage + 构建版本 + 镜像 digest + 安装包签名 + 运维验证记录&#10;第三方包与生成代码不计本项目覆盖率；上游 UI 的测试通过不能替代本项目用例&#10;TBD 阻塞的真实场景单独标 blocked，不以模拟通过声称已验证硬件&#10;当前交付只验证文档与图表；应用单元、集成、E2E 和 Docker 运行验收均尚未执行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1935" width="1680" height="195" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；测试脚本随业务实现提交，本轮不伪造脚手架或通过结果。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="2178" width="1720" height="48" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

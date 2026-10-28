@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2050" viewBox="0 0 1800 2050" role="img" aria-labelledby="title desc">
+<title id="title">04 · 业务事务、并发、幂等与批量结束</title><desc id="desc">数据库是唯一权威；列表与 preview 都是快照。图中每列执行过程均服从底部统一锁顺序及条件唯一约束。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1800" height="2050" fill="#ffffff"/>
+<polyline points="310,300 310,395" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900,300 900,395" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490,300 1490,395" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="310.0,465 310.0,545" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="310.0,710 310.0,790" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="310.0,955 310.0,1035" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="310.0,1200 310.0,1280" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900.0,465 900.0,545" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900.0,710 900.0,790" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900.0,955 900.0,1035" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="900.0,1200 900.0,1280" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490.0,465 1490.0,545" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490.0,710 1490.0,790" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490.0,955 1490.0,1035" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490.0,1200 1490.0,1280" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">04 · 业务事务、并发、幂等与批量结束</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">数据库是唯一权威；列表与 preview 都是快照。图中每列执行过程均服从底部统一锁顺序及条件唯一约束。</text>
+<rect x="60" y="150" width="1680" height="150" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="200.79999999999998" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">确认提交入口：验证账号 / client / 机房范围 / schema → 查 operations(actorId, requestId)</text>
+<text x="900.0" y="232.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">已有同路由同摘要：返回原结果；同键异请求拒绝；preview / batchUnit 只成功消费一次</text>
+<text x="900.0" y="264.59999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">新请求：验证预览绑定/TTL，开始事务并占用幂等键；先查结果再检查过期 preview</text>
+<rect x="60" y="395" width="500" height="70" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="310.0" y="437.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">A · 开始使用</text>
+<rect x="650" y="395" width="500" height="70" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="437.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">B · 单条结束</text>
+<rect x="1240" y="395" width="500" height="70" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="437.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">C · 批量结束</text>
+<rect x="60" y="545" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="310.0" y="592.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">目标明确</text>
+<text x="310.0" y="620.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">previewId / deviceId / notes</text>
+<text x="310.0" y="647.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知学生补充字段仅限白名单</text>
+<text x="310.0" y="675.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不从姓名班级猜测身份</text>
+<rect x="60" y="790" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="310.0" y="837.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">锁定与验证</text>
+<text x="310.0" y="865.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备可分配；学生未归档且无占用</text>
+<text x="310.0" y="892.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知卡：同事务插入学生/凭证</text>
+<text x="310.0" y="920.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">任一凭证别名冲突整笔回滚</text>
+<rect x="60" y="1035" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="310.0" y="1082.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写入</text>
+<text x="310.0" y="1110.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">创建 usage_record，结束时间为空</text>
+<text x="310.0" y="1137.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写审计 + committed 操作结果</text>
+<text x="310.0" y="1165.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">条件唯一索引保证一人/一机一条</text>
+<rect x="60" y="1280" width="500" height="165" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="310.0" y="1327.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提交后返回</text>
+<text x="310.0" y="1355.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">返回记录 ID、版本与操作 ID</text>
+<text x="310.0" y="1382.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">竞争失败 409；无孤儿档案</text>
+<text x="310.0" y="1410.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同键重试不重复创建</text>
+<rect x="650" y="545" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="592.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">目标明确</text>
+<text x="900.0" y="620.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">recordId + expectedVersion</text>
+<text x="900.0" y="647.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预览候选结束时间 / 完整备注值</text>
+<text x="900.0" y="675.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">手动结束需显式确认</text>
+<rect x="650" y="790" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="837.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">锁定与验证</text>
+<text x="900.0" y="865.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">先读关联 ID，按统一顺序取锁</text>
+<text x="900.0" y="892.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">重验关联、权限、版本、仍活动</text>
+<text x="900.0" y="920.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">校验结束时间不早于开始</text>
+<rect x="650" y="1035" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1082.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写入</text>
+<text x="900.0" y="1110.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">结束时间 / 原因 / 备注 / version++</text>
+<text x="900.0" y="1137.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写审计 + committed 操作结果</text>
+<text x="900.0" y="1165.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不重新按学生寻找另一条记录</text>
+<rect x="650" y="1280" width="500" height="165" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1327.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提交后返回</text>
+<text x="900.0" y="1355.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同键重复：返回原结果</text>
+<text x="900.0" y="1382.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">其他键已结束/改版：409</text>
+<text x="900.0" y="1410.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不静默覆盖刚编辑的备注</text>
+<rect x="1240" y="545" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="592.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">确认前已预览固定集合</text>
+<text x="1490.0" y="620.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">服务器解析有权机房与筛选范围</text>
+<text x="1490.0" y="647.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">保存 recordIds + versions + endedAtMs</text>
+<text x="1490.0" y="675.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">明确数量/机房，之后新增不纳入</text>
+<rect x="1240" y="790" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="837.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">显式确认 → 单批事务</text>
+<text x="1490.0" y="865.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">按固定 ID 排序取锁并重验每条</text>
+<text x="1490.0" y="892.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">任一变更：整批 409 回滚</text>
+<text x="1490.0" y="920.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">过期/重启失效须重新预览</text>
+<rect x="1240" y="1035" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="1082.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写入与公共备注</text>
+<text x="1490.0" y="1110.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">空备注：保留每条原文</text>
+<text x="1490.0" y="1137.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">非空：原文 + 换行 + 批量结束备注</text>
+<text x="1490.0" y="1165.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同事务审计 / batchId / 操作结果</text>
+<rect x="1240" y="1280" width="500" height="165" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="1327.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">单批全成或全败</text>
+<text x="1490.0" y="1355.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">默认最多 500 条，可配置</text>
+<text x="1490.0" y="1382.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">超过：固定分批计划 + 逐批状态</text>
+<text x="1490.0" y="1410.4750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">跨批部分完成不能显示全局成功</text>
+<rect x="60" y="1555" width="1680" height="150" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1606.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">统一锁顺序：设备 IDs 升序 → 学生 IDs 升序 → 记录 IDs 升序</text>
+<text x="900.0" y="1637.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">开始、结束、归档、更正、批量都遵守；关联被改则回滚重预览，不临时反向加锁</text>
+<text x="900.0" y="1667.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">未知卡在设备锁后创建新学生；凭证/活动唯一冲突整笔回滚；死锁有限重试沿用原 requestId</text>
+<rect x="60" y="1775" width="800" height="165" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="460.0" y="1821.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">提交结果未知 · 网络中断 / 应用重启</text>
+<text x="460.0" y="1850.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">main 先持久保存不含 UID 的提交意图</text>
+<text x="460.0" y="1879.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">GET /operations/{requestId} 查询结果</text>
+<text x="460.0" y="1908.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">未找到不证明没执行；重试仍用原键</text>
+<rect x="920" y="1775" width="820" height="165" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1330.0" y="1821.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">范围和备注必须可解释</text>
+<text x="1330.0" y="1850.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">“结束全部”= 账号授权范围全部活动记录</text>
+<text x="1330.0" y="1879.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">“结束筛选结果”/“结束选中”使用不同按钮</text>
+<text x="1330.0" y="1908.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">批量初始备注为空；追加由服务端执行一次</text>
+<rect x="40" y="1978" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2007.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">失败事务不会留下半个学生/使用记录；不允许 raw CRUD 绕过业务命令。归档、历史更正、作废均保留审计。</text>
+</svg>

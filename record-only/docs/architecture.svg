@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1660" viewBox="0 0 1800 1660" role="img" aria-labelledby="title desc">
+<title id="title">01 · 刷卡登记版总体架构</title><desc id="desc">当前实施范围：教师 Electron + Docker 服务端；设备仅是登记资源。箭头表示调用或数据流，虚线表示日志归集。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+<rect width="1800" height="1660" fill="#ffffff"/>
+<rect x="40" y="145" width="520" height="1140" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="721.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="640" y="145" width="1120" height="1140" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1200.0" y="721.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<polyline points="300.0,570 300.0,640" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,735 300.0,810" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="300.0,970 300.0,1065" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="75,285 57,285 57,870 75,870" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1200.0,345 1200.0,400.0 920.0,400.0 920.0,455" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1160,535 1260,535" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="920,635 920,690 1195,690 1195,920 1200,920 1200,955" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="1490.0,635 1490.0,725" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<polyline points="525,870 600,870 600,290 680,290" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<polyline points="525,1140 620,1140 620,320 680,320" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">01 · 刷卡登记版总体架构</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">当前实施范围：教师 Electron + Docker 服务端；设备仅是登记资源。箭头表示调用或数据流，虚线表示日志归集。</text>
+<text x="300.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">教师 Windows · 可有多个客户端</text>
+<rect x="75" y="225" width="450" height="120" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="264.09999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">USB → CardReader 适配器</text>
+<text x="300.0" y="291.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">scanId / 来源 / UID 字节</text>
+<text x="300.0" y="319.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-03：协议、驱动、字节序</text>
+<rect x="75" y="420" width="450" height="150" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="460.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">React renderer + cyez-ui</text>
+<text x="300.0" y="487.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备列表 / 登记 / 结束 / 管理</text>
+<text x="300.0" y="515.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">页面门控、确认、倒计时</text>
+<text x="300.0" y="542.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无原 UID、token 或数据库权限</text>
+<rect x="75" y="640" width="450" height="95" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="680.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">受限 preload IPC</text>
+<text x="300.0" y="707.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">sender + schema 校验，隔离 renderer</text>
+<rect x="75" y="810" width="450" height="160" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="855.3249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Electron main · TypeScript</text>
+<text x="300.0" y="882.8749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">读卡防抖 / 认证 / REST SDK</text>
+<text x="300.0" y="910.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">原 UID 仅短期内存 → 服务端</text>
+<text x="300.0" y="937.9749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">持久提交意图 / 操作结果恢复</text>
+<rect x="75" y="1065" width="450" height="150" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="300.0" y="1105.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地 SQLite 日志 outbox</text>
+<text x="300.0" y="1132.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">main / UI / reader / SDK / 安装日志</text>
+<text x="300.0" y="1160.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">稳定 logId，断网留盘</text>
+<text x="300.0" y="1187.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">服务端持久 ACK 后回收</text>
+<text x="1200.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">学校固定地址 · Linux Docker Compose</text>
+<rect x="680" y="230" width="1040" height="115" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1200.0" y="266.59999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">HTTPS :443 → gateway → Fastify REST /api/v1</text>
+<text x="1200.0" y="294.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">注册 / 登录 / 预览 / 业务命令 / 查询 / 日志 ACK</text>
+<text x="1200.0" y="321.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">身份与机房权限、schema、限流；教师 IP 变化不影响主动请求</text>
+<rect x="680" y="455" width="480" height="180" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="920.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">业务模块 · 服务端最终判断</text>
+<text x="920.0" y="537.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生与卡凭证 / 设备与标签</text>
+<text x="920.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">开始 / 结束 / 批量固定集合</text>
+<text x="920.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预览 TTL / 幂等 / 版本 / 事务</text>
+<rect x="1260" y="455" width="460" height="180" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">外部校园卡 API · 服务端独占</text>
+<text x="1490.0" y="537.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">仅未知卡需要查询</text>
+<text x="1490.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提取白名单后释放完整响应</text>
+<text x="1490.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-01 字段 / TBD-02 接口</text>
+<rect x="680" y="725" width="480" height="125" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="920.0" y="766.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">身份与账号边界</text>
+<text x="920.0" y="794.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">客户端身份：入网 / 日志 / 启动报告</text>
+<text x="920.0" y="821.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">operator / admin：业务与机房授权</text>
+<rect x="1260" y="725" width="460" height="125" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1490.0" y="766.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">短期候选 · 有界内存</text>
+<text x="1490.0" y="794.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">previewId 绑定账号 + 客户端</text>
+<text x="1490.0" y="821.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">默认 2 分钟；重启需重刷</text>
+<rect x="680" y="955" width="1040" height="160" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1200.0" y="996.6750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">PostgreSQL · 仅 Compose 内网 :5432 · pgdata 持久卷</text>
+<text x="1200.0" y="1027.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">学生 / 卡 HMAC / 机房 / 设备 / 标签 / 使用记录</text>
+<text x="1200.0" y="1057.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">操作结果 + 审计同事务；全部应用与部署日志统一存储</text>
+<text x="1200.0" y="1088.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">活动记录条件唯一索引防止一人或一机重复占用</text>
+<text x="1195.0" y="1172.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">客户端日志也经 HTTPS API → 去重持久提交 → 逐项 ACK</text>
+<text x="1195.0" y="1198.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">服务端 / gateway / DB 日志另经本地 spool → 内部 log-ingest</text>
+<rect x="40" y="1330" width="840" height="160" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="460.0" y="1373.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">范围边界</text>
+<text x="460.0" y="1402.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本版无学生端、Rust、人脸识别、锁机或屏幕墙</text>
+<text x="460.0" y="1431.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">“结束使用”仅结束记录，故障不控制或关闭电脑</text>
+<text x="460.0" y="1460.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不限制设备总数；有限分页/批次用于资源保护</text>
+<rect x="920" y="1330" width="840" height="160" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1340.0" y="1373.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">统一规则</text>
+<text x="1340.0" y="1402.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">业务失败不伪造成功；响应丢失用原 requestId 恢复</text>
+<text x="1340.0" y="1431.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">所有已产生日志归集；无原卡号、token 或完整资料响应</text>
+<text x="1340.0" y="1460.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">技术决策 / 来源 / 待定项详见 decisions.md</text>
+<rect x="40" y="1588" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="1617.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">黄色：尚待外部确认的需求。蓝/绿：已决定的结构。后续三端扩展方案保留于根 docs/，不混用本版状态机。</text>
+</svg>
