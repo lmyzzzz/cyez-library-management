@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="第 1 页" id="sQLAhiAUqx3hKYcK_h94">
-    <mxGraphModel dx="2853" dy="1489" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2007" dy="989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -130,27 +130,30 @@
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-71" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="学生卡号如果改变，分情况处理&lt;br&gt;如果存在能唯一确定一个学生的数据，则用那个数据的加盐hash来定位学生；否则就是用卡号，然后卡号不同视为两个不同学生即可&lt;div&gt;目前这个系统是紧急上线，所以不需要很严谨，卡号就是学生的唯一身份标识。但是需要记录在文档里，之后系统升级首当其冲需要处理这个&lt;/div&gt;" vertex="1">
           <mxGeometry height="140" width="230" x="50" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-50" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="使用流程" vertex="1">
-          <mxGeometry height="60" width="120" x="180" y="1530" as="geometry" />
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-11" parent="1" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" value="使用流程" vertex="1">
+          <mxGeometry height="1180" width="1640" x="300" y="1530" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-57" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-56">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-57" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-56">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-53" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="设备列表页面" vertex="1">
-          <mxGeometry height="60" width="120" x="290" y="1870" as="geometry" />
-        </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-66" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-65">
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-3" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.005;exitY=0.84;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-56" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="学生刷卡" vertex="1">
-          <mxGeometry height="80" width="120" x="510" y="1860" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-53" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="设备列表页面" vertex="1">
+          <mxGeometry height="60" width="120" x="530" y="550" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-73" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-61">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-66" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-65">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-77" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-92">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-56" parent="nPUgz08-ScTQTXVQVtWs-11" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="学生刷卡" vertex="1">
+          <mxGeometry height="80" width="120" x="750" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-73" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-77" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-92">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1189.9999999999995" y="1680" as="targetPoint" />
+            <mxPoint x="1429.9999999999995" y="360" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-97" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-77" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="确认" vertex="1">
@@ -158,7 +161,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-86" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-86" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-87" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-86" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="取消" vertex="1">
@@ -166,13 +169,13 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-59" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="登记界面" vertex="1">
-          <mxGeometry height="60" width="120" x="940" y="1650" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-59" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="登记界面" vertex="1">
+          <mxGeometry height="60" width="120" x="1180" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="显示学生信息（待会需要详细列举一下会有哪些）&lt;div&gt;开始使用时间（刷卡时间）&lt;/div&gt;&lt;div&gt;可选输入备注&lt;br&gt;&lt;div&gt;列出可分配机器（需要专门设计一个ui组件，用于列出和选择机器，以及强制下机&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;）&lt;/span&gt;&lt;/div&gt;&lt;div&gt;取消（5秒自动取消）、确认按钮&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="130" width="210" x="895" y="1760" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-61" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=0;whiteSpace=wrap;html=1;" value="显示学生信息（待会需要详细列举一下会有哪些）&lt;div&gt;开始使用时间（刷卡时间）&lt;/div&gt;&lt;div&gt;可选输入备注&lt;br&gt;&lt;div&gt;列出可分配机器（需要专门设计一个ui组件，用于列出和选择机器，以及强制下机&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;）&lt;/span&gt;&lt;/div&gt;&lt;div&gt;取消（5秒自动取消）、确认按钮&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="210" x="1135" y="440" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-67" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-59">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-67" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-59">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-74" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-67" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="否" vertex="1">
@@ -180,12 +183,12 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-79" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-75">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-79" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-75">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="760" y="2020" />
+              <mxPoint x="1000" y="700" />
             </Array>
-            <mxPoint x="760" y="1940" as="sourcePoint" />
+            <mxPoint x="1000" y="620" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-82" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-79" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="是" vertex="1">
@@ -193,13 +196,13 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-65" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="判断是否在使用" vertex="1">
-          <mxGeometry height="80" width="120" x="700" y="1860" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-65" parent="nPUgz08-ScTQTXVQVtWs-11" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="判断是否在使用" vertex="1">
+          <mxGeometry height="80" width="120" x="940" y="540" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-85" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-84">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-85" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-84">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-93" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-91">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-93" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-91">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-95" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-93" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="确认" vertex="1">
@@ -207,10 +210,10 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-75" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="结束使用界面" vertex="1">
-          <mxGeometry height="60" width="120" x="940" y="1990" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-75" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="结束使用界面" vertex="1">
+          <mxGeometry height="60" width="120" x="1180" y="670" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-88" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-88" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="P8i-xwklN0WiJ0ACK7I8-90" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-88" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="取消" vertex="1">
@@ -218,36 +221,92 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-84" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;显示学生信息&lt;/div&gt;&lt;div&gt;开始使用时间&lt;/div&gt;&lt;div&gt;结束时间&lt;/div&gt;&lt;div&gt;使用的机器&lt;/div&gt;&lt;div&gt;可选输入备注（如果开始使用有备注，编辑框内需要加载已有的备注）&lt;/div&gt;&lt;div&gt;取消、确认按钮（5秒自动确认）&lt;/div&gt;" vertex="1">
-          <mxGeometry height="220" width="360" x="820" y="2130" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-84" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;显示学生信息&lt;/div&gt;&lt;div&gt;开始使用时间&lt;/div&gt;&lt;div&gt;结束时间&lt;/div&gt;&lt;div&gt;使用的机器&lt;/div&gt;&lt;div&gt;可选输入备注（如果开始使用有备注，编辑框内需要加载已有的备注）&lt;/div&gt;&lt;div&gt;取消、确认按钮（5秒自动确认）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="220" width="360" x="1060" y="810" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-94" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-91" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-94" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-91" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1270" y="2460" />
-              <mxPoint x="350" y="2460" />
+              <mxPoint x="1510" y="1140" />
+              <mxPoint x="590" y="1140" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-91" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录" vertex="1">
-          <mxGeometry height="60" width="120" x="1210" y="1990" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-91" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录" vertex="1">
+          <mxGeometry height="60" width="120" x="1450" y="670" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-96" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-96" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1270" y="1500" />
-              <mxPoint x="350" y="1500" />
+              <mxPoint x="1510" y="180" />
+              <mxPoint x="590" y="180" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-92" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录，结束时间留空" vertex="1">
-          <mxGeometry height="60" width="120" x="1210" y="1650" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-92" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录，结束时间留空" vertex="1">
+          <mxGeometry height="60" width="120" x="1450" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-99" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-98" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-99" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="P8i-xwklN0WiJ0ACK7I8-98" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="P8i-xwklN0WiJ0ACK7I8-98" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="使用中设备列表，包含设备名称，开始时间，学生姓名，手动结束，备注（可编辑）&lt;div&gt;未使用设备列表（以上两个列表使用选项卡形式切换）&lt;/div&gt;&lt;div&gt;页面顶部加一个按钮：结束所有记录，用于给所有正在使用的电脑批量结束使用并记录&lt;/div&gt;" vertex="1">
-          <mxGeometry height="140" width="220" x="-70" y="1860" as="geometry" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-98" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=0;whiteSpace=wrap;html=1;" value="使用中设备列表，包含设备名称，开始时间，学生姓名，手动结束，备注（可编辑）&lt;div&gt;未使用设备列表（以上两个列表使用选项卡形式切换）&lt;/div&gt;&lt;div&gt;页面顶部加一个按钮：结束所有记录，用于给所有正在使用的电脑批量结束使用并记录&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="220" x="70" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-2" parent="nPUgz08-ScTQTXVQVtWs-11" style="rounded=1;whiteSpace=wrap;html=1;" value="结算modal" vertex="1">
+          <mxGeometry height="60" width="120" x="220" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-5" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="nPUgz08-ScTQTXVQVtWs-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-4" parent="nPUgz08-ScTQTXVQVtWs-11" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="结束单个设备或者结束多个设备" vertex="1">
+          <mxGeometry height="80" width="120" x="350" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-8" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="nPUgz08-ScTQTXVQVtWs-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-6" parent="nPUgz08-ScTQTXVQVtWs-11" style="whiteSpace=wrap;html=1;aspect=fixed;" value="单设备直接和刷卡结束时相同界面（但是此时是modal，刷卡结束是完整页面）&lt;div&gt;批量结束，显示一个紧凑的列表，然后下面有一个共用的备注框。备注框为空。填入内容后，储存时实际内容是：原有备注+“批量结束备注：XXX”。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="180" width="180" x="150" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-7" edge="1" parent="nPUgz08-ScTQTXVQVtWs-11" source="nPUgz08-ScTQTXVQVtWs-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.603;entryY=0.024;entryDx=0;entryDy=0;entryPerimeter=0;" target="nPUgz08-ScTQTXVQVtWs-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-9" parent="nPUgz08-ScTQTXVQVtWs-11" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="结算modal时，刷卡不跳转登记或者结束使用页面&lt;div&gt;事实上任何别的页面，都不跳转，只有设备列表页面跳转。&lt;/div&gt;&lt;div&gt;如果其他页面收到刷卡信息，则显示“接收到刷卡消息，请返回主页面以触发登记”的toast&lt;/div&gt;" vertex="1">
+          <mxGeometry height="150" width="160" x="620" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-17" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-20" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="内网服务器 nodejs，切记选择一个合适的服务器框架&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;职责：暴露一个restful api&lt;/div&gt;" vertex="1">
+          <mxGeometry height="378" width="120" x="400" y="2862" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-18" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-21" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="nPUgz08-ScTQTXVQVtWs-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="教师端电脑，electron，使用现有ui库。&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;职责，接受用户输入以及刷卡输入。&lt;/div&gt;" vertex="1">
+          <mxGeometry height="378" width="120" x="790" y="2862" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="教师端只是个壳子，主要逻辑在服务端。服务端不导出裸接口，而是导出完善的业务逻辑接口&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;做好数据安全性工作。原则是，不储存不需要的数据（比如学生学籍号）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="270" width="180" x="570" y="3150" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-19" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="校园卡提供方api&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;由服务端请求，教师端不应当负责请求这个api。请求到的数据即时销毁，只取走其中会用到的部分&lt;/div&gt;" vertex="1">
+          <mxGeometry height="378" width="120" x="110" y="2862" as="geometry" />
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-22" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="nPUgz08-ScTQTXVQVtWs-13">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="920.0000000000005" y="3046.0000000000005" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nPUgz08-ScTQTXVQVtWs-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="刷卡机&lt;div&gt;usb接入&lt;/div&gt;&lt;div&gt;等待提供方技术文档中。当前可以暂时抽象为一个待填写的类&lt;/div&gt;" vertex="1">
+          <mxGeometry height="380" width="120" x="1060" y="2860" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
