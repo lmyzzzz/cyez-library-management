@@ -292,7 +292,7 @@
           <mxGeometry height="378" width="120" x="790" y="2862" as="geometry" />
         </mxCell>
         <mxCell id="nPUgz08-ScTQTXVQVtWs-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="教师端只是个壳子，主要逻辑在服务端。服务端不导出裸接口，而是导出完善的业务逻辑接口&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;做好数据安全性工作。原则是，不储存不需要的数据（比如学生学籍号）&lt;/div&gt;" vertex="1">
-          <mxGeometry height="270" width="180" x="570" y="3150" as="geometry" />
+          <mxGeometry height="270" width="180" x="570" y="3130" as="geometry" />
         </mxCell>
         <mxCell id="nPUgz08-ScTQTXVQVtWs-19" edge="1" parent="1" source="nPUgz08-ScTQTXVQVtWs-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="nPUgz08-ScTQTXVQVtWs-12">
           <mxGeometry relative="1" as="geometry" />
