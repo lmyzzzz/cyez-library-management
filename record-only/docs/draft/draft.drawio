@@ -1,0 +1,255 @@
+<mxfile host="Electron">
+  <diagram name="第 1 页" id="sQLAhiAUqx3hKYcK_h94">
+    <mxGraphModel dx="2853" dy="1489" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-47" parent="1" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" value="数据库格式" vertex="1">
+          <mxGeometry height="810" width="1780" x="230" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-11" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-3" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="学生信息数据表" vertex="1">
+          <mxGeometry height="60" width="120" x="280" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-14" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-4" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="可能没有预填充的学生信息，因此登记时，如果发现学生信息不存在，需要注册" vertex="1">
+          <mxGeometry height="60" width="120" x="240" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-5" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="增删查改，可以批量" vertex="1">
+          <mxGeometry height="60" width="120" x="470" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-28" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-9" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="登记&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;数据表&lt;/span&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="737" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-15" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-10" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="按每次登记使用为一条数据条目" vertex="1">
+          <mxGeometry height="60" width="120" x="737" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-20" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-17" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="学生数据格式（此处待定！！）：&lt;div&gt;学生id，即&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;卡号（加盐hash防泄漏）&lt;/span&gt;&lt;/div&gt;&lt;div&gt;姓名&lt;/div&gt;&lt;div&gt;班级&lt;/div&gt;&lt;div&gt;学号&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="120" x="310" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-21" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-36" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-18" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="登记数据格式（不是指sql数据类型）&lt;div&gt;条目id&lt;br&gt;开始时间 （整数时间戳，注意不使用字符串时间戳）&lt;/div&gt;&lt;div&gt;结束时间&lt;/div&gt;&lt;div&gt;学生id&lt;/div&gt;&lt;div&gt;设备编号&lt;/div&gt;&lt;div&gt;备注&lt;/div&gt;" vertex="1">
+          <mxGeometry height="160" width="230" x="930" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-19" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rhombus;whiteSpace=wrap;html=1;" value="共享信息：学生id" vertex="1">
+          <mxGeometry height="80" width="80" x="630" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-23" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-22" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="按每个学生为一条数据条目" vertex="1">
+          <mxGeometry height="60" width="120" x="400" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-26" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-24" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="设备数据表" vertex="1">
+          <mxGeometry height="60" width="120" x="1110" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-25" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="增删查改，可以批量" vertex="1">
+          <mxGeometry height="60" width="120" x="1510" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-27" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="增删查改，可以批量" vertex="1">
+          <mxGeometry height="60" width="120" x="940" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-37" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-41" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-29" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="设备数据格式&lt;div&gt;设备id&lt;/div&gt;&lt;div&gt;tag id列表&lt;/div&gt;&lt;div&gt;显示名称&lt;/div&gt;&lt;div&gt;可用状态（正在使用，空闲，禁用）&lt;/div&gt;&lt;div&gt;备注&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="1410" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-34" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-31" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="设备tag数据表" vertex="1">
+          <mxGeometry height="60" width="120" x="1260" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-33" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="增删查改 ，可以批量" vertex="1">
+          <mxGeometry height="60" width="120" x="1480" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-35" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rhombus;whiteSpace=wrap;html=1;" value="共享信息：设备id" vertex="1">
+          <mxGeometry height="80" width="80" x="1250" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-38" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="设备tag数据格式&lt;div&gt;tag id&lt;br&gt;显示名称&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="1660" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-39" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rhombus;whiteSpace=wrap;html=1;" value="共享信息：设备tag id" vertex="1">
+          <mxGeometry height="80" width="80" x="1650" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-40" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.391;entryY=0.065;entryDx=0;entryDy=0;entryPerimeter=0;" target="P8i-xwklN0WiJ0ACK7I8-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-43" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="需要判断！！&lt;br&gt;这里tag和设备需不需要双向维护，设备已经存了tag列表了，tag需不需要再存设备列表" vertex="1">
+          <mxGeometry height="120" width="160" x="1470" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-45" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-44" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="主要是便于快速筛选设备。或者多机房，机房内多分区之类的场景" vertex="1">
+          <mxGeometry height="60" width="120" x="1260" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-48" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="需求待定！！（已解决）&lt;div&gt;学生可能会更换班级和学号，此时要判断该怎么处理！！&lt;/div&gt;&lt;div&gt;如果旧纪录显示新学号，则只存id；否则需要把整个学生信息快照存进去&lt;/div&gt;&lt;div&gt;只存id。所以旧的记录也会显示新的班级学号&lt;/div&gt;&lt;div&gt;但是目前仍然不确定学生信息格式，但是既然不存快照，那么影响面不大&lt;/div&gt;" vertex="1">
+          <mxGeometry height="110" width="250" x="560" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-62" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="需求待定！！&lt;div&gt;数据格式到底长啥样&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="250" x="175" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-64" parent="P8i-xwklN0WiJ0ACK7I8-47" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="需要判断！！&lt;br&gt;学生当前是否正在使用电脑，这个信息存在哪里？单开一个表还是直接存在学生的那个表里？&lt;div&gt;如果认为学生那个表不合适，理由是那个表应该储存一个更加长期的静态的数据来源&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="200" x="870" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-69" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-68" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="学生信息可能会变，比如更换班级和学号。此时遵循直接覆盖旧数据的策略" vertex="1">
+          <mxGeometry height="60" width="120" x="70" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-72" edge="1" parent="P8i-xwklN0WiJ0ACK7I8-47" source="P8i-xwklN0WiJ0ACK7I8-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-71" parent="P8i-xwklN0WiJ0ACK7I8-47" style="rounded=1;whiteSpace=wrap;html=1;" value="学生卡号如果改变，分情况处理&lt;br&gt;如果存在能唯一确定一个学生的数据，则用那个数据的加盐hash来定位学生；否则就是用卡号，然后卡号不同视为两个不同学生即可&lt;div&gt;目前这个系统是紧急上线，所以不需要很严谨，卡号就是学生的唯一身份标识。但是需要记录在文档里，之后系统升级首当其冲需要处理这个&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="230" x="50" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-50" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="使用流程" vertex="1">
+          <mxGeometry height="60" width="120" x="180" y="1530" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-57" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-53" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="设备列表页面" vertex="1">
+          <mxGeometry height="60" width="120" x="290" y="1870" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-66" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-65">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-56" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="学生刷卡" vertex="1">
+          <mxGeometry height="80" width="120" x="510" y="1860" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-73" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-77" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-92">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1189.9999999999995" y="1680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-97" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-77" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="确认" vertex="1">
+          <mxGeometry relative="1" x="0.1482" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-86" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-59" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-87" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-86" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="取消" vertex="1">
+          <mxGeometry relative="1" x="-0.0955" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-59" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="登记界面" vertex="1">
+          <mxGeometry height="60" width="120" x="940" y="1650" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="显示学生信息（待会需要详细列举一下会有哪些）&lt;div&gt;开始使用时间（刷卡时间）&lt;/div&gt;&lt;div&gt;可选输入备注&lt;br&gt;&lt;div&gt;列出可分配机器（需要专门设计一个ui组件，用于列出和选择机器，以及强制下机&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;）&lt;/span&gt;&lt;/div&gt;&lt;div&gt;取消（5秒自动取消）、确认按钮&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="210" x="895" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-67" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-59">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-74" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-67" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="否" vertex="1">
+          <mxGeometry relative="1" x="-0.3621" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-79" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-75">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="2020" />
+            </Array>
+            <mxPoint x="760" y="1940" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-82" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-79" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="是" vertex="1">
+          <mxGeometry relative="1" x="-0.7701" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-65" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" value="判断是否在使用" vertex="1">
+          <mxGeometry height="80" width="120" x="700" y="1860" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-85" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-84">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-93" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-91">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-95" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-93" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="确认" vertex="1">
+          <mxGeometry relative="1" x="-0.2596" y="4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-75" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="结束使用界面" vertex="1">
+          <mxGeometry height="60" width="120" x="940" y="1990" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-88" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-75" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-90" connectable="0" parent="P8i-xwklN0WiJ0ACK7I8-88" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="取消" vertex="1">
+          <mxGeometry relative="1" x="-0.3551" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-84" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;显示学生信息&lt;/div&gt;&lt;div&gt;开始使用时间&lt;/div&gt;&lt;div&gt;结束时间&lt;/div&gt;&lt;div&gt;使用的机器&lt;/div&gt;&lt;div&gt;可选输入备注（如果开始使用有备注，编辑框内需要加载已有的备注）&lt;/div&gt;&lt;div&gt;取消、确认按钮（5秒自动确认）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="220" width="360" x="820" y="2130" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-94" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-91" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1270" y="2460" />
+              <mxPoint x="350" y="2460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-91" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录" vertex="1">
+          <mxGeometry height="60" width="120" x="1210" y="1990" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-96" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1270" y="1500" />
+              <mxPoint x="350" y="1500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-92" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="写入记录，结束时间留空" vertex="1">
+          <mxGeometry height="60" width="120" x="1210" y="1650" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-99" edge="1" parent="1" source="P8i-xwklN0WiJ0ACK7I8-98" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="P8i-xwklN0WiJ0ACK7I8-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P8i-xwklN0WiJ0ACK7I8-98" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="使用中设备列表，包含设备名称，开始时间，学生姓名，手动结束，备注（可编辑）&lt;div&gt;未使用设备列表（以上两个列表使用选项卡形式切换）&lt;/div&gt;&lt;div&gt;页面顶部加一个按钮：结束所有记录，用于给所有正在使用的电脑批量结束使用并记录&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="220" x="-70" y="1860" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
