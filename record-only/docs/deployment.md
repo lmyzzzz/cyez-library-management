@@ -63,4 +63,4 @@ Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固�
 
 ## 交付验收
 
-业务实施时提交可运行 Dockerfile/Compose、无秘密配置模板、ORM migrations 和运行说明。测试涵盖空库启动、合法学生 seed、重复启动、迁移失败阻断、DB 重启、SIGTERM、共享口令重建生效、旧会话失效、证书指纹不符拒绝、卷重建持久性、spool 补传及空间压力。初始预置/TLS/外部 API 输入未齐时明确 blocked。备份、导出、恢复演练已从本版交付项删除。
+现已提交可运行 Dockerfile/Compose、无秘密配置模板、ORM migrations 和[运行说明](operations.md)。集成环境的空库启动、受控 seed、重启与卷持久性、改密、证书 pin、spool 补传及容量状态等实际结果见[测试报告](verification-report.md)；目标环境空间压力与真实初始预置/TLS/外部 API 仍按 TBD 验收。备份、导出、恢复演练已从本版交付项删除。

@@ -49,11 +49,21 @@ jobs:
       - run: docker build -t cyez-record-only:ci .
       - run: docker build -f deploy/db.Dockerfile -t cyez-record-db:ci .
       - run: docker build -f deploy/gateway.Dockerfile -t cyez-record-gateway:ci .
+      - name: Record build identities
+        run: |
+          mkdir -p test-results
+          docker image inspect cyez-record-only:ci cyez-record-db:ci cyez-record-gateway:ci --format '{{index .RepoTags 0}} {{.Id}}' > test-results/image-ids.txt
+          node --version > test-results/toolchain.txt
+          yarn --version >> test-results/toolchain.txt
+          git rev-parse HEAD >> test-results/toolchain.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: server-coverage
-          path: record-only/coverage/server
+          path: |
+            record-only/coverage/server
+            record-only/test-results/image-ids.txt
+            record-only/test-results/toolchain.txt
 
   windows-client:
     runs-on: windows-2025

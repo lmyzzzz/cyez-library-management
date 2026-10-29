@@ -49,7 +49,7 @@ preload 仅提供限定业务动作与刷卡元数据，renderer 不接收原 UI
 | `@series/electron@0.1.0` | `/main`、`/preload`、`/shared` 分离入口，窗口控制/状态同步 | main 和 preload 仅引用对应入口；业务 IPC 独立定义并验证 sender，不把 main bundle 导入 renderer |
 | peer 依赖 | UI：React/React DOM `>=19 <20`、router `>=7 <8`；Electron 包：`>=39 <45` | 由应用显式声明并固定兼容版本，确保单份 React；最终 Electron 版本经 Windows/安装器测试决定 |
 
-上游 pnpm 项目尚未在 npm 发布包，采用构建 tarball。实施时由受信任构建流程在固定上游提交构建并产出 `series-ui-0.1.0.tgz` 与 `series-electron-0.1.0.tgz`，记录源 commit、校验和与 LICENSE/NOTICE；项目通过受控制品或 `vendor/` 固定包消费，Yarn lockfile 记录校验。不能把 GitHub repo URL 当已构建 npm 包，不从浮动 main 在线安装生产依赖。
+上游 pnpm 项目尚未在 npm 发布包，本项目已从固定上游提交构建 `series-ui-0.1.0.tgz` 与 `series-electron-0.1.0.tgz`，在 [`vendor/PROVENANCE.md`](../vendor/PROVENANCE.md) 记录源 commit、校验和与 LICENSE/NOTICE；Yarn 通过 `vendor/` 中的固定包消费并在 lockfile 锁定。不能把 GitHub repo URL 当已构建 npm 包，不从浮动 main 在线安装生产依赖。
 
 本项目内部依赖继续使用 `workspace:^`，UI 封装包可对外部 tarball 使用 `file:` 依赖；适配包构建不复制业务逻辑。`packages/protocol` 定义分离的 CardScanInput/StudentDTO schema 与 studentId 编码/哈希函数，由 main、server 和 seed 共用；固定盐值由部署配置注入，renderer 不调用读卡/哈希入口，也不接收原卡号。上游采用 pnpm 不要求消费项目改 pnpm，本项目只保留一个 Yarn lockfile。消费验收必须从干净目录安装、构建、检查单份 React、验证 preload 分离与打包运行，而非引用上游 node_modules 的偶然依赖。
 

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2250" viewBox="0 0 1800 2250" role="img" aria-labelledby="title desc">
-<title id="title">08 · 服务端与客户端测试分层、联调及发布门禁</title><desc id="desc">两端分别具备单元与集成测试；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。当前均为待实施验收计划。</desc>
+<title id="title">08 · 服务端与客户端测试分层、联调及发布门禁</title><desc id="desc">两端单元与集成测试已运行；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。目标环境验收按 TBD 保留。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
 <rect width="1800" height="2250" fill="#ffffff"/>
 <rect x="60" y="385" width="800" height="830" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -17,7 +17,7 @@
 <polyline points="460,1830 460,1935" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1340,1830 1340,1935" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">08 · 服务端与客户端测试分层、联调及发布门禁</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">两端分别具备单元与集成测试；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。当前均为待实施验收计划。</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">两端单元与集成测试已运行；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。目标环境验收按 TBD 保留。</text>
 <rect x="60" y="150" width="1680" height="130" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="206.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">提交 → 文档/图源一致性 → Yarn 不可变安装 → 类型/格式 → 四类独立测试报告</text>
 <text x="900.0" y="238.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">服务端 S-U / S-I 与客户端 C-U / C-I 均为必需；缺少桌面或 DB 环境不能静默跳过并标绿</text>
@@ -74,7 +74,7 @@
 <text x="900.0" y="1994.175" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收</text>
 <text x="900.0" y="2024.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch</text>
 <text x="900.0" y="2055.075" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署</text>
-<text x="900.0" y="2085.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">当前仅校验设计和图表；应用、Docker、真实 USB 与集成测试仍待实现和运行</text>
+<text x="900.0" y="2085.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">集成环境应用 / Docker / PG / Electron 已验证；真实 API、USB 和目标发布仍待验收</text>
 <rect x="40" y="2178" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="2207.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；测试脚本随业务实现提交，本轮不伪造脚手架或通过结果。</text>
+<text x="900.0" y="2207.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；实际通过范围、CI 与 TBD 缺口见 verification-report.md。</text>
 </svg>

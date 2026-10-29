@@ -380,13 +380,13 @@ def workspaces():
          '已确认：cyez-ui 使用授权\n按固定提交 tarball 接入，保留 LICENSE/NOTICE\nTBD-06 仅 Windows 签名材料 / 发布实机验收\n上下两个一级入口：使用登记 / 设置\n不把上游验证当本项目集成通过',YELLOW,19)
     note(p,'phase',940,1810,800,185,
          '范围与延期\n无学生端 / Rust / 完整 Session 状态机\nNEXT-01：换卡/盐改变 ID，历史关联迁移延期\n无 admin、机房 ACL、备份导出、历史编辑删除\nTBD-07：合法档案和哈希 studentId 预置',YELLOW,19)
-    caption(p,'上游提交与包入口已核对；应用目录和脚本为实施契约，当前文档仓库尚未创建运行中的工作区或应用。')
+    caption(p,'固定上游包已入 vendor；Yarn 4 工作区、教师应用与服务端已实现，真实外部接入按 TBD 验收。')
     return p
 
 
 def testing():
     p = page('testing-pipeline', '08 · 服务端与客户端测试分层、联调及发布门禁',
-             '两端分别具备单元与集成测试；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。当前均为待实施验收计划。', 1800, 2250)
+             '两端单元与集成测试已运行；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。目标环境验收按 TBD 保留。', 1800, 2250)
     card(p,'source',60,150,1680,130,
          '提交 → 文档/图源一致性 → Yarn 不可变安装 → 类型/格式 → 四类独立测试报告\n服务端 S-U / S-I 与客户端 C-U / C-I 均为必需；缺少桌面或 DB 环境不能静默跳过并标绿',BLUE,22)
     panel(p,'server-tests',60,385,800,830,'服务端 · Linux CI · Vitest / Fastify / PostgreSQL',GREEN)
@@ -414,10 +414,10 @@ def testing():
     down(p,'e2e-coverage','e2e','coverage')
     route(p,'e2e-hardware','e2e','hardware',[(1340,1505),(1340,1610)])
     card(p,'release',60,1935,1680,195,
-         '发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收\n上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch\nTBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署\n当前仅校验设计和图表；应用、Docker、真实 USB 与集成测试仍待实现和运行',PURPLE,21)
+         '发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收\n上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch\nTBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署\n集成环境应用 / Docker / PG / Electron 已验证；真实 API、USB 和目标发布仍待验收',PURPLE,21)
     route(p,'gate-release','coverage','release',[(460,1830),(460,1935)])
     route(p,'hardware-release','hardware','release',[(1340,1830),(1340,1935)])
-    caption(p,'详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；测试脚本随业务实现提交，本轮不伪造脚手架或通过结果。')
+    caption(p,'详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；实际通过范围、CI 与 TBD 缺口见 verification-report.md。')
     return p
 
 

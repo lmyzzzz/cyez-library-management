@@ -1091,7 +1091,7 @@
         <mxCell id="phase" value="范围与延期&#10;无学生端 / Rust / 完整 Session 状态机&#10;NEXT-01：换卡/盐改变 ID，历史关联迁移延期&#10;无 admin、机房 ACL、备份导出、历史编辑删除&#10;TBD-07：合法档案和哈希 studentId 预置" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="940" y="1810" width="800" height="185" as="geometry" />
         </mxCell>
-        <mxCell id="footer" value="上游提交与包入口已核对；应用目录和脚本为实施契约，当前文档仓库尚未创建运行中的工作区或应用。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="footer" value="固定上游包已入 vendor；Yarn 4 工作区、教师应用与服务端已实现，真实外部接入按 TBD 验收。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="40" y="2048" width="1720" height="48" as="geometry" />
         </mxCell>
       </root>
@@ -1175,7 +1175,7 @@
         <mxCell id="title" value="08 · 服务端与客户端测试分层、联调及发布门禁" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=30;fontStyle=1;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="15" width="1750" height="52" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle" value="两端分别具备单元与集成测试；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。当前均为待实施验收计划。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="subtitle" value="两端单元与集成测试已运行；Mock 不能替代数据库约束、真实 Electron IPC 和打包运行。目标环境验收按 TBD 保留。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=left;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="25" y="68" width="1750" height="36" as="geometry" />
         </mxCell>
         <mxCell id="source" value="提交 → 文档/图源一致性 → Yarn 不可变安装 → 类型/格式 → 四类独立测试报告&#10;服务端 S-U / S-I 与客户端 C-U / C-I 均为必需；缺少桌面或 DB 环境不能静默跳过并标绿" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -1208,10 +1208,10 @@
         <mxCell id="hardware" value="待确认的真实输入&#10;TBD-02 API / 原卡号格式；TBD-03 USB 协议&#10;TBD-04 Linux / TLS 叶证书 / pin 分发&#10;TBD-06 Windows 签名；UI 使用授权已确认&#10;TBD-07 初始合法学生与哈希 studentId 来源" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="940" y="1610" width="800" height="220" as="geometry" />
         </mxCell>
-        <mxCell id="release" value="发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收&#10;上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch&#10;TBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署&#10;当前仅校验设计和图表；应用、Docker、真实 USB 与集成测试仍待实现和运行" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="release" value="发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收&#10;上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch&#10;TBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署&#10;集成环境应用 / Docker / PG / Electron 已验证；真实 API、USB 和目标发布仍待验收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="1935" width="1680" height="195" as="geometry" />
         </mxCell>
-        <mxCell id="footer" value="详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；测试脚本随业务实现提交，本轮不伪造脚手架或通过结果。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="footer" value="详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；实际通过范围、CI 与 TBD 缺口见 verification-report.md。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="40" y="2178" width="1720" height="48" as="geometry" />
         </mxCell>
       </root>
