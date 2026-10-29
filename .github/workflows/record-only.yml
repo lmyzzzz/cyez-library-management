@@ -1,0 +1,94 @@
+name: record-only
+
+on:
+  push:
+    paths:
+      - "record-only/**"
+      - ".github/workflows/record-only.yml"
+  pull_request:
+    paths:
+      - "record-only/**"
+      - ".github/workflows/record-only.yml"
+  workflow_dispatch:
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.6-bookworm
+        env:
+          POSTGRES_USER: cyez_test
+          POSTGRES_PASSWORD: integration-only
+          POSTGRES_DB: cyez_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cyez_test -d cyez_test"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://cyez_test:integration-only@127.0.0.1:5432/cyez_test
+    defaults:
+      run:
+        working-directory: record-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --global corepack@0.34.1
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: python docs/tools/generate_diagrams.py --check
+      - run: yarn format:check
+      - run: yarn typecheck
+      - run: yarn test:unit:server
+      - run: yarn test:coverage:server
+      - run: yarn build:server
+      - run: docker build -t cyez-record-only:ci .
+      - run: docker build -f deploy/db.Dockerfile -t cyez-record-db:ci .
+      - run: docker build -f deploy/gateway.Dockerfile -t cyez-record-gateway:ci .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: server-coverage
+          path: record-only/coverage/server
+
+  windows-client:
+    runs-on: windows-latest
+    env:
+      TEST_DATABASE_URL: postgres://cyez_test:integration-only@127.0.0.1:5432/cyez_test
+    defaults:
+      run:
+        working-directory: record-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --global corepack@0.34.1
+      - run: corepack enable
+      - name: Start isolated PostgreSQL
+        shell: pwsh
+        run: |
+          choco install postgresql17 --no-progress --yes --params '/Password:integration-only'
+          $psql = 'C:\Program Files\PostgreSQL\17\bin\psql.exe'
+          $env:PGPASSWORD = 'integration-only'
+          & $psql -h 127.0.0.1 -U postgres -c "CREATE ROLE cyez_test WITH LOGIN CREATEDB PASSWORD 'integration-only'"
+          & $psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE cyez_test OWNER cyez_test"
+      - run: yarn install --immutable
+      - run: yarn format:check
+      - run: yarn typecheck
+      - run: yarn test:unit:client
+      - run: yarn test:coverage:client
+      - run: yarn build:client
+      - run: yarn test:integration:client
+      - run: yarn package:win
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-client-results
+          path: |
+            record-only/coverage/client-unit
+            record-only/test-results/electron
+            record-only/release/*-setup.exe

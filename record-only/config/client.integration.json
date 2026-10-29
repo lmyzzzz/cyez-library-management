@@ -1,0 +1,9 @@
+{
+  "environment": "integration",
+  "identity": {
+    "hashVersion": "v1",
+    "fixedSaltHex": "00112233445566778899aabbccddeeff",
+    "issuer": "integration",
+    "uidByteLengths": [4]
+  }
+}

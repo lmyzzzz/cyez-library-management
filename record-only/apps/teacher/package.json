@@ -1,0 +1,58 @@
+{
+  "name": "@record/teacher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "out/main/index.js",
+  "description": "学校图书馆刷卡使用登记系统",
+  "author": "cyez",
+  "scripts": {
+    "build": "electron-vite build",
+    "start": "electron .",
+    "dev": "electron-vite dev",
+    "package:win": "electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "sequelize": "6.37.8",
+    "sqlite3": "5.1.7",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@record/client-sdk": "workspace:^",
+    "@record/protocol": "workspace:^",
+    "@record/ui": "workspace:^",
+    "@series/electron": "file:../../vendor/series-electron-0.1.0.tgz",
+    "@series/ui": "file:../../vendor/series-ui-0.1.0.tgz",
+    "@vitejs/plugin-react": "5.1.1",
+    "electron": "44.9.1",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "7.18.2",
+    "vite": "7.3.6"
+  },
+  "build": {
+    "appId": "school.cyez.library.record",
+    "productName": "图书馆使用登记",
+    "directories": {
+      "output": "../../release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "cyez-library-${version}-${arch}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

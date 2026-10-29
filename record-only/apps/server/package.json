@@ -1,0 +1,25 @@
+{
+  "name": "@record/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "migrate": "node dist/cli.js migrate",
+    "seed": "node dist/cli.js seed",
+    "ingest": "node dist/ingest.js"
+  },
+  "dependencies": {
+    "@fastify/rate-limit": "10.3.0",
+    "@record/domain": "workspace:^",
+    "@record/protocol": "workspace:^",
+    "bcryptjs": "3.0.2",
+    "fastify": "5.12.7",
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.1",
+    "sequelize": "6.37.8",
+    "umzug": "3.8.2",
+    "zod": "3.25.76"
+  }
+}

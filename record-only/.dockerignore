@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/out
+.cache
+.git
+.env*
+runtime
+secrets
+release
+coverage
+test-results
+docs
+tests

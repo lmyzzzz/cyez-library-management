@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "identity": {
+    "hashVersion": "REPLACE_WITH_CONFIRMED_HASH_VERSION",
+    "fixedSaltHex": "REPLACE_WITH_CONFIRMED_FIXED_SALT_HEX",
+    "issuer": "REPLACE_WITH_CONFIRMED_ISSUER",
+    "uidByteLengths": [0]
+  },
+  "readerModule": "C:/ProgramData/cyez-library/adapters/reader.mjs"
+}

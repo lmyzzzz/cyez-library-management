@@ -1,6 +1,6 @@
 # 刷卡登记版实施与问题处理计划
 
-日期：2026-10-29。**状态：设计已明确，以下业务实现与产品测试均待执行。** 本计划仅适用于 `record-only/`，以 [opinions.md](../opinions.md)、后续用户确认和[业务规格](specification.md)为依据；不依赖其他目录的方案。
+日期：2026-10-29。**状态：集成环境的业务实现与自动化门禁已落地；真实输入与实机验收仍按 TBD 保留。** 本计划仅适用于 `record-only/`，以 [opinions.md](../opinions.md)、后续用户确认和[业务规格](specification.md)为依据；不依赖其他目录的方案。逐项实测结果见[测试报告](verification-report.md)。
 
 ## 审查结论修正
 

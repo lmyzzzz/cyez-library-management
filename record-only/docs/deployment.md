@@ -1,6 +1,6 @@
 # Docker 部署与运维设计
 
-2026-10-29 修订，依据 [opinions.md](../opinions.md) 及后续确认的卡号临时查询/哈希学生 ID 规则。服务端必须容器化；本轮仍为部署契约，Dockerfile/Compose/应用尚未实现。备份、导出和管理员控制台不在本版范围。
+2026-10-29 修订，依据 [opinions.md](../opinions.md) 及后续确认的卡号临时查询/哈希学生 ID 规则。Dockerfile、Compose、迁移和应用已实现；集成环境实测及生产前置输入见[测试报告](verification-report.md)，可执行步骤见[运行说明](operations.md)。备份、导出和管理员控制台不在本版范围。
 
 ![Docker 部署](docker-deployment.svg)
 

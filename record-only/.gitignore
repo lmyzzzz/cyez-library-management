@@ -1,0 +1,17 @@
+node_modules/
+.cache/
+.yarn/install-state.gz
+dist/
+out/
+release/
+coverage/
+test-results/
+playwright-report/
+.env
+.env.*
+!.env.example
+!.env.integration.example
+runtime/
+*.log
+*.sqlite*
+secrets/

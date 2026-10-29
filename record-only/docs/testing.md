@@ -1,6 +1,6 @@
 # 服务端与客户端测试设计
 
-2026-10-29 按 [opinions.md](../opinions.md) 及后续卡号临时查询/哈希学生 ID 确认修订。**两端各自必须具备单元测试和集成测试。** 当前尚未实现应用，下述是待实现/待运行验收清单，不能把文档图表校验算作产品测试通过。
+2026-10-29 按 [opinions.md](../opinions.md) 及后续卡号临时查询/哈希学生 ID 确认修订。**两端各自必须具备单元测试和集成测试。** 下述矩阵是目标验收清单；当前已执行范围、环境与剩余缺口见[测试报告](verification-report.md)，不能把文档图表校验算作产品测试通过。
 
 ![测试与 CI](testing-pipeline.svg)
 
@@ -72,6 +72,6 @@
 
 CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、Windows 真实 Electron 集成，然后构建 Docker/客户端包并联调。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。
 
-实施时创建根 Yarn 调度脚本 `test:unit:server/client` 与 `test:integration:server/client`；当前无这些脚本，不宣称已运行。两端分别 lines/statements/functions ≥85%、branches ≥80%；身份/占用/幂等/pin/计时/资料刷新/备注关键模块 branches ≥90%。阈值为项目门禁；生成代码和第三方库明确排除，不能排除失败路径凑覆盖率。
+根 Yarn 调度脚本 `test:unit:server/client` 与 `test:integration:server/client` 已创建并运行；实际结果见[测试报告](verification-report.md)。两端分别 lines/statements/functions ≥85%、branches ≥80%；身份/占用/幂等/pin/计时/资料刷新/备注关键模块 branches ≥90%。阈值为项目门禁；生成代码和第三方库明确排除，不能排除失败路径凑覆盖率。
 
 实施优先级、阶段产物与容量/故障状态的具体语义见[实施计划](implementation-plan.md)。全部矩阵场景是完成标准。P0 包括 S-I-01～05、07～18、C-U-01～04、C-I-03～06、09～12 及完整联调；不能静默跳过标绿，flaky 重试也报告。TBD-02/03/04/06/07 的真实输入缺失用例标 blocked，模拟通过不等于硬件已验证。产品不验收备份、导出、历史编辑/删除或管理员功能；这些接口必须不存在或拒绝访问。

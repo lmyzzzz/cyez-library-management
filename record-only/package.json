@@ -1,0 +1,54 @@
+{
+  "name": "cyez-record-only",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@4.10.3",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:shared": "yarn workspace @record/protocol build && yarn workspace @record/domain build && yarn workspace @record/client-sdk build && yarn workspace @record/ui build",
+    "build:server": "yarn workspace @record/protocol build && yarn workspace @record/domain build && yarn workspace @record/server build",
+    "build:client": "yarn build:shared && yarn workspace @record/teacher build",
+    "build": "yarn build:server && yarn build:client",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "format": "prettier --write apps packages scripts tests *.json *.ts",
+    "format:check": "prettier --check apps packages scripts tests *.json *.ts",
+    "test:unit:server": "vitest run --config vitest.server.config.ts",
+    "test:unit:client": "vitest run --config vitest.client.config.ts",
+    "test:coverage:server": "vitest run --config vitest.coverage-server.config.ts",
+    "test:coverage:client": "vitest run --config vitest.client.config.ts --coverage",
+    "test:integration:server": "vitest run --config vitest.integration.config.ts",
+    "test:integration:client": "playwright test --config playwright.config.ts",
+    "start:server": "yarn workspace @record/server start",
+    "start:client": "yarn workspace @record/teacher start",
+    "migrate": "yarn workspace @record/server migrate",
+    "seed": "yarn workspace @record/server seed",
+    "package:win": "yarn build:client && yarn workspace @record/teacher package:win"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "22.20.1",
+    "@types/node-forge": "1.3.14",
+    "@types/pg": "8.15.5",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitest/coverage-v8": "4.1.11",
+    "jsdom": "29.1.1",
+    "node-forge": "1.4.2",
+    "prettier": "3.8.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
