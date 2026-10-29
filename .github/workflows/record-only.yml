@@ -39,6 +39,7 @@ jobs:
       - run: npm install --global corepack@0.34.1
       - run: corepack enable
       - run: yarn install --immutable
+      - run: yarn build:shared
       - run: python docs/tools/generate_diagrams.py --check
       - run: yarn format:check
       - run: yarn typecheck
@@ -66,7 +67,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: npm install --global corepack@0.34.1
+      - run: npm install --global corepack@0.34.1 --force
       - run: corepack enable
       - name: Start isolated PostgreSQL
         shell: pwsh
@@ -77,6 +78,7 @@ jobs:
           & $psql -h 127.0.0.1 -U postgres -c "CREATE ROLE cyez_test WITH LOGIN CREATEDB PASSWORD 'integration-only'"
           & $psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE cyez_test OWNER cyez_test"
       - run: yarn install --immutable
+      - run: yarn build:shared
       - run: yarn format:check
       - run: yarn typecheck
       - run: yarn test:unit:client
