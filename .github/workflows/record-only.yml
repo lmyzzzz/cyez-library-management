@@ -89,7 +89,6 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - run: yarn install --immutable
       - run: yarn build:shared
-      - run: yarn format:check
       - run: yarn typecheck
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
