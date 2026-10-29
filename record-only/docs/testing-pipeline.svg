@@ -25,34 +25,34 @@
 <text x="1340.0" y="425.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">客户端 · Windows CI · Vitest / 真实 Electron</text>
 <rect x="90" y="485" width="740" height="230" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="534.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">S-U · 单元 / 确定性 fake</text>
-<text x="460.0" y="563.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">cardHash 协议、资料白名单与敏感信息过滤</text>
-<text x="460.0" y="592.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">毫秒整数、时区、结束 ≥ 开始</text>
-<text x="460.0" y="621.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">活动/禁用/软删除；共享账号业务白名单</text>
-<text x="460.0" y="650.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">批量备注、全系统范围、请求摘要和错误映射</text>
+<text x="460.0" y="563.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">由原卡号重算 studentId，错配/版本错误拒绝</text>
+<text x="460.0" y="592.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">共享向量 / 前导零 / 长度编码 / 白名单</text>
+<text x="460.0" y="621.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">毫秒整数、结束 ≥ 开始、活动/禁用/软删除</text>
+<text x="460.0" y="650.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">共享账号、批量备注、请求摘要和错误映射</text>
 <text x="460.0" y="679.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Vitest；fake clock / provider，不用真实资料</text>
 <rect x="970" y="485" width="740" height="230" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="534.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">C-U · 规则与 React 组件</text>
-<text x="1340.0" y="563.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">CardReader 立即固定盐 hash，raw UID 不出模块</text>
-<text x="1340.0" y="592.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">主列表 / 设置 / 历史 / Modal 刷卡门控</text>
+<text x="1340.0" y="563.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">立即算 studentId；卡输入与学生 DTO 分离</text>
+<text x="1340.0" y="592.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">原卡号仅内存/HTTPS，无 IPC/日志/持久队列</text>
 <text x="1340.0" y="621.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">10 秒无操作取消，真实输入重置 / 后台检查</text>
 <text x="1340.0" y="650.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">结束 5 秒确认独立规则 / 一次提交门闩</text>
-<text x="1340.0" y="679.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备编辑 / 历史只读 / pin 格式 / IPC schema</text>
+<text x="1340.0" y="679.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">页面门控 / 设备编辑 / 历史只读 / pin 格式</text>
 <rect x="90" y="820" width="740" height="315" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="897.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">S-I · Fastify → Sequelize → 真实 PostgreSQL</text>
-<text x="460.0" y="926.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">并发抢同机/同学生、条件索引、行锁与迁移</text>
-<text x="460.0" y="955.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">每次刷卡刷新；取消仍保留资料；未知学生拒绝</text>
-<text x="460.0" y="984.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">历史只查内部库，历史修改/删除请求拒绝</text>
+<text x="460.0" y="926.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">哈希 PK/FK、条件索引、并发占用、行锁与迁移</text>
+<text x="460.0" y="955.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">provider 收到原卡号；错配拒绝；卡号不落库</text>
+<text x="460.0" y="984.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">每次刷卡刷新；未知拒绝；历史只查内部库</text>
 <text x="460.0" y="1013.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">响应丢失 / 重启 / intentId / 固定批量集合</text>
-<text x="460.0" y="1042.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">.env 改密重建使旧 token/密码失效，无 admin</text>
-<text x="460.0" y="1071.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">日志 ACK / 外部故障 / 数据卷持久性</text>
+<text x="460.0" y="1042.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">.env 改密失效；网关 body 无临时文件</text>
+<text x="460.0" y="1071.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">日志 ACK / 原卡号生命周期 / 数据卷持久性</text>
 <rect x="970" y="820" width="740" height="315" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="897.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">C-I · Windows 真实 Electron / SQLite / HTTPS</text>
 <text x="1340.0" y="926.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">main / preload / renderer + fake reader 完整链路</text>
-<text x="1340.0" y="955.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">真实 TLS：pin 错误不得发送密码/卡 hash/正文</text>
+<text x="1340.0" y="955.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TLS pin 错误不得发送密码/原卡号/正文</text>
 <text x="1340.0" y="984.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">证书过期/SAN 错/重定向拒绝；换 pin 清 session</text>
 <text x="1340.0" y="1013.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">OS 密码保存/清除，不可用不得回落明文</text>
-<text x="1340.0" y="1042.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">10 秒空闲 / 重启意图恢复 / 日志补传 / IPC 越权</text>
-<text x="1340.0" y="1071.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设置设备 CRUD / 历史列表 / 打包 cyez-ui 验收</text>
+<text x="1340.0" y="1042.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">刷卡不持久重放；卡号释放 / 10 秒空闲 / 补传</text>
+<text x="1340.0" y="1071.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备 CRUD / 历史 / IPC 越权 / 打包 UI 验收</text>
 <rect x="60" y="1320" width="1680" height="185" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="1374.175" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">E2E · 打包教师应用 + Docker gateway / API / PostgreSQL + FakeProvider + 合法 seed</text>
 <text x="900.0" y="1404.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">已知卡每次刷新 → 登记 → 再刷卡结束 → 设置内查历史；未知拒绝，无手动注册</text>
@@ -66,10 +66,10 @@
 <text x="460.0" y="1785.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">覆盖率不能代替实际行为与网络测试</text>
 <rect x="940" y="1610" width="800" height="220" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="1669.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">待确认的真实输入</text>
-<text x="1340.0" y="1698.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-02 API hash/lookupRef 兼容；TBD-03 USB 协议</text>
+<text x="1340.0" y="1698.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-02 API / 原卡号格式；TBD-03 USB 协议</text>
 <text x="1340.0" y="1727.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-04 Linux / TLS 叶证书 / pin 分发</text>
 <text x="1340.0" y="1756.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-06 Windows 签名；UI 使用授权已确认</text>
-<text x="1340.0" y="1785.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-07 初始合法学生与 hash 对应来源</text>
+<text x="1340.0" y="1785.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-07 初始合法学生与哈希 studentId 来源</text>
 <rect x="60" y="1935" width="1680" height="195" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="1994.175" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收</text>
 <text x="900.0" y="2024.625" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch</text>

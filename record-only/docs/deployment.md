@@ -1,6 +1,6 @@
 # Docker 部署与运维设计
 
-2026-10-29 修订，依据 [opinions.md](../opinions.md)。服务端必须容器化；本轮仍为部署契约，Dockerfile/Compose/应用尚未实现。备份、导出和管理员控制台不在本版范围。
+2026-10-29 修订，依据 [opinions.md](../opinions.md) 及后续确认的卡号临时查询/哈希学生 ID 规则。服务端必须容器化；本轮仍为部署契约，Dockerfile/Compose/应用尚未实现。备份、导出和管理员控制台不在本版范围。
 
 ![Docker 部署](docker-deployment.svg)
 
@@ -10,13 +10,13 @@
 
 | 服务 | 网络与职责 | 持久性 |
 | --- | --- | --- |
-| gateway | 非特权 Nginx，LAN 443 → 内部 8443 → api:3000；TLS、body/速率限制、固定路由、覆写转发头 | 只读证书/私钥挂载；脱敏访问日志 spool |
+| gateway | 非特权 Nginx，LAN 443 → 内部 8443 → api:3000；TLS、body/速率限制、固定路由、覆写转发头；刷卡 body 仅内存处理，禁磁盘缓冲/缓存 | 只读证书/私钥挂载；脱敏访问日志 spool |
 | api | Fastify + Sequelize/pg，非 root，只开放业务 API；唯一可访问校园 API 的业务服务 | 应用日志 spool；预览/会话内存，重启失效 |
 | db | PostgreSQL，backend 内部 5432，绝不发布 LAN 端口 | pgdata 命名卷；运行账号限必要 DML，迁移账号独立 |
 | migrate | API 同版镜像的一次性任务；Sequelize QueryInterface + Umzug 迁移，只有一个部署任务运行 | schema 版本/迁移元数据；失败阻断 API 启动 |
 | log-ingest | 内部工作进程，经 ORM 导入各来源 spool，稳定 ID 去重，持久提交后 ACK | 日志游标和未确认数据卷；无公开端口/无 Docker socket |
 
-frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 有受控外部出口。gateway/api 的同宿主内部 HTTP 限 Compose 私网，跨不可信网络需 TLS。服务端外部校园 API 始终使用正常 TLS 信任验证，与教师端 pinning 分离。
+frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 有受控外部出口。gateway/api 的同宿主内部 HTTP 限 Compose 私网，跨不可信网络需 TLS。服务端外部校园 API 始终使用正常 TLS 信任验证，与教师端 pinning 分离；原卡号仅发往运维配置的固定 provider 目的地，拒绝重定向、降级及请求中传入的任意 URL。
 
 无 backup 容器、自动导出任务、导出端点、RPO/RTO 或产品恢复承诺。运维以后确有需要，可在产品外手工导出原始表；这不成为教师功能或当前验收门禁。卷持久性和无损升级仍是应用要求，不能把不做备份解释为容器重建即可丢数据。
 
@@ -24,7 +24,7 @@ frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 
 
 教师设置页配置 IP/端口、叶证书 DER SHA-256 指纹和共享账号密码，使用专用 Electron network session 严格核对 pin、证书有效期和 IP SAN；不向系统信任库添加自签名证书。可以使用应用显式固定的自签名叶证书，私钥只在 gateway 的只读挂载。证书/指纹通过受信任运维渠道分发，不能从首次失败连接无条件接受。更换叶证书必须更新配置指纹并清理旧 session/连接缓存。
 
-口令、token 和 cardHash 必须在握手 pin 校验通过后才发送；拒绝重定向、HTTP 降级及非配置 origin。具体校验规则见[业务规格](specification.md)。真实证书、IP SAN 与发放方式为 TBD-04；校园 API 是否能以 hash/非原卡号 lookupRef 查询为 TBD-02。
+口令、token、原卡号和 studentId 必须在握手 pin 校验通过后才发送；拒绝重定向、HTTP 降级及非配置 origin。具体校验规则见[业务规格](specification.md)。真实证书、IP SAN 与发放方式为 TBD-04；校园 API 协议、认证、原卡号转换格式和字段为 TBD-02；已确定用本次原卡号查询。
 
 ## .env 与共享业务账号
 
@@ -40,10 +40,12 @@ frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 
 | 共享登录口令 | 运维 `.env` 配置，经受限宿主权限管理；不打印配置或将 env 全量放进故障报告 |
 | 其他秘密 | PostgreSQL 密码、provider 凭证、TLS 私钥使用受限文件/Compose secrets 挂载；不进镜像或构建参数 |
 | 本地保存 | IP/pin 普通配置；教师密码/token 仅 OS 加密存储，不能可用性失败后回落明文 |
-| ORM 日志 | 禁止输出绑定参数、登录/刷卡 body、cardHash 和完整 provider 响应；业务审计只存必要 ID/字段名 |
+| ORM 日志 | 禁止输出绑定参数、登录/刷卡 body、原卡号/studentId、provider 完整 URL/响应；应用日志用请求/记录 ID；内部审计可存必要 student_id FK/字段名 |
 | 数据与 spool | DB、日志卷、游标独立持久化；未 ACK 日志不自动清理；容量不足告警并停止无法审计的新写入 |
 
-Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固定盐不是秘密，但一经预置数据使用不得随意变更；无原 UID 不能重算旧 hash。合法学生预置需与 hash 规则一致，TBD-07 明确来源/格式/责任；不为此添加教师注册或导入入口。
+Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固定盐不是秘密，但一经预置数据使用不得随意变更；无原 UID 不能重算旧 hash。换盐/版本/卡改变学生主键，必须按 NEXT-01 迁移历史 FK/审计/持久结果，不能只改配置。合法学生预置只保存哈希 studentId 和档案，需与共享规则一致，TBD-07 明确来源/格式/责任；不为此添加教师注册或导入入口。
+
+刷卡请求只在 main、gateway/API、provider 适配器的短时内存中流转。gateway 对该路由禁用磁盘请求体缓冲与缓存（不能只关访问日志），上限内请求全部内存处理、超限拒绝；API 不启用原始请求录制、磁盘重试队列或响应缓存。调用完成/失败/取消后释放原卡号及 provider 响应；HTTP/ORM 错误、trace、崩溃报告不得附带正文或内存转储。未知字段不因诊断需要而持久化。
 
 ## 构建、迁移与运行
 

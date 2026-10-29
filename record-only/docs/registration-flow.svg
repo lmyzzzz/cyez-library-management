@@ -19,9 +19,9 @@
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">03 · 刷卡、登记和结束的完整流程</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">实线为事件/请求/状态流；每次提交都重新校验权限、占用和版本。教师客户端显示成功必须以服务端提交结果为准。</text>
 <rect x="60" y="155" width="500" height="150" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="310.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">① CardReader 规范化后立即 hash</text>
-<text x="310.0" y="222.87500000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">原 UID 不离开模块、不进日志</text>
-<text x="310.0" y="250.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">仅输出 scanId / cardHash / hashVersion</text>
+<text x="310.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">① CardReader 规范化并计算 studentId</text>
+<text x="310.0" y="222.87500000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定盐 SHA-256；原卡号独立短时内存</text>
+<text x="310.0" y="250.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">卡号不经 renderer IPC、不进日志</text>
 <text x="310.0" y="277.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-03：读卡协议与 UID 格式</text>
 <rect x="650" y="155" width="500" height="150" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">② 页面门控</text>
@@ -35,24 +35,24 @@
 <text x="1490.0" y="277.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不排队稍后重放</text>
 <rect x="650" y="395" width="500" height="155" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="437.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">③ main → 已 pin HTTPS /scan-previews</text>
-<text x="900.0" y="465.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">只传 cardHash，服务端记 scanAtMs</text>
-<text x="900.0" y="492.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">查内部学生；TBD-07 合法档案预置</text>
-<text x="900.0" y="520.475" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不存在即拒绝，不进入注册流程</text>
+<text x="900.0" y="465.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">card + studentId / hashVersion / scanId</text>
+<text x="900.0" y="492.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">服务端重算 ID 拒绝错配，记 scanAtMs</text>
+<text x="900.0" y="520.475" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">按重算 ID 查库；TBD-07 合法预置</text>
 <rect x="730.0" y="327.0" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="355.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">是</text>
 <rect x="1240" y="395" width="500" height="155" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1490.0" y="437.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次有效刷卡 → 校园 API 最新资料</text>
-<text x="1490.0" y="465.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：hash / 非原卡号引用查询</text>
-<text x="1490.0" y="492.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">仅更新内部已存在学生，不创建新人</text>
-<text x="1490.0" y="520.475" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">失败阻止刷卡；TBD-01 白名单</text>
+<text x="1490.0" y="437.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次有效刷卡 → 原卡号查校园 API</text>
+<text x="1490.0" y="465.375" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">查询/校验后释放；不入预览或队列</text>
+<text x="1490.0" y="492.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：协议/认证/卡号格式/身份绑定</text>
+<text x="1490.0" y="520.475" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-01 白名单；仅刷新已有合法学生</text>
 <rect x="60" y="395" width="500" height="155" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="310.0" y="439.65000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">未知 / 停用 / 外部失败 / 身份不符</text>
-<text x="310.0" y="465.75000000000006" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">不创建学生、不使用旧资料冒充刷新</text>
+<text x="310.0" y="439.65000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">未知 / 停用 / 外部失败 / 卡号 ID 错配</text>
+<text x="310.0" y="465.75000000000006" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">不创建学生；释放原卡号，无自动重放</text>
 <text x="310.0" y="491.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">显示错误，重刷或返回；无手动注册</text>
 <text x="310.0" y="517.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">已有记录可从内部列表手动结束</text>
 <rect x="650" y="640" width="500" height="120" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="679.1" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">④ 已有学生资料刷新单独提交</text>
-<text x="900.0" y="706.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">根据内部活动记录返回 start / end</text>
+<text x="900.0" y="706.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">按 studentId 返回 start/end，无原卡号</text>
 <text x="900.0" y="734.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">历史只读 DB；取消不回滚资料刷新</text>
 <rect x="60" y="865" width="780" height="185" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="450.0" y="906.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">无活动记录 → 登记页</text>

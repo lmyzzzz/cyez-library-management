@@ -1,6 +1,6 @@
 # 教师端界面与 cyez-ui 接入
 
-2026-10-29 按 [opinions.md](../opinions.md) 修订。界面库确定为 [cyez-ui](https://github.com/lmyzzzz/cyez-ui)，用户已确认取得授权。已核对上游提交 `0a1d4f4fa9affecb2eaf83e978c1e9b1557c7043` 的包入口；最终页面由本项目实现和测试。
+2026-10-29 按 [opinions.md](../opinions.md) 及后续卡号/学生 ID 分离确认修订。界面库确定为 [cyez-ui](https://github.com/lmyzzzz/cyez-ui)，用户已确认取得授权。已核对上游提交 `0a1d4f4fa9affecb2eaf83e978c1e9b1557c7043` 的包入口；最终页面由本项目实现和测试。
 
 ![界面结构](teacher-ui.svg)
 
@@ -37,7 +37,7 @@ AppShell 显示产品名、服务器连接/认证状态、数据更新时间，�
 
 登记空闲时钟从资料就绪开始，用单调时钟判断；本页和 DevicePicker 的可信活动重置，轮询/动画/合成事件/重复读卡不重置。后台也计空闲，到期只取消；回前台先退出过期页再接新操作。提交中不再执行空闲取消，不把页面退出当撤销请求。刷卡结束自动确认则在失焦/编辑时暂停，恢复需要明确动作；单结束/批量从不自动确认。
 
-preload 仅提供限定业务动作与刷卡元数据，renderer 不接收原 UID、token 或可直接发任意 URL 的函数。连接测试、pin 校验、密码保存和网络都在 main；同一业务 API 访问范围由服务端再次约束。设置/历史/设备编辑收到刷卡只 Toast，不查询外部、不存队列、不改变正在编辑的设备。
+preload 仅提供限定业务动作与刷卡元数据，renderer 不接收原 UID、token 或可直接发任意 URL 的函数。StudentDTO 的 id 是卡号加盐哈希，只作业务关联，不在诊断或日志显示。CardScanInput 与学生资料分开，只在 main/服务端本次请求使用原卡号，校园 API 查询完成或失败后释放；不建立卡号展示/编辑/查询页。连接测试、pin 校验、密码保存和网络都在 main；同一业务 API 访问范围由服务端再次约束。设置/历史/设备编辑收到刷卡只 Toast，不查询外部、不存队列、不改变正在编辑的设备。
 
 ## 包与 Yarn 工作区边界
 
@@ -51,7 +51,7 @@ preload 仅提供限定业务动作与刷卡元数据，renderer 不接收原 UI
 
 上游 pnpm 项目尚未在 npm 发布包，采用构建 tarball。实施时由受信任构建流程在固定上游提交构建并产出 `series-ui-0.1.0.tgz` 与 `series-electron-0.1.0.tgz`，记录源 commit、校验和与 LICENSE/NOTICE；项目通过受控制品或 `vendor/` 固定包消费，Yarn lockfile 记录校验。不能把 GitHub repo URL 当已构建 npm 包，不从浮动 main 在线安装生产依赖。
 
-本项目内部依赖继续使用 `workspace:^`，UI 封装包可对外部 tarball 使用 `file:` 依赖；适配包构建不复制业务逻辑。上游采用 pnpm 不要求消费项目改 pnpm，本项目只保留一个 Yarn lockfile。消费验收必须从干净目录安装、构建、检查单份 React、验证 preload 分离与打包运行，而非引用上游 node_modules 的偶然依赖。
+本项目内部依赖继续使用 `workspace:^`，UI 封装包可对外部 tarball 使用 `file:` 依赖；适配包构建不复制业务逻辑。`packages/protocol` 定义分离的 CardScanInput/StudentDTO schema 与 studentId 编码/哈希函数，由 main、server 和 seed 共用；固定盐值由部署配置注入，renderer 不调用读卡/哈希入口，也不接收原卡号。上游采用 pnpm 不要求消费项目改 pnpm，本项目只保留一个 Yarn lockfile。消费验收必须从干净目录安装、构建、检查单份 React、验证 preload 分离与打包运行，而非引用上游 node_modules 的偶然依赖。
 
 在 renderer 保持 `sandbox=true`、`contextIsolation=true`、`nodeIntegration=false`；preload 仅暴露刷卡订阅、受控业务动作、必要窗口功能和日志接口。main 负责认证及网络，服务端承担业务最终判断。页面不允许任意外部导航、新窗口或直接校园卡 API 请求；UI 更新不能扩大 IPC 权限。
 

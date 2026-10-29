@@ -2,7 +2,7 @@
 
 **当前优先阶段：刷卡登记版（record-only）正式设计。** 最新草图已整理为[需求与业务规格](record-only/docs/specification.md)、[技术决策与依据](record-only/docs/decisions.md)、[Docker 部署](record-only/docs/deployment.md)、[两端测试计划](record-only/docs/testing.md)和 [cyez-ui 接入](record-only/docs/ui.md)。当前尚未实现应用。
 
-这一阶段由教师 Electron、Docker 化 Fastify/Sequelize 服务端和 PostgreSQL 组成，处理刷卡登记、设备分配与使用记录；业务判断在服务端，界面采用已授权的 [cyez-ui](https://github.com/lmyzzzz/cyez-ui)，工程使用现代 Yarn 4 workspaces。2026-10-29 已按 [opinions.md](record-only/opinions.md) 修订：共享业务账号、证书指纹 HTTPS、刷卡立即哈希并刷新已有学生资料、10 秒无操作取消，设置内提供设备编辑及只读历史。
+这一阶段由教师 Electron、Docker 化 Fastify/Sequelize 服务端和 PostgreSQL 组成，处理刷卡登记、设备分配与使用记录；业务判断在服务端，界面采用已授权的 [cyez-ui](https://github.com/lmyzzzz/cyez-ui)，工程使用现代 Yarn 4 workspaces。2026-10-29 已按 [opinions.md](record-only/opinions.md) 及后续确认修订：共享业务账号、证书指纹 HTTPS、10 秒无操作取消，设置内提供设备编辑及只读历史。卡号与学生资料分开，学生 ID 直接采用卡号固定盐哈希；原卡号仅在本次 HTTPS 请求中供服务端查询校园 API，查询后释放、不落库，每次有效刷卡刷新已有学生资料。
 
 - [刷卡登记版设计入口](record-only/README.md)
 - [八页正式图册与维护说明](record-only/docs/diagrams.md)

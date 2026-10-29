@@ -1,6 +1,6 @@
 # 服务端与客户端测试设计
 
-2026-10-29 按 [opinions.md](../opinions.md) 修订。**两端各自必须具备单元测试和集成测试。** 当前尚未实现应用，下述是待实现/待运行验收清单，不能把文档图表校验算作产品测试通过。
+2026-10-29 按 [opinions.md](../opinions.md) 及后续卡号临时查询/哈希学生 ID 确认修订。**两端各自必须具备单元测试和集成测试。** 当前尚未实现应用，下述是待实现/待运行验收清单，不能把文档图表校验算作产品测试通过。
 
 ![测试与 CI](testing-pipeline.svg)
 
@@ -8,7 +8,7 @@
 
 | 层 | 对象及真实边界 | 工具与环境 |
 | --- | --- | --- |
-| S-U 服务端单元 | hash 协议校验、资料白名单、时间/备注/规则、共享认证、业务 DTO 白名单 | Vitest，假时钟/ID/provider；不用生产资料 |
+| S-U 服务端单元 | studentId 重算与卡号绑定、资料白名单、时间/备注/规则、共享认证、业务 DTO 白名单 | Vitest，假时钟/ID/provider；不用生产资料 |
 | S-I 服务端集成 | Fastify 路由 → 服务 → Sequelize 模型/事务 → **真实 PostgreSQL**，migration/索引/行锁 | inject + 临时 PG；另起实际 gateway/TLS 进行网络测试 |
 | C-U 客户端单元/组件 | CardReader 立即 hash、页面门控、空闲/自动确认计时、设备/历史/设置组件、pin 输入规范化 | Vitest + Testing Library，fake reader/clock/network |
 | C-I 客户端集成 | **真实 Electron** main/preload/renderer，实际 SQLite、临时 userData、OS 保存、真实 HTTPS/pin | Windows + 固定 Playwright Electron（实验性），FakeCardReader，可控 HTTPS 服务和测试证书 |
@@ -21,7 +21,7 @@
 
 | ID | 场景 | 关键断言 |
 | --- | --- | --- |
-| S-U-01 | cardHash/hashVersion/发行方、schema 和敏感数据 | 只接受规范 hash，不接收原 UID；白名单响应不暴露 hash/lookupRef/密码；日志无敏感字段 |
+| S-U-01 | studentId/hashVersion/发行方、原卡号与 schema | 共享向量重算得到同一 64 位 hex；错误 ID/版本拒绝且不调用 provider；StudentDTO 仅 id/白名单资料，无原卡号/盐/密码；校验错误不回显请求 |
 | S-U-02 | 毫秒安全整数、结束 ≥ 开始、区间边界 | null/时区/负时长处理正确，等值边界可用 |
 | S-U-03 | 活动/禁用/软删除、全系统范围 | 已删除不可分配，禁用不隐式结束；所有合法教师可操作任意设备，无 admin/机房条件 |
 | S-U-04 | 批量备注、摘要、资料白名单 | 公共备注空保留，非空精确追加；同键异 payload 拒绝；额外资料不落库 |
@@ -33,31 +33,33 @@
 | S-I-06 | 两次已知学生刷卡，历史重复查询 | 每次有效刷卡调用 provider 并更新已有资料；历史展示最新 DB 值，查询 provider 调用计数不增加；取消预览不撤销刷新 |
 | S-I-07 | 未知学生、provider 故障/额外字段/身份不符 | 未知即拒绝，无学生 insert 或手动注册；外部成功也不放行；失败不覆盖旧档案、不允许旧数据刷卡提交；手动结束可继续 |
 | S-I-08 | 共享账号、任意设备、业务外端点 | 合法同账号两端可用全设备；无 admin/学生注册/导出/运维/任意表接口；401/413/422/429 明确 |
-| S-I-09 | 日志 ACK 丢失/DB 不可写/ORM 日志输出 | 稳定 ID 去重，提交后 ACK；参数/body/hash/密码不进入日志；教师不能读取服务器日志 |
+| S-I-09 | 日志 ACK 丢失/DB 不可写/ORM 日志输出 | 稳定 ID 去重，提交后 ACK；参数/body/原 UID/studentId/密码不进入 app_logs；审计只保留必要 student_id FK/字段名；教师不能读取服务器日志 |
 | S-I-10 | 空库 ORM migration、已有数据升级、失败迁移/重建 | 条件索引/FK/迁移版本正确，失败阻断 ready，卷数据不丢；生产不使用 sync force/alter，无备份导出要求 |
 | S-I-11 | preview 换键/并发消费/重启/后来再次空闲 | intentId 只成功消费一次，同键返回原结果，批次单元分别幂等 |
 | S-I-12 | 旧刷卡时间、资料刷新并发/乱序 | 重叠时间拒绝；同学生刷新串行，旧响应不能覆盖新资料，preview 版本变化明确冲突 |
 | S-I-13 | .env 改密与 API 重建 | 新密码生效、旧密码和旧 token 拒绝；无在线改密/admin；日志保留到重新认证后补传 |
+| S-I-14 | 原卡号 → API、学生哈希 PK/FK、内存生命周期 | FakeProvider 实际收到无损原卡号（含前导零），不是哈希；错配 ID 不更新任何学生；PG/SQLite/spool/operations 无原卡号，预览无 card；成功/错误/超时/取消清理；真实 gateway 不产生 body 临时文件；PK/FK 同为 STRING(64)，拒绝孤儿关联 |
 
 ## 客户端矩阵
 
 | ID | 场景 | 关键断言 |
 | --- | --- | --- |
 | C-U-01 | 主列表/设置/历史/Modal/提交中刷卡 | 只有合格主列表请求 preview；其他只 Toast，无 provider 请求或排队重放 |
-| C-U-02 | reader 立即 hash、跨客户端、前导零/长度/字节序 | 固定测试向量一致；原 UID 不出 adapter、不经 IPC/HTTP/日志/SQLite；重复 scan 合并 |
+| C-U-02 | reader 立即 hash、跨客户端/服务端/seed、前导零/长度/字节序 | 相同规范卡号得相同 studentId；不同盐/版本/发行方有明确隔离；CardScanInput 独立于 StudentDTO；原卡号仅内存/HTTPS，不进 IPC/日志/SQLite；重复 scan 合并 |
 | C-U-03 | 10 秒无操作，9.9 秒输入，持续编辑，后台/唤醒 | 真实活动重置；轮询/合成事件不重置；后台返回先清过期；只取消不提交；提交后不触发空闲取消 |
 | C-U-04 | 结束页 5 秒确认/编辑失焦、按钮竞争 | 自动提交暂停并需显式恢复；仅一次动作；手动/批量 Modal 从不自动确认 |
 | C-U-05 | 设置/设备/历史组件，pin 输入 | 两个一级入口正确；历史无编辑删除导出；pin 规范化长度正确，错误清晰；设备状态不可误选 |
 | C-I-01 | 真实 Electron/cyez-ui/窗口/路由 | 独立 userData、单份 React、沙箱与隔离开启，无旧仓库路径 |
-| C-I-02 | fake reader → main → preload → renderer | adapter 立即 hash；主页面门控真实生效；设置/历史不跳转；订阅不泄漏 |
+| C-I-02 | fake reader → main → preload → renderer | adapter 立即计算 studentId；main 以临时 card 数据请求 HTTPS，renderer 仅收学生 DTO；主页面门控生效，拒绝事件释放卡号；订阅不泄漏 |
 | C-I-03 | 断网/超时/会话失效/空闲边界 | 不显示虚假成功，原键恢复；后台过期登记不复活，结束页恢复不偷提交 |
 | C-I-04 | 提交后 kill Electron、重启/换服务器 | SQLite 意图恢复，查询原结果；不存 UID/hash；旧服务器意图绝不发给新 origin |
 | C-I-05 | 日志重启/断网/ACK 丢失/磁盘失败 | 全部日志持久补传和去重；未确认不删；记录不了就明确报错 |
 | C-I-06 | IPC 越权/任意 URL/导航与窗口来源伪装 | sender/schema 拒绝；renderer 无原始凭证/任意网络或系统权限 |
 | C-I-07 | 干净 tarball 消费与打包 Windows 应用 | 单份依赖、main/preload 分包、可执行文件运行；上游测试不计本项目通过 |
 | C-I-08 | 设备 CRUD/删除占用/历史视觉交互 | 编辑冲突、删除确认和软删除；历史筛选/分页/固定表头/详情抽屉/空态/窄窗口/键盘可用，历史读取无 provider 调用 |
-| C-I-09 | 实际 HTTPS pin 正负例与证书更换 | 正确自签名 pin 无系统导入可用；错误 pin（包括系统信任证书）、过期、SAN 错、重定向/HTTP 都拒绝；服务端证实失败握手后未收到密码/cardHash/body |
+| C-I-09 | 实际 HTTPS pin 正负例与证书更换 | 正确自签名 pin 无系统导入可用；错误 pin（包括系统信任证书）、过期、SAN 错、重定向/HTTP 都拒绝；服务端证实失败握手后未收到密码/原卡号/studentId/body |
 | C-I-10 | 保存密码/清除/不可用/改 IP 或 pin | OS 加密文件不含明文；加密不可用不回落明文；清除生效；新 session 不复用旧校验缓存，重新认证 |
+| C-I-11 | 刷卡失败/取消/重启、普通提交重试边界 | 刷卡不进持久队列、不自动重放；重新刷卡才再次查 provider；main/renderer 错误、trace/日志无原卡号；内存请求引用释放后无应用级缓存，不宣称能证明 GC 物理擦除 |
 
 ## 联调与门禁
 
@@ -67,4 +69,4 @@ CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服
 
 实施时创建根 Yarn 调度脚本 `test:unit:server/client` 与 `test:integration:server/client`；当前无这些脚本，不宣称已运行。两端分别 lines/statements/functions ≥85%、branches ≥80%；身份/占用/幂等/pin/计时/资料刷新/备注关键模块 branches ≥90%。阈值为项目门禁；生成代码和第三方库明确排除，不能排除失败路径凑覆盖率。
 
-全部矩阵场景是完成标准。P0 包括 S-I-01～05、07～13、C-U-01～04、C-I-03～06、09～10 及完整联调；不能静默跳过标绿，flaky 重试也报告。TBD-02/03/04/06/07 的真实输入缺失用例标 blocked，模拟通过不等于硬件已验证。产品不验收备份、导出、历史编辑/删除或管理员功能；这些接口必须不存在或拒绝访问。
+全部矩阵场景是完成标准。P0 包括 S-I-01～05、07～14、C-U-01～04、C-I-03～06、09～11 及完整联调；不能静默跳过标绿，flaky 重试也报告。TBD-02/03/04/06/07 的真实输入缺失用例标 blocked，模拟通过不等于硬件已验证。产品不验收备份、导出、历史编辑/删除或管理员功能；这些接口必须不存在或拒绝访问。

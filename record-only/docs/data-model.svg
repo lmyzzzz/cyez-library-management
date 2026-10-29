@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1920" viewBox="0 0 1800 1920" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2120" viewBox="0 0 1800 2120" role="img" aria-labelledby="title desc">
 <title id="title">02 · 数据模型、关系与一致性约束</title><desc id="desc">实线从外键引用方指向被引用方，边旁写明基数；虚线为约束/算法说明。活动占用只从 usage_records 派生。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1800" height="1920" fill="#ffffff"/>
+<rect width="1800" height="2120" fill="#ffffff"/>
 <rect x="60" y="1150" width="1680" height="310" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="1311.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
 <polyline points="650,280 560,280" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
@@ -11,21 +11,23 @@
 <polyline points="900,405 900,500" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
 <polyline points="1710,845 1770,845 1770,365 1740,365" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <polyline points="1240,935 1150,935" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
-<polyline points="310,745 310,845" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polyline points="60,950 30,950 30,280 60,280" fill="none" stroke="#475569" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">02 · 数据模型、关系与一致性约束</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">实线从外键引用方指向被引用方，边旁写明基数；虚线为约束/算法说明。活动占用只从 usage_records 派生。</text>
 <rect x="60" y="160" width="500" height="245" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="310.0" y="231.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">students · 预置合法档案</text>
-<text x="310.0" y="260.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PK id / UNIQUE card_hash / hash_version</text>
-<text x="310.0" y="289.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">可选 provider_lookup_ref / is_enabled</text>
-<text x="310.0" y="318.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">profile_refreshed_at / version</text>
-<text x="310.0" y="347.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-01：姓名、班级、校内学号</text>
+<text x="310.0" y="217.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">students · 预置合法档案</text>
+<text x="310.0" y="246.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PK id = 固定盐 SHA-256 / STRING(64)</text>
+<text x="310.0" y="275.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">hash_version / is_enabled</text>
+<text x="310.0" y="304.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">profile_refreshed_at / version</text>
+<text x="310.0" y="333.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">无原卡号 / card_hash / lookupRef</text>
+<text x="310.0" y="362.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-01：姓名、班级、校内学号</text>
 <rect x="650" y="160" width="500" height="245" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="231.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">usage_records · 一次使用一条</text>
-<text x="900.0" y="260.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PK id / FK student_id / FK device_id</text>
-<text x="900.0" y="289.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">started_at / ended_at nullable</text>
-<text x="900.0" y="318.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">notes / end_reason / version</text>
-<text x="900.0" y="347.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">clientId / timestamps；结束后只读</text>
+<text x="900.0" y="217.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">usage_records · 一次使用一条</text>
+<text x="900.0" y="246.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">UUID PK id / UUID FK device_id</text>
+<text x="900.0" y="275.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">FK student_id STRING(64) → students.id</text>
+<text x="900.0" y="304.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">started_at / ended_at nullable</text>
+<text x="900.0" y="333.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">notes / end_reason / version / clientId</text>
+<text x="900.0" y="362.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">结束后只读；无原卡号</text>
 <rect x="1240" y="160" width="500" height="245" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="231.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">devices · 设备资源</text>
 <text x="1490.0" y="260.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PK id / unique code / display_name</text>
@@ -36,10 +38,10 @@
 <text x="1195.0" y="238.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">N : 1</text>
 <rect x="60" y="500" width="500" height="245" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="310.0" y="571.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">合法档案预置 · TBD-07</text>
-<text x="310.0" y="600.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">来源 / 格式 / hash 与查询标识对应</text>
-<text x="310.0" y="629.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">产品外受控 ORM seed，不是教师功能</text>
-<text x="310.0" y="658.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">未知 hash 即非法，不自动插入学生</text>
-<text x="310.0" y="687.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">外部 API 有此学生也不能放行</text>
+<text x="310.0" y="600.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">合法学生 / 哈希 studentId 来源与格式</text>
+<text x="310.0" y="629.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">与客户端、服务端共用规范化/哈希协议</text>
+<text x="310.0" y="658.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">产品外受控 ORM seed；无原卡号落库</text>
+<text x="310.0" y="687.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">未知 ID 即非法，API 成功也不能放行</text>
 <rect x="650" y="500" width="500" height="245" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="571.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">一致性约束 · ORM 声明与事务</text>
 <text x="900.0" y="600.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">活动 = ended_at 为空</text>
@@ -53,11 +55,11 @@
 <text x="425.0" y="455.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">受控预置</text>
 <text x="1600.0" y="455.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">业务规则</text>
 <rect x="60" y="845" width="500" height="210" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="310.0" y="901.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">CardReader 内 SHA-256 固定盐哈希</text>
-<text x="310.0" y="929.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">hashVersion / salt / issuer / UID 长度字节</text>
-<text x="310.0" y="956.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">立即处理；原 UID 不出模块、不落盘</text>
-<text x="310.0" y="984.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">所有终端与预置工具使用同一协议</text>
-<text x="310.0" y="1011.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不能由旧 hash 重算新盐后的 hash</text>
+<text x="310.0" y="901.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">CardScanInput · 不是持久实体</text>
+<text x="310.0" y="929.0999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">card: { issuer, uidHex } 仅短时内存</text>
+<text x="310.0" y="956.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">main → HTTPS → API → provider</text>
+<text x="310.0" y="984.1999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">查询完成/失败即释放原卡号</text>
+<text x="310.0" y="1011.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不进学生档案 / 预览 / 日志 / 磁盘</text>
 <rect x="650" y="845" width="500" height="180" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="898.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">tags · 平面标签</text>
 <text x="900.0" y="927.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">PK id / normalized_name UNIQUE</text>
@@ -69,6 +71,7 @@
 <text x="1490.0" y="956.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">反向索引 (tag_id, device_id)</text>
 <text x="1490.0" y="985.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备 DTO 的 tagIds 由此投影</text>
 <text x="1195.0" y="895.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">N : 1</text>
+<text x="310.0" y="798.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">卡号仅作临时输入；以哈希关联学生</text>
 <text x="1555.0" y="769.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">关联表 → 设备：N : 1</text>
 <text x="900.0" y="1190.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">业务提交与可追踪性 · 逻辑关联使用对象 ID，业务更新与审计/操作结果同事务</text>
 <rect x="85" y="1230" width="510" height="180" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -78,16 +81,16 @@
 <text x="340.0" y="1354.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">路由 / payload 摘要 / 持久结果</text>
 <text x="340.0" y="1381.7500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">重登后仍可查原提交</text>
 <rect x="645" y="1230" width="510" height="180" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1271.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">audit_events · 内部追加写入</text>
-<text x="900.0" y="1299.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">共享账号 / clientId / requestId</text>
-<text x="900.0" y="1326.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">对象 ID / batchId / 时间 / 动作</text>
-<text x="900.0" y="1354.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">只记必要 ID 与字段名</text>
-<text x="900.0" y="1381.7500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">教师不能查询服务器审计表</text>
+<text x="900.0" y="1271.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">audit_events · 受限内部审计</text>
+<text x="900.0" y="1299.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">共享账号 / clientId / requestId / 时间</text>
+<text x="900.0" y="1326.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">必要时 student_id STRING(64) FK</text>
+<text x="900.0" y="1354.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无原卡号，仅必要对象 ID 与字段名</text>
+<text x="900.0" y="1381.7500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">与资料/业务更新同事务；教师不可查</text>
 <rect x="1205" y="1230" width="510" height="180" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1460.0" y="1271.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">app_logs · 全部来源日志</text>
-<text x="1460.0" y="1299.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">认证 source + logId UNIQUE</text>
-<text x="1460.0" y="1326.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">level / 时间 / 脱敏关联信息</text>
-<text x="1460.0" y="1354.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">持久提交后 ACK；不开放教师查询</text>
+<text x="1460.0" y="1299.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">source + logId UNIQUE；提交后 ACK</text>
+<text x="1460.0" y="1326.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">requestId / scanId / recordId 关联</text>
+<text x="1460.0" y="1354.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无原卡号 / studentId / 完整响应</text>
 <text x="1460.0" y="1381.7500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-05：保留与产品外清理</text>
 <rect x="60" y="1520" width="800" height="230" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="1584.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">历史记录 · 只读内部库</text>
@@ -96,11 +99,16 @@
 <text x="460.0" y="1671.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">无编辑 / 删除 / 导出；软删除设备仍可显示历史</text>
 <text x="460.0" y="1700.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-01：字段；TBD-05：留存</text>
 <rect x="920" y="1520" width="820" height="230" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1330.0" y="1584.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">NEXT-01 · 跨卡迁移延期</text>
-<text x="1330.0" y="1613.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">新卡无预置合法记录就拒绝，不按姓名班级合并</text>
-<text x="1330.0" y="1642.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">固定盐哈希不防低熵枚举或克隆卡，不能当认证凭证</text>
-<text x="1330.0" y="1671.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Sequelize + pg / QueryInterface + Umzug；不手写 SQL</text>
-<text x="1330.0" y="1700.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">JSON 毫秒整数；DB timestamptz</text>
-<rect x="40" y="1848" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="1877.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">可分配 = 未软删除 + 未禁用 + 无活动记录；固定盐 hash 不等于不可枚举或不可克隆，不作为认证秘密。</text>
+<text x="1330.0" y="1584.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">NEXT-01 · 跨卡 / 换盐迁移延期</text>
+<text x="1330.0" y="1613.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">换卡/盐/版本会改变 studentId 主键</text>
+<text x="1330.0" y="1642.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">需要新旧映射，迁移历史 FK / 审计 / 持久结果</text>
+<text x="1330.0" y="1671.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">旧 hash 不能反算新 hash，新卡无预置即拒绝</text>
+<text x="1330.0" y="1700.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">固定盐哈希不防枚举/克隆，不是认证秘密</text>
+<rect x="60" y="1810" width="1680" height="165" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1856.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">身份协议与临时卡号生命周期</text>
+<text x="900.0" y="1885.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">studentId = 小写 hex(SHA-256(版本 / 固定盐 / 发行方 / UID 的有长度字节编码))</text>
+<text x="900.0" y="1914.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">客户端 / 服务端 / seed 共用协议；服务端由原卡号重算，不能让一个学生 ID 绑定另一张卡</text>
+<text x="900.0" y="1943.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">原卡号仅本次 HTTPS 查询；成功、失败、取消、超时均释放，不进入预览或离线重试</text>
+<rect x="40" y="2048" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2077.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">可分配 = 未软删除 + 未禁用 + 无活动记录；固定盐 hash 不等于不可枚举或不可克隆，不作为认证秘密。</text>
 </svg>

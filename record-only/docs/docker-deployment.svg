@@ -21,15 +21,15 @@
 <text x="420.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">IP / 端口 / SHA-256 叶证书指纹 / 共享账号密码</text>
 <text x="420.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">应用内 pin 后才发 HTTPS，不改系统证书库</text>
 <rect x="1020" y="155" width="720" height="145" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">校园卡 API · 每次有效刷卡最新资料</text>
-<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">服务端独占凭证，外部链路正常 TLS 校验</text>
-<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-02：hash / lookupRef 兼容、字段与限额</text>
+<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">校园卡 API · 本次原卡号查询，用后释放</text>
+<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">固定 HTTPS 目的地，正常 TLS，拒绝重定向</text>
+<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-02：协议、认证、原卡号格式与字段</text>
 <text x="900.0" y="460.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">Compose 项目 · frontend / backend 网络隔离 · 不发布 PostgreSQL 端口</text>
 <rect x="100" y="530" width="430" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">gateway · Nginx 非特权容器</text>
 <text x="315.0" y="605.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">宿主 443 → 容器 8443</text>
-<text x="315.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TLS / body 上限 / 限速</text>
-<text x="315.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">覆写代理头 / 访问日志脱敏</text>
+<text x="315.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TLS / body 上限 / 限速 / 日志脱敏</text>
+<text x="315.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">刷卡 body 禁磁盘缓冲与缓存</text>
 <rect x="650" y="530" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">api · Fastify / Sequelize</text>
 <text x="900.0" y="605.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">内部 :3000 / 非 root / 单实例</text>
@@ -67,8 +67,8 @@
 <text x="900.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定镜像版本与 digest，SIGTERM 排空</text>
 <rect x="1270" y="1090" width="430" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1485.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生预置 · TBD-07</text>
-<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">合法档案 / hash / 可选 lookupRef</text>
-<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">产品外受控 ORM seed</text>
+<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">合法档案 / 哈希 studentId</text>
+<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">产品外受控 ORM seed，无原卡号</text>
 <text x="1485.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">没有教师注册、备份或导出服务</text>
 <text x="900.0" y="1337.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">frontend：gateway 与 api；backend：api / db / migrate / log-ingest</text>
 <text x="900.0" y="1365.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同宿主受控网络内部 HTTP；跨不可信网络改为 TLS。容器重启不能代替业务恢复和数据库迁移。</text>
