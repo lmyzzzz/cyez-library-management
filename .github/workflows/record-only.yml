@@ -56,9 +56,9 @@ jobs:
           path: record-only/coverage/server
 
   windows-client:
-    runs-on: windows-latest
+    runs-on: windows-2025
     env:
-      TEST_DATABASE_URL: postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test
+      TEST_DATABASE_URL: postgres://cyez_test:integration-only@127.0.0.1:5432/cyez_test
     defaults:
       run:
         working-directory: record-only
@@ -72,12 +72,20 @@ jobs:
       - name: Start isolated PostgreSQL
         shell: pwsh
         run: |
-          choco install postgresql17 --no-progress --yes --params '/Password:integration-only /Port:55432'
-          $psql = 'C:\Program Files\PostgreSQL\17\bin\psql.exe'
-          $env:PGPASSWORD = 'integration-only'
-          & $psql -h 127.0.0.1 -p 55432 -U postgres -c "CREATE ROLE cyez_test WITH LOGIN CREATEDB PASSWORD 'integration-only'"
+          Set-Service postgresql-x64-17 -StartupType Manual
+          Start-Service postgresql-x64-17
+          $psql = Join-Path $env:PGBIN 'psql.exe'
+          $ready = Join-Path $env:PGBIN 'pg_isready.exe'
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            & $ready -h 127.0.0.1 -p 5432 -U postgres | Out-Null
+            if ($LASTEXITCODE -eq 0) { break }
+            Start-Sleep -Seconds 1
+          }
+          if ($LASTEXITCODE -ne 0) { throw 'POSTGRES_NOT_READY' }
+          $env:PGPASSWORD = 'root'
+          & $psql -h 127.0.0.1 -p 5432 -U postgres -c "CREATE ROLE cyez_test WITH LOGIN CREATEDB PASSWORD 'integration-only'"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & $psql -h 127.0.0.1 -p 55432 -U postgres -c "CREATE DATABASE cyez_test OWNER cyez_test"
+          & $psql -h 127.0.0.1 -p 5432 -U postgres -c "CREATE DATABASE cyez_test OWNER cyez_test"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - run: yarn install --immutable
       - run: yarn build:shared
