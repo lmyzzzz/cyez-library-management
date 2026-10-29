@@ -1,109 +1,154 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2220" viewBox="0 0 1800 2220" role="img" aria-labelledby="title desc">
-<title id="title">06 · 教师界面结构与交互细节</title><desc id="desc">正式结构线框图：以 cyez-ui 实现主题、导航、表单和 Modal；数字与设备名仅作示意，最终学生字段仍待定。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2760" viewBox="0 0 1800 2760" role="img" aria-labelledby="title desc">
+<title id="title">06 · 教师界面：使用登记与设置</title><desc id="desc">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口，设置内含连接、设备、历史和诊断。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
-<rect width="1800" height="2220" fill="#ffffff"/>
-<rect x="60" y="150" width="1680" height="690" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="501.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<rect x="60" y="1015" width="520" height="775" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="320.0" y="1408.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<rect x="640" y="1015" width="520" height="775" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1408.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<rect x="1220" y="1015" width="520" height="775" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1480.0" y="1408.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
-<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">06 · 教师界面结构与交互细节</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">正式结构线框图：以 cyez-ui 实现主题、导航、表单和 Modal；数字与设备名仅作示意，最终学生字段仍待定。</text>
-<text x="900.0" y="190.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">A · 设备列表主页面 · 唯一接收刷卡自动跳转的页面</text>
-<rect x="90" y="230" width="1620" height="70" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="272.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">图书馆登记   |   当前账号 / 角色   |   有权机房范围   |   在线 / 离线   |   数据更新时间</text>
-<rect x="90" y="330" width="260" height="450" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="220.0" y="446.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">导航</text>
-<text x="220.0" y="475.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备列表</text>
-<text x="220.0" y="504.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">使用记录</text>
-<text x="220.0" y="533.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">学生管理</text>
-<text x="220.0" y="562.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备 / 标签</text>
-<text x="220.0" y="591.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">账号与机房</text>
-<text x="220.0" y="620.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设置 / 诊断</text>
-<text x="220.0" y="649.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d"></text>
-<text x="220.0" y="678.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">管理入口按角色显示</text>
-<rect x="390" y="330" width="1320" height="80" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1050.0" y="377.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">使用中  |  未使用     机房 ▼   标签 ▼   搜索   刷新     结束选中…   结束全部记录…</text>
-<rect x="390" y="440" width="1320" height="230" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1050.0" y="504.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">选择    设备 / 机房 / 标签     学生摘要     开始时间 / 时长     备注     操作</text>
-<text x="1050.0" y="533.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">□        A-001 / 图书馆       当前资料       10:20 / 18 分钟       查看     手动结束…</text>
-<text x="1050.0" y="562.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">□        A-002 / 图书馆       当前资料       10:25 / 13 分钟       编辑…    手动结束…</text>
-<text x="1050.0" y="591.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">使用中且禁用：仍显示占用，同时标注“已禁用，不可再次分配”</text>
-<text x="1050.0" y="620.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">未使用选项卡：空闲可分配与禁用明确区分，状态不只使用颜色</text>
-<rect x="390" y="700" width="1320" height="80" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1050.0" y="747.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">已选条数 / 总条数 · 分页     |     断线保留过期视图，禁用业务写入，恢复后刷新</text>
-<rect x="60" y="865" width="1680" height="60" rx="10" fill="#fff4dc" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="902.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">刷卡门控：主页面 + 无 Modal + 无提交 + 无 scan 处理中；其余场景只 Toast，要求回主页面重新刷卡。</text>
-<text x="320.0" y="1055.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">B · 登记页 / 刷卡结束页</text>
-<rect x="85" y="1100" width="470" height="150" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="320.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">StudentSummary</text>
-<text x="320.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">姓名 / 班级 / 校内学号：候选</text>
-<text x="320.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-01：最终字段与必填项</text>
-<text x="320.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知学生仅补充允许的字段</text>
-<rect x="85" y="1285" width="470" height="110" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="320.0" y="1319.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">时间与备注</text>
-<text x="320.0" y="1346.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">开始：本次刷卡时间，备注可空</text>
-<text x="320.0" y="1374.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">结束：原开始/本次结束，已有备注</text>
-<rect x="85" y="1430" width="470" height="105" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="320.0" y="1461.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">登记：打开 DevicePicker →</text>
-<text x="320.0" y="1489.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">结束：固定设备 / recordId / version</text>
-<text x="320.0" y="1516.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不自动替换成另一条新记录</text>
-<rect x="85" y="1570" width="470" height="175" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="320.0" y="1609.0500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">取消   |   确认</text>
-<text x="320.0" y="1636.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">登记：5 秒后自动取消</text>
-<text x="320.0" y="1664.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡结束：5 秒后自动确认</text>
-<text x="320.0" y="1691.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">编辑/失焦暂停；回前台显式继续</text>
-<text x="320.0" y="1719.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">资料缺失/未选设备不可确认</text>
-<text x="900.0" y="1055.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">C · DevicePicker · 可搜索分页</text>
-<rect x="665" y="1100" width="470" height="75" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1144.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">机房 / 标签 / 搜索 / 状态筛选</text>
-<rect x="665" y="1220" width="470" height="105" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1251.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">○ A-003 · 空闲 · 可选择</text>
-<text x="900.0" y="1279.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">显示设备名、机房、标签</text>
-<text x="900.0" y="1306.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">选择状态明确，键盘可操作</text>
-<rect x="665" y="1370" width="470" height="140" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1405.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">A-004 · 使用中 · 不可直接选</text>
-<text x="900.0" y="1432.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">[结束占用…] → 独立确认 Modal</text>
-<text x="900.0" y="1460.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提交成功 → 刷新；释放晚于刷卡须重刷</text>
-<text x="900.0" y="1487.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">登记和结束是两个明确动作</text>
-<rect x="665" y="1555" width="470" height="105" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1586.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">A-005 · 禁用 · 不可选</text>
-<text x="900.0" y="1614.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">显示原因，不与空闲混淆</text>
-<text x="900.0" y="1641.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提交时服务端再次检查</text>
-<text x="900.0" y="1723.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">没有可分配设备 → 提示并禁用确认</text>
-<text x="1480.0" y="1055.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">D · 手动 / 批量结束 Modal</text>
-<rect x="1245" y="1100" width="470" height="140" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1480.0" y="1135.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">手动单结束</text>
-<text x="1480.0" y="1162.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">复用结束页表单，加载已有备注</text>
-<text x="1480.0" y="1190.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定记录版本；显式确认</text>
-<text x="1480.0" y="1217.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">没有 5 秒自动提交</text>
-<rect x="1245" y="1285" width="470" height="190" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1480.0" y="1331.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">批量结束 · 范围 / 条数 / 机房</text>
-<text x="1480.0" y="1359.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">紧凑设备 + 学生 + 开始时间列表</text>
-<text x="1480.0" y="1386.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">公共备注初始为空，只追加不覆盖</text>
-<text x="1480.0" y="1414.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">后续新增不入固定集合</text>
-<text x="1480.0" y="1441.7500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">取消   |   明确确认结束 N 条</text>
-<rect x="1245" y="1520" width="470" height="120" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1480.0" y="1559.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">冲突：整批回滚，重新预览确认</text>
-<text x="1480.0" y="1586.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">超批次上限：显示逐批状态</text>
-<text x="1480.0" y="1614.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">已成功批次不重复执行</text>
-<rect x="1245" y="1680" width="470" height="65" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1480.0" y="1718.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">焦点限制 / 关闭恢复 / 刷卡只 Toast</text>
-<rect x="60" y="1870" width="800" height="220" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="460.0" y="1929.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">其他管理页面</text>
-<text x="460.0" y="1958.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">记录：筛选、分页、导出；更正/作废需 admin + 原因</text>
-<text x="460.0" y="1987.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">学生 / 设备 / 标签：单条与批量预览、归档、版本冲突</text>
-<text x="460.0" y="2016.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-01：学生表单和 CSV 模板；TBD-05：权限与保留</text>
-<text x="460.0" y="2045.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">旧记录显示学生最新资料，不保存学生快照</text>
-<rect x="920" y="1870" width="820" height="220" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1330.0" y="1929.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">诊断与界面安全</text>
-<text x="1330.0" y="1958.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">服务器 / TLS / 版本 / reader 状态 / 待传日志数</text>
-<text x="1330.0" y="1987.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-03：实际 reader 协议、驱动与型号</text>
-<text x="1330.0" y="2016.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不显示 UID / HMAC / token；不执行任意 shell</text>
-<text x="1330.0" y="2045.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">Loading / 空态 / 错误 / 冲突 / 离线都提供清晰反馈</text>
-<rect x="40" y="2148" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="2177.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">线框图不声称已实现 cyez-ui 页面。主题与窗口能力由库提供，登记规则、权限和业务组件由本项目实现与测试。</text>
+<rect width="1800" height="2760" fill="#ffffff"/>
+<rect x="50" y="145" width="1700" height="520" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="411.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="50" y="760" width="800" height="400" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="450.0" y="966.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="930" y="760" width="820" height="400" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1340.0" y="966.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="50" y="1250" width="1700" height="560" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1536.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="50" y="1900" width="530" height="555" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="315.0" y="2183.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="635" y="1900" width="530" height="555" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="2183.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<rect x="1220" y="1900" width="530" height="555" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1485.0" y="2183.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
+<text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">06 · 教师界面：使用登记与设置</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口，设置内含连接、设备、历史和诊断。</text>
+<text x="900.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">AppShell · 两个并列入口 · 共享业务账号，无管理员或机房权限</text>
+<rect x="80" y="225" width="250" height="80" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="205.0" y="273.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#172b4d">使用登记</text>
+<rect x="80" y="545" width="250" height="80" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="205.0" y="593.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#172b4d">设置</text>
+<text x="205.0" y="390.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">一级入口只有两个</text>
+<text x="205.0" y="416.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">设置固定于侧栏下方</text>
+<text x="205.0" y="442.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">其余页面在内容区内切换</text>
+<rect x="380" y="225" width="1330" height="80" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1045.0" y="272.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">当前内容页    |    服务器连接 / 认证状态    |    数据更新时间</text>
+<rect x="380" y="345" width="630" height="245" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="695.0" y="402.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">使用登记</text>
+<text x="695.0" y="431.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">使用中 / 未使用，搜索 / 标签筛选</text>
+<text x="695.0" y="460.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备、学生、时间、备注、手动结束</text>
+<text x="695.0" y="489.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">结束选中… / 结束全部记录…</text>
+<text x="695.0" y="518.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">唯一允许刷卡跳转的设备列表</text>
+<text x="695.0" y="547.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全系统设备均可用，标签不授予权限</text>
+<rect x="1060" y="345" width="650" height="245" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1385.0" y="402.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设置 · 内部页签</text>
+<text x="1385.0" y="431.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连接配置   |   设备管理   |   历史记录   |   诊断</text>
+<text x="1385.0" y="460.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连接：IP / pin / 账号密码 / 本地保存</text>
+<text x="1385.0" y="489.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备：新增、修改、删除，历史引用保留</text>
+<text x="1385.0" y="518.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">历史：漂亮、清晰的只读分页列表</text>
+<text x="1385.0" y="547.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">本页任何刷卡都只 Toast，不跳转、不查 API</text>
+<text x="450.0" y="800.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">设置 / 连接配置</text>
+<rect x="80" y="840" width="740" height="140" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="450.0" y="886.9" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">服务端 IP   [                 ]    端口 [443]</text>
+<text x="450.0" y="917.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">叶证书 SHA-256 指纹   [规范化的 64 位十六进制]</text>
+<text x="450.0" y="947.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">账号 [          ]   密码 [••••••••]   □ 记住登录</text>
+<rect x="80" y="1015" width="740" height="105" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="450.0" y="1046.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">测试连接    保存并登录    清除保存项</text>
+<text x="450.0" y="1074.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">pin 正确后才发送密码；不安装系统自签名证书</text>
+<text x="450.0" y="1101.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">密码由 main OS 加密；换配置清旧网络 session</text>
+<text x="1340.0" y="800.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">设置 / 设备管理</text>
+<rect x="960" y="840" width="760" height="70" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1340.0" y="882.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">新增设备…    搜索 / 标签 / 状态筛选    刷新</text>
+<rect x="960" y="945" width="760" height="175" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1340.0" y="984.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">编号 / 名称      标签      状态      备注      操作</text>
+<text x="1340.0" y="1011.5999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">A-001 / 电脑 1   图书馆    空闲      —        编辑 / 删除…</text>
+<text x="1340.0" y="1039.1499999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">A-002 / 电脑 2   东区      使用中    —        编辑</text>
+<text x="1340.0" y="1066.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">删除确认；活动设备先结束；软删除保留历史</text>
+<text x="1340.0" y="1094.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">编辑带版本，冲突重新加载，不能覆盖别人修改</text>
+<text x="900.0" y="1290.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">设置 / 历史记录 · 内部数据库查询，完全只读</text>
+<rect x="80" y="1330" width="1640" height="70" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1372.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">历史记录 · 总条数    日期范围 [开始—结束]    学生搜索    设备 / 标签    重置筛选</text>
+<rect x="80" y="1435" width="275" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="217.5" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">开始时间</text>
+<rect x="80" y="1495" width="275" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="217.5" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10-29 09:00</text>
+<rect x="80" y="1555" width="275" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="217.5" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10-29 08:10</text>
+<rect x="355" y="1435" width="275" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="492.5" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">结束时间</text>
+<rect x="355" y="1495" width="275" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="492.5" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10-29 09:45</text>
+<rect x="355" y="1555" width="275" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="492.5" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">10-29 08:40</text>
+<rect x="630" y="1435" width="160" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="710.0" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">时长</text>
+<rect x="630" y="1495" width="160" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="710.0" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">45 分钟</text>
+<rect x="630" y="1555" width="160" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="710.0" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">30 分钟</text>
+<rect x="790" y="1435" width="310" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="945.0" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生摘要</text>
+<rect x="790" y="1495" width="310" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="945.0" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">姓名 / 班级（示例）</text>
+<rect x="790" y="1555" width="310" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="945.0" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">姓名 / 班级（示例）</text>
+<rect x="1100" y="1435" width="230" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1215.0" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备</text>
+<rect x="1100" y="1495" width="230" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1215.0" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">A-001</text>
+<rect x="1100" y="1555" width="230" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1215.0" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">A-002</text>
+<rect x="1330" y="1435" width="390" height="55" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1525.0" y="1469.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">备注</text>
+<rect x="1330" y="1495" width="390" height="55" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1525.0" y="1528.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">正常结束</text>
+<rect x="1330" y="1555" width="390" height="55" rx="10" fill="#f2f6fc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1525.0" y="1588.45" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">长备注省略… 点击查看完整内容</text>
+<rect x="80" y="1650" width="1640" height="110" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="1684.1000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">上一页   1 / …   下一页   每页条数     |     点击行 → 右侧只读详情抽屉</text>
+<text x="900.0" y="1711.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定表头 / 时间列对齐 / 长备注展开 / 键盘焦点；加载骨架、空态、重试和过期提示</text>
+<text x="900.0" y="1739.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无编辑 / 删除 / 导出按钮；展示最近一次刷卡刷新后的数据库资料，不向外部 API 请求</text>
+<text x="315.0" y="1940.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">使用登记 / 登记页</text>
+<rect x="75" y="1985" width="480" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="315.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生摘要只读 · TBD-01 字段</text>
+<text x="315.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次刷卡已向外部刷新并更新 DB</text>
+<text x="315.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知学生拒绝，无手动注册/补填</text>
+<text x="315.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡开始时间 / 备注 / DevicePicker</text>
+<text x="315.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-07：合法档案初始预置</text>
+<rect x="75" y="2200" width="480" height="210" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="315.0" y="2246.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">连续 10 秒无操作 → 自动取消</text>
+<text x="315.0" y="2272.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">键盘/指针/选择/编辑等真实操作重置</text>
+<text x="315.0" y="2298.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">轮询、动画、合成事件不重置</text>
+<text x="315.0" y="2324.3500000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">后台继续计时，返回先清过期登记</text>
+<text x="315.0" y="2350.4500000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">已提交则关闭空闲计时</text>
+<text x="315.0" y="2376.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">取消不撤销资料刷新或已发结束请求</text>
+<text x="900.0" y="1940.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">使用登记 / 设备选择</text>
+<rect x="660" y="1985" width="480" height="170" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">空闲 → 可选；禁用 → 不可选</text>
+<text x="900.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">占用 → 先独立确认结束，再刷新选择</text>
+<text x="900.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">若释放晚于本次刷卡，要求重刷</text>
+<text x="900.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无可用设备 / 资料不齐 → 禁用确认</text>
+<text x="900.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">提交仍由服务端重新校验</text>
+<rect x="660" y="2200" width="480" height="210" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="2242.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">仅在设备列表收到刷卡才自动进入</text>
+<text x="900.0" y="2270.3250000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设置 / 历史 / Modal / 提交中只 Toast</text>
+<text x="900.0" y="2297.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">重复硬件帧不触发额外刷新</text>
+<text x="900.0" y="2325.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">新卡事件不替换正在处理的学生</text>
+<text x="900.0" y="2352.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">DevicePicker 内操作重置登记空闲</text>
+<text x="900.0" y="2380.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不排队返回后自动重放刷卡</text>
+<text x="1485.0" y="1940.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">使用登记 / 结束与批量</text>
+<rect x="1245" y="1985" width="480" height="170" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1485.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡结束仍为 5 秒自动确认</text>
+<text x="1485.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">现有备注、原开始、本次刷卡时间</text>
+<text x="1485.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">编辑 / 失焦 / 后台暂停自动提交</text>
+<text x="1485.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">返回显式继续；按钮/到期仅提交一次</text>
+<text x="1485.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">手动单结束 Modal：无自动确认</text>
+<rect x="1245" y="2200" width="480" height="210" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1485.0" y="2242.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">批量 Modal：固定列表 + 数量 + 范围</text>
+<text x="1485.0" y="2270.3250000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">公共备注初始为空，提交只追加一次</text>
+<text x="1485.0" y="2297.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">结束全部 = 全系统活动记录</text>
+<text x="1485.0" y="2325.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">单批冲突整体回滚；分批结果透明</text>
+<text x="1485.0" y="2352.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">已结束历史不可修改或删除</text>
+<text x="1485.0" y="2380.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Modal 内刷卡仍只 Toast</text>
+<rect x="50" y="2530" width="1700" height="115" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="900.0" y="2565.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">cyez-ui 主题 / 间距 / 圆角 / 清晰字级；状态不只靠颜色，窄窗口筛选换行与表格横向滚动</text>
+<text x="900.0" y="2594.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">诊断只显示本机连接、读卡、版本与待传数量；无服务器系统日志、密钥、任意表或管理权限</text>
+<text x="900.0" y="2623.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-03 读卡硬件；TBD-05 保留期；TBD-06 Windows 发布材料；UI 使用授权已确认</text>
+<rect x="40" y="2688" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
+<text x="900.0" y="2717.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">本图是正式交互结构，不是已实现截图。所有请求经 pin 校验 HTTPS；历史页、设备页与手动结束不调用校园 API。</text>
 </svg>

@@ -17,13 +17,13 @@
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">05 · Docker 服务端部署与运维拓扑</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">目标是学校 Linux Docker Engine / Compose 单节点；Windows 宿主可使用 Linux VM。图中端口是设计约定，非已部署事实。</text>
 <rect x="60" y="155" width="720" height="145" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="420.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">教师 Windows Electron</text>
-<text x="420.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">受信任校内证书 / client 身份 + 操作账号</text>
-<text x="420.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">只访问固定服务器 HTTPS :443</text>
+<text x="420.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">教师 Electron · 设置连接</text>
+<text x="420.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">IP / 端口 / SHA-256 叶证书指纹 / 共享账号密码</text>
+<text x="420.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">应用内 pin 后才发 HTTPS，不改系统证书库</text>
 <rect x="1020" y="155" width="720" height="145" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">外部校园卡 API</text>
-<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">仅 api 受控出口可访问，凭证仅服务端持有</text>
-<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-02：主机 / 认证 / 限额 / 错误与 SLA</text>
+<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">校园卡 API · 每次有效刷卡最新资料</text>
+<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">服务端独占凭证，外部链路正常 TLS 校验</text>
+<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-02：hash / lookupRef 兼容、字段与限额</text>
 <text x="900.0" y="460.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">Compose 项目 · frontend / backend 网络隔离 · 不发布 PostgreSQL 端口</text>
 <rect x="100" y="530" width="430" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">gateway · Nginx 非特权容器</text>
@@ -31,29 +31,29 @@
 <text x="315.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TLS / body 上限 / 限速</text>
 <text x="315.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">覆写代理头 / 访问日志脱敏</text>
 <rect x="650" y="530" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">api · Fastify 生产镜像</text>
-<text x="900.0" y="605.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">仅内部 :3000 / 非 root</text>
-<text x="900.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">业务 + 账号鉴权 + runtime schema</text>
-<text x="900.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">运行账号仅必要数据库 DML</text>
+<text x="900.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">api · Fastify / Sequelize</text>
+<text x="900.0" y="605.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">内部 :3000 / 非 root / 单实例</text>
+<text x="900.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">共享登录 + 业务 API 白名单</text>
+<text x="900.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">无 admin、导出、服务器日志查询</text>
 <rect x="1270" y="530" width="430" height="165" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1485.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">db · PostgreSQL</text>
 <text x="1485.0" y="605.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">backend 内部 :5432</text>
 <text x="1485.0" y="634.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">pgdata 命名卷 / 独立角色</text>
 <text x="1485.0" y="663.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不向 LAN 发布端口</text>
 <rect x="100" y="800" width="430" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="315.0" y="848.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">secrets · /run/secrets/*</text>
-<text x="315.0" y="877.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">DB / HMAC / provider / TLS</text>
-<text x="315.0" y="906.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">宿主文件挂载，不自带加密</text>
-<text x="315.0" y="935.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">镜像/日志/源码中没有秘密</text>
+<text x="315.0" y="848.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">部署 .env + 受限挂载</text>
+<text x="315.0" y="877.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TEACHER_USERNAME / PASSWORD</text>
+<text x="315.0" y="906.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">改密需重建 API；旧 token 失效</text>
+<text x="315.0" y="935.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TLS / DB / provider 秘密不进镜像</text>
 <rect x="650" y="800" width="500" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="848.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">持久日志 spool · 多个来源卷</text>
 <text x="900.0" y="877.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">API / gateway / DB / 运维日志</text>
 <text x="900.0" y="906.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">数据库不可写继续留盘</text>
 <text x="900.0" y="935.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">stdout 仅作额外运维输出</text>
 <rect x="1270" y="800" width="430" height="170" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1485.0" y="850.3249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">migrate · 一次性任务</text>
-<text x="1485.0" y="877.8749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">与 API 同版镜像 / 独立 DDL 账号</text>
-<text x="1485.0" y="905.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">迁移锁 + 版本化 migration</text>
+<text x="1485.0" y="850.3249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">migrate · 单次串行任务</text>
+<text x="1485.0" y="877.8749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Sequelize QueryInterface + Umzug</text>
+<text x="1485.0" y="905.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">版本迁移，不手写 SQL</text>
 <text x="1485.0" y="932.9749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">成功退出后 API 才启动</text>
 <rect x="100" y="1090" width="430" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">log-ingest · 内部工作进程</text>
@@ -65,33 +65,33 @@
 <text x="900.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">只读根 FS / 有界 tmpfs / 可写日志卷</text>
 <text x="900.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">cap_drop / no-new-privileges</text>
 <text x="900.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定镜像版本与 digest，SIGTERM 排空</text>
-<rect x="1270" y="1090" width="430" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1485.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">backup · 运维 profile / 调度</text>
-<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">独立凭证 / 匹配 PG 版本</text>
-<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">一致备份 + 必要 WAL/PITR</text>
-<text x="1485.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">加密发送校外或异盘目的地</text>
-<text x="900.0" y="1337.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">frontend：gateway 与 api；backend：api / db / migrate / log-ingest / backup</text>
+<rect x="1270" y="1090" width="430" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1485.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生预置 · TBD-07</text>
+<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">合法档案 / hash / 可选 lookupRef</text>
+<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">产品外受控 ORM seed</text>
+<text x="1485.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">没有教师注册、备份或导出服务</text>
+<text x="900.0" y="1337.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">frontend：gateway 与 api；backend：api / db / migrate / log-ingest</text>
 <text x="900.0" y="1365.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同宿主受控网络内部 HTTP；跨不可信网络改为 TLS。容器重启不能代替业务恢复和数据库迁移。</text>
 <rect x="60" y="1515" width="800" height="190" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="1559.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">镜像构建契约 · 多阶段</text>
 <text x="460.0" y="1588.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">固定 Node LTS / Yarn 4；install --immutable</text>
-<text x="460.0" y="1617.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">共享包 → server 构建；workspaces focus 生产依赖</text>
-<text x="460.0" y="1646.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">复制 dist + 依赖工作区产物，Linux 原生模块重建</text>
-<text x="460.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不把 UI 包、Windows node_modules 或秘密放进镜像</text>
+<text x="460.0" y="1617.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">共享包 → server；focus 生产依赖含 Sequelize/pg</text>
+<text x="460.0" y="1646.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">复制 dist / 迁移 / 工作区产物，Linux 原生模块重建</text>
+<text x="460.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不含 Windows 依赖、UI 包、真实 .env 或个人数据</text>
 <rect x="920" y="1515" width="820" height="190" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1330.0" y="1559.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">持久化与备份契约</text>
-<text x="1330.0" y="1588.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">pgdata / 各来源 spool / 收集游标独立卷</text>
-<text x="1330.0" y="1617.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">业务、审计、日志、操作结果都须可恢复</text>
-<text x="1330.0" y="1646.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">备份包含加密密钥材料和未交接日志；恢复实测</text>
-<text x="1330.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">普通升级严禁 down -v；同盘副本不是灾备</text>
+<text x="1330.0" y="1559.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">数据与日志持久性</text>
+<text x="1330.0" y="1588.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">pgdata / spool / 游标使用独立卷</text>
+<text x="1330.0" y="1617.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">容器重建保留业务、审计、日志、操作结果</text>
+<text x="1330.0" y="1646.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不做备份/导出；有需由运维在产品外手工操作</text>
+<text x="1330.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">正常升级禁止 down -v，无损迁移需验证</text>
 <rect x="60" y="1780" width="1680" height="145" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="1829.3999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">启动门禁：db healthy → migrate 成功 → api ready → gateway 接入</text>
-<text x="900.0" y="1859.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">/health/live：事件循环；/health/ready：DB、schema、必要写入条件；运行中仍处理 DB 断线</text>
-<text x="900.0" y="1890.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">迁移失败阻断；发布前备份，扩展—迁移—收缩；回旧镜像不等于撤销数据库迁移</text>
+<text x="900.0" y="1829.3999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">启动：db healthy → ORM migrate 成功 → api ready → gateway 接入</text>
+<text x="900.0" y="1859.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">.env 改密后 force-recreate api，旧会话全部失效；教师用新密码重新登录</text>
+<text x="900.0" y="1890.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">live 测进程；ready 测 DB/schema；provider 故障停止刷卡，历史与手动结束仍可用</text>
 <rect x="60" y="1990" width="1680" height="160" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="900.0" y="2046.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-04：Linux 发行版 / 架构 / TLS 发放 / API 放通 / 备份位置 / RPO / RTO</text>
-<text x="900.0" y="2077.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-05：资料、记录、日志保留期和授权导出 / 归档规则</text>
-<text x="900.0" y="2107.7999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">单节点不承诺零停机；停机时禁止新业务，已发请求沿用 requestId，日志保留到恢复补传</text>
+<text x="900.0" y="2046.8999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-04：Linux / 架构 / 服务器 IP / 含 IP SAN 的叶证书与可信指纹分发 / API 放通</text>
+<text x="900.0" y="2077.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-05：保留期及产品外清理；不新增教师备份、导出、机房授权或管理员页面</text>
+<text x="900.0" y="2107.7999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">单节点停机时禁止新业务；认证恢复后沿原 requestId 查询，日志留盘补传</text>
 <rect x="40" y="2188" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="2217.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">本轮交付部署设计，Dockerfile / Compose / migration 与容器测试在业务实现阶段落地；没有虚构可运行的应用镜像。</text>
+<text x="900.0" y="2217.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">五类 Compose 服务：gateway / api / db / migrate / log-ingest；右侧预置是运维步骤，不是第六个常驻服务。</text>
 </svg>

@@ -24,10 +24,10 @@
 <text x="900.0" y="227.7" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">workspaces 明确覆盖 record-only/apps/* + record-only/packages/*</text>
 <text x="900.0" y="259.59999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#172b4d">CI install --immutable；共享包 exports + 编译产物；禁止跨包相对导入与双份 DTO</text>
 <rect x="60" y="390" width="800" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="460.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/server · Node / Fastify</text>
-<text x="460.0" y="467.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">依赖 protocol + domain；最终业务判断在服务端</text>
-<text x="460.0" y="497.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">认证 / HMAC / preview / 占用事务 / provider / 日志</text>
-<text x="460.0" y="528.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">不依赖 Electron / React / UI 包</text>
+<text x="460.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/server · Fastify / Sequelize</text>
+<text x="460.0" y="467.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">protocol + domain；共享账号、刷卡刷新、占用事务</text>
+<text x="460.0" y="497.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">仅查询/更新预置学生；设备编辑 / 只读历史</text>
+<text x="460.0" y="528.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">通过 ORM 操作 PostgreSQL，不手写 SQL</text>
 <rect x="940" y="390" width="800" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/teacher · Electron / React</text>
 <text x="1340.0" y="467.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">依赖 protocol + client-sdk + ui</text>
@@ -76,25 +76,25 @@
 <rect x="655" y="1515" width="490" height="140" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="1550.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">preload + @series/electron/preload</text>
 <text x="900.0" y="1577.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">有限 typed API / sender 校验</text>
-<text x="900.0" y="1605.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡元数据 / 业务意图 / 日志</text>
-<text x="900.0" y="1632.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不暴露任意 channel / URL / shell</text>
+<text x="900.0" y="1605.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡元数据 / 业务动作 / 日志</text>
+<text x="900.0" y="1632.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无任意 URL / shell / 原 UID / token</text>
 <rect x="1220" y="1515" width="490" height="140" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1465.0" y="1550.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">main + @series/electron/main</text>
-<text x="1465.0" y="1577.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">系统安全存储 / REST / reader</text>
-<text x="1465.0" y="1605.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本地 SQLite 意图与日志</text>
-<text x="1465.0" y="1632.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">provider 凭证只在服务端</text>
+<text x="1465.0" y="1577.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">原 UID 在 CardReader 内立即 hash</text>
+<text x="1465.0" y="1605.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">专用 session pin / OS 保存密码</text>
+<text x="1465.0" y="1632.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">SQLite 持久队列由库操作</text>
 <rect x="60" y="1810" width="800" height="185" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="460.0" y="1854.0500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-06 · 发布输入</text>
-<text x="460.0" y="1881.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">库选择已确定；代码/二进制使用分发许可需留证</text>
-<text x="460.0" y="1909.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">上游 LICENSE/NOTICE 保留权利，未重新开源</text>
-<text x="460.0" y="1936.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Windows 签名材料、安装/卸载与 DPI 实机验收</text>
-<text x="460.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本轮不复制上游源码，不声明已经集成通过</text>
+<text x="460.0" y="1854.0500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">已确认：cyez-ui 使用授权</text>
+<text x="460.0" y="1881.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">按固定提交 tarball 接入，保留 LICENSE/NOTICE</text>
+<text x="460.0" y="1909.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-06 仅 Windows 签名材料 / 发布实机验收</text>
+<text x="460.0" y="1936.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">上下两个一级入口：使用登记 / 设置</text>
+<text x="460.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不把上游验证当本项目集成通过</text>
 <rect x="940" y="1810" width="800" height="185" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1340.0" y="1854.0500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">范围和后续扩展</text>
-<text x="1340.0" y="1881.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本阶段不引入学生端 / Rust / 完整 Session 状态机</text>
-<text x="1340.0" y="1909.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">NEXT-01：跨卡合并与历史迁移明确延期</text>
-<text x="1340.0" y="1936.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">当前卡是唯一业务身份，内部 UUID 不等于跨卡识别</text>
-<text x="1340.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">后续共享包复用须审查业务语义是否相同</text>
+<text x="1340.0" y="1854.0500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">范围与延期</text>
+<text x="1340.0" y="1881.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无学生端 / Rust / 完整 Session 状态机</text>
+<text x="1340.0" y="1909.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">NEXT-01：跨卡迁移延期；新卡无预置记录即拒绝</text>
+<text x="1340.0" y="1936.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无 admin、机房 ACL、备份导出、历史编辑删除</text>
+<text x="1340.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">合法学生与 hash/queryRef 预置为 TBD-07</text>
 <rect x="40" y="2048" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="2077.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">上游提交与包入口已核对；应用目录和脚本为实施契约，当前文档仓库尚未创建运行中的工作区或应用。</text>
 </svg>
