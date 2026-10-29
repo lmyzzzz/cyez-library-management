@@ -37,11 +37,11 @@ IP/pin 可作为普通本地配置保存；密码和 token 仅 main 通过操作
 1. CardReader 完成协议必要的 UID 规范化后，**第一时间在模块内**计算 `studentId = hexLower(SHA-256(encode(hashVersion, fixedSalt, issuer, uidBytes)))`。输出为 64 位小写十六进制，直接用作 `students.id`，不再另设 UUID 学生 ID 或重复的 card_hash 列。编码与持久化边界见下表；所有终端、服务端和预置工具复用同一纯函数与测试向量，不得随机逐次加盐。固定盐不是秘密，不当作密码或认证凭证。
 2. 读卡模块向 main 的请求协调器交付两个分离的模型：短暂的 `CardScanInput`（卡号）与 `studentId`（学生标识）。原 UID 不经 renderer/preload IPC、不入日志/SQLite/持久队列；main 仅在本次 HTTPS 请求所需的内存中持有它。页面只接收刷卡状态和后续 StudentDTO，不能通过学生资料接口取得原卡号。
 3. 只有“使用登记”的设备列表、无 Modal、无提交且无 scan 处理中时才接受刷卡流程；其他页面（包括设置和历史）只 Toast“接收到刷卡消息，请返回主页面以触发登记”，丢弃该事件，不向外部 API 查询、不排队重放。以下“每次刷卡”指通过该门控并去重后的有效刷卡；不把硬件连续重复帧视为多次业务刷卡。
-4. main 通过已校验 pin 的 HTTPS 发送 `POST /api/v1/scan-previews`，包含 `scanId / studentId / hashVersion / card:{issuer,uidHex} / source`。服务端记录 `scanAtMs`，校验版本与 UID 格式，用受控固定盐重算 studentId，与请求值不符则以 `CARD_ID_MISMATCH` 拒绝，既不查外部也不更新档案。验证通过后用重算 ID 查内部学生，并将本次**原卡号**交给校园 API 适配器查询；不要求供应方接受哈希或 lookupRef。每次通过页面门控、去重和请求校验的有效刷卡均查询，包括内部未知学生，但外部成功不能赋予其登记资格；已知学生也每次请求，不读缓存冒充刷新。
-5. 内部数据库中不存在、已停用或 hash 版本不匹配：拒绝登记，不插入学生，即使外部返回合法学生也一样。内部已知学生且外部成功：按 TBD-01 白名单校验并更新该学生已有资料、`profile_refreshed_at` 和版本；不改变学生 ID/登记资格。provider 响应必须按适配协议与本次卡号查询绑定，不能按姓名/班级匹配其他学生；响应多义、超时、错误、身份不匹配或必需字段缺失时不覆盖旧资料、不生成可提交预览，显示错误允许重刷。未知/停用学生始终返回 `STUDENT_NOT_ALLOWED`。
-6. 资料刷新是刷卡阶段独立提交的事务，之后按是否有活动记录返回 `start` 或 `end` 预览。预览取消只取消登记/结束意图，**不回滚已经刷新的学生资料**。同一学生的刷新在单实例服务端串行处理，provider 调用在短数据库事务之外；并发旧响应不能覆盖新响应。未来多 API 实例须先实现跨实例串行/版本控制，不能直接水平扩容。
+4. main 通过已校验 pin 的 HTTPS 发送 `POST /api/v1/scan-previews`，包含 `scanId / studentId / hashVersion / card:{issuer,uidHex} / source`。服务端记录 `scanAtMs`，校验版本与 UID 格式，用受控固定盐重算 studentId，与请求值不符则以 `CARD_ID_MISMATCH` 拒绝，既不查外部也不更新档案。验证通过后先用重算 ID 查内部学生；不存在、停用或档案 hash 版本不符时返回 `STUDENT_NOT_ALLOWED`，不调用校园 API、不插入学生。仅内部授权通过后，才将本次**原卡号**交给校园 API 适配器查询；不要求供应方接受哈希或 lookupRef。每次通过页面门控、去重、请求校验与内部授权的有效刷卡都查询，不读缓存冒充刷新。
+5. 内部已知学生且外部成功：按 TBD-01 白名单校验并更新该学生已有资料、`profile_refreshed_at` 和版本；不改变学生 ID/登记资格。provider 响应按本次 HTTPS 调用上下文关联到请求，不按姓名/班级匹配其他学生，也不要求供应方额外提供卡号绑定证明。实际协议若返回卡号引用就做普通一致性校验；不返回该字段不构成错误。响应多义、超时、错误、协议已有引用不符或必需字段缺失时不覆盖旧资料、不生成可提交预览，显示错误允许重刷。
+6. 资料刷新是刷卡阶段独立提交的事务，之后按是否有活动记录返回 `start` 或 `end` 预览。预览取消只取消登记/结束意图，**不回滚已经刷新的学生资料**。同一学生的刷新在单实例服务端串行处理，provider 调用在短数据库事务之外；资料提交时重新校验学生仍启用及版本有效，并发旧响应不能覆盖新响应。未来多 API 实例须先实现跨实例串行/版本控制，不能直接水平扩容。
 7. 预览绑定 clientId/认证上下文，默认 2 分钟、仅有界内存、重启失效；只保留 studentId/资料版本等必要状态，不保留原卡号。提交时验证 studentId 与当前档案版本仍匹配。确认前若另一次刷卡刷新了资料，旧页面返回 409 重新预览，不能悄悄切换学生。
-8. 成功、失败、超时、取消及门控拒绝都结束本次卡号生命周期；main 在发送完成或中止后释放请求数据，服务端在查询/响应绑定校验结束后释放卡号与 provider 原始响应，不等到 2 分钟 preview 过期才释放。可写 buffer 尽力覆写，JavaScript GC/运行时副本不能保证物理擦除。刷卡请求不进入持久 operations、离线队列或自动重放；超时后重新刷卡。以 `(clientId,scanId)` 做有界内存去重，只保留必要状态/结果和 studentId，不保存原卡号；同键但重算 studentId/版本不同则拒绝，重启后重新刷卡。登记/结束确认仍按原 requestId 持久幂等恢复。
+8. 成功、失败、超时、取消及门控拒绝都结束本次卡号生命周期；main 在发送完成或中止后释放请求数据，服务端在查询/响应校验结束后释放卡号与 provider 原始响应，不等到 2 分钟 preview 过期才释放。可写 buffer 尽力覆写，JavaScript GC/运行时副本不能保证物理擦除。刷卡请求不进入持久 operations、离线队列或自动重放；超时后重新刷卡。以 `(clientId,scanId)` 做有界内存去重，只保留必要状态/结果和 studentId，不保存原卡号；同键但重算 studentId/版本不同则拒绝，重启后重新刷卡。登记/结束确认仍按原 requestId 持久幂等恢复。
 
 ### 卡号与学生模型分离
 
@@ -115,7 +115,7 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 | --- | --- | --- |
 | `POST /auth/login`、`/auth/logout` | `.env` 对应账号密码、clientId；登录限速 | 内存短期会话；重启失效；401/429；无注册/改密/admin API |
 | `POST /clients/startup` | 已认证的 clientId、版本报告 | 仅报告启动，无自报角色提权 |
-| `POST /scan-previews` | scanId/studentId/hashVersion/card:{issuer,uidHex}/source；仅内存请求，不持久重放 | 重算 ID 校验绑定，用原卡号查 provider；每次有效刷卡刷新已有学生，未知拒绝；返回无原卡号的资料/模式/绑定预览 |
+| `POST /scan-previews` | scanId/studentId/hashVersion/card:{issuer,uidHex}/source；仅内存请求，不持久重放 | 重算 ID 并先查内部授权，未知/停用拒绝且不查 provider；合法卡用原卡号查询并刷新已有资料；返回无原卡号的资料/模式/绑定预览 |
 | `DELETE /scan-previews/{id}` | 仅当前 client 的预览 | 释放意图，TTL 兜底；不回滚学生资料刷新或已提交业务 |
 | `POST /usage-records/start` | previewId/deviceId/notes/requestId | 仅创建使用记录；409 冲突、410 过期；没有学生补充字段 |
 | `POST /usage-records/{id}/end-preview`、`/end` | 手动预览；确认带 previewId/expectedVersion/notes/requestId | 结束指定活动记录；手动流程只读内部 DB |
@@ -126,8 +126,9 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 | `POST /devices`、`PATCH /devices/{id}`、`DELETE /devices/{id}` | 业务字段、标签关系、预期版本、requestId；DELETE 为软删除 | 活动中不能删；保留历史 FK；标签仅业务管理 |
 | `POST /tags`、`PATCH/DELETE /tags/{id}` | 名称/版本/设备筛选关系 | 仅影响筛选，不产生权限；删除关联同事务 |
 | `GET /operations/{requestId}` | session 绑定 clientId 的原请求 | 持久结果；未找到仍沿原键重试，不直接判定未执行 |
+| `GET /service-status` | 已认证；返回业务可用性、allowedActions 与原因码 | 前台随列表轮询；容量/provider 故障分别限制相关动作，无服务器磁盘路径/系统日志/秘密 |
 | `POST /logs/batch` | 已认证来源和稳定 logId，有限批量 | 持久提交后 ACK；仅上传，无教师全库读取 |
-| `GET /health/live`、`/health/ready` | 进程、DB/schema/必要写入条件 | 200/503，无秘密或运维数据；健康路径无 `/api/v1` 前缀 |
+| `GET /health/live`、`/health/ready` | 进程、核心 DB 可访问/schema 就绪；写能力另按操作限制 | 200/503，无秘密或运维数据；健康路径无 `/api/v1` 前缀 |
 
 固定错误 code 区分 `CARD_ID_MISMATCH`（422）、`HASH_VERSION_UNSUPPORTED`（422）、`STUDENT_NOT_ALLOWED`、`PROVIDER_UNAVAILABLE`、`PROFILE_MISMATCH`、`TIME_RANGE_CONFLICT`、`PREVIEW_ALREADY_USED`、`HISTORY_READ_ONLY`；401 恢复登录，409 冲突须重预览，410 过期须重刷，422 输入错误，429/503 退避。刷卡错误均不回显原卡号/请求 body，不把刷卡请求放入后台重试队列。API 不接受任意表名、SQL、外部 URL 或运行命令。
 
@@ -135,4 +136,4 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 
 教师 main/renderer/reader/SDK/安装日志全部在生成时脱敏、本地持久排队，认证恢复后上传，持久 ACK 前不回收。服务端/gateway/DB 日志先 spool 后内部归集；配置 ORM/gateway/SDK 禁止输出绑定参数、刷卡/登录 body、原卡号、studentId、密码、token、完整请求 URL 或 provider 响应。错误/校验失败不能 stringify 整个请求。应用日志用 requestId/scanId/recordId 关联；数据库内部审计可按上表保留必要 student_id FK，这是受限业务关联，不复制到 app_logs 或教师诊断。全部日志集中上传不等于采集秘密正文。教师诊断只显示本机连接/读卡/版本/待传数量等业务必要状态，不提供服务器系统日志、数据库凭证或原始表访问。
 
-所有来源稳定 logId 去重，日志接收不递归生成同类日志；无法保存业务审计则拒绝业务写入。本版故障不控制或关闭学生电脑。应用无备份/导出功能；运维确有需要时在产品外手工操作数据库。完整验收见[两端测试设计](testing.md)。
+所有来源稳定 logId 去重，日志接收不递归生成同类日志；无法保存业务审计则拒绝业务写入。本版故障不控制或关闭学生电脑。应用无备份/导出功能；运维确有需要时在产品外手工操作数据库。日志容量水位、存储失败、断线恢复及实施顺序见[实施计划](implementation-plan.md)；完整验收见[两端测试设计](testing.md)。

@@ -22,7 +22,7 @@
 每页副标题定义箭头含义：总体图是调用/数据流，数据模型是外键引用，工作区图是依赖，流程图是执行顺序。双向箭头表示请求/响应或双向 IPC，虚线表示日志交接/附属路径，具体以线旁文字为准。蓝、绿、紫用于分组；红色表示冲突/错误路径；黄色用于待定项或需要注意的业务边界，以文字标识为准，不只靠颜色判断。
 
 - TBD-01：学生最终字段与显示白名单；出现在 01/02/03/06。
-- TBD-02：校园卡 API 协议、认证、原卡号格式与响应身份绑定；出现在 01/03/05/08。
+- TBD-02：校园卡 API 协议、认证、原卡号格式与请求/响应字段；出现在 01/03/05/08。
 - TBD-03：USB 协议、驱动与 UID 格式；出现在 01/03/06/08。
 - TBD-04：宿主、IP SAN 证书、pin 分发和网络；出现在 05/08。
 - TBD-05：保留期和产品外清理；出现在 02/05/06。
@@ -32,7 +32,7 @@
 
 ## 维护与校验
 
-规范图源为 [tools/generate_diagrams.py](tools/generate_diagrams.py)，复用根目录的[图形导出引擎](../../docs/tools/generate_diagrams.py)。Python 标准库即可再生成 SVG 和未压缩 draw.io；本轮没有将图片栅格化后塞入 draw.io。用图形编辑器探索布局后，应把最终变更同步回生成器，避免后续生成覆盖手工改动。
+规范图源为 [tools/generate_diagrams.py](tools/generate_diagrams.py)，使用本目录的[图形导出引擎](tools/diagram_engine.py)，不依赖其他设计目录。Python 标准库即可再生成 SVG 和未压缩 draw.io；本轮没有将图片栅格化后塞入 draw.io。用图形编辑器探索布局后，应把最终变更同步回生成器，避免后续生成覆盖手工改动。
 
 在仓库根目录执行：
 
@@ -49,4 +49,4 @@ python record-only/docs/tools/generate_diagrams.py --check --render-dir "$env:TE
 
 生成器检查 ID 唯一、边引用、画布边界、文字行高和生成文件一致性。发布文档前还要渲染逐页检查文字宽度、重叠和连线，并核对 Markdown 链接。以上是文档校验；产品单元测试、集成测试与容器验收另见 [testing.md](testing.md)，不能混计。
 
-完整三端方案图册继续位于 [根 docs](../../docs/diagrams.md)，记录版不复用其中锁机、守护与 Session 时序。
+图表对应的实施顺序、故障处理和剩余外部输入见[实施计划](implementation-plan.md)。

@@ -71,7 +71,7 @@
 <text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">产品外受控 ORM seed，无原卡号</text>
 <text x="1485.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">没有教师注册、备份或导出服务</text>
 <text x="900.0" y="1337.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">frontend：gateway 与 api；backend：api / db / migrate / log-ingest</text>
-<text x="900.0" y="1365.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同宿主受控网络内部 HTTP；跨不可信网络改为 TLS。容器重启不能代替业务恢复和数据库迁移。</text>
+<text x="900.0" y="1365.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">单宿主专用网络内部 HTTP；无关容器禁入；跨宿主/不可信网络改为 TLS。仅 gateway 发布端口。</text>
 <rect x="60" y="1515" width="800" height="190" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="1559.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">镜像构建契约 · 多阶段</text>
 <text x="460.0" y="1588.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">固定 Node LTS / Yarn 4；install --immutable</text>
@@ -83,7 +83,7 @@
 <text x="1330.0" y="1588.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">pgdata / spool / 游标使用独立卷</text>
 <text x="1330.0" y="1617.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">容器重建保留业务、审计、日志、操作结果</text>
 <text x="1330.0" y="1646.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不做备份/导出；有需由运维在产品外手工操作</text>
-<text x="1330.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">正常升级禁止 down -v，无损迁移需验证</text>
+<text x="1330.0" y="1675.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">正常升级禁止 down -v；容量告警/限写/恢复</text>
 <rect x="60" y="1780" width="1680" height="145" rx="10" fill="#eee7f8" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="1829.3999999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">启动：db healthy → ORM migrate 成功 → api ready → gateway 接入</text>
 <text x="900.0" y="1859.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">.env 改密后 force-recreate api，旧会话全部失效；教师用新密码重新登录</text>

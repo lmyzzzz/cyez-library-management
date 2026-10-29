@@ -16,7 +16,7 @@
 | migrate | API 同版镜像的一次性任务；Sequelize QueryInterface + Umzug 迁移，只有一个部署任务运行 | schema 版本/迁移元数据；失败阻断 API 启动 |
 | log-ingest | 内部工作进程，经 ORM 导入各来源 spool，稳定 ID 去重，持久提交后 ACK | 日志游标和未确认数据卷；无公开端口/无 Docker socket |
 
-frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 有受控外部出口。gateway/api 的同宿主内部 HTTP 限 Compose 私网，跨不可信网络需 TLS。服务端外部校园 API 始终使用正常 TLS 信任验证，与教师端 pinning 分离；原卡号仅发往运维配置的固定 provider 目的地，拒绝重定向、降级及请求中传入的任意 URL。
+frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 有受控外部出口。gateway/api 的同宿主内部 HTTP 限专用 Compose 私网，信任宿主与 Docker 管理员；禁止无关容器接入，不向 LAN 发布 API 端口。跨宿主或跨不可信网络时重新设计 TLS/mTLS，当前不新增内部证书体系。服务端外部校园 API 始终使用正常 TLS 信任验证，与教师端 pinning 分离；原卡号仅发往运维配置的固定 provider 目的地，拒绝重定向、降级及请求中传入的任意 URL。
 
 无 backup 容器、自动导出任务、导出端点、RPO/RTO 或产品恢复承诺。运维以后确有需要，可在产品外手工导出原始表；这不成为教师功能或当前验收门禁。卷持久性和无损升级仍是应用要求，不能把不做备份解释为容器重建即可丢数据。
 
@@ -53,9 +53,13 @@ Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固�
 - 多阶段镜像固定 Node LTS 和基础镜像 digest；不可变安装，按拓扑构建共享包与 server，Yarn focus 裁剪生产依赖。运行镜像带 dist、迁移、依赖工作区产物与 ORM/pg，不带教师 UI、Windows node_modules、真实 .env 或测试数据。CI 显式准备 Yarn，不假定基础镜像内置 Corepack。
 - 非 root、只读根 FS、有界 tmpfs、明确可写日志卷、cap_drop/no-new-privileges。Node exec 启动，SIGTERM 停接新命令并有界排空；已提交事务仍可由原 requestId 查询。
 - migration 只用 Sequelize QueryInterface API，Umzug 记录版本；不手写 SQL、raw query/literal，不用 sync force/alter。部署只运行一个 migrate 作业，多个发布流水线需串行化。启用 runtime 账号最小 DML、迁移账号 DDL，不用超级用户运行 API。
-- 启动顺序：db healthy → migrate 成功退出 → api 检查 schema/DB → ready → gateway。live 测进程，ready 测核心数据库/必要写入条件。provider 故障阻止刷卡，但历史/设备/手动结束仍可服务；不因此循环重启 API。
+- 启动顺序：db healthy → migrate 成功退出 → api 检查 schema/DB → ready → gateway。live 测进程，ready 测核心数据库可访问/schema 就绪，写能力由各业务操作单独判定。provider 故障阻止刷卡，但历史/设备/手动结束仍可服务；不因此循环重启 API。
 - 只采用可兼容的扩展迁移；破坏性变更不能通过回旧镜像自动回滚。发布前在临时数据副本验证升级，不以删除数据库完成升级。正常部署禁止 down -v。此处测试副本是工程验证材料，不是产品备份模块。
 - 不同来源日志先持久 spool，再由 log-ingest 经 ORM 导入 app_logs；stdout 仅作额外运维输出，轮转不能丢弃未交接日志。数据库不可写保留磁盘队列，教师没有服务器日志查询权限。
+
+## 容量与故障处理
+
+日志/DB/客户端持久空间需按实测增量与最长中断窗口配置预警、保留和恢复水位。命名卷若共享底层文件系统须合并核算；未 ACK 日志不覆盖或删除，TBD-05 未定不自动清理服务端数据。达到保留水位暂停新登记与资料刷新，手动结束仅在业务、审计、操作结果及必要日志均可保存时继续；持久失败则拒绝对应写入，保留可用查询并明确报错。容量预警/provider 故障不使整个 API 退出 readiness 或反复重启；业务可用性通过已认证的 GET /api/v1/service-status 向教师端表达。详细状态、扩容/恢复步骤和上线交付见[实施计划](implementation-plan.md)。
 
 ## 交付验收
 

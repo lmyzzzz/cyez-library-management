@@ -123,7 +123,7 @@
         <mxCell id="api" value="HTTPS :443 → gateway → Fastify REST /api/v1&#10;共享登录 / 刷卡刷新 / 登记结束 / 设备编辑 / 历史 / 日志 ACK&#10;固定业务白名单；无 admin、机房 ACL 或运维数据查询" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="680" y="230" width="1040" height="115" as="geometry" />
         </mxCell>
-        <mxCell id="services" value="Fastify + Sequelize · 服务端规则&#10;按原卡号重算 studentId，拒绝错配&#10;每次有效刷卡查 API / 刷新已有资料&#10;预览 TTL / 幂等 / 版本 / 事务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="services" value="Fastify + Sequelize · 服务端规则&#10;按原卡号重算 studentId，拒绝错配&#10;先内部授权；合法卡查 API 刷新资料&#10;预览 TTL / 幂等 / 版本 / 事务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="680" y="455" width="480" height="180" as="geometry" />
         </mxCell>
         <mxCell id="provider" value="校园卡 API · 用本次原卡号查询&#10;正常 TLS；查询后释放原卡号&#10;TBD-02：协议、认证、卡号格式&#10;TBD-01：学生资料白名单" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -147,7 +147,7 @@
         <mxCell id="privacy" value="数据与刷新边界&#10;卡号临时请求 / 学生档案分开；原卡号不入库或日志&#10;studentId 为哈希，服务端验证绑定；未知学生拒绝&#10;取消不撤销已刷新资料；日志仅用请求/记录 ID 关联" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="920" y="1330" width="840" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="footer" value="黄色：尚待外部确认的需求。蓝/绿：已决定的结构。后续三端扩展方案保留于根 docs/，不混用本版状态机。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="footer" value="黄色：尚待外部确认的需求。蓝/绿：已决定的结构。本目录独立维护；实施与故障处理见 implementation-plan.md。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="40" y="1588" width="1720" height="48" as="geometry" />
         </mxCell>
       </root>
@@ -410,16 +410,16 @@
         <mxCell id="ignored" value="否 → 仅 Toast&#10;返回使用登记主页面重新刷卡&#10;丢弃事件，不调用外部 API&#10;不排队稍后重放" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1240" y="155" width="500" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="preview" value="③ main → 已 pin HTTPS /scan-previews&#10;card + studentId / hashVersion / scanId&#10;服务端重算 ID 拒绝错配，记 scanAtMs&#10;按重算 ID 查库；TBD-07 合法预置" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="preview" value="③ main → 已 pin HTTPS /scan-previews&#10;card + studentId / hashVersion / scanId&#10;服务端重算 ID 拒绝错配，记 scanAtMs&#10;先查库授权；未知/停用不查 provider&#10;TBD-07：内部合法学生预置" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="650" y="395" width="500" height="155" as="geometry" />
         </mxCell>
         <mxCell id="gate-preview-label" value="是" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=17;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="730.0" y="327.0" width="340" height="46" as="geometry" />
         </mxCell>
-        <mxCell id="provider" value="每次有效刷卡 → 原卡号查校园 API&#10;查询/校验后释放；不入预览或队列&#10;TBD-02：协议/认证/卡号格式/身份绑定&#10;TBD-01 白名单；仅刷新已有合法学生" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="provider" value="内部授权通过 → 原卡号查校园 API&#10;查询/校验后释放；不入预览或队列&#10;TBD-02：协议/认证/卡号格式/字段&#10;正常请求关联，无需额外绑定证明&#10;TBD-01：资料白名单；仅更新已有档案" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1240" y="395" width="500" height="155" as="geometry" />
         </mxCell>
-        <mxCell id="failed-preview" value="未知 / 停用 / 外部失败 / 卡号 ID 错配&#10;不创建学生；释放原卡号，无自动重放&#10;显示错误，重刷或返回；无手动注册&#10;已有记录可从内部列表手动结束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="failed-preview" value="未知 / 停用 / 外部失败 / 卡号 ID 错配&#10;未知/停用不查外部；无自动注册/重放&#10;显示错误，重刷或返回；无手动注册&#10;已有记录可从内部列表手动结束" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fcebea;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=18;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="395" width="500" height="155" as="geometry" />
         </mxCell>
         <mxCell id="mode" value="④ 已有学生资料刷新单独提交&#10;按 studentId 返回 start/end，无原卡号&#10;历史只读 DB；取消不回滚资料刷新" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -761,13 +761,13 @@
         <mxCell id="seed" value="学生预置 · TBD-07&#10;合法档案 / 哈希 studentId&#10;产品外受控 ORM seed，无原卡号&#10;没有教师注册、备份或导出服务" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1270" y="1090" width="430" height="170" as="geometry" />
         </mxCell>
-        <mxCell id="network-note" value="frontend：gateway 与 api；backend：api / db / migrate / log-ingest&#10;同宿主受控网络内部 HTTP；跨不可信网络改为 TLS。容器重启不能代替业务恢复和数据库迁移。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="network-note" value="frontend：gateway 与 api；backend：api / db / migrate / log-ingest&#10;单宿主专用网络内部 HTTP；无关容器禁入；跨宿主/不可信网络改为 TLS。仅 gateway 发布端口。" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="100" y="1310" width="1600" height="70" as="geometry" />
         </mxCell>
         <mxCell id="build" value="镜像构建契约 · 多阶段&#10;固定 Node LTS / Yarn 4；install --immutable&#10;共享包 → server；focus 生产依赖含 Sequelize/pg&#10;复制 dist / 迁移 / 工作区产物，Linux 原生模块重建&#10;不含 Windows 依赖、UI 包、真实 .env 或个人数据" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="1515" width="800" height="190" as="geometry" />
         </mxCell>
-        <mxCell id="persist" value="数据与日志持久性&#10;pgdata / spool / 游标使用独立卷&#10;容器重建保留业务、审计、日志、操作结果&#10;不做备份/导出；有需由运维在产品外手工操作&#10;正常升级禁止 down -v，无损迁移需验证" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="persist" value="数据与日志持久性&#10;pgdata / spool / 游标使用独立卷&#10;容器重建保留业务、审计、日志、操作结果&#10;不做备份/导出；有需由运维在产品外手工操作&#10;正常升级禁止 down -v；容量告警/限写/恢复" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="920" y="1515" width="820" height="190" as="geometry" />
         </mxCell>
         <mxCell id="startup" value="启动：db healthy → ORM migrate 成功 → api ready → gateway 接入&#10;.env 改密后 force-recreate api，旧会话全部失效；教师用新密码重新登录&#10;live 测进程；ready 测 DB/schema；provider 故障停止刷卡，历史与手动结束仍可用" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#eee7f8;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -1193,7 +1193,7 @@
         <mxCell id="cu" value="C-U · 规则与 React 组件&#10;立即算 studentId；卡输入与学生 DTO 分离&#10;原卡号仅内存/HTTPS，无 IPC/日志/持久队列&#10;10 秒无操作取消，真实输入重置 / 后台检查&#10;结束 5 秒确认独立规则 / 一次提交门闩&#10;页面门控 / 设备编辑 / 历史只读 / pin 格式" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="970" y="485" width="740" height="230" as="geometry" />
         </mxCell>
-        <mxCell id="si" value="S-I · Fastify → Sequelize → 真实 PostgreSQL&#10;哈希 PK/FK、条件索引、并发占用、行锁与迁移&#10;provider 收到原卡号；错配拒绝；卡号不落库&#10;每次刷卡刷新；未知拒绝；历史只查内部库&#10;响应丢失 / 重启 / intentId / 固定批量集合&#10;.env 改密失效；网关 body 无临时文件&#10;日志 ACK / 原卡号生命周期 / 数据卷持久性" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="si" value="S-I · Fastify → Sequelize → 真实 PostgreSQL&#10;哈希 PK/FK、条件索引、并发占用、行锁与迁移&#10;provider 收到原卡号；错配拒绝；卡号不落库&#10;合法卡每次刷新；未知不查外部；历史读 DB&#10;响应丢失 / 重启 / intentId / 固定批量集合&#10;.env 改密失效；网关 body 无临时文件&#10;日志 ACK / 容量恢复 / 网络隔离 / seed" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="90" y="820" width="740" height="315" as="geometry" />
         </mxCell>
         <mxCell id="ci" value="C-I · Windows 真实 Electron / SQLite / HTTPS&#10;main / preload / renderer + fake reader 完整链路&#10;TLS pin 错误不得发送密码/原卡号/正文&#10;证书过期/SAN 错/重定向拒绝；换 pin 清 session&#10;OS 密码保存/清除，不可用不得回落明文&#10;刷卡不持久重放；卡号释放 / 10 秒空闲 / 补传&#10;设备 CRUD / 历史 / IPC 越权 / 打包 UI 验收" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
