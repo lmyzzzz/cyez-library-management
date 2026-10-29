@@ -78,9 +78,12 @@ test.beforeAll(async () => {
   await launch();
 });
 async function launch() {
+  const packagedExecutable = process.env.CYEZ_ELECTRON_EXECUTABLE;
   desktop = await electron.launch({
-    executablePath: resolve("node_modules/electron/dist/electron.exe"),
-    args: [resolve("apps/teacher")],
+    executablePath: packagedExecutable
+      ? resolve(packagedExecutable)
+      : resolve("node_modules/electron/dist/electron.exe"),
+    args: packagedExecutable ? [] : [resolve("apps/teacher")],
     env: {
       ...process.env,
       CYEZ_USER_DATA: userData,

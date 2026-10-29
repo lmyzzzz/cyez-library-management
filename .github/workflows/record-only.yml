@@ -93,8 +93,10 @@ jobs:
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
       - run: yarn build:client
-      - run: yarn test:integration:client
       - run: yarn package:win
+      - run: yarn test:integration:client
+        env:
+          CYEZ_ELECTRON_EXECUTABLE: release/win-unpacked/图书馆使用登记.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
