@@ -153,6 +153,31 @@ test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口", async (
   expect(preferences.contextIsolation).toBe(true);
   expect(preferences.nodeIntegration).toBe(false);
 });
+test("C-I-06: 真实 renderer 的 IPC 白名单、输入 schema 与外部导航拒绝", async () => {
+  const originalUrl = page.url();
+  await expect(call("arbitraryAction", {})).rejects.toThrow("IPC_FORBIDDEN");
+  await expect(call("status", { unexpected: true })).rejects.toThrow();
+  expect(
+    await page.evaluate(() => {
+      const opened = window.open("https://example.org/", "untrusted");
+      return opened === null;
+    }),
+  ).toBe(true);
+  expect(desktop.windows()).toHaveLength(1);
+  const navigationBlocked = await desktop.evaluate(({ BrowserWindow }) => {
+    const window = BrowserWindow.getAllWindows()[0];
+    let blocked = false;
+    window.webContents.emit(
+      "will-navigate",
+      { preventDefault: () => (blocked = true) } as never,
+      "https://example.org/",
+    );
+    return blocked;
+  });
+  expect(navigationBlocked).toBe(true);
+  expect(page.url()).toBe(originalUrl);
+  await expect(call("status", {})).resolves.toBeTruthy();
+});
 test("C-I-09: 真 TLS 错 pin 在密码及正文发送前拒绝；正确自签 pin 成功", async () => {
   await call("configure", { ip: "127.0.0.1", port, pin: "00".repeat(32) });
   const before = requests;
