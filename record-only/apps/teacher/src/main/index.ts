@@ -55,7 +55,7 @@ void app.whenReady().then(async () => {
       minHeight: 600,
       show: false,
       frame: false,
-      backgroundColor: "#f7f8fb",
+      backgroundColor: "#f4f9fc",
       webPreferences: {
         preload: join(location, "../preload/index.cjs"),
         sandbox: true,
