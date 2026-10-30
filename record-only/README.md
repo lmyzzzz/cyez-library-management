@@ -27,4 +27,4 @@ Electron main 收到独立读卡进程的 4 字节 UID 后立即计算固定盐 
 
 待定项在图中标黄：学生字段、校园 API、真实读卡器接入、部署和发布输入，以及新增的初始合法学生预置来源 TBD-07。TBD-02 保留校园 API 的协议、认证、原卡号格式和字段等接入输入，不要求 API 接受哈希。跨卡身份迁移 NEXT-01 仍延期，新卡无预置记录即拒绝。
 
-工作区入口在本目录运行：`corepack yarn install --immutable`，`corepack yarn typecheck`，`corepack yarn test:coverage:server`（需要真实 PostgreSQL），`corepack yarn test:coverage:client`，`corepack yarn build`。Windows 需 Rust 1.94.0 + MSVC Build Tools，先用 `corepack yarn build:reader:mock` 构建读卡 mock；客户端用 `corepack yarn package:win` 生成 `release/` 内安装包；该目录为本地构建产物，不入源码仓库。GitHub Actions 检查入口为仓库根目录 `.github/workflows/record-only.yml`。
+工作区入口在本目录运行：首次执行 `corepack yarn install --immutable`，日常开发直接执行 `corepack yarn dev`（自动准备 Rust mock、共享包并启动带热更新的 Electron/Vite 开发环境）；`corepack yarn typecheck`，`corepack yarn test:coverage:server`（需要真实 PostgreSQL），`corepack yarn test:coverage:client`，`corepack yarn build`。Windows 需 Rust 1.94.0 + MSVC Build Tools；客户端用 `corepack yarn package:win` 生成 `release/` 内安装包；该目录为本地构建产物，不入源码仓库。GitHub Actions 检查入口为仓库根目录 `.github/workflows/record-only.yml`。

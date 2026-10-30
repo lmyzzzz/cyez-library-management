@@ -22,6 +22,8 @@ docker compose --env-file .env.integration ps
 
 受控 seed 必须用 `migrate` 服务的迁移数据库角色运行。`api` 运行角色不能新增学生；重复执行测试 seed 应返回 `inserted:0`。教师端先执行 `corepack yarn build:reader:mock` 和 `corepack yarn build:client`，设置 `$env:CYEZ_CLIENT_CONFIG = (Resolve-Path config/client.integration.json).Path` 后运行 `corepack yarn start:client`；也可运行 `corepack yarn package:win` 后启动 `release/win-unpacked/图书馆使用登记.exe`。应用设置页按 `runtime/integration-connection.json` 输入 IP、端口、指纹和共享账号。Electron 会自动启动 Rust UID 输入窗口，输入 `00000001` 并点击 Send scan；详情见[读卡进程协议](reader-process.md)。测试卡按钮仅在开发/集成客户端出现；生产客户端配置拒绝缺少真实读卡适配器，生产服务端配置拒绝 fake provider。
 
+日常开发在 `record-only/` 运行 `corepack yarn dev` 即可：自动增量构建 Rust mock、准备共享包并启动 Electron/Vite。默认使用集成配置和独立的 `runtime/teacher-dev` 数据目录（可用 `CYEZ_CLIENT_CONFIG` / `CYEZ_USER_DATA` 覆盖）。React 与客户端共享源码修改自动热更新，main/preload 修改自动重建并重启/刷新；修改 Rust 后重新运行 `dev` 即自动增量编译。首次安装依赖仍需 `corepack yarn install --immutable`。后端沿用上面的 Compose 启动方式，开发脚本不会创建数据库或预置数据。
+
 开发验证命令：
 
 ```powershell

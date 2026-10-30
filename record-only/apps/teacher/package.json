@@ -9,7 +9,7 @@
   "scripts": {
     "build": "electron-vite build",
     "start": "electron .",
-    "dev": "electron-vite dev",
+    "dev": "electron-vite dev --watch",
     "package:win": "electron-builder --win nsis --x64"
   },
   "dependencies": {

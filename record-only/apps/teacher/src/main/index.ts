@@ -67,9 +67,26 @@ void app.whenReady().then(async () => {
     });
     const controls = createWindowControlHost();
     controls.bind(window);
-    const renderer = pathToFileURL(
-      join(location, "../renderer/index.html"),
-    ).href;
+    let renderer = pathToFileURL(join(location, "../renderer/index.html")).href;
+    if (
+      !app.isPackaged &&
+      config.environment !== "production" &&
+      process.env.NODE_ENV === "development" &&
+      process.env.ELECTRON_RENDERER_URL
+    ) {
+      const devUrl = new URL(process.env.ELECTRON_RENDERER_URL);
+      if (
+        devUrl.protocol !== "http:" ||
+        devUrl.hostname !== "127.0.0.1" ||
+        devUrl.username ||
+        devUrl.password ||
+        devUrl.pathname !== "/" ||
+        devUrl.search ||
+        devUrl.hash
+      )
+        throw new Error("INVALID_DEV_RENDERER_URL");
+      renderer = devUrl.href;
+    }
     window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
     window.webContents.on("will-navigate", (event, url) => {
       if (url.split("#")[0] !== renderer) event.preventDefault();

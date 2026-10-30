@@ -12,6 +12,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "yarn build:reader:mock && yarn build:shared && yarn workspace @record/teacher dev",
     "build:shared": "yarn workspace @record/protocol build && yarn workspace @record/domain build && yarn workspace @record/client-sdk build && yarn workspace @record/ui build",
     "build:server": "yarn workspace @record/protocol build && yarn workspace @record/domain build && yarn workspace @record/server build",
     "build:client": "yarn build:shared && yarn workspace @record/teacher build",
