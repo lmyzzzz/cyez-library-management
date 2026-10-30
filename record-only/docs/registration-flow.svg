@@ -19,10 +19,10 @@
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">03 · 刷卡、登记和结束的完整流程</text>
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">实线为事件/请求/状态流；每次提交都重新校验权限、占用和版本。教师客户端显示成功必须以服务端提交结果为准。</text>
 <rect x="60" y="155" width="500" height="150" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="310.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">① CardReader 规范化并计算 studentId</text>
+<text x="310.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">① 读卡进程 → main 立即计算 studentId</text>
 <text x="310.0" y="222.87500000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定盐 SHA-256；原卡号独立短时内存</text>
 <text x="310.0" y="250.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">卡号不经 renderer IPC、不进日志</text>
-<text x="310.0" y="277.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-03：读卡协议与 UID 格式</text>
+<text x="310.0" y="277.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Wiegand-34 / 4 字节；TBD-03 实机验收</text>
 <rect x="650" y="155" width="500" height="150" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="195.32500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">② 页面门控</text>
 <text x="900.0" y="222.87500000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">在设备列表主页面？</text>

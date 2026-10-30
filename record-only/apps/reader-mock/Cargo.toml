@@ -1,0 +1,8 @@
+[package]
+name = "cyez-reader-mock"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[target.'cfg(windows)'.dependencies]
+native-windows-gui = { version = "=1.0.13", default-features = false }

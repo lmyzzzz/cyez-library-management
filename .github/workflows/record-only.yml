@@ -100,6 +100,10 @@ jobs:
       - run: yarn install --immutable
       - run: yarn build:shared
       - run: yarn typecheck
+      - run: rustup toolchain install 1.94.0 --profile minimal --component rustfmt
+      - run: cargo fmt --all -- --check
+      - run: yarn test:reader:mock
+      - run: yarn build:reader:mock
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
       - run: yarn build:client

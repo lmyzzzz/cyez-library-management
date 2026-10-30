@@ -49,13 +49,15 @@ Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固�
 
 ## 构建、迁移与运行
 
-- 根工程使用 Yarn 4 精确版本、单一 yarn.lock、node-modules linker，内部依赖 workspace:^；目录为 record-only/apps/server、apps/teacher 与 packages/{protocol,domain,client-sdk,ui}。
+- 根工程使用 Yarn 4 精确版本、单一 yarn.lock、node-modules linker，内部依赖 workspace:^；目录为 record-only/apps/server、apps/teacher 与 packages/{protocol,domain,client-sdk,ui}。教师端另含 Cargo workspace 的 apps/reader-mock，Rust 版本与 Cargo.lock 固定；构建 target 不进入 Docker context。
 - 多阶段镜像固定 Node LTS 和基础镜像 digest；不可变安装，按拓扑构建共享包与 server，Yarn focus 裁剪生产依赖。运行镜像带 dist、迁移、依赖工作区产物与 ORM/pg，不带教师 UI、Windows node_modules、真实 .env 或测试数据。CI 显式准备 Yarn，不假定基础镜像内置 Corepack。
 - 非 root、只读根 FS、有界 tmpfs、明确可写日志卷、cap_drop/no-new-privileges。Node exec 启动，SIGTERM 停接新命令并有界排空；已提交事务仍可由原 requestId 查询。
 - migration 只用 Sequelize QueryInterface API，Umzug 记录版本；不手写 SQL、raw query/literal，不用 sync force/alter。部署只运行一个 migrate 作业，多个发布流水线需串行化。启用 runtime 账号最小 DML、迁移账号 DDL，不用超级用户运行 API。
 - 启动顺序：db healthy → migrate 成功退出 → api 检查 schema/DB → ready → gateway。live 测进程，ready 测核心数据库可访问/schema 就绪，写能力由各业务操作单独判定。provider 故障阻止刷卡，但历史/设备/手动结束仍可服务；不因此循环重启 API。
 - 只采用可兼容的扩展迁移；破坏性变更不能通过回旧镜像自动回滚。发布前在临时数据副本验证升级，不以删除数据库完成升级。正常部署禁止 down -v。此处测试副本是工程验证材料，不是产品备份模块。
 - 不同来源日志先持久 spool，再由 log-ingest 经 ORM 导入 app_logs；stdout 仅作额外运维输出，轮转不能丢弃未交接日志。数据库不可写保留磁盘队列，教师没有服务器日志查询权限。
+
+教师端构建需 Rust/MSVC；`yarn package:win` 自动构建 Rust mock 并复制到资源目录。生产使用外部原生读卡 exe，配置与升级兼容性见[读卡接口](reader-process.md)；更换读卡器只替换进程实现，不能启用 mock 代替实机验收。
 
 ## 容量与故障处理
 

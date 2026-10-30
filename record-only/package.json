@@ -29,7 +29,9 @@
     "start:client": "yarn workspace @record/teacher start",
     "migrate": "yarn workspace @record/server migrate",
     "seed": "yarn workspace @record/server seed",
-    "package:win": "yarn build:client && yarn workspace @record/teacher package:win"
+    "build:reader:mock": "cargo build --manifest-path Cargo.toml -p cyez-reader-mock --release --locked",
+    "test:reader:mock": "cargo test --manifest-path Cargo.toml -p cyez-reader-mock --locked",
+    "package:win": "yarn build:reader:mock && yarn build:client && yarn workspace @record/teacher package:win"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

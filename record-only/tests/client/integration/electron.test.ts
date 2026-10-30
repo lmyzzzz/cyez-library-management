@@ -128,6 +128,9 @@ async function login() {
   await page.getByRole("button", { name: "刷新", exact: true }).first().click();
 }
 test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口", async () => {
+  expect(await call<{ reader: string }>("status")).toMatchObject({
+    reader: "Rust mock：Wiegand-34 手动输入",
+  });
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "使用登记", exact: true }),

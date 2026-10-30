@@ -4,7 +4,10 @@
     "hashVersion": "REPLACE_WITH_CONFIRMED_HASH_VERSION",
     "fixedSaltHex": "REPLACE_WITH_CONFIRMED_FIXED_SALT_HEX",
     "issuer": "REPLACE_WITH_CONFIRMED_ISSUER",
-    "uidByteLengths": [0]
+    "uidByteLengths": [4]
   },
-  "readerModule": "C:/ProgramData/cyez-library/adapters/reader.mjs"
+  "readerProcess": {
+    "kind": "external",
+    "executable": "C:/Program Files/cyez-library-reader/reader.exe"
+  }
 }

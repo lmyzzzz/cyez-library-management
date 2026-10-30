@@ -11,10 +11,6 @@ export interface CardEvent {
   card: CardScanInput;
   source: "reader" | "integration";
 }
-export interface ReaderAdapter {
-  start(accept: (uid: Uint8Array) => void, onError: () => void): Promise<void>;
-  stop(): Promise<void>;
-}
 export class CardReader {
   private last: { id: string; time: number } | undefined;
   constructor(

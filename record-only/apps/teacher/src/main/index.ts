@@ -9,23 +9,32 @@ import { ApiError } from "@record/protocol";
 import { actions, type ActionName } from "../shared/bridge.js";
 import { LocalStore } from "./store.js";
 import { Coordinator } from "./coordinator.js";
-import type { ReaderAdapter } from "./reader.js";
+import {
+  ProcessReader,
+  readerProcessSchema,
+  resolveReaderExecutable,
+} from "./reader-process.js";
 const configSchema = z
   .object({
     environment: z.enum(["development", "integration", "production"]),
     identity: identityConfigSchema,
-    readerModule: z.string().optional(),
+    readerProcess: readerProcessSchema.optional(),
   })
   .strict()
   .superRefine((v, c) => {
-    if (v.environment === "production" && !v.readerModule)
-      c.addIssue({ code: "custom", message: "READER_ADAPTER_REQUIRED" });
+    if (v.environment === "production" && v.readerProcess?.kind !== "external")
+      c.addIssue({ code: "custom", message: "EXTERNAL_READER_REQUIRED" });
+    if (
+      v.identity.uidByteLengths.length !== 1 ||
+      v.identity.uidByteLengths[0] !== 4
+    )
+      c.addIssue({ code: "custom", message: "WIEGAND34_UID_REQUIRED" });
   });
 if (process.env.CYEZ_USER_DATA)
   app.setPath("userData", process.env.CYEZ_USER_DATA);
 app.disableHardwareAcceleration();
 let coordinator: Coordinator | undefined;
-let adapter: ReaderAdapter | undefined;
+let adapter: ProcessReader | undefined;
 let interval: NodeJS.Timeout | undefined;
 let stopping = false;
 void app.whenReady().then(async () => {
@@ -104,25 +113,47 @@ void app.whenReady().then(async () => {
       },
     );
     await coordinator.init();
-    if (config.readerModule) {
-      const mod = await import(pathToFileURL(config.readerModule).href);
-      adapter = await mod.createReader();
-      if (!adapter) throw new Error("READER_ADAPTER_INVALID");
-      await adapter.start(
-        (uid) => {
-          void coordinator!.reader.accept(uid).catch(() =>
-            coordinator!.log({
-              source: "reader",
-              level: "error",
-              code: "READER_FAILED",
-            }),
-          );
-        },
-        () => {
-          coordinator!.readerState = "读卡器异常";
-        },
+    if (config.readerProcess) {
+      adapter = new ProcessReader(
+        resolveReaderExecutable(
+          config.readerProcess,
+          config.environment,
+          app.getAppPath(),
+          process.resourcesPath,
+          app.isPackaged,
+        ),
+        config.environment === "production",
       );
-      coordinator.readerState = "读卡器已连接";
+      await adapter
+        .start(
+          (uid, source) => {
+            void coordinator!.reader.accept(uid, source).catch(() =>
+              coordinator!.log({
+                source: "reader",
+                level: "error",
+                code: "READER_FAILED",
+              }),
+            );
+          },
+          () => {
+            coordinator!.readerState = "读卡进程已断开，请检查设备后重启应用";
+            void coordinator!
+              .log({ source: "reader", level: "error", code: "READER_FAILED" })
+              .catch(() => {});
+            if (!window.isDestroyed())
+              window.webContents.send("library:event", { type: "changed" });
+          },
+          (mock) => {
+            coordinator!.readerState = mock
+              ? "Rust mock：Wiegand-34 手动输入"
+              : "读卡进程已连接";
+            if (!window.isDestroyed())
+              window.webContents.send("library:event", { type: "changed" });
+          },
+        )
+        .catch(() => {
+          coordinator!.readerState = "读卡进程启动失败，请检查配置后重启应用";
+        });
     } else coordinator.readerState = "集成环境：测试读卡器";
     interval = setInterval(() => {
       void coordinator!.flush().catch(() => {});
@@ -133,7 +164,7 @@ void app.whenReady().then(async () => {
   } catch {
     dialog.showErrorBox(
       "启动失败",
-      "请提供有效的 client-config.json，并检查本地存储。生产环境需配置真实读卡适配器。",
+      "请提供有效的 client-config.json，并检查本地存储和读卡进程。生产环境需配置真实读卡可执行文件。",
     );
     app.quit();
   }

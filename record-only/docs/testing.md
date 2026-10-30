@@ -49,12 +49,12 @@
 | ID | 场景 | 关键断言 |
 | --- | --- | --- |
 | C-U-01 | 主列表/设置/历史/Modal/提交中刷卡 | 只有合格主列表请求 preview；其他只 Toast，无 provider 请求或排队重放 |
-| C-U-02 | reader 立即 hash、跨客户端/服务端/seed、前导零/长度/字节序 | 相同规范卡号得相同 studentId；不同盐/版本/发行方有明确隔离；CardScanInput 独立于 StudentDTO；原卡号仅内存/HTTPS，不进 IPC/日志/SQLite；重复 scan 合并 |
+| C-U-02 | reader 立即 hash、跨客户端/服务端/seed、前导零/长度/字节序 | 相同规范卡号得相同 studentId；不同盐/版本/发行方有明确隔离；CardScanInput 独立于 StudentDTO；原卡号仅在读卡继承管道及本次查询内存/HTTPS，不进 renderer IPC/日志/SQLite；重复 scan 合并 |
 | C-U-03 | 10 秒无操作，9.9 秒输入，持续编辑，后台/唤醒 | 真实活动重置；轮询/合成事件不重置；后台返回先清过期；只取消不提交；提交后不触发空闲取消 |
 | C-U-04 | 结束页 5 秒确认/编辑失焦、按钮竞争 | 自动提交暂停并需显式恢复；仅一次动作；手动/批量 Modal 从不自动确认 |
 | C-U-05 | 设置/设备/历史组件，pin 输入 | 两个一级入口正确；历史无编辑删除导出；pin 规范化长度正确，错误清晰；设备状态不可误选 |
 | C-I-01 | 真实 Electron/cyez-ui/窗口/路由 | 独立 userData、单份 React、沙箱与隔离开启，无旧仓库路径 |
-| C-I-02 | fake reader → main → preload → renderer | adapter 立即计算 studentId；main 以临时 card 数据请求 HTTPS，renderer 仅收学生 DTO；主页面门控生效，拒绝事件释放卡号；订阅不泄漏 |
+| C-I-02 | 独立 Rust mock → main → preload → renderer | main 收到 UID 后立即计算 studentId；main 以临时 card 数据请求 HTTPS，renderer 仅收学生 DTO；主页面门控生效，拒绝事件释放卡号；订阅不泄漏 |
 | C-I-03 | 断网/超时/会话失效/空闲边界 | 不显示虚假成功，原键恢复；后台过期登记不复活，结束页恢复不偷提交 |
 | C-I-04 | 提交后 kill Electron、重启/换服务器 | SQLite 意图恢复，查询原结果；不存 UID/hash；旧服务器意图绝不发给新 origin |
 | C-I-05 | 日志重启/断网/ACK 丢失/磁盘失败 | 全部日志持久补传和去重；未确认不删；记录不了就明确报错 |
@@ -66,11 +66,15 @@
 | C-I-11 | 刷卡失败/取消/重启、普通提交重试边界 | 刷卡不进持久队列、不自动重放；重新刷卡才再次查 provider；main/renderer 错误、trace/日志无原卡号；内存请求引用释放后无应用级缓存，不宣称能证明 GC 物理擦除 |
 | C-I-12 | 本地 outbox/提交意图空间不足与恢复 | 预警明确，持久失败不发送新业务或伪装保存成功；已发请求仍显示待确认；不删除未 ACK 日志；恢复空间后沿原键查结果并补传，不离线补记时间 |
 
+## 读卡子进程验证
+
+2026-10-30 增补：Rust `cargo test --locked` 校验 Wiegand-34 位/奇偶、8 位 UID 与 shutdown；客户端实际 spawn Rust release exe 校验握手、前导零、生产拒绝 mock、关闭和重启；用独立故障子进程验证分片/多帧/CRLF、超长/畸形消息、握手超时、缺少可执行文件、提前退出和强制关闭。真实 Electron 套件验证自动启动及打包资源路径；另用原生窗口手动输入验证 scan 输出。所有这些均不能替代 TBD-03 真实硬件。
+
 ## 联调与门禁
 
 完整联调使用**预置合法学生**：刷卡刷新 → 选设备 → 开始 → 再刷卡刷新 → 结束 → 设置内查历史；另测未知拒绝、外部故障转手动结束、标签跨区域设备、全系统批量、设备编辑/删除、10 秒空闲、共享改密、pin 错误、应用/DB 重启和日志补传。
 
-CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、Windows 真实 Electron 集成，然后构建 Docker/客户端包并联调。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。
+CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、Windows Rust fmt/test/release build、真实 Electron 集成，然后构建 Docker/客户端包并联调。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。
 
 根 Yarn 调度脚本 `test:unit:server/client` 与 `test:integration:server/client` 已创建并运行；实际结果见[测试报告](verification-report.md)。两端分别 lines/statements/functions ≥85%、branches ≥80%；身份/占用/幂等/pin/计时/资料刷新/备注关键模块 branches ≥90%。阈值为项目门禁；生成代码和第三方库明确排除，不能排除失败路径凑覆盖率。
 

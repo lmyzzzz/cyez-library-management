@@ -42,6 +42,12 @@
       "out/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "../../target/release/cyez-reader-mock.exe",
+        "to": "readers/cyez-reader-mock.exe"
+      }
+    ],
     "asar": true,
     "win": {
       "target": [

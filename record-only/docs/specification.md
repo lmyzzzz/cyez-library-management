@@ -8,7 +8,8 @@
 
 | 组件 | 负责 | 边界 |
 | --- | --- | --- |
-| CardReader / Electron main | USB 解析后立即计算 studentId、临时持有卡号、指纹校验、认证、持久提交意图和日志 | 原 UID 仅经已校验 pin 的 HTTPS 刷卡请求发往服务端；不交 renderer、不入日志/SQLite/持久队列 |
+| 原生读卡子进程 | 处理真实设备协议与 Wiegand-34 校验，仅通过继承管道交付 4 字节 UID | 不读取其他扇区；Rust mock 仅用于开发/集成，见[接口契约](reader-process.md) |
+| CardReader / Electron main | 接收独立进程的规范 UID 后立即计算 studentId、临时持有卡号、指纹校验、认证、持久提交意图和日志 | 原 UID 仅经已校验 pin 的 HTTPS 刷卡请求发往服务端；不交 renderer、不入日志/SQLite/持久队列 |
 | renderer / preload | 两个导航入口、设备选择、10 秒无操作取消、结束确认、受限 IPC | 不持有密码/token、任意 URL、SQL 或系统权限；仅使用最小业务 DTO |
 | Fastify | 共享账号验证、每次合格刷卡刷新资料、登记/结束、设备编辑、历史查询、审计/日志接收 | 只开放列明的业务 API；不开放数据库、系统配置、运维日志、导出或任意表查询 |
 | Sequelize + PostgreSQL | 模型、关联、参数化查询、事务、行锁、迁移、条件唯一索引 | 使用库的 Model / QueryInterface / transaction API；不手写 SQL 字符串 |
@@ -34,7 +35,7 @@ IP/pin 可作为普通本地配置保存；密码和 token 仅 main 通过操作
 
 ![刷卡流程](registration-flow.svg)
 
-1. CardReader 完成协议必要的 UID 规范化后，**第一时间在模块内**计算 `studentId = hexLower(SHA-256(encode(hashVersion, fixedSalt, issuer, uidBytes)))`。输出为 64 位小写十六进制，直接用作 `students.id`，不再另设 UUID 学生 ID 或重复的 card_hash 列。编码与持久化边界见下表；所有终端、服务端和预置工具复用同一纯函数与测试向量，不得随机逐次加盐。固定盐不是秘密，不当作密码或认证凭证。
+1. 独立读卡进程完成 Wiegand-34 校验并经管道交付 4 字节 UID；main 的 CardReader 收到后，**第一时间在模块内**计算 `studentId = hexLower(SHA-256(encode(hashVersion, fixedSalt, issuer, uidBytes)))`。输出为 64 位小写十六进制，直接用作 `students.id`，不再另设 UUID 学生 ID 或重复的 card_hash 列。编码与持久化边界见下表；所有终端、服务端和预置工具复用同一纯函数与测试向量，不得随机逐次加盐。固定盐不是秘密，不当作密码或认证凭证。
 2. 读卡模块向 main 的请求协调器交付两个分离的模型：短暂的 `CardScanInput`（卡号）与 `studentId`（学生标识）。原 UID 不经 renderer/preload IPC、不入日志/SQLite/持久队列；main 仅在本次 HTTPS 请求所需的内存中持有它。页面只接收刷卡状态和后续 StudentDTO，不能通过学生资料接口取得原卡号。
 3. 只有“使用登记”的设备列表、无 Modal、无提交且无 scan 处理中时才接受刷卡流程；其他页面（包括设置和历史）只 Toast“接收到刷卡消息，请返回主页面以触发登记”，丢弃该事件，不向外部 API 查询、不排队重放。以下“每次刷卡”指通过该门控并去重后的有效刷卡；不把硬件连续重复帧视为多次业务刷卡。
 4. main 通过已校验 pin 的 HTTPS 发送 `POST /api/v1/scan-previews`，包含 `scanId / studentId / hashVersion / card:{issuer,uidHex} / source`。服务端记录 `scanAtMs`，校验版本与 UID 格式，用受控固定盐重算 studentId，与请求值不符则以 `CARD_ID_MISMATCH` 拒绝，既不查外部也不更新档案。验证通过后先用重算 ID 查内部学生；不存在、停用或档案 hash 版本不符时返回 `STUDENT_NOT_ALLOWED`，不调用校园 API、不插入学生。仅内部授权通过后，才将本次**原卡号**交给校园 API 适配器查询；不要求供应方接受哈希或 lookupRef。每次通过页面门控、去重、请求校验与内部授权的有效刷卡都查询，不读缓存冒充刷新。
@@ -51,7 +52,7 @@ IP/pin 可作为普通本地配置保存；密码和 token 仅 main 通过操作
 | `StudentDTO` / `students` | `id=studentId`（加盐哈希）、白名单学生资料；数据库另存 hash_version、状态和版本 | 内部数据库持久保存；DTO 可将 id 作为业务标识交给页面，但不含原卡号、盐或 provider 原始响应 |
 | `ScanPreview` | studentId、资料版本、start/end 模式、时间、clientId/会话绑定 | 有界内存；把本次查询结果绑定到合法档案；无原卡号 |
 
-`encode` 使用有版本的明确字节协议：域分隔 ASCII `cyez-record-only/student-id` + 零字节，随后依次为四段 `uint32BE(byteLength) + bytes`：hashVersion 的 UTF-8、固定盐原始字节、规范 issuer 的 UTF-8、UID 原始字节。盐的配置使用严格十六进制解析；不做普通字符串拼接。uidHex 必须为偶数位小写十六进制，拒绝空值和非法长度；不转整数、不丢前导零、不擅自反转字节序。issuer 为已配置的固定发行方代码，硬件 UID 长度/字节序见 TBD-03。服务端只接受已配置的 hashVersion/issuer，不接受客户端提供 salt 或算法。
+`encode` 使用有版本的明确字节协议：域分隔 ASCII `cyez-record-only/student-id` + 零字节，随后依次为四段 `uint32BE(byteLength) + bytes`：hashVersion 的 UTF-8、固定盐原始字节、规范 issuer 的 UTF-8、UID 原始字节。盐的配置使用严格十六进制解析；不做普通字符串拼接。uidHex 必须为偶数位小写十六进制，拒绝空值和非法长度；不转整数、不丢前导零、不擅自反转字节序。issuer 为已配置的固定发行方代码。UID 已确定为 Wiegand-34 中间 32 个数据位，最高位在前，固定 4 字节/8 位小写十六进制；硬件传输与规范 UID 的映射样本验收仍为 TBD-03，详见[读卡进程协议](reader-process.md)。服务端只接受已配置的 hashVersion/issuer，不接受客户端提供 salt 或算法。
 
 provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号格式，保持协议定义的长度/字节序；使用固定、受信任的 HTTPS 目的地，拒绝重定向和降级，不接受客户端指定 URL。不在本系统 URL/query、错误信息、trace 或请求记录中保留卡号；若供应方协议使用 URL/query，适配器必须先移除完整 URL/参数再生成任何日志。服务端请求 schema/错误序列化不能回显输入；gateway 对刷卡请求关闭磁盘 body 缓冲、缓存和 body 日志，限定内存 body 大小，防止临时文件落盘。
 

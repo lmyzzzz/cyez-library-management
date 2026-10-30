@@ -1,6 +1,6 @@
 # 运行、部署与升级
 
-本目录是独立的 Yarn 4 工作区。需要 Node.js 22、Corepack；Windows 教师端构建需要 Windows，服务端需要 Linux Docker Engine + Compose。`nodeLinker: node-modules` 和 `yarn.lock` 固定依赖。无真实校园 API、读卡器或学校授权名单时，只能运行显式 `integration` 环境。
+本目录是独立的 Yarn 4 工作区。需要 Node.js 22、Corepack；Windows 教师端构建需要 Windows、Rust 1.94.0 与 MSVC C++ Build Tools，服务端需要 Linux Docker Engine + Compose。`nodeLinker: node-modules` 和 `yarn.lock` 固定依赖。无真实校园 API、读卡器或学校授权名单时，只能运行显式 `integration` 环境。
 
 ## 集成环境启动
 
@@ -20,11 +20,13 @@ docker compose --env-file .env.integration run --rm --no-deps migrate node apps/
 docker compose --env-file .env.integration ps
 ```
 
-受控 seed 必须用 `migrate` 服务的迁移数据库角色运行。`api` 运行角色不能新增学生；重复执行测试 seed 应返回 `inserted:0`。教师端执行 `corepack yarn build:client` 后 `corepack yarn start:client`，并将 `CYEZ_CLIENT_CONFIG` 指向绝对路径 `config/client.integration.json`；也可运行 `corepack yarn package:win` 后启动 `release/win-unpacked/图书馆使用登记.exe`。应用设置页按 `runtime/integration-connection.json` 输入 IP、端口、指纹和共享账号。测试卡按钮仅在开发/集成客户端出现；生产客户端配置拒绝缺少真实读卡适配器，生产服务端配置拒绝 fake provider。
+受控 seed 必须用 `migrate` 服务的迁移数据库角色运行。`api` 运行角色不能新增学生；重复执行测试 seed 应返回 `inserted:0`。教师端先执行 `corepack yarn build:reader:mock` 和 `corepack yarn build:client`，设置 `$env:CYEZ_CLIENT_CONFIG = (Resolve-Path config/client.integration.json).Path` 后运行 `corepack yarn start:client`；也可运行 `corepack yarn package:win` 后启动 `release/win-unpacked/图书馆使用登记.exe`。应用设置页按 `runtime/integration-connection.json` 输入 IP、端口、指纹和共享账号。Electron 会自动启动 Rust UID 输入窗口，输入 `00000001` 并点击 Send scan；详情见[读卡进程协议](reader-process.md)。测试卡按钮仅在开发/集成客户端出现；生产客户端配置拒绝缺少真实读卡适配器，生产服务端配置拒绝 fake provider。
 
 开发验证命令：
 
 ```powershell
+corepack yarn test:reader:mock
+corepack yarn build:reader:mock
 corepack yarn typecheck
 corepack yarn format:check
 corepack yarn test:coverage:server
@@ -42,7 +44,7 @@ corepack yarn package:win
 
 合法学生预置文件通过 `node apps/server/dist/cli.js seed /path/to/seed.json` 交给 `migrate` 容器处理。格式为 `source`、`compatibleIdentityConfirmed:true`、`students` 数组，每项含 64 位十六进制哈希 `id`、`hashVersion`、`issuer` 和已确认白名单 `profile`。文件不得含原卡号。重复同一输入不覆盖资料；冲突整批回滚。来源和授权核验由 TBD-07 责任方提供。
 
-教师端生产 `client-config.json` 位于 Electron userData，字段为 `environment:"production"`、共享 `identity` 参数和绝对路径 `readerModule`。读卡模块实现 `ReaderAdapter`，按真实硬件协议提供 UID 字节；未经 TBD-03 验证不得将普通键盘输入当刷卡数据。Windows 包当前未签名；签名、目标系统安装升级和多 DPI 验收需 TBD-06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端重新配置连接。
+教师端生产 `client-config.json` 位于 Electron userData，字段为 `environment:"production"`、共享 `identity` 参数和 `readerProcess:{kind:"external",executable:"C:/Program Files/cyez-library-reader/reader.exe"}`。原生进程实现[管道协议 v1](reader-process.md)，只交付 Wiegand-34 中间 4 字节 UID；main 不加载 JavaScript 硬件模块。生产配置及握手均拒绝 mock；`identity.uidByteLengths` 必须为 `[4]`。旧 `readerModule` 配置须替换。Windows 包当前未签名；签名、目标系统安装升级和多 DPI 验收需 TBD-06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端重新配置连接。
 
 ## 升级与故障
 
