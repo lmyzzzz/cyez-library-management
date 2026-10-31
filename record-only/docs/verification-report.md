@@ -39,3 +39,18 @@
 | Windows 制品 | `release/cyez-library-0.1.0-x64-setup.exe`，119453763 字节；SHA-256 `29dae3f58ea85e5de65956c3628c386ba928703c33ae2f1dc58116725dc9e7e1`；仍为 NotSigned。包内 `resources/readers/cyez-reader-mock.exe` 为 228864 字节 |
 
 CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建 Rust exe。真实 Electron 业务操作仍使用显式测试卡，Rust 手动窗口到管道另行实际验证；未将两种验证合称真实硬件端到端验收。上述旧报告的已验证容器重建、日志积压和容量行为未因本轮新增读卡代码重新扩大声明。其余 TBD 与 NEXT-01 继续保留。
+
+## 2026-10-31 学生资料缓存修订验证
+
+校园 API 成功即允许登记；本地学生行仅用于设备列表与历史查询。每次新刷卡先查询 provider，再事务性新增或覆盖缓存。重复提交同一个 scanId 是幂等重试，不重复查询。API 明确拒绝、故障或资料字段无效时不使用旧缓存生成可提交预览。旧 `isEnabled`/`seedDigest` 字段不再参与授权；原 TBD-07 生产预置要求已撤回。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| 无 seed 实库验证 | 新建独立 PostgreSQL 库，依次执行 `001`、`002` 迁移；确认旧列从非空改为可空。未写入固定盐指纹时 API 拒绝启动，迁移初始化后重复执行不改变指纹，换盐被拒绝；学生表为空时 API 成功刷卡插入缓存并登记，第二次刷卡覆盖所有字段，原旧库 `isEnabled=false` 不阻止成功查询；拒绝、故障和字段不完整都不覆盖缓存，设备列表与历史读取不调用 provider，故障期间可手动结束 |
+| 服务端 | 真实 PostgreSQL 33 项通过；statements 92.99%、branches 89.83%、functions 96.87%、lines 94.44%；`service.ts` 分支 91.89%，覆盖率门禁通过 |
+| 客户端 | 47 项单元/组件测试通过；statements 88.22%、branches 83.51%、functions 86.31%、lines 89.11%；真实 Electron 集成 6 项通过，测试库不执行学生 seed，首次刷卡从空缓存开始；显式 Compose 用例另行通过 |
+| 集成部署 | Docker API 镜像重建并通过迁移；DB、API、gateway 与 log-ingest 正常，API/DB healthy，现有命名卷保留。打包 Electron 经 HTTPS gateway → API → PostgreSQL 的登记/结束/只读历史用例通过；另以受信任测试证书和运行账号经真实 HTTPS 网关刷随机未缓存 UID，首次返回版本 1，再次刷卡返回版本 2，验证运行账号首次插入权限 |
+| Rust 与发布 | Rust mock 3 项测试通过；Windows x64 NSIS 安装包重新生成，SHA-256 `cb94ce8c7740527feb73d50ec6fd572525469628981d2cb591832242e7ee2291`，Authenticode `NotSigned` |
+| 静态校验 | TypeScript、Prettier、图源/SVG 一致性通过；Docker 构建中的 Yarn `--immutable` 通过 |
+
+测试仍使用开发/集成 FakeProvider、测试证书与测试 UID。TBD-01/02 的真实学生字段、校园 API 协议、拒绝语义和 HTTPS 联调，TBD-03 真实读卡器，TBD-04 目标部署与容量，TBD-05 保留期，TBD-06 签名/目标 Windows 验收尚待外部输入；真实校园 API 故障/限额、目标磁盘写满与长时间日志积压仍未实测。NEXT-01 跨卡/换盐身份迁移继续延期。此前报告的 TBD-07 行仅保留历史记录，不再构成未完成验收项。

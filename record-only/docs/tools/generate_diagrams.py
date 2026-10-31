@@ -51,7 +51,7 @@ def overview():
     card(p, 'api', 680, 230, 1040, 115,
          'HTTPS :443 → gateway → Fastify REST /api/v1\n共享登录 / 刷卡刷新 / 登记结束 / 设备编辑 / 历史 / 日志 ACK\n固定业务白名单；无 admin、机房 ACL 或运维数据查询')
     card(p, 'services', 680, 455, 480, 180,
-         'Fastify + Sequelize · 服务端规则\n按原卡号重算 studentId，拒绝错配\n先内部授权；合法卡查 API 刷新资料\n预览 TTL / 幂等 / 版本 / 事务')
+         'Fastify + Sequelize · 服务端规则\n按原卡号重算 studentId，拒绝错配\n每次查 API；成功新增或覆盖缓存\n预览 TTL / 幂等 / 版本 / 事务')
     card(p, 'provider', 1260, 455, 460, 180,
          '校园卡 API · 用本次原卡号查询\n正常 TLS；查询后释放原卡号\nTBD-02：协议、认证、卡号格式\nTBD-01：学生资料白名单', YELLOW)
     card(p, 'credentials', 680, 725, 480, 125,
@@ -71,7 +71,7 @@ def overview():
     note(p, 'scope', 40, 1330, 840, 160,
          '范围边界\n本版无学生端、人脸识别、锁机或屏幕墙\n“结束使用”仅结束记录，故障不控制或关闭电脑\n不限制设备总数；有限分页/批次用于资源保护', BLUE, 20)
     note(p, 'privacy', 920, 1330, 840, 160,
-         '数据与刷新边界\n卡号临时请求 / 学生档案分开；原卡号不入库或日志\nstudentId 为哈希，服务端验证绑定；未知学生拒绝\n取消不撤销已刷新资料；日志仅用请求/记录 ID 关联', GREEN, 20)
+         '数据与刷新边界\n卡号临时请求 / 学生缓存分开；原卡号不入库或日志\nstudentId 为哈希；API 为权威，本地仅缓存\n取消不撤销已刷新资料；日志仅用请求/记录 ID 关联', GREEN, 20)
     caption(p, '黄色：尚待外部确认的需求。蓝/绿：已决定的结构。本目录独立维护；实施与故障处理见 implementation-plan.md。')
     return p
 
@@ -80,7 +80,7 @@ def data_model():
     p = page('data-model', '02 · 数据模型、关系与一致性约束',
              '实线从外键引用方指向被引用方，边旁写明基数；虚线为约束/算法说明。活动占用只从 usage_records 派生。', 1800, 2120)
     card(p, 'students', 60, 160, 500, 245,
-         'students · 预置合法档案\nPK id = 固定盐 SHA-256 / STRING(64)\nhash_version / is_enabled\nprofile_refreshed_at / version\n无原卡号 / card_hash / lookupRef\nTBD-01：姓名、班级、校内学号', YELLOW, 20)
+         'students · API 资料缓存\nPK id = 固定盐 SHA-256 / STRING(64)\nhash_version / 最新白名单资料\nprofile_refreshed_at / version\n无原卡号 / card_hash / lookupRef\nTBD-01：姓名、班级、校内学号', YELLOW, 20)
     card(p, 'records', 650, 160, 500, 245,
          'usage_records · 一次使用一条\nUUID PK id / UUID FK device_id\nFK student_id STRING(64) → students.id\nstarted_at / ended_at nullable\nnotes / end_reason / version / clientId\n结束后只读；无原卡号', GREEN, 20)
     card(p, 'devices', 1240, 160, 500, 245,
@@ -91,13 +91,13 @@ def data_model():
     p.label('device-many', 1160, 200, 70, 65, 'N : 1', 17)
 
     card(p, 'card', 60, 500, 500, 245,
-         '合法档案预置 · TBD-07\n合法学生 / 哈希 studentId 来源与格式\n与客户端、服务端共用规范化/哈希协议\n产品外受控 ORM seed；无原卡号落库\n未知 ID 即非法，API 成功也不能放行', YELLOW, 20)
+         '校园 API 是权威数据源\n每次有效刷卡按原卡号查询\n成功时新增或覆盖本地学生缓存\n拒绝/故障不使用旧缓存放行\n日常查看和历史仅读本地缓存', YELLOW, 20)
     card(p, 'rules', 650, 500, 500, 245,
          '一致性约束 · ORM 声明与事务\n活动 = ended_at 为空\n活动 student_id / device_id 各自唯一\n行锁内验证时间与区间不重叠\n无单独占用表，无历史更正/删除', PURPLE, 20)
     card(p, 'device-rule', 1240, 500, 500, 170,
          '设备编辑与删除\n设置中增加 / 修改 / 删除\n有活动记录先结束，删除为软删除', BLUE, 20)
     route(p, 'card-student', 'card', 'students', [(310,500),(310,405)], dashed=True)
-    p.label('card-many', 325, 427, 200, 45, '受控预置', 17)
+    p.label('card-many', 325, 427, 200, 45, '成功写入缓存', 17)
     route(p, 'device-rule-edge', 'devices', 'device-rule', [(1490,405),(1490,500)], dashed=True)
     p.label('device-rule-label', 1500, 427, 200, 45, '业务规则', 17)
     route(p, 'record-rules', 'records', 'rules', [(900,405),(900,500)], dashed=True)
@@ -125,7 +125,7 @@ def data_model():
     note(p, 'history', 60, 1520, 800, 230,
          '历史记录 · 只读内部库\n学生字段为最近一次成功刷卡刷新的数据库值\n查看历史不请求校园 API；取消登记不撤销资料刷新\n无编辑 / 删除 / 导出；软删除设备仍可显示历史\nTBD-01：字段；TBD-05：留存', YELLOW, 20)
     note(p, 'identity', 920, 1520, 820, 230,
-         'NEXT-01 · 跨卡 / 换盐迁移延期\n换卡/盐/版本会改变 studentId 主键\n需要新旧映射，迁移历史 FK / 审计 / 持久结果\n旧 hash 不能反算新 hash，新卡无预置即拒绝\n固定盐哈希不防枚举/克隆，不是认证秘密', YELLOW, 20)
+         'NEXT-01 · 跨卡 / 换盐迁移延期\n换卡/盐/版本会改变 studentId 主键\n需要新旧映射，迁移历史 FK / 审计 / 持久结果\n新卡可单独缓存，但不自动合并旧历史\n固定盐哈希不防枚举/克隆，不是认证秘密', YELLOW, 20)
     note(p, 'identity-protocol', 60, 1810, 1680, 165,
          '身份协议与临时卡号生命周期\nstudentId = 小写 hex(SHA-256(版本 / 固定盐 / 发行方 / UID 的有长度字节编码))\n客户端 / 服务端 / seed 共用协议；服务端由原卡号重算，不能让一个学生 ID 绑定另一张卡\n原卡号仅本次 HTTPS 查询；成功、失败、取消、超时均释放，不进入预览或离线重试', BLUE, 20)
     caption(p, '可分配 = 未软删除 + 未禁用 + 无活动记录；固定盐 hash 不等于不可枚举或不可克隆，不作为认证秘密。')
@@ -144,16 +144,16 @@ def registration():
     route(p, 'scan-gate', 'scan', 'gate', [(560,230),(650,230)])
     route(p, 'gate-ignore', 'gate', 'ignored', [(1150,230),(1240,230)])
     card(p, 'preview', 650, 395, 500, 155,
-         '③ main → 已 pin HTTPS /scan-previews\ncard + studentId / hashVersion / scanId\n服务端重算 ID 拒绝错配，记 scanAtMs\n先查库授权；未知/停用不查 provider\nTBD-07：内部合法学生预置', BLUE)
+         '③ main → 已 pin HTTPS /scan-previews\ncard + studentId / hashVersion / scanId\n服务端重算 ID 拒绝错配，记 scanAtMs\n本地有无缓存都查询校园 API\nAPI 确认学生后才创建预览', BLUE)
     down(p, 'gate-preview', 'gate', 'preview', '是')
     card(p, 'provider', 1240, 395, 500, 155,
-         '内部授权通过 → 原卡号查校园 API\n查询/校验后释放；不入预览或队列\nTBD-02：协议/认证/卡号格式/字段\n正常请求关联，无需额外绑定证明\nTBD-01：资料白名单；仅更新已有档案', YELLOW)
+         '本次原卡号查询校园 API\n查询/校验后释放；不入预览或队列\nTBD-02：协议/认证/拒绝语义/字段\n正常请求关联，无需额外绑定证明\nTBD-01：资料白名单；新增或覆盖缓存', YELLOW)
     route(p, 'preview-provider', 'preview', 'provider', [(1150,470),(1240,470)], both=True)
     note(p, 'failed-preview', 60, 395, 500, 155,
-         '未知 / 停用 / 外部失败 / 卡号 ID 错配\n未知/停用不查外部；无自动注册/重放\n显示错误，重刷或返回；无手动注册\n已有记录可从内部列表手动结束', RED)
+         'API 拒绝 / 外部失败 / 卡号 ID 错配\n失败不写缓存，不以旧缓存放行\n显示错误，重刷或返回；无手动注册\n已有记录可从内部列表手动结束', RED)
     route(p, 'preview-fail', 'preview', 'failed-preview', [(650,470),(560,470)])
     card(p, 'mode', 650, 640, 500, 120,
-         '④ 已有学生资料刷新单独提交\n按 studentId 返回 start/end，无原卡号\n历史只读 DB；取消不回滚资料刷新', PURPLE)
+         '④ 学生缓存新增或覆盖单独提交\n按 studentId 返回 start/end，无原卡号\n历史只读 DB；取消不回滚缓存更新', PURPLE)
     down(p, 'preview-mode', 'preview', 'mode')
 
     card(p, 'register-form', 60, 865, 780, 185,
@@ -198,7 +198,7 @@ def transactions():
     texts = {
         'start': [
             '目标明确\npreviewId / deviceId / notes\n只允许内部已存在且启用的学生\n先刷新资料，提交时核对版本',
-            '锁定与验证\n设备可分配；学生有效且无占用\n未知直接拒绝，不插入学生\n仅创建使用记录，失败整笔回滚',
+            '锁定与验证\n设备可分配；学生缓存版本有效\n刷卡阶段已完成 API 查询和缓存写入\n仅创建使用记录，失败整笔回滚',
             '写入\n创建 usage_record，结束时间为空\n写审计 + committed 操作结果\n条件唯一索引保证一人/一机一条',
             '提交后返回\n返回记录 ID、版本与操作 ID\n竞争失败 409；不留下半条记录\n同键重试不重复创建'],
         'end': [
@@ -260,7 +260,7 @@ def docker():
     card(p,'runtime',650,1090,500,170,
          '容器基线\n只读根 FS / 有界 tmpfs / 可写日志卷\ncap_drop / no-new-privileges\n固定镜像版本与 digest，SIGTERM 排空',size=19)
     card(p,'seed',1270,1090,430,170,
-         '学生预置 · TBD-07\n合法档案 / 哈希 studentId\n产品外受控 ORM seed，无原卡号\n没有教师注册、备份或导出服务',YELLOW,19)
+         '学生缓存 · API 权威\n成功刷卡新增或覆盖资料\n旧缓存仅供日常查询与历史\n没有教师注册、备份或导出服务',YELLOW,19)
     route(p,'spool-ingest','spool','ingest',[(750,970),(750,1030),(315,1030),(315,1090)],dashed=True)
     route(p,'logs-db','ingest','db',[(315,1260),(315,1290),(1195,1290),(1195,735),(1330,735),(1330,695)],dashed=True)
     route(p,'seed-db','seed','db',[(1700,1175),(1720,1175),(1720,650),(1700,650)],dashed=True)
@@ -275,7 +275,7 @@ def docker():
          '启动：db healthy → ORM migrate 成功 → api ready → gateway 接入\n.env 改密后 force-recreate api，旧会话全部失效；教师用新密码重新登录\nlive 测进程；ready 测 DB/schema；provider 故障停止刷卡，历史与手动结束仍可用',PURPLE,21)
     note(p,'pending',60,1990,1680,160,
          'TBD-04：Linux / 架构 / 服务器 IP / 含 IP SAN 的叶证书与可信指纹分发 / API 放通\nTBD-05：保留期及产品外清理；不新增教师备份、导出、机房授权或管理员页面\n单节点停机时禁止新业务；认证恢复后沿原 requestId 查询，日志留盘补传',YELLOW,21)
-    caption(p,'五类 Compose 服务：gateway / api / db / migrate / log-ingest；右侧预置是运维步骤，不是第六个常驻服务。')
+    caption(p,'五类 Compose 服务：gateway / api / db / migrate / log-ingest；学生缓存由 API 在成功刷卡后维护。')
     return p
 
 
@@ -315,7 +315,7 @@ def teacher_ui():
          '上一页   1 / …   下一页   每页条数     |     点击行 → 右侧只读详情抽屉\n固定表头 / 时间列对齐 / 长备注展开 / 键盘焦点；加载骨架、空态、重试和过期提示\n无编辑 / 删除 / 导出按钮；展示最近一次刷卡刷新后的数据库资料，不向外部 API 请求',GREEN,19)
     panel(p,'register',50,1900,530,555,'使用登记 / 登记页',GREEN)
     card(p,'reg-info',75,1985,480,170,
-         '学生摘要只读 · TBD-01 字段\n每次刷卡已向外部刷新并更新 DB\n未知学生拒绝，无手动注册/补填\n刷卡开始时间 / 备注 / DevicePicker\nTBD-07：合法档案初始预置',YELLOW,19)
+         '学生摘要只读 · TBD-01 字段\n每次刷卡都向校园 API 查询\n成功时新增或覆盖缓存；无手动补填\n刷卡开始时间 / 备注 / DevicePicker\n失败不以旧缓存继续登记',YELLOW,19)
     card(p,'reg-timer',75,2200,480,210,
          '连续 10 秒无操作 → 自动取消\n键盘/指针/选择/编辑等真实操作重置\n轮询、动画、合成事件不重置\n后台继续计时，返回先清过期登记\n已提交则关闭空闲计时\n取消不撤销资料刷新或已发结束请求',BLUE,18)
     panel(p,'picker-panel',635,1900,530,555,'使用登记 / 设备选择',PURPLE)
@@ -340,7 +340,7 @@ def workspaces():
     card(p,'root',60,150,1680,140,
          '项目根 · 私有 monorepo · Yarn 4 精确版本 · 单一 yarn.lock · nodeLinker: node-modules\nworkspaces 明确覆盖 record-only/apps/* + record-only/packages/*\nCI install --immutable；共享包 exports + 编译产物；禁止跨包相对导入与双份 DTO',BLUE,22)
     card(p,'server-app',60,390,800,170,
-         'record-only/apps/server · Fastify / Sequelize\nprotocol + domain；共享账号、刷卡刷新、占用事务\n仅查询/更新预置学生；设备编辑 / 只读历史\n通过 ORM 操作 PostgreSQL，不手写 SQL',GREEN,21)
+         'record-only/apps/server · Fastify / Sequelize\nprotocol + domain；共享账号、刷卡刷新、占用事务\nAPI 成功后新增/覆盖缓存；设备编辑 / 只读历史\n通过 ORM 操作 PostgreSQL，不手写 SQL',GREEN,21)
     card(p,'teacher-app',940,390,800,170,
          'record-only/apps/teacher · Electron / React\n依赖 protocol + client-sdk + ui\nrenderer：页面；preload：受限桥；main：子进程/网络\nmain spawn apps/reader-mock；Cargo.lock 锁定原生依赖',GREEN,21)
     route(p,'root-server','root','server-app',[(460,290),(460,390)])
@@ -379,7 +379,7 @@ def workspaces():
     note(p,'release',60,1810,800,185,
          '已确认：cyez-ui 使用授权\n按固定提交 tarball 接入，保留 LICENSE/NOTICE\nTBD-06 仅 Windows 签名材料 / 发布实机验收\n上下两个一级入口：使用登记 / 设置\n不把上游验证当本项目集成通过',YELLOW,19)
     note(p,'phase',940,1810,800,185,
-         '范围与延期\n无学生端 / 完整 Session 状态机\nNEXT-01：换卡/盐改变 ID，历史关联迁移延期\n无 admin、机房 ACL、备份导出、历史编辑删除\nTBD-07：合法档案和哈希 studentId 预置',YELLOW,19)
+         '范围与延期\n无学生端 / 完整 Session 状态机\nNEXT-01：换卡/盐改变 ID，历史关联迁移延期\n无 admin、机房 ACL、备份导出、历史编辑删除\nTBD-02：真实 API 拒绝语义待确认',YELLOW,19)
     caption(p,'固定上游包已入 vendor；Yarn 4 工作区、教师应用与服务端已实现，真实外部接入按 TBD 验收。')
     return p
 
@@ -396,7 +396,7 @@ def testing():
     card(p,'cu',970,485,740,230,
          'C-U · 规则与 React 组件\n立即算 studentId；卡输入与学生 DTO 分离\n原卡号仅内存/HTTPS，无 IPC/日志/持久队列\n10 秒无操作取消，真实输入重置 / 后台检查\n结束 5 秒确认独立规则 / 一次提交门闩\n页面门控 / 设备编辑 / 历史只读 / pin 格式',size=20)
     card(p,'si',90,820,740,315,
-         'S-I · Fastify → Sequelize → 真实 PostgreSQL\n哈希 PK/FK、条件索引、并发占用、行锁与迁移\nprovider 收到原卡号；错配拒绝；卡号不落库\n合法卡每次刷新；未知不查外部；历史读 DB\n响应丢失 / 重启 / intentId / 固定批量集合\n.env 改密失效；网关 body 无临时文件\n日志 ACK / 容量恢复 / 网络隔离 / seed',size=20)
+         'S-I · Fastify → Sequelize → 真实 PostgreSQL\n哈希 PK/FK、条件索引、并发占用、行锁与迁移\nprovider 收到原卡号；错配拒绝；卡号不落库\n首次建缓存、每次覆盖；历史只读 DB\n响应丢失 / 重启 / intentId / 固定批量集合\n.env 改密失效；网关 body 无临时文件\n日志 ACK / 容量恢复 / 网络隔离',size=20)
     card(p,'ci',970,820,740,315,
          'C-I · Windows 真实 Electron / SQLite / HTTPS\nRust mock / main / preload / renderer 链路\nTLS pin 错误不得发送密码/原卡号/正文\n证书过期/SAN 错/重定向拒绝；换 pin 清 session\nOS 密码保存/清除，不可用不得回落明文\n刷卡不持久重放；卡号释放 / 10 秒空闲 / 补传\n设备 CRUD / 历史 / IPC 越权 / 打包 UI 验收',size=20)
     down(p,'su-si','su','si')
@@ -404,17 +404,17 @@ def testing():
     route(p,'source-server','source','server-tests',[(460,280),(460,385)])
     route(p,'source-client','source','client-tests',[(1340,280),(1340,385)])
     card(p,'e2e',60,1320,1680,185,
-         'E2E · 打包教师应用 + Docker gateway / API / PostgreSQL + FakeProvider + 合法 seed\n已知卡每次刷新 → 登记 → 再刷卡结束 → 设置内查历史；未知拒绝，无手动注册\n设备增改软删除、历史只读、pin 正负例、共享改密、断网/重启/补传、迁移和卷持久性\n临时环境隔离；备份/导出/管理员/历史更正不属产品功能，业务外 API 必须拒绝',BLUE,21)
+         'E2E · 打包教师应用 + Docker gateway / API / PostgreSQL + FakeProvider\n空缓存首次刷卡建档 → 登记 → 再刷卡覆盖 → 结束 → 历史；API 拒绝不放行\n设备增改软删除、历史只读、pin 正负例、共享改密、断网/重启/补传、迁移和卷持久性\n临时环境隔离；备份/导出/管理员/历史更正不属产品功能，业务外 API 必须拒绝',BLUE,21)
     route(p,'server-e2e','server-tests','e2e',[(460,1215),(460,1320)])
     route(p,'client-e2e','client-tests','e2e',[(1340,1215),(1340,1320)])
     card(p,'coverage',60,1610,800,220,
          '自动门禁 · 两端独立统计\nlines / statements / functions ≥85%，branches ≥80%\n身份 / 占用 / 幂等 / pin / 计时 / 刷新等 branches ≥90%\nP0 全通过，无静默跳过；flaky 重试仍须报告\n覆盖率不能代替实际行为与网络测试',GREEN,20)
     note(p,'hardware',940,1610,800,220,
-         '待确认的真实输入\nTBD-02 API / 原卡号格式；TBD-03 实机输入\nTBD-04 Linux / TLS 叶证书 / pin 分发\nTBD-06 Windows 签名；UI 使用授权已确认\nTBD-07 初始合法学生与哈希 studentId 来源',YELLOW,20)
+         '待确认的真实输入\nTBD-02 API / 原卡号格式 / 拒绝语义\nTBD-03 真实读卡器与 UID 对照样本\nTBD-04 Linux / TLS 证书 / pin 分发\nTBD-06 Windows 签名与目标验收',YELLOW,20)
     down(p,'e2e-coverage','e2e','coverage')
     route(p,'e2e-hardware','e2e','hardware',[(1340,1505),(1340,1610)])
     card(p,'release',60,1935,1680,195,
-         '发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收\n上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch\nTBD 阻塞的 API/硬件/合法预置明确 blocked，不以模拟通过声称已部署\n集成环境应用 / Docker / PG / Electron 已验证；真实 API、USB 和目标发布仍待验收',PURPLE,21)
+         '发布候选：单元/集成报告 + 两端 coverage + 源版本 + 镜像 digest + 安装包验收\n上游 UI 测试不计本项目覆盖；证书 pin 必须实际握手验证，不能只 mock fetch\nTBD 阻塞的 API/硬件明确 blocked，不以模拟通过声称已部署\n集成环境应用 / Docker / PG / Electron 已验证；真实 API、USB 和目标发布仍待验收',PURPLE,21)
     route(p,'gate-release','coverage','release',[(460,1830),(460,1935)])
     route(p,'hardware-release','hardware','release',[(1340,1830),(1340,1935)])
     caption(p,'详见 testing.md 中 S-U / S-I / C-U / C-I 的逐条断言；实际通过范围、CI 与 TBD 缺口见 verification-report.md。')

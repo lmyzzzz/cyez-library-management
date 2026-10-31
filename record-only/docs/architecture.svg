@@ -49,7 +49,7 @@
 <rect x="680" y="455" width="480" height="180" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="920.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Fastify + Sequelize · 服务端规则</text>
 <text x="920.0" y="537.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">按原卡号重算 studentId，拒绝错配</text>
-<text x="920.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">先内部授权；合法卡查 API 刷新资料</text>
+<text x="920.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次查 API；成功新增或覆盖缓存</text>
 <text x="920.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预览 TTL / 幂等 / 版本 / 事务</text>
 <rect x="1260" y="455" width="460" height="180" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1490.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">校园卡 API · 用本次原卡号查询</text>
@@ -78,8 +78,8 @@
 <text x="460.0" y="1460.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">不限制设备总数；有限分页/批次用于资源保护</text>
 <rect x="920" y="1330" width="840" height="160" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="1373.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">数据与刷新边界</text>
-<text x="1340.0" y="1402.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">卡号临时请求 / 学生档案分开；原卡号不入库或日志</text>
-<text x="1340.0" y="1431.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">studentId 为哈希，服务端验证绑定；未知学生拒绝</text>
+<text x="1340.0" y="1402.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">卡号临时请求 / 学生缓存分开；原卡号不入库或日志</text>
+<text x="1340.0" y="1431.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">studentId 为哈希；API 为权威，本地仅缓存</text>
 <text x="1340.0" y="1460.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">取消不撤销已刷新资料；日志仅用请求/记录 ID 关联</text>
 <rect x="40" y="1588" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="1617.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">黄色：尚待外部确认的需求。蓝/绿：已决定的结构。本目录独立维护；实施与故障处理见 implementation-plan.md。</text>

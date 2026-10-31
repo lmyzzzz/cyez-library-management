@@ -7,14 +7,16 @@ import {
   type QueryInterface,
 } from "sequelize";
 import { Umzug, SequelizeStorage } from "umzug";
-import type { Profile, AppLog } from "@record/protocol";
+import { ApiError, type Profile, type AppLog } from "@record/protocol";
+import type { IdentityConfig } from "@record/protocol/identity";
+import { payloadDigest } from "@record/domain";
 export interface StudentRow extends Profile {
   id: string;
   hashVersion: string;
-  isEnabled: boolean;
+  isEnabled: boolean | null;
   profileRefreshedAt: Date | null;
   version: number;
-  seedDigest: string;
+  seedDigest: string | null;
 }
 export interface DeviceRow {
   id: string;
@@ -105,10 +107,10 @@ function definitions() {
       name: str(100),
       className: str(100),
       schoolNumber: str(100),
-      isEnabled: { type: D.BOOLEAN, allowNull: false },
+      isEnabled: { type: D.BOOLEAN, allowNull: true },
       profileRefreshedAt: date(true),
       version: integer(),
-      seedDigest: str(64),
+      seedDigest: str(64, true),
     },
     devices: {
       id: pk(),
@@ -220,8 +222,18 @@ export class Database {
           up: async () => {
             await this.sequelize.transaction(async (transaction) => {
               const q = this.sequelize.getQueryInterface();
-              for (const [name, attributes] of Object.entries(defs))
-                await q.createTable(name, attributes, { transaction });
+              for (const [name, attributes] of Object.entries(defs)) {
+                // Keep the original migration stable; 002 relaxes these legacy columns.
+                const initialAttributes =
+                  name === "students"
+                    ? {
+                        ...attributes,
+                        isEnabled: { type: D.BOOLEAN, allowNull: false },
+                        seedDigest: str(64),
+                      }
+                    : attributes;
+                await q.createTable(name, initialAttributes, { transaction });
+              }
               await q.addIndex("devices", ["code"], {
                 unique: true,
                 transaction,
@@ -264,8 +276,37 @@ export class Database {
             });
           },
         },
+        {
+          name: "002-student-cache",
+          up: async () => {
+            await this.sequelize.transaction(async (transaction) => {
+              const q = this.sequelize.getQueryInterface();
+              await q.changeColumn(
+                "students",
+                "isEnabled",
+                { type: D.BOOLEAN, allowNull: true },
+                { transaction },
+              );
+              await q.changeColumn(
+                "students",
+                "seedDigest",
+                { type: D.STRING(64), allowNull: true },
+                { transaction },
+              );
+            });
+          },
+        },
       ],
     });
+  }
+  async initializeIdentity(identity: IdentityConfig) {
+    const fingerprint = payloadDigest("identity", identity);
+    const [stored] = await this.settings.findOrCreate({
+      where: { key: "identity" },
+      defaults: { key: "identity", value: fingerprint },
+    });
+    if (stored.get().value !== fingerprint)
+      throw new ApiError("IDENTITY_CONFIGURATION_CHANGED", 409);
   }
   async ready() {
     await this.sequelize.authenticate();
@@ -277,7 +318,7 @@ export class Database {
         { tableName: "SequelizeMeta", timestamps: false },
       );
     const completed = await metadata.findAll();
-    if (!completed.some((row) => row.get("name") === "001-initial"))
+    if (!completed.some((row) => row.get("name") === "002-student-cache"))
       throw new Error("SCHEMA_NOT_READY");
   }
   async close() {

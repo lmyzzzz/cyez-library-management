@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 
 test.skip(
   process.env.COMPOSE_E2E !== "1",
-  "Requires explicit seeded integration Compose stack",
+  "Requires explicit integration Compose stack",
 );
 
 test("打包 Electron 连接 Compose gateway：登记、结束、只读历史", async () => {

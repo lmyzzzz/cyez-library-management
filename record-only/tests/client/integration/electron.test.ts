@@ -13,10 +13,6 @@ import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { Database } from "../../../apps/server/src/database.js";
 import { createApp } from "../../../apps/server/src/app.js";
-import {
-  seedStudents,
-  integrationSeed,
-} from "../../../apps/server/src/seed.js";
 import { testConfig, identity } from "../../helpers/config.js";
 import { certificate } from "../../helpers/certificates.js";
 import { LocalStore } from "../../../apps/teacher/src/main/store.js";
@@ -45,7 +41,8 @@ test.beforeAll(async () => {
   );
   const db = new Database(config.databaseUrl);
   await db.migrator.up();
-  await seedStudents(db, integrationSeed(identity), identity);
+  await db.initializeIdentity(identity);
+  expect(await db.students.count()).toBe(0);
   api = await createApp(config);
   await api.app.listen({ host: "127.0.0.1", port: 0 });
   const address = api.app.server.address();

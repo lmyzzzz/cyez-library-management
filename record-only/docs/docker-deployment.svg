@@ -66,9 +66,9 @@
 <text x="900.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">cap_drop / no-new-privileges</text>
 <text x="900.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定镜像版本与 digest，SIGTERM 排空</text>
 <rect x="1270" y="1090" width="430" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1485.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生预置 · TBD-07</text>
-<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">合法档案 / 哈希 studentId</text>
-<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">产品外受控 ORM seed，无原卡号</text>
+<text x="1485.0" y="1140.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生缓存 · API 权威</text>
+<text x="1485.0" y="1167.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">成功刷卡新增或覆盖资料</text>
+<text x="1485.0" y="1195.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">旧缓存仅供日常查询与历史</text>
 <text x="1485.0" y="1222.9750000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">没有教师注册、备份或导出服务</text>
 <text x="900.0" y="1337.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">frontend：gateway 与 api；backend：api / db / migrate / log-ingest</text>
 <text x="900.0" y="1365.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">单宿主专用网络内部 HTTP；无关容器禁入；跨宿主/不可信网络改为 TLS。仅 gateway 发布端口。</text>
@@ -93,5 +93,5 @@
 <text x="900.0" y="2077.35" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-05：保留期及产品外清理；不新增教师备份、导出、机房授权或管理员页面</text>
 <text x="900.0" y="2107.7999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">单节点停机时禁止新业务；认证恢复后沿原 requestId 查询，日志留盘补传</text>
 <rect x="40" y="2188" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
-<text x="900.0" y="2217.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">五类 Compose 服务：gateway / api / db / migrate / log-ingest；右侧预置是运维步骤，不是第六个常驻服务。</text>
+<text x="900.0" y="2217.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">五类 Compose 服务：gateway / api / db / migrate / log-ingest；学生缓存由 API 在成功刷卡后维护。</text>
 </svg>

@@ -16,7 +16,8 @@ declare global {
   }
 }
 const messages: Record<string, string> = {
-  STUDENT_NOT_ALLOWED: "该学生未在系统中授权。请联系学校数据负责人。",
+  STUDENT_NOT_ALLOWED:
+    "校园资料服务未确认该学生的登记资格。请联系学校数据负责人。",
   CARD_ID_MISMATCH: "卡号与学生标识不一致，请重新刷卡。",
   PROVIDER_UNAVAILABLE: "校园资料服务暂不可用。已有使用记录仍可手动结束。",
   PROFILE_MISMATCH: "校园资料不符合字段要求，请稍后重刷。",

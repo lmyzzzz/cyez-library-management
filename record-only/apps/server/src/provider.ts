@@ -3,7 +3,9 @@ import { ApiError, profileSchema, type Profile } from "@record/protocol";
 import type { CardScanInput } from "@record/protocol/identity";
 import type { Config } from "./config.js";
 /** Real adapters receive only the transient card and MUST use normal verified HTTPS.
- * No logging of raw request/response. Return only the approved profile whitelist. */
+ * Return a profile only when the campus API confirms this student may register.
+ * Map an explicit rejection to STUDENT_NOT_ALLOWED; never use a cached profile
+ * as a fallback for outages. Do not log raw requests or responses. */
 export interface CampusProvider {
   lookup(card: Readonly<CardScanInput>, signal: AbortSignal): Promise<unknown>;
 }
@@ -15,6 +17,8 @@ export class FakeProvider implements CampusProvider {
   ): Promise<Profile> {
     signal.throwIfAborted();
     this.calls++;
+    if (_card.uidHex === "ffffffff")
+      throw new ApiError("STUDENT_NOT_ALLOWED", 403);
     return {
       name: "集成测试学生",
       className: "测试班级",

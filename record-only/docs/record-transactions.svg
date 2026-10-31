@@ -36,8 +36,8 @@
 <text x="310.0" y="675.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">先刷新资料，提交时核对版本</text>
 <rect x="60" y="790" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="310.0" y="837.8249999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">锁定与验证</text>
-<text x="310.0" y="865.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备可分配；学生有效且无占用</text>
-<text x="310.0" y="892.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知直接拒绝，不插入学生</text>
+<text x="310.0" y="865.3749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">设备可分配；学生缓存版本有效</text>
+<text x="310.0" y="892.925" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡阶段已完成 API 查询和缓存写入</text>
 <text x="310.0" y="920.4749999999999" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">仅创建使用记录，失败整笔回滚</text>
 <rect x="60" y="1035" width="500" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="310.0" y="1082.825" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">写入</text>

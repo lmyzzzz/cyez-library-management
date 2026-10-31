@@ -161,12 +161,6 @@ export class Service {
             await this.capacity.require("scan");
             signal?.throwIfAborted();
             const before = await this.db.students.findByPk(id);
-            if (
-              !before ||
-              !before.get().isEnabled ||
-              before.get().hashVersion !== input.hashVersion
-            )
-              throw new ApiError("STUDENT_NOT_ALLOWED", 403);
             let profile;
             try {
               profile = await refreshProfile(
@@ -177,7 +171,8 @@ export class Service {
               );
               this.providerHealthy = true;
             } catch (e) {
-              this.providerHealthy = false;
+              this.providerHealthy =
+                e instanceof ApiError && e.code === "STUDENT_NOT_ALLOWED";
               throw e;
             }
             await this.capacity.require("scan");
@@ -188,30 +183,28 @@ export class Service {
                   transaction,
                   lock: transaction.LOCK.UPDATE,
                 });
-                if (
-                  !current ||
-                  !current.get().isEnabled ||
-                  current.get().hashVersion !== input.hashVersion
-                )
-                  throw new ApiError("STUDENT_NOT_ALLOWED", 403);
-                if (current.get().version !== before.get().version)
+                if (current?.get().version !== before?.get().version)
                   throw new ApiError("PROFILE_VERSION_CONFLICT", 409);
-                await current.update(
-                  {
-                    ...profile,
-                    profileRefreshedAt: new Date(this.now()),
-                    version: current.get().version + 1,
-                  },
-                  { transaction },
-                );
+                const values = {
+                  ...profile,
+                  hashVersion: input.hashVersion,
+                  profileRefreshedAt: new Date(this.now()),
+                  version: (current?.get().version ?? 0) + 1,
+                };
+                const cached = current
+                  ? await current.update(values, { transaction })
+                  : await this.db.students.create(
+                      { id, ...values, isEnabled: null, seedDigest: null },
+                      { transaction },
+                    );
                 await this.audit(
                   ctx,
-                  "profile.refresh",
+                  current ? "profile.refresh" : "profile.cached",
                   Object.keys(profile),
                   transaction,
                   { studentId: id, scanId: input.scanId },
                 );
-                return current.get();
+                return cached.get();
               },
             );
             const active = await this.db.records.findOne({
@@ -358,11 +351,7 @@ export class Service {
   async checkProfile(p: Intent, tx: Transaction) {
     if (!p.studentId) return;
     const s = await this.db.students.findByPk(p.studentId, { transaction: tx });
-    if (
-      !s ||
-      !s.get().isEnabled ||
-      s.get().hashVersion !== this.config.identity.hashVersion
-    )
+    if (!s || s.get().hashVersion !== this.config.identity.hashVersion)
       throw new ApiError("STUDENT_NOT_ALLOWED", 403);
     if (s.get().version !== p.studentVersion)
       throw new ApiError("PROFILE_VERSION_CONFLICT", 409);

@@ -11,6 +11,7 @@ try {
   const command = process.argv[2];
   if (command === "migrate") {
     await db.migrator.up();
+    await db.initializeIdentity(config.identity);
     if (process.env.RUNTIME_DATABASE_URL_FILE)
       await runner({
         databaseUrl: config.databaseUrl,
@@ -27,12 +28,12 @@ try {
       });
     console.log("MIGRATIONS_COMPLETE");
   } else if (command === "seed") {
+    if (config.environment === "production")
+      throw new Error("PRODUCTION_SEED_FORBIDDEN");
     await db.ready();
     const file = process.argv[3];
     let input: unknown;
     if (file === "--integration") {
-      if (config.environment === "production")
-        throw new Error("INTEGRATION_SEED_FORBIDDEN");
       input = integrationSeed(config.identity);
     } else {
       if (!file) throw new Error("SEED_FILE_REQUIRED");

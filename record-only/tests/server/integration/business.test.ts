@@ -11,6 +11,7 @@ import {
 } from "../../../apps/server/src/seed.js";
 import { testConfig, identity } from "../../helpers/config.js";
 import { studentId } from "@record/protocol/identity";
+import { ApiError } from "@record/protocol";
 import type { Config } from "../../../apps/server/src/config.js";
 import type { CampusProvider } from "../../../apps/server/src/provider.js";
 import { ingestLogs, Spool } from "../../../apps/server/src/storage.js";
@@ -31,6 +32,8 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       calls++;
       expect(card.uidHex).toMatch(/^(?:[0-9a-f]{2}){4}$/);
       if (fail) throw Error("provider unreachable");
+      if (card.uidHex === "eeeeeeee")
+        throw new ApiError("STUDENT_NOT_ALLOWED", 403);
       return { name: profileName, className: "集成一班", schoolNumber: "T001" };
     },
   };
@@ -142,12 +145,19 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       notes: p.body.record.notes,
     });
   }
-  it("S-I-07/14: 未知、停用、错配学生不调用 provider；响应不回显卡号", async () => {
+  it("S-I-07/14: API 成功创建缓存，拒绝不创建，错配 ID 不调用 provider", async () => {
     const before = calls;
-    expect((await scan("ffffffff")).status).toBe(403);
-    const id = studentId(
-      { issuer: identity.issuer, uidHex: "00000001" },
+    const newId = studentId(
+      { issuer: identity.issuer, uidHex: "ffffffff" },
       identity,
+    );
+    expect(await server.db.students.findByPk(newId)).toBeNull();
+    const first = await scan("ffffffff");
+    expect(first.status).toBe(200);
+    expect(first.body.student.id).toBe(newId);
+    expect(JSON.stringify(first.body)).not.toContain("uidHex");
+    expect((await server.db.students.findByPk(newId))?.get().name).toBe(
+      profileName,
     );
     const bad = await api("POST", "/scan-previews", {
       scanId: randomUUID(),
@@ -157,10 +167,16 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       source: "integration",
     });
     expect(bad.body).toEqual({ code: "CARD_ID_MISMATCH" });
-    await server.db.students.update({ isEnabled: false }, { where: { id } });
-    expect((await scan()).body.code).toBe("STUDENT_NOT_ALLOWED");
-    await server.db.students.update({ isEnabled: true }, { where: { id } });
-    expect(calls).toBe(before);
+    const deniedId = studentId(
+      { issuer: identity.issuer, uidHex: "eeeeeeee" },
+      identity,
+    );
+    expect((await scan("eeeeeeee")).body.code).toBe("STUDENT_NOT_ALLOWED");
+    expect(await server.db.students.findByPk(deniedId)).toBeNull();
+    expect(
+      (await api("GET", "/service-status")).body.reasonCodes,
+    ).not.toContain("PROVIDER_UNAVAILABLE");
+    expect(calls).toBe(before + 2);
   });
   it("S-I-06: 刷卡刷新独立提交、重复 scan 去重、每次新刷卡刷新", async () => {
     const scanId = randomUUID(),
@@ -175,10 +191,15 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
     const second = await scan();
     expect(second.body.student.name).toBe(profileName);
     expect(calls).toBe(before + 2);
-    expect(await server.db.students.count()).toBe(3);
+    expect(await server.db.students.count()).toBe(4);
   });
   it("S-I-06/07/11: 故障刷卡同键缓存拒绝，活动学生再刷卡生成结束意图", async () => {
     const failedScanId = randomUUID();
+    const cachedId = studentId(
+      { issuer: identity.issuer, uidHex: "00000003" },
+      identity,
+    );
+    const cachedBefore = (await server.db.students.findByPk(cachedId))!.get();
     fail = true;
     const before = calls;
     expect((await scan("00000003", token, failedScanId)).body.code).toBe(
@@ -188,6 +209,16 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       "PROVIDER_UNAVAILABLE",
     );
     expect(calls).toBe(before + 1);
+    expect((await server.db.students.findByPk(cachedId))!.get()).toMatchObject({
+      name: cachedBefore.name,
+      version: cachedBefore.version,
+    });
+    const uncachedId = studentId(
+      { issuer: identity.issuer, uidHex: "eeeeeeef" },
+      identity,
+    );
+    expect((await scan("eeeeeeef")).body.code).toBe("PROVIDER_UNAVAILABLE");
+    expect(await server.db.students.findByPk(uncachedId)).toBeNull();
     fail = false;
     const recordId = await start("00000003", await device());
     const preview = await scan("00000003");
@@ -716,7 +747,7 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       ).status,
     ).toBe(410);
   });
-  it("S-I-12: provider 查询期间停用学生不得更新，刷新队列顺序可验证", async () => {
+  it("S-I-12: provider 查询期间缓存变化不得覆盖，刷新队列顺序可验证", async () => {
     const original = provider.lookup;
     const sid = studentId(
       { issuer: identity.issuer, uidHex: "00000001" },
@@ -732,23 +763,20 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       return { name: "不应写入", className: "班", schoolNumber: "N" };
     };
     try {
+      const version = (await server.db.students.findByPk(sid))!.get().version;
       const request = scan();
       await entered;
       await server.db.students.update(
-        { isEnabled: false },
+        { name: "并发更新", version: version + 1 },
         { where: { id: sid } },
       );
       finish();
-      expect((await request).body.code).toBe("STUDENT_NOT_ALLOWED");
-      expect((await server.db.students.findByPk(sid))!.get().name).not.toBe(
-        "不应写入",
+      expect((await request).body.code).toBe("PROFILE_VERSION_CONFLICT");
+      expect((await server.db.students.findByPk(sid))!.get().name).toBe(
+        "并发更新",
       );
     } finally {
       provider.lookup = original;
-      await server.db.students.update(
-        { isEnabled: true },
-        { where: { id: sid } },
-      );
     }
     let release!: () => void;
     const hold = new Promise<void>((r) => (release = r));

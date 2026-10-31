@@ -1,5 +1,7 @@
 # Docker 部署与运维设计
 
+2026-10-31 修订：本地学生表仅缓存校园 API 成功返回的资料，不再承担登记授权或要求生产预置。服务运行账号新增 `students` 的受限 `INSERT` 权限；迁移 `002-student-cache` 使旧的预置字段可空，保留历史记录和缓存资料。迁移作业同时写入固定盐等身份配置的指纹；API 在指纹缺失或不匹配时拒绝启动。服务先查询 API，成功后新增或覆盖缓存；旧缓存只供日常列表和历史读取，故障刷卡不放行。下文预置与 TBD-07 旧规则已撤回，真实 API 拒绝语义归 TBD-02。
+
 2026-10-29 修订，依据 [opinions.md](../opinions.md) 及后续确认的卡号临时查询/哈希学生 ID 规则。Dockerfile、Compose、迁移和应用已实现；集成环境实测及生产前置输入见[测试报告](verification-report.md)，可执行步骤见[运行说明](operations.md)。备份、导出和管理员控制台不在本版范围。
 
 ![Docker 部署](docker-deployment.svg)
@@ -43,7 +45,7 @@ frontend 只连接 gateway/api，backend 连接 api/db/migrate/log-ingest；API 
 | ORM 日志 | 禁止输出绑定参数、登录/刷卡 body、原卡号/studentId、provider 完整 URL/响应；应用日志用请求/记录 ID；内部审计可存必要 student_id FK/字段名 |
 | 数据与 spool | DB、日志卷、游标独立持久化；未 ACK 日志不自动清理；容量不足告警并停止无法审计的新写入 |
 
-Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固定盐不是秘密，但一经预置数据使用不得随意变更；无原 UID 不能重算旧 hash。换盐/版本/卡改变学生主键，必须按 NEXT-01 迁移历史 FK/审计/持久结果，不能只改配置。合法学生预置只保存哈希 studentId 和档案，需与共享规则一致，TBD-07 明确来源/格式/责任；不为此添加教师注册或导入入口。
+Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固定盐不是秘密，但一经缓存和历史使用不得随意变更；无原 UID 不能重算旧 hash。换盐/版本/卡改变学生主键，必须按 NEXT-01 迁移历史 FK/审计/持久结果，不能只改配置。学生缓存只保存哈希 studentId 和 API 白名单资料；不添加教师注册或导入入口。
 
 刷卡请求只在 main、gateway/API、provider 适配器的短时内存中流转。gateway 对该路由禁用磁盘请求体缓冲与缓存（不能只关访问日志），上限内请求全部内存处理、超限拒绝；API 不启用原始请求录制、磁盘重试队列或响应缓存。调用完成/失败/取消后释放原卡号及 provider 响应；HTTP/ORM 错误、trace、崩溃报告不得附带正文或内存转储。未知字段不因诊断需要而持久化。
 
@@ -65,4 +67,4 @@ Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固�
 
 ## 交付验收
 
-现已提交可运行 Dockerfile/Compose、无秘密配置模板、ORM migrations 和[运行说明](operations.md)。集成环境的空库启动、受控 seed、重启与卷持久性、改密、证书 pin、spool 补传及容量状态等实际结果见[测试报告](verification-report.md)；目标环境空间压力与真实初始预置/TLS/外部 API 仍按 TBD 验收。备份、导出、恢复演练已从本版交付项删除。
+现已提交可运行 Dockerfile/Compose、无秘密配置模板、ORM migrations 和[运行说明](operations.md)。集成环境的空库启动、首次刷卡建缓存、重启与卷持久性、改密、证书 pin、spool 补传及容量状态等实际结果见[测试报告](verification-report.md)；目标环境空间压力、TLS 与真实外部 API 仍按 TBD 验收。备份、导出、恢复演练已从本版交付项删除。

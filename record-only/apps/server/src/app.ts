@@ -23,10 +23,8 @@ export async function createApp(
   const db = options.database ?? new Database(config.databaseUrl);
   await db.ready();
   const identity = await db.settings.findByPk("identity");
-  if (
-    identity &&
-    identity.get().value !== payloadDigest("identity", config.identity)
-  )
+  if (!identity) throw new Error("IDENTITY_CONFIGURATION_MISSING");
+  if (identity.get().value !== payloadDigest("identity", config.identity))
     throw new Error("IDENTITY_CONFIGURATION_CHANGED");
   const spool = new Spool(config.spoolDir);
   await spool.init();

@@ -106,10 +106,10 @@
 <text x="315.0" y="1940.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">使用登记 / 登记页</text>
 <rect x="75" y="1985" width="480" height="170" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">学生摘要只读 · TBD-01 字段</text>
-<text x="315.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次刷卡已向外部刷新并更新 DB</text>
-<text x="315.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">未知学生拒绝，无手动注册/补填</text>
+<text x="315.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次刷卡都向校园 API 查询</text>
+<text x="315.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">成功时新增或覆盖缓存；无手动补填</text>
 <text x="315.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡开始时间 / 备注 / DevicePicker</text>
-<text x="315.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-07：合法档案初始预置</text>
+<text x="315.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">失败不以旧缓存继续登记</text>
 <rect x="75" y="2200" width="480" height="210" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="2246.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">连续 10 秒无操作 → 自动取消</text>
 <text x="315.0" y="2272.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">键盘/指针/选择/编辑等真实操作重置</text>

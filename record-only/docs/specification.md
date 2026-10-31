@@ -1,5 +1,9 @@
 # 刷卡登记版业务与接口规格
 
+## 2026-10-31 学生缓存规则修订
+
+本节取代下文中关于本地学生预置、先查内部授权、停用学生不查询校园 API 的旧规则。校园 API 是学生资料与登记资格的权威来源；本地 `students` 仅是最近一次成功刷卡资料的持久缓存。服务端先验证登录、请求 schema 和固定盐 studentId，再对每次有效刷卡查询校园 API；本地没有学生行时也必须查询。API 确认学生并返回有效白名单资料后，事务性新增或覆盖缓存，才创建可提交预览。API 明确拒绝时返回 `STUDENT_NOT_ALLOWED`；不可用或资料无效时不写缓存、不使用旧缓存放行本次刷卡。日常设备列表与历史只读缓存，不调用校园 API。旧库中的 `is_enabled`、`seed_digest` 列保留但不参与授权；生产不再需要预置。TBD-02 须确认真实 API 的学生拒绝语义，TBD-07 预置要求撤回。更换卡会形成新哈希 ID，旧历史不会自动合并，NEXT-01 仍延期。
+
 修订基线：2026-10-29，以 [opinions.md](../opinions.md) 及用户随后确认的“卡号与学生分开、学生 ID 使用卡号的加盐哈希、原卡号仅经 HTTPS 查询校园 API 后释放不落库”为准，后续确认优先。当前实现和验证状态见[测试报告](verification-report.md)。`usage_record` 是一次使用记录，不套用完整三端方案的锁机/Session 状态机。
 
 ## 范围与职责
@@ -15,7 +19,7 @@
 | Sequelize + PostgreSQL | 模型、关联、参数化查询、事务、行锁、迁移、条件唯一索引 | 使用库的 Model / QueryInterface / transaction API；不手写 SQL 字符串 |
 | 校园卡提供方 | 返回本次刷卡最新学生信息 | 仅服务端调用，TBD-02；完整响应仅短时处理，只更新白名单字段 |
 
-不提供学生手动注册、学生导入/编辑页、历史补录/更正/删除、备份或导出功能。初始合法学生必须预置于内部数据库，来源见 TBD-07；外部 API 有这个人也不构成本系统登记资格。设备数量不设产品上限，分页和单批上限仅用于控制一次请求的成本。
+不提供学生手动注册、学生导入/编辑页、历史补录/更正/删除、备份或导出功能。校园 API 是学生资料与登记资格的权威来源；本地学生表只缓存成功刷卡取得的资料，空库可从首次成功刷卡开始使用。设备数量不设产品上限，分页和单批上限仅用于控制一次请求的成本。
 
 ## 连接、证书指纹与共享账号
 
@@ -38,9 +42,9 @@ IP/pin 可作为普通本地配置保存；密码和 token 仅 main 通过操作
 1. 独立读卡进程完成 Wiegand-34 校验并经管道交付 4 字节 UID；main 的 CardReader 收到后，**第一时间在模块内**计算 `studentId = hexLower(SHA-256(encode(hashVersion, fixedSalt, issuer, uidBytes)))`。输出为 64 位小写十六进制，直接用作 `students.id`，不再另设 UUID 学生 ID 或重复的 card_hash 列。编码与持久化边界见下表；所有终端、服务端和预置工具复用同一纯函数与测试向量，不得随机逐次加盐。固定盐不是秘密，不当作密码或认证凭证。
 2. 读卡模块向 main 的请求协调器交付两个分离的模型：短暂的 `CardScanInput`（卡号）与 `studentId`（学生标识）。原 UID 不经 renderer/preload IPC、不入日志/SQLite/持久队列；main 仅在本次 HTTPS 请求所需的内存中持有它。页面只接收刷卡状态和后续 StudentDTO，不能通过学生资料接口取得原卡号。
 3. 只有“使用登记”的设备列表、无 Modal、无提交且无 scan 处理中时才接受刷卡流程；其他页面（包括设置和历史）只 Toast“接收到刷卡消息，请返回主页面以触发登记”，丢弃该事件，不向外部 API 查询、不排队重放。以下“每次刷卡”指通过该门控并去重后的有效刷卡；不把硬件连续重复帧视为多次业务刷卡。
-4. main 通过已校验 pin 的 HTTPS 发送 `POST /api/v1/scan-previews`，包含 `scanId / studentId / hashVersion / card:{issuer,uidHex} / source`。服务端记录 `scanAtMs`，校验版本与 UID 格式，用受控固定盐重算 studentId，与请求值不符则以 `CARD_ID_MISMATCH` 拒绝，既不查外部也不更新档案。验证通过后先用重算 ID 查内部学生；不存在、停用或档案 hash 版本不符时返回 `STUDENT_NOT_ALLOWED`，不调用校园 API、不插入学生。仅内部授权通过后，才将本次**原卡号**交给校园 API 适配器查询；不要求供应方接受哈希或 lookupRef。每次通过页面门控、去重、请求校验与内部授权的有效刷卡都查询，不读缓存冒充刷新。
-5. 内部已知学生且外部成功：按 TBD-01 白名单校验并更新该学生已有资料、`profile_refreshed_at` 和版本；不改变学生 ID/登记资格。provider 响应按本次 HTTPS 调用上下文关联到请求，不按姓名/班级匹配其他学生，也不要求供应方额外提供卡号绑定证明。实际协议若返回卡号引用就做普通一致性校验；不返回该字段不构成错误。响应多义、超时、错误、协议已有引用不符或必需字段缺失时不覆盖旧资料、不生成可提交预览，显示错误允许重刷。
-6. 资料刷新是刷卡阶段独立提交的事务，之后按是否有活动记录返回 `start` 或 `end` 预览。预览取消只取消登记/结束意图，**不回滚已经刷新的学生资料**。同一学生的刷新在单实例服务端串行处理，provider 调用在短数据库事务之外；资料提交时重新校验学生仍启用及版本有效，并发旧响应不能覆盖新响应。未来多 API 实例须先实现跨实例串行/版本控制，不能直接水平扩容。
+4. main 通过已校验 pin 的 HTTPS 发送 `POST /api/v1/scan-previews`，包含 `scanId / studentId / hashVersion / card:{issuer,uidHex} / source`。服务端记录 `scanAtMs`，校验版本与 UID 格式，用受控固定盐重算 studentId，与请求值不符则以 `CARD_ID_MISMATCH` 拒绝，既不查外部也不更新缓存。校验通过的每次有效刷卡都将本次**原卡号**交给校园 API 适配器查询；本地是否已有学生行不影响查询，不要求供应方接受哈希或 lookupRef。
+5. 校园 API 返回确认可登记的有效学生资料后，按 TBD-01 白名单校验，事务性新增或覆盖该 studentId 的本地缓存、`profile_refreshed_at` 和版本。provider 响应按本次 HTTPS 调用上下文关联到请求，不按姓名/班级匹配其他学生，也不要求供应方额外提供卡号绑定证明。实际协议若返回卡号引用就做普通一致性校验；不返回该字段不构成错误。API 明确拒绝该学生时返回 `STUDENT_NOT_ALLOWED`；响应多义、超时、错误、协议已有引用不符或必需字段缺失时不覆盖旧缓存、不生成可提交预览，显示错误允许重刷。
+6. 缓存写入是刷卡阶段独立提交的事务，之后按是否有活动记录返回 `start` 或 `end` 预览。预览取消只取消登记/结束意图，**不回滚已经写入的学生缓存**。同一学生的查询与写入在单实例服务端串行处理，provider 调用在短数据库事务之外；资料提交时校验先前观察的缓存版本仍有效，并发旧响应不能覆盖新响应。未来多 API 实例须先实现跨实例串行/版本控制，不能直接水平扩容。
 7. 预览绑定 clientId/认证上下文，默认 2 分钟、仅有界内存、重启失效；只保留 studentId/资料版本等必要状态，不保留原卡号。提交时验证 studentId 与当前档案版本仍匹配。确认前若另一次刷卡刷新了资料，旧页面返回 409 重新预览，不能悄悄切换学生。
 8. 成功、失败、超时、取消及门控拒绝都结束本次卡号生命周期；main 在发送完成或中止后释放请求数据，服务端在查询/响应校验结束后释放卡号与 provider 原始响应，不等到 2 分钟 preview 过期才释放。可写 buffer 尽力覆写，JavaScript GC/运行时副本不能保证物理擦除。刷卡请求不进入持久 operations、离线队列或自动重放；超时后重新刷卡。以 `(clientId,scanId)` 做有界内存去重，只保留必要状态/结果和 studentId，不保存原卡号；同键但重算 studentId/版本不同则拒绝，重启后重新刷卡。登记/结束确认仍按原 requestId 持久幂等恢复。
 
@@ -49,14 +53,14 @@ IP/pin 可作为普通本地配置保存；密码和 token 仅 main 通过操作
 | 模型 | 内容 | 可存在的位置与用途 |
 | --- | --- | --- |
 | `CardScanInput` | `card:{issuer,uidHex}`，不含姓名等学生资料；uidHex 为规范原 UID 的无损十六进制表达 | 仅 CardReader/main、本次请求链路、服务端 provider 适配器短时内存；用于校园 API 查询，不是数据库实体 |
-| `StudentDTO` / `students` | `id=studentId`（加盐哈希）、白名单学生资料；数据库另存 hash_version、状态和版本 | 内部数据库持久保存；DTO 可将 id 作为业务标识交给页面，但不含原卡号、盐或 provider 原始响应 |
+| `StudentDTO` / `students` | `id=studentId`（加盐哈希）、白名单学生资料；数据库另存 hash_version、缓存时间和版本 | 内部数据库持久缓存最近一次成功刷卡取得的资料；DTO 可将 id 作为业务标识交给页面，但不含原卡号、盐或 provider 原始响应 |
 | `ScanPreview` | studentId、资料版本、start/end 模式、时间、clientId/会话绑定 | 有界内存；把本次查询结果绑定到合法档案；无原卡号 |
 
 `encode` 使用有版本的明确字节协议：域分隔 ASCII `cyez-record-only/student-id` + 零字节，随后依次为四段 `uint32BE(byteLength) + bytes`：hashVersion 的 UTF-8、固定盐原始字节、规范 issuer 的 UTF-8、UID 原始字节。盐的配置使用严格十六进制解析；不做普通字符串拼接。uidHex 必须为偶数位小写十六进制，拒绝空值和非法长度；不转整数、不丢前导零、不擅自反转字节序。issuer 为已配置的固定发行方代码。UID 已确定为 Wiegand-34 中间 32 个数据位，最高位在前，固定 4 字节/8 位小写十六进制；硬件传输与规范 UID 的映射样本验收仍为 TBD-03，详见[读卡进程协议](reader-process.md)。服务端只接受已配置的 hashVersion/issuer，不接受客户端提供 salt 或算法。
 
 provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号格式，保持协议定义的长度/字节序；使用固定、受信任的 HTTPS 目的地，拒绝重定向和降级，不接受客户端指定 URL。不在本系统 URL/query、错误信息、trace 或请求记录中保留卡号；若供应方协议使用 URL/query，适配器必须先移除完整 URL/参数再生成任何日志。服务端请求 schema/错误序列化不能回显输入；gateway 对刷卡请求关闭磁盘 body 缓冲、缓存和 body 日志，限定内存 body 大小，防止临时文件落盘。
 
-**未知学生绝无手动登记入口。** 合法学生初始预置及与 card/issuer/hashVersion 对应的 studentId 来源为 TBD-07；预置结果只含哈希 ID 与档案，原卡号处理也须短时内存完成。未解决前只能使用测试种子，不能把空库自动注册当上线替代方案。更换卡会产生新 studentId；新卡没有预置授权记录就拒绝，跨卡迁移作为 NEXT-01 后续事项。
+**校园 API 未确认的学生绝无手动登记入口。** 首次刷卡若校园 API 确认该学生且返回有效资料，服务端自动建立本地缓存；API 拒绝或不可用时不创建缓存，也不以旧缓存完成本次刷卡。更换卡会产生新 studentId，并按新 ID 建立独立缓存；旧历史关联不会自动合并，跨卡迁移作为 NEXT-01 后续事项。
 
 外部 API 不可用时停止刷卡登记及刷卡结束，不用旧资料冒充本次新资料；教师仍可从内部活动列表**手动结束**已有记录，清楚显示为手动操作。历史、列表、设备管理和手动/批量结束只访问内部数据库，不触发校园 API。
 
@@ -80,7 +84,7 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 
 | 实体 | 字段与约束 | 说明 |
 | --- | --- | --- |
-| `students` | `id` STRING(64) PK（固定盐 SHA-256、小写 hex）、`hash_version`、候选姓名/班级/校内学号、`is_enabled`、`profile_refreshed_at`、`version` | id 就是 studentId；无独立 card_hash、原卡号或 provider_lookup_ref 列；只刷新已有合法档案；字段 TBD-01、预置来源 TBD-07 |
+| `students` | `id` STRING(64) PK（固定盐 SHA-256、小写 hex）、`hash_version`、候选姓名/班级/校内学号、`profile_refreshed_at`、`version`；旧库保留不再用于授权的可空 `is_enabled`/`seed_digest` | id 就是 studentId；无独立 card_hash、原卡号或 provider_lookup_ref 列；API 成功时新增或覆盖缓存；字段白名单 TBD-01 |
 | `devices` | UUID PK、唯一 code、display_name、is_disabled、notes、deleted_at、version | 设置中添加/编辑/删除；删除使用软删除以保留历史引用 |
 | `tags` / `device_tags` | 标签 ID/名称；关联 `(device_id,tag_id)` 复合 PK，两个 FK，反向索引 | 机房/区域仅为筛选标签，一份关系双向查询，无机房授权表 |
 | `usage_records` | UUID PK、student_id STRING(64) FK → students.id、device_id UUID FK、started_at、ended_at nullable、notes、end_reason、version、clientId 与写入时间 | 学生 FK 与哈希 PK 同型；活动=`ended_at` 为空；学生/设备活动字段各设条件唯一索引；已结束历史只读 |
@@ -90,7 +94,7 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 
 卡号与学生分离为临时输入和持久档案两个模型，**本版不建原卡号/卡凭证持久表**；不再需要卡密钥轮换映射表、账号角色表或机房 ACL 表。Sequelize 对学生 PK/FK 统一声明 `DataTypes.STRING(64)`，schema/模型验证小写 hex，数据库 FK 与唯一约束兜底，不为学生生成 UUID。固定盐/hashVersion 属于协议配置，**运行中不得随意改盐**；换盐/版本/卡会改变主键，不能由旧 hash 重算新 hash。NEXT-01 如需实施，须以受控原始输入建立新旧 ID 映射，并事务性迁移历史外键、审计关联及相关持久结果，验证无孤儿和重复活动记录；首版不提供自动迁移，不能只改盐/插入新档案冒充历史迁移。
 
-约束通过 QueryInterface 的建表/外键/复合主键/`addIndex({ unique, where })` 等 API 声明；学生和设备分别只允许一条 `ended_at` 为空的记录。事务使用统一顺序的行锁验证时间区间和停用/删除状态，防止并发抢同机与禁用竞争。学生/设备表不额外双写 `is_using`；设备 DTO 按活动记录派生占用。
+约束通过 QueryInterface 的建表/外键/复合主键/`addIndex({ unique, where })` 等 API 声明；学生和设备分别只允许一条 `ended_at` 为空的记录。事务使用统一顺序的行锁验证时间区间、缓存版本和设备禁用/删除状态，防止并发抢同机与过期资料覆盖。学生/设备表不额外双写 `is_using`；设备 DTO 按活动记录派生占用。
 
 删除设备前若仍有活动记录返回 409，先显式结束后再删除；软删除后不在可分配列表中出现，历史仍可关联设备名称/编号。历史页只查内部当前资料，学生信息显示**最近一次成功刷卡刷新后的数据库值**；查看历史不发外部请求。历史不允许修改备注、开始/结束时间、关联或删除；活动记录的备注编辑及结束时备注合并仍属于当前使用流程，结束后不可再次编辑。
 
@@ -116,7 +120,7 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 | --- | --- | --- |
 | `POST /auth/login`、`/auth/logout` | `.env` 对应账号密码、clientId；登录限速 | 内存短期会话；重启失效；401/429；无注册/改密/admin API |
 | `POST /clients/startup` | 已认证的 clientId、版本报告 | 仅报告启动，无自报角色提权 |
-| `POST /scan-previews` | scanId/studentId/hashVersion/card:{issuer,uidHex}/source；仅内存请求，不持久重放 | 重算 ID 并先查内部授权，未知/停用拒绝且不查 provider；合法卡用原卡号查询并刷新已有资料；返回无原卡号的资料/模式/绑定预览 |
+| `POST /scan-previews` | scanId/studentId/hashVersion/card:{issuer,uidHex}/source；仅内存请求，不持久重放 | 重算 ID 后每次用原卡号查询校园 API；成功时新增或覆盖学生缓存，失败不回退旧资料；返回无原卡号的资料/模式/绑定预览 |
 | `DELETE /scan-previews/{id}` | 仅当前 client 的预览 | 释放意图，TTL 兜底；不回滚学生资料刷新或已提交业务 |
 | `POST /usage-records/start` | previewId/deviceId/notes/requestId | 仅创建使用记录；409 冲突、410 过期；没有学生补充字段 |
 | `POST /usage-records/{id}/end-preview`、`/end` | 手动预览；确认带 previewId/expectedVersion/notes/requestId | 结束指定活动记录；手动流程只读内部 DB |

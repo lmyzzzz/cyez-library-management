@@ -26,7 +26,7 @@
 <rect x="60" y="390" width="800" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/server · Fastify / Sequelize</text>
 <text x="460.0" y="467.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">protocol + domain；共享账号、刷卡刷新、占用事务</text>
-<text x="460.0" y="497.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">仅查询/更新预置学生；设备编辑 / 只读历史</text>
+<text x="460.0" y="497.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">API 成功后新增/覆盖缓存；设备编辑 / 只读历史</text>
 <text x="460.0" y="528.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">通过 ORM 操作 PostgreSQL，不手写 SQL</text>
 <rect x="940" y="390" width="800" height="170" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1340.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/teacher · Electron / React</text>
@@ -94,7 +94,7 @@
 <text x="1340.0" y="1881.6000000000001" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无学生端 / 完整 Session 状态机</text>
 <text x="1340.0" y="1909.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">NEXT-01：换卡/盐改变 ID，历史关联迁移延期</text>
 <text x="1340.0" y="1936.7000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">无 admin、机房 ACL、备份导出、历史编辑删除</text>
-<text x="1340.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-07：合法档案和哈希 studentId 预置</text>
+<text x="1340.0" y="1964.2500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：真实 API 拒绝语义待确认</text>
 <rect x="40" y="2048" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="2077.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">固定上游包已入 vendor；Yarn 4 工作区、教师应用与服务端已实现，真实外部接入按 TBD 验收。</text>
 </svg>

@@ -59,7 +59,19 @@ describe("配置与适配器的失败边界", () => {
   it("替换模块必须显式配置，生产永不加载 fake", async () => {
     const dir = await mkdtemp(join(tmpdir(), "cyez-provider-")),
       config = testConfig("postgres://a:b@localhost/d", dir);
-    expect(await loadProvider(config)).toBeDefined();
+    const fake = await loadProvider(config);
+    expect(
+      await fake.lookup(
+        { issuer: "integration", uidHex: "00000001" },
+        new AbortController().signal,
+      ),
+    ).toMatchObject({ name: "集成测试学生" });
+    await expect(
+      fake.lookup(
+        { issuer: "integration", uidHex: "ffffffff" },
+        new AbortController().signal,
+      ),
+    ).rejects.toThrow("STUDENT_NOT_ALLOWED");
     await expect(
       loadProvider({ ...config, environment: "production" }),
     ).rejects.toThrow("FAKE_PROVIDER_FORBIDDEN");
