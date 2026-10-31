@@ -54,3 +54,5 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | 静态校验 | TypeScript、Prettier、图源/SVG 一致性通过；Docker 构建中的 Yarn `--immutable` 通过 |
 
 测试仍使用开发/集成 FakeProvider、测试证书与测试 UID。TBD-01/02 的真实学生字段、校园 API 协议、拒绝语义和 HTTPS 联调，TBD-03 真实读卡器，TBD-04 目标部署与容量，TBD-05 保留期，TBD-06 签名/目标 Windows 验收尚待外部输入；真实校园 API 故障/限额、目标磁盘写满与长时间日志积压仍未实测。NEXT-01 跨卡/换盐身份迁移继续延期。此前报告的 TBD-07 行仅保留历史记录，不再构成未完成验收项。
+
+首次推送的 [CI run 41149731844](https://github.com/lmyzzzz/cyez-library-management/actions/runs/41149731844) 中服务端通过，Windows 普通单元测试通过，但覆盖率阶段有 3 项 SQLite/协调器测试触发 Vitest 默认 5 秒超时，后续打包步骤被跳过。随后将客户端测试文件改为串行执行、单项超时设为 20 秒；不启用重试或调低覆盖率阈值。本机重新运行 47 项覆盖率测试全部通过；远端后续运行结果应独立查看，不把首次失败计为成功。

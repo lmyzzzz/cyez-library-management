@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     include: ["tests/client/unit/**/*.test.{ts,tsx}"],
     environment: "jsdom",
+    fileParallelism: false,
+    testTimeout: 20000,
     coverage: {
       provider: "v8",
       reportsDirectory: "coverage/client-unit",
