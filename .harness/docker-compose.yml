@@ -1,0 +1,50 @@
+# =============================================================================
+# DSH container - compose exists only to hold what would otherwise be repeated
+# in every bat: the port mapping, the volume mounts and the environment file.
+#
+# There is deliberately NO "command:" on the service. The container starts with
+# the image's default CMD (bash), and the docker-*.bat files pass the real
+# command, for example:
+#   docker compose run --rm dev bash
+#   docker compose run --rm --service-ports dev bash /workspace/.harness/sh/dsh.sh
+#
+# context: ..  ->  the repository root, so the bind mount and the build context
+# cover the whole repo, not .harness/ alone.
+# =============================================================================
+
+name: dsh-dev
+
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .harness/Dockerfile
+    image: dsh-dev:local
+    working_dir: /workspace
+    stdin_open: true   # -i
+    tty: true          # -t, needed by the dsh terminal UI and bash
+    env_file:
+      - .env           # TZ plus any uncommented *_API_KEY (relative to this file)
+    ports:
+      # Published only with "docker compose run --service-ports" (used by
+      # docker-dsh.bat). The container port is the socat relay in sh/dsh.sh.
+      - "${DSH_WEB_PORT:-3088}:3080"
+    volumes:
+      # The whole repository, so host edits are visible in the container instantly
+      - ..:/workspace
+      # .git is exposed READ-ONLY: the container can read history, status and
+      # diffs, but can never commit, branch, stage or rewrite the repository.
+      # Git operations belong on the host. This nested mount overrides the
+      # parent bind mount above.
+      - ../.git:/workspace/.git:ro
+      # $DSH_HOME is persisted: credentials, settings.yaml, profiles and plugins
+      # survive container recreation. The container runs as root, hence /root.
+      - cyez-lm-dsh-home:/root/.dsh
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+# The only data volume, the one thing meant to outlive a container.
+# With "name: dsh-dev" above its full name is dsh-dev_cyez-lm-dsh-home
+# (see "docker volume ls").
+volumes:
+  cyez-lm-dsh-home:

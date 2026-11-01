@@ -1,0 +1,13 @@
+# Build context for .harness/Dockerfile (docker-compose.yml:
+# context: .. , dockerfile: .harness/Dockerfile).
+#
+# The image only COPYs the two provisioner scripts from .harness/sh/, so
+# everything else is kept out of the context: notably record-only/node_modules
+# (~730 MB), record-only/target, .git, and .harness/.env, which may hold API
+# keys. If the Dockerfile starts COPYing more files, allow them here too.
+*
+!.harness
+.harness/*
+!.harness/sh
+.harness/sh/*
+!.harness/sh/*.sh
