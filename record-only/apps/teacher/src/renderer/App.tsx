@@ -21,9 +21,8 @@ import {
   LibraryIcon,
   SettingsIcon,
   timestamp,
-  duration,
+  LiveDuration,
   errorText,
-  useClock,
 } from "./common.js";
 import {
   ConnectionForm,
@@ -89,60 +88,65 @@ export function App() {
     [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const polling = useRef(false),
     delay = useRef(3000);
-  useClock();
   const refreshStatus = useCallback(async () => {
     setStatus(await window.library.call<LocalStatus>("status", {}));
   }, []);
-  const load = useCallback(async () => {
-    if (polling.current) return;
-    polling.current = true;
-    setLoading(true);
-    try {
-      const local = await window.library.call<LocalStatus>("status", {});
-      setStatus(local);
-      if (!local.authenticated) return;
-      const [{ devices: d, status: s }, t] = await Promise.all([
-        window.library.call<{
-          devices: Page<DeviceDTO>;
-          status: ServiceStatus;
-        }>("devices", {
-          page,
-          pageSize: 30,
-          state: settings ? "all" : state,
-          search,
-          tagId: tagId || undefined,
-        }),
-        window.library.call<{ items: TagDTO[] }>("tags", {}),
-      ]);
-      setDevices(d);
-      setService(s);
-      setTags(t.items);
-      setLastUpdated(Date.now());
-      setError(undefined);
-      delay.current = 3000;
-      await refreshStatus();
-    } catch (e) {
-      setError(e);
-      delay.current = Math.min(30000, delay.current * 2);
-      await refreshStatus();
-    } finally {
-      polling.current = false;
-      setLoading(false);
-    }
-  }, [page, state, search, tagId, settings]);
+  const load = useCallback(
+    async (background = false) => {
+      if (polling.current) return;
+      polling.current = true;
+      if (!background) setLoading(true);
+      try {
+        const local = await window.library.call<LocalStatus>("status", {});
+        setStatus(local);
+        if (!local.authenticated) return;
+        const [{ devices: d, status: s }, t] = await Promise.all([
+          window.library.call<{
+            devices: Page<DeviceDTO>;
+            status: ServiceStatus;
+          }>("devices", {
+            page,
+            pageSize: 30,
+            state: settings ? "all" : state,
+            search,
+            tagId: tagId || undefined,
+          }),
+          window.library.call<{ items: TagDTO[] }>("tags", {}),
+        ]);
+        setDevices(d);
+        setService(s);
+        setTags(t.items);
+        setLastUpdated(Date.now());
+        setError(undefined);
+        delay.current = 3000;
+        await refreshStatus();
+      } catch (e) {
+        setError(e);
+        delay.current = Math.min(30000, delay.current * 2);
+        await refreshStatus();
+      } finally {
+        polling.current = false;
+        if (!background) setLoading(false);
+      }
+    },
+    [page, state, search, tagId, settings],
+  );
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
+    let initial = true;
     const poll = async () => {
       if (stopped) return;
       if (!document.hidden && !flow && (!settings || tab === "devices"))
-        await load();
+        await load(!initial);
       else await refreshStatus().catch(() => {});
+      initial = false;
       if (!stopped) timer = setTimeout(poll, delay.current);
     };
     void poll();
     const visible = () => {
-      if (!document.hidden) void load();
+      if (!document.hidden && !flow && (!settings || tab === "devices"))
+        void load(true);
     };
     document.addEventListener("visibilitychange", visible);
     return () => {
@@ -388,7 +392,7 @@ export function App() {
                           </strong>
                           <small>
                             {timestamp(d.active.startedAtMs)} ·{" "}
-                            {duration(d.active.startedAtMs, null)}
+                            <LiveDuration startedAtMs={d.active.startedAtMs} />
                           </small>
                           <span className="truncate">
                             {d.active.notes || "无备注"}
@@ -554,9 +558,8 @@ export function App() {
                 </Button>
               ))}
             </nav>
-            {tab === "connection" && (
+            {tab === "connection" && status && (
               <ConnectionForm
-                key={status?.connection?.pin ?? "none"}
                 status={status}
                 refresh={() => {
                   void refreshStatus();

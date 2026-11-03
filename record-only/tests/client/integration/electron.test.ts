@@ -378,3 +378,78 @@ test("C-I-10/04/05: OS 加密保存与真实 SQLite 跨重启，origin 隔离", 
     (await call<{ savedCredentials: boolean }>("status")).savedCredentials,
   ).toBe(false);
 });
+
+test("C-I-08: 自动局部更新保留真实滚动、焦点与编辑草稿", async () => {
+  await login();
+  const rows = Array.from({ length: 24 }, (_, i) => ({
+    id: randomUUID(),
+    code: `SCROLL-${String(i).padStart(2, "0")}`,
+    displayName: `滚动测试设备 ${i}`,
+    notes: "",
+    isDisabled: false,
+    deletedAt: null,
+    version: 1,
+  }));
+  await api.db.devices.bulkCreate(rows);
+  await page.getByRole("link", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "设备管理", exact: true }).click();
+  await page.getByLabel("搜索设备").fill("SCROLL-");
+  await expect(page.locator("tbody tr")).toHaveCount(24);
+  await page.getByLabel("搜索设备").focus();
+  const scroll = page.locator(".table-scroll");
+  const initial = await scroll.evaluate((element) => {
+    const node = element as HTMLElement;
+    node.scrollTop = 180;
+    node.dataset.preserved = "true";
+    return node.scrollTop;
+  });
+  expect(initial).toBeGreaterThan(0);
+  await api.db.devices.update(
+    { displayName: "后台更新名称", version: 2 },
+    {
+      where: { id: rows[0].id },
+    },
+  );
+  await expect(page.getByText("后台更新名称", { exact: true })).toHaveCount(1);
+  expect(await scroll.evaluate((e) => e.scrollTop)).toBe(initial);
+  await expect(scroll).toHaveAttribute("data-preserved", "true");
+  await expect(page.getByLabel("搜索设备")).toBeFocused();
+  await expect(page.getByLabel("搜索设备")).toHaveValue("SCROLL-");
+  const row = page.locator("tbody tr").filter({ hasText: "SCROLL-04" });
+  await row.getByRole("button", { name: "编辑", exact: true }).click();
+  const notes = page.getByLabel("设备备注", { exact: true });
+  await notes.fill("尚未保存的草稿");
+  await notes.evaluate((element) => {
+    const node = element as HTMLTextAreaElement;
+    node.style.height = "160px";
+    node.setSelectionRange(2, 5);
+    node.dataset.preserved = "true";
+  });
+  await api.db.devices.update(
+    { displayName: "第二次后台更新", version: 3 },
+    {
+      where: { id: rows[0].id },
+    },
+  );
+  await expect(page.getByText("第二次后台更新", { exact: true })).toHaveCount(
+    1,
+  );
+  await expect(notes).toHaveValue("尚未保存的草稿");
+  await expect(notes).toHaveAttribute("data-preserved", "true");
+  await expect(notes).toBeFocused();
+  expect(
+    await notes.evaluate((element) => {
+      const node = element as HTMLTextAreaElement;
+      return {
+        height: node.style.height,
+        start: node.selectionStart,
+        end: node.selectionEnd,
+      };
+    }),
+  ).toEqual({ height: "160px", start: 2, end: 5 });
+  await page.getByRole("button", { name: "取消", exact: true }).click();
+  await page.screenshot({
+    path: "test-results/electron/amber-devices.png",
+    fullPage: true,
+  });
+});

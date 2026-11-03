@@ -188,3 +188,7 @@ export function useClock() {
   }, []);
   return now;
 }
+export function LiveDuration({ startedAtMs }: { startedAtMs: number }) {
+  const now = useClock();
+  return <>{duration(startedAtMs, now)}</>;
+}

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -157,6 +158,116 @@ function show(path = "/") {
 }
 
 describe("C-U-01/05 主页面门控和状态", () => {
+  it("自动更新只修改数据，保留勾选、滚动和弹窗草稿及焦点", async () => {
+    vi.useFakeTimers();
+    try {
+      let view!: ReturnType<typeof show>;
+      await act(async () => {
+        view = show();
+      });
+      const scroll =
+        view.container.querySelector<HTMLElement>(".table-scroll")!;
+      const row = screen.getByText(device.displayName).closest("tr");
+      fireEvent.click(screen.getByLabelText("选择 PC-01"));
+      scroll.scrollTop = 120;
+      scroll.scrollLeft = 40;
+      fireEvent.click(screen.getByRole("button", { name: "备注" }));
+      const notes = screen.getByLabelText<HTMLTextAreaElement>("当前使用备注");
+      fireEvent.change(notes, { target: { value: "正在输入的草稿" } });
+      notes.focus();
+      notes.setSelectionRange(2, 5);
+      notes.style.height = "240px";
+      devices = [{ ...device, displayName: "另一位教师更新的名称" }, free];
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6500);
+      });
+      expect(screen.getByText("另一位教师更新的名称").closest("tr")).toBe(row);
+      expect(view.container.querySelector(".table-scroll")).toBe(scroll);
+      expect(scroll.scrollTop).toBe(120);
+      expect(scroll.scrollLeft).toBe(40);
+      expect(
+        screen.getByLabelText<HTMLInputElement>("选择 PC-01").checked,
+      ).toBe(true);
+      expect(screen.getByLabelText("当前使用备注")).toBe(notes);
+      expect(notes.value).toBe("正在输入的草稿");
+      expect(notes.style.height).toBe("240px");
+      expect(notes.selectionStart).toBe(2);
+      expect(notes.selectionEnd).toBe(5);
+      expect(document.activeElement).toBe(notes);
+      expect(
+        call.mock.calls.filter(([action]) => action === "devices").length,
+      ).toBeGreaterThanOrEqual(3);
+    } finally {
+      cleanup();
+      vi.useRealTimers();
+    }
+  });
+
+  it("连接状态更新不重新挂载正在编辑的连接表单", async () => {
+    show("/settings");
+    await waitFor(() =>
+      expect(screen.getByLabelText("服务器 IP")).toBeTruthy(),
+    );
+    const ip = screen.getByLabelText<HTMLInputElement>("服务器 IP");
+    const pin =
+      screen.getByLabelText<HTMLTextAreaElement>("叶证书 SHA-256 指纹");
+    fireEvent.change(ip, { target: { value: "192.168.1.20" } });
+    pin.style.height = "240px";
+    local = {
+      ...local,
+      connection: { ...local.connection!, pin: "cd".repeat(32) },
+    };
+    await act(async () => {
+      listener!({ type: "changed" });
+    });
+    expect(screen.getByLabelText("服务器 IP")).toBe(ip);
+    expect(ip.value).toBe("192.168.1.20");
+    expect(screen.getByLabelText("叶证书 SHA-256 指纹")).toBe(pin);
+    expect(pin.style.height).toBe("240px");
+  });
+
+  it("后台轮询保持空态与表格节点，不进入手动刷新的加载状态", async () => {
+    devices = [];
+    const view = show();
+    await waitFor(() =>
+      expect(screen.getByText(/当前筛选没有设备/)).toBeTruthy(),
+    );
+    const table = view.container.querySelector(".table-scroll")!;
+    const refresh = screen.getByRole("button", { name: "刷新" });
+    let finish!: (value: unknown) => void;
+    const original = call.getMockImplementation()!;
+    call.mockImplementation((action, input) =>
+      action === "devices"
+        ? new Promise((resolve) => {
+            finish = resolve;
+          })
+        : original(action, input),
+    );
+    vi.useFakeTimers();
+    try {
+      // Visibility recovery uses the same passive update as the scheduled poll.
+      await act(async () => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      expect(finish).toBeTypeOf("function");
+      expect(view.container.querySelector(".table-scroll")).toBe(table);
+      expect(table.getAttribute("aria-busy")).toBe("false");
+      expect(refresh.hasAttribute("disabled")).toBe(false);
+      expect(screen.getByText(/当前筛选没有设备/)).toBeTruthy();
+      expect(view.container.querySelector(".skeleton")).toBeNull();
+      await act(async () => {
+        finish({
+          devices: { items: [free], total: 1, page: 1, pageSize: 30 },
+          status: { mode: "normal", allowedActions: ["read"] },
+        });
+      });
+      expect(screen.getByText(free.displayName)).toBeTruthy();
+      expect(view.container.querySelector(".table-scroll")).toBe(table);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("活动列表、筛选、备注、结束预览和批量确认入口", async () => {
     show();
     await waitFor(() => expect(screen.getByText("活动备注")).toBeTruthy());
