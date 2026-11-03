@@ -1,6 +1,8 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { isAbsolute, resolve } from "node:path";
 import { z } from "zod";
+import type { ReaderProcessConfig } from "../shared/reader-config.js";
+export { readerProcessSchema } from "../shared/reader-config.js";
 
 const messageSchema = z.discriminatedUnion("type", [
   z
@@ -23,14 +25,6 @@ const messageSchema = z.discriminatedUnion("type", [
     })
     .strict(),
 ]);
-export const readerProcessSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("mock") }).strict(),
-  z
-    .object({ kind: z.literal("external"), executable: z.string().min(1) })
-    .strict(),
-]);
-export type ReaderProcessConfig = z.infer<typeof readerProcessSchema>;
-
 export function resolveReaderExecutable(
   config: ReaderProcessConfig,
   environment: string,
@@ -44,12 +38,35 @@ export function resolveReaderExecutable(
       ? resolve(resourcesPath, "readers", "cyez-reader-mock.exe")
       : resolve(appPath, "../../target/release/cyez-reader-mock.exe");
   }
+  if (config.kind === "serial")
+    return packaged
+      ? resolve(resourcesPath, "readers", "cyez-reader-serial.exe")
+      : resolve(appPath, "../../target/release/cyez-reader-serial.exe");
   if (
     !isAbsolute(config.executable) ||
     !config.executable.toLowerCase().endsWith(".exe")
   )
     throw new Error("READER_EXECUTABLE_INVALID");
   return config.executable;
+}
+
+export function readerArguments(config: ReaderProcessConfig): string[] {
+  return config.kind !== "serial"
+    ? []
+    : [
+        "--port",
+        config.port,
+        "--baud",
+        String(config.baudRate),
+        "--data-bits",
+        String(config.dataBits),
+        "--parity",
+        config.parity,
+        "--stop-bits",
+        String(config.stopBits),
+        "--flow-control",
+        config.flowControl,
+      ];
 }
 
 /** Private inherited pipes only; no renderer/network listener, disk queue or UID logs. */

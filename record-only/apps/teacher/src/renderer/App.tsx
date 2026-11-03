@@ -26,6 +26,7 @@ import {
 } from "./common.js";
 import {
   ConnectionForm,
+  ReaderSettings,
   DeviceEditor,
   TagManager,
   History,
@@ -545,6 +546,7 @@ export function App() {
             <nav className="tabs" aria-label="设置分类">
               {[
                 ["connection", "连接配置"],
+                ["reader", "读卡器"],
                 ["devices", "设备管理"],
                 ["history", "历史记录"],
                 ["diagnostics", "诊断"],
@@ -567,6 +569,12 @@ export function App() {
                 }}
               />
             )}
+            {tab === "reader" && status && (
+              <ReaderSettings
+                status={status}
+                refresh={() => void refreshStatus()}
+              />
+            )}
             {tab === "devices" && table}
             {tab === "history" && (
               <History
@@ -584,11 +592,7 @@ export function App() {
                   <dt>读卡器</dt>
                   <dd>{status?.reader}</dd>
                   <dt>服务器</dt>
-                  <dd>{status?.connection?.ip ?? "未配置"}</dd>
-                  <dt>证书指纹</dt>
-                  <dd className="fingerprint">
-                    {status?.connection?.pin ?? "未配置"}
-                  </dd>
+                  <dd>{status?.connectionConfigured ? "已配置" : "未配置"}</dd>
                   <dt>待传日志</dt>
                   <dd>
                     {status?.pendingLogs ?? 0} 条 · 最早未确认{" "}

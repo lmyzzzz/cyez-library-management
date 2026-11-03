@@ -1,3 +1,3 @@
 [workspace]
-members = ["apps/reader-mock"]
+members = ["apps/reader-mock", "apps/reader-serial"]
 resolver = "2"

@@ -329,7 +329,8 @@ tbody tr:hover {
   gap: 16px;
   margin-bottom: 18px;
 }
-.form-grid input {
+.form-grid input,
+.form-grid select {
   width: 100%;
   margin-top: 6px;
 }

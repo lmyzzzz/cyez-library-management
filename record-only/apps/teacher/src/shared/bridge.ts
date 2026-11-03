@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readerProcessSchema } from "./reader-config.js";
 import {
   normalizePin,
   listSchema,
@@ -38,10 +39,13 @@ export const actions = {
       username: z.string().min(1).max(100),
       password: z.string().max(1024),
       remember: z.boolean(),
+      autoLogin: z.boolean().default(false),
     })
     .strict(),
   loginSaved: z.object({}).strict(),
   clearSaved: z.object({}).strict(),
+  configureReader: readerProcessSchema,
+  listSerialPorts: z.object({}).strict(),
   testConnection: z.object({}).strict(),
   logout: z.object({}).strict(),
   status: z.object({}).strict(),
@@ -75,10 +79,11 @@ export const actions = {
 export type ActionName = keyof typeof actions;
 export type ActionInput<K extends ActionName> = z.input<(typeof actions)[K]>;
 export interface LocalStatus {
-  connection: Connection | null;
+  connectionConfigured: boolean;
   authenticated: boolean;
   online: boolean;
   savedCredentials: boolean;
+  autoLogin: boolean;
   pendingCommands: number;
   pendingOtherOrigins: number;
   pendingLogs: number;

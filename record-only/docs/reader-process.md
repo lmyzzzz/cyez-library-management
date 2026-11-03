@@ -10,7 +10,7 @@
 
 ## 通道与消息
 
-main 用 `spawn(executable, [], {shell:false, stdio:["pipe","pipe","pipe"]})` 启动；生产配置指定绝对 `.exe` 路径，mock 使用构建产物/打包资源。进程不监听网络或公共命名管道。stdout 仅输出协议；UTF-8 JSON，每条一行并立即 flush，LF 分隔（接收兼容 CRLF），一行不含 LF 最多 256 字节。消息可跨多个 pipe chunk，也可多条合并；不以 chunk 边界当帧边界。字段严格校验，未知字段/类型/版本不忽略。
+main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 启动；外部进程路径必须是绝对 `.exe`，内置 mock/serial 使用构建产物或打包资源。进程不监听网络或公共命名管道。stdout 仅输出协议；UTF-8 JSON，每条一行并立即 flush，LF 分隔（接收兼容 CRLF），一行不含 LF 最多 256 字节。消息可跨多个 pipe chunk，也可多条合并；不以 chunk 边界当帧边界。字段严格校验，未知字段/类型/版本不忽略。
 
 | 方向 | 消息 | 语义 |
 | --- | --- | --- |
@@ -26,6 +26,16 @@ main 用 `spawn(executable, [], {shell:false, stdio:["pipe","pipe","pipe"]})` �
 
 ## Rust mock 与配置
 
+2026-11-03 新增 Rust 串口进程 `cyez-reader-serial.exe`。设置页可覆盖选择内置串口、外部原生进程或（仅开发/集成）手动 mock；main 等待新进程 ready 后才保存选择，启动失败尝试恢复旧进程。串口列表由内置 Rust 进程单次枚举，Node 不直接读取串口；亦可手动输入 `COM1` 至 `COM9999`。串口配置为端口、300–921600 比特率、5/6/7/8 数据位、无/奇/偶校验、1/2 停止位、无/硬件/软件流控。默认 9600/8N1/无流控；实际硬件参数需按设备说明设定。配置只从表单整份覆盖，界面不读取或回填旧参数。
+
+串口进程打开设备成功后发送 `kind:"hardware"` 握手；串口字节流按 LF 分帧，接受 CRLF。每行必须恰为 8 位十六进制 UID，允许大小写且保留前导零；不能含空格、分隔符或十进制解释。格式错误发送固定 `INVALID_FRAME`，I/O 错误发送 `READER_IO` 并退出；不上传原始串口行。`--list-ports` 是独立的一次性枚举模式，输出严格 JSON 列表，不能代替正常读卡 IPC。Linux 伪终端测试覆盖实际串口读写与进程握手；Windows 实物串口/读卡器验收仍需 TBD-03。
+
+串口配置的本机示例：
+
+```json
+{"kind":"serial","port":"COM3","baudRate":9600,"dataBits":8,"parity":"none","stopBits":1,"flowControl":"none"}
+```
+
 Windows、Rust 1.94.0（MSVC 工具链）和 Visual Studio C++ Build Tools：
 
 ```powershell
@@ -39,12 +49,12 @@ corepack yarn start:client
 
 `--test-uid 00000001` 是自动化测试专用的一次性模式：发送 mock ready 和一条 scan 后退出；不会伪装成 hardware，不用于正常 GUI 运行。交互运行须由 Node/Electron 保持 stdin 管道；直接双击 exe 没有父管道会退出。
 
-生产模板使用：
+生产模板可使用内置串口进程或外部进程。`readerProcess` 也可暂时省略，让生产客户端先打开设置页选择；此时读卡状态明确显示未配置，不能刷卡。外部进程示例：
 
 ```json
 {"readerProcess":{"kind":"external","executable":"C:/Program Files/cyez-library-reader/reader.exe"}}
 ```
 
-`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端和授权种子一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。安装包将 mock 放在 `resources/readers/`，只可在显式开发/集成配置使用。
+`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。安装包将两个 Rust 进程放在 `resources/readers/`；其中 mock 只可在显式开发/集成配置使用。
 
 TBD-03 现在仅保留真实读卡器型号、驱动/电气或设备传输协议、实际发行方以及真实帧到规范 UID 的对照样本与验收。Wiegand-34、4 字节数据和本 IPC 接口已经确定。Rust mock 证明管道和应用集成，不证明真实硬件已验证；校园 API 对原 UID 的转换仍依 TBD-02，不编造硬件/校园协议。

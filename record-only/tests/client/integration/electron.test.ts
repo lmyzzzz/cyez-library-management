@@ -453,3 +453,102 @@ test("C-I-08: 自动局部更新保留真实滚动、焦点与编辑草稿", asy
     fullPage: true,
   });
 });
+
+test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配置", async () => {
+  await call("configure", { ip: "127.0.0.1", port, pin: cert.pin });
+  await call("login", {
+    username: "teacher-test",
+    password: "integration-password-only",
+    remember: true,
+    autoLogin: true,
+  });
+  expect((await call<{ autoLogin: boolean }>("status")).autoLogin).toBe(true);
+  await desktop.close();
+  const bytes = await readFile(join(userData, "library.sqlite"));
+  expect(bytes.includes(Buffer.from("integration-password-only"))).toBe(false);
+  await launch();
+  await expect
+    .poll(
+      async () =>
+        (await call<{ authenticated: boolean }>("status")).authenticated,
+    )
+    .toBe(true);
+  await page.getByRole("link", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "读卡器", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "读卡器" })).toBeVisible();
+  await page.screenshot({
+    path: "test-results/electron/serial-settings.png",
+    fullPage: true,
+  });
+  const ports = await call<{ ports: string[] }>("listSerialPorts");
+  expect(Array.isArray(ports.ports)).toBe(true);
+  await expect(
+    call("configureReader", {
+      kind: "serial",
+      port: "COM9999",
+      baudRate: 9600,
+      dataBits: 8,
+      parity: "none",
+      stopBits: 1,
+      flowControl: "none",
+    }),
+  ).rejects.toThrow();
+  await expect
+    .poll(async () => (await call<{ reader: string }>("status")).reader)
+    .toContain("Rust mock");
+  await call("configureReader", { kind: "mock" });
+  const store = new LocalStore(join(userData, "library.sqlite"));
+  await store.init();
+  expect(await store.get("readerProcess")).toBe('{"kind":"mock"}');
+  await store.close();
+  await call("clearSaved");
+  expect((await call<{ autoLogin: boolean }>("status")).autoLogin).toBe(false);
+});
+
+test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "cyez-reader-setup-"));
+  const configFile = join(directory, "client-config.json");
+  await writeFile(
+    configFile,
+    JSON.stringify({ environment: "production", identity }),
+  );
+  const packagedExecutable = process.env.CYEZ_ELECTRON_EXECUTABLE;
+  const setup = await electron.launch({
+    executablePath: packagedExecutable
+      ? resolve(packagedExecutable)
+      : resolve("node_modules/electron/dist/electron.exe"),
+    args: packagedExecutable ? [] : [resolve("apps/teacher")],
+    env: {
+      ...process.env,
+      CYEZ_USER_DATA: directory,
+      CYEZ_CLIENT_CONFIG: configFile,
+    },
+  });
+  try {
+    const setupPage = await setup.firstWindow();
+    await setupPage.waitForLoadState("domcontentloaded");
+    expect(
+      await setupPage.evaluate(
+        async () =>
+          (await window.library.call<{ reader: string }>("status", {})).reader,
+      ),
+    ).toBe("未配置读卡进程");
+    await setupPage.getByRole("link", { name: "设置", exact: true }).click();
+    await setupPage
+      .getByRole("button", { name: "读卡器", exact: true })
+      .click();
+    await expect(
+      setupPage.getByRole("heading", { name: "读卡器" }),
+    ).toBeVisible();
+    await expect(
+      setupPage.getByRole("option", { name: "手动 UID 测试窗口" }),
+    ).toHaveCount(0);
+    await expect(
+      setupPage.evaluate(() =>
+        window.library.call("configureReader", { kind: "mock" }),
+      ),
+    ).rejects.toThrow();
+  } finally {
+    await setup.close();
+  }
+});

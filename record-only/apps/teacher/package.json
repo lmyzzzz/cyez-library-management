@@ -46,6 +46,10 @@
       {
         "from": "../../target/release/cyez-reader-mock.exe",
         "to": "readers/cyez-reader-mock.exe"
+      },
+      {
+        "from": "../../target/release/cyez-reader-serial.exe",
+        "to": "readers/cyez-reader-serial.exe"
       }
     ],
     "asar": true,

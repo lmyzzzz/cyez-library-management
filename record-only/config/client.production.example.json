@@ -5,9 +5,5 @@
     "fixedSaltHex": "REPLACE_WITH_CONFIRMED_FIXED_SALT_HEX",
     "issuer": "REPLACE_WITH_CONFIRMED_ISSUER",
     "uidByteLengths": [4]
-  },
-  "readerProcess": {
-    "kind": "external",
-    "executable": "C:/Program Files/cyez-library-reader/reader.exe"
   }
 }

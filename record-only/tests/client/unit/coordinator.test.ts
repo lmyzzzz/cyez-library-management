@@ -80,6 +80,48 @@ async function login() {
 }
 
 describe("C-U main 协调器", () => {
+  it("自动登录只在加密保存密码后启用，启动按来源恢复，退出后禁用", async () => {
+    await coordinator.call("configure", {
+      ip: "127.0.0.1",
+      port: 8443,
+      pin: "ab".repeat(32),
+    });
+    await expect(
+      coordinator.call("login", {
+        username: "teacher",
+        password: "secret",
+        remember: false,
+        autoLogin: true,
+      }),
+    ).rejects.toThrow("AUTO_LOGIN_REQUIRES_SAVED_PASSWORD");
+    expect(await store.get("credentials")).toBeNull();
+    await coordinator.call("login", {
+      username: "teacher",
+      password: "secret",
+      remember: true,
+      autoLogin: true,
+    });
+    expect(await store.get("autoLogin")).toBe("true");
+    const before = traffic.filter(
+      (t) => t.path === "/api/v1/auth/login",
+    ).length;
+    const restarted = new Coordinator(
+      store,
+      coordinator.clientId,
+      "integration",
+      identity,
+      (e) => events.push(e),
+    );
+    await restarted.init();
+    expect((await restarted.status()).authenticated).toBe(false);
+    await restarted.autoLoginOnStartup();
+    expect((await restarted.status()).authenticated).toBe(true);
+    expect(traffic.filter((t) => t.path === "/api/v1/auth/login")).toHaveLength(
+      before + 1,
+    );
+    await restarted.call("logout", {});
+    expect(await store.get("autoLogin")).toBe("false");
+  });
   it("连接、加密保存、刷卡门控与原卡号生命周期", async () => {
     await coordinator.init();
     expect((await coordinator.status()).authenticated).toBe(false);

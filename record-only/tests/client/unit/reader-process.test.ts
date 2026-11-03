@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import {
   ProcessReader,
   readerProcessSchema,
+  readerArguments,
   resolveReaderExecutable,
 } from "../../../apps/teacher/src/main/reader-process.js";
 
@@ -41,6 +42,52 @@ describe("Wiegand-34 独立读卡进程", () => {
         true,
       ),
     ).toMatch(/readers[\\/]cyez-reader-mock\.exe$/);
+  });
+
+  it("串口进程参数严格校验并完整传给独立进程", () => {
+    const choice = readerProcessSchema.parse({
+      kind: "serial",
+      port: "com12",
+      baudRate: 115200,
+      dataBits: 8,
+      parity: "even",
+      stopBits: 2,
+      flowControl: "hardware",
+    });
+    expect(choice).toMatchObject({ kind: "serial", port: "COM12" });
+    expect(readerArguments(choice)).toEqual([
+      "--port",
+      "COM12",
+      "--baud",
+      "115200",
+      "--data-bits",
+      "8",
+      "--parity",
+      "even",
+      "--stop-bits",
+      "2",
+      "--flow-control",
+      "hardware",
+    ]);
+    expect(
+      resolveReaderExecutable(
+        choice,
+        "production",
+        "C:/app",
+        "C:/resources",
+        true,
+      ),
+    ).toMatch(/readers[\\/]cyez-reader-serial\.exe$/);
+    for (const bad of ["COM0", "COM99999", "../reader", "\\\\.\\pipe\\test"])
+      expect(
+        readerProcessSchema.safeParse({ ...choice, port: bad }).success,
+      ).toBe(false);
+    expect(
+      readerProcessSchema.safeParse({ ...choice, baudRate: 0 }).success,
+    ).toBe(false);
+    expect(
+      readerProcessSchema.safeParse({ ...choice, password: "secret" }).success,
+    ).toBe(false);
   });
 
   it("实际 Rust 子进程输出握手与无损 4 字节 UID", async () => {

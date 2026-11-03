@@ -69,3 +69,16 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | 静态与视觉检查 | TypeScript、Prettier、客户端构建通过；已检查真实 Electron 的新主题截图 `test-results/electron/amber-devices.png`，按钮、导航、表格及状态文字可读 |
 
 本轮仅修改教师端和对应文档、测试；未重新执行本机服务端套件、Compose 专用业务用例或 Docker 构建，其既有结果保留在前述报告中。真实校园 API、读卡器、目标部署、签名及其他外部验收边界未改变。
+
+## 2026-11-03 串口读卡与自动登录增量验证
+
+新增独立 Rust `cyez-reader-serial` 进程，内置串口和外部读卡进程可在设置页整份覆盖选择。串口按 LF/CRLF 每行读取一个 8 位十六进制 UID，严格保留前导零；端口、比特率、数据位、校验位、停止位和流控由教师界面提交。生产禁用 mock，允许以“读卡进程未配置”状态启动设置页。连接和读卡配置不回填到设置表单；临时登录输入提交后清空。自动登录仅在显式保存密码且 OS 加密可用时启用，并核对原服务器来源。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| Rust 串口进程 | Windows Rust 1.94 `cargo test --locked` 的 3 项参数、UID、控制消息测试通过，release exe 已构建。WSL/Linux `serialport::TTYPort::pair()` 伪终端 2 项实际进程测试通过：分片字节流、连续两行、CRLF、前导零、正常关闭与格式错误拒绝 |
+| 客户端单元与覆盖率 | 54 项通过；statements 89.02%、branches 84.12%、functions 86.73%、lines 89.76%，覆盖率门禁通过；含自动登录限制、启动恢复、退出禁用、读卡参数验证与设置表单无回填 |
+| 真实 Electron 集成 | Windows 打包应用 9 项通过，Compose 专用 1 项按默认设置跳过；使用随机测试 PostgreSQL、TLS、SQLite 与实际 Electron，新增自动登录跨重启、串口枚举、无效端口切换失败恢复原 mock 进程、本地读卡配置覆盖及生产客户端不预设读卡进程时可打开设置且禁止 mock 的验证 |
+| 构建与静态校验 | Yarn immutable install、TypeScript、Prettier、Cargo fmt、共享包及客户端构建通过；NSIS 安装包含 `resources/readers/cyez-reader-serial.exe`（284672 字节），SHA-256 `900217b326c30440ae2f6c34d393884c3df656d0f0b2b1fabb17c1b6ab8d26e9`；仍未签名。已检查真实 Electron 设置页截图 `test-results/electron/serial-settings.png` |
+
+本轮没有真实 Windows 串口读卡器与校园系统，因此实物端口、具体设备串口参数、卡号行编码对照及校园 API 联调仍需 TBD-02/03 输入；Linux 伪终端和开发 mock 不构成目标硬件验收。服务端业务代码、Docker 镜像与 Compose 专用用例本轮未改或重跑；其既有结果见上文。

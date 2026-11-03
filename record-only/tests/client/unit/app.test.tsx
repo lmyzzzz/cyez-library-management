@@ -52,10 +52,11 @@ const free: DeviceDTO = {
   active: null,
 };
 const status: LocalStatus = {
-  connection: { ip: "127.0.0.1", port: 8443, pin: "ab".repeat(32) },
+  connectionConfigured: true,
   authenticated: true,
   online: true,
   savedCredentials: false,
+  autoLogin: false,
   pendingLogs: 0,
   pendingCommands: 0,
   pendingOtherOrigins: 0,
@@ -215,7 +216,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
     pin.style.height = "240px";
     local = {
       ...local,
-      connection: { ...local.connection!, pin: "cd".repeat(32) },
+      connectionConfigured: false,
     };
     await act(async () => {
       listener!({ type: "changed" });

@@ -43,6 +43,9 @@ jobs:
       - run: python docs/tools/generate_diagrams.py --check
       - run: yarn format:check
       - run: yarn typecheck
+      - run: rustup toolchain install 1.94.0 --profile minimal --component rustfmt
+      - run: cargo +1.94.0 fmt --all -- --check
+      - run: cargo +1.94.0 test --locked -p cyez-reader-serial
       - run: yarn test:unit:server
       - run: yarn test:coverage:server
       - run: yarn build:server
@@ -103,7 +106,9 @@ jobs:
       - run: rustup toolchain install 1.94.0 --profile minimal --component rustfmt
       - run: cargo fmt --all -- --check
       - run: yarn test:reader:mock
+      - run: yarn test:reader:serial
       - run: yarn build:reader:mock
+      - run: yarn build:reader:serial
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
       - run: yarn build:client

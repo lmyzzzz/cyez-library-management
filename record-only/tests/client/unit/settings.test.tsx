@@ -10,6 +10,7 @@ import type { DeviceDTO, RecordDTO, TagDTO } from "@record/protocol";
 import type { LocalStatus } from "../../../apps/teacher/src/shared/bridge.js";
 import {
   ConnectionForm,
+  ReaderSettings,
   DeviceEditor,
   TagManager,
   History,
@@ -27,10 +28,11 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const status = {
-  connection: { ip: "127.0.0.1", port: 8443, pin: "ab".repeat(32) },
+  connectionConfigured: true,
   authenticated: false,
   online: false,
   savedCredentials: true,
+  autoLogin: false,
   pendingLogs: 0,
   pendingCommands: 0,
   pendingOtherOrigins: 0,
@@ -72,6 +74,78 @@ const record: RecordDTO = {
 };
 
 describe("C-U-05 设置和只读历史", () => {
+  it("连接表单只接受完整覆盖输入；自动登录依赖保存密码", async () => {
+    render(<ConnectionForm status={status} refresh={vi.fn()} />);
+    expect((screen.getByLabelText("服务器 IP") as HTMLInputElement).value).toBe(
+      "",
+    );
+    expect(
+      (screen.getByLabelText("叶证书 SHA-256 指纹") as HTMLTextAreaElement)
+        .value,
+    ).toBe("");
+    const auto = screen.getByLabelText<HTMLInputElement>("启动时自动登录");
+    expect(auto.disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText("保存密码"));
+    expect(auto.disabled).toBe(false);
+    fireEvent.click(auto);
+    fireEvent.click(screen.getByLabelText("保存密码"));
+    expect(auto.disabled).toBe(true);
+    expect(auto.checked).toBe(false);
+  });
+
+  it("串口参数与进程选择按整份配置提交，生产隐藏 mock", async () => {
+    const refresh = vi.fn();
+    render(<ReaderSettings status={status} refresh={refresh} />);
+    expect((screen.getByLabelText("串口") as HTMLInputElement).value).toBe("");
+    call.mockResolvedValueOnce({ ports: ["COM3", "COM9"] });
+    fireEvent.click(screen.getByRole("button", { name: "刷新串口列表" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("listSerialPorts", {}),
+    );
+    fireEvent.change(screen.getByLabelText("串口"), {
+      target: { value: "COM9" },
+    });
+    fireEvent.change(screen.getByLabelText("比特率"), {
+      target: { value: "115200" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("configureReader", {
+        kind: "serial",
+        port: "COM9",
+        baudRate: 115200,
+        dataBits: 8,
+        parity: "none",
+        stopBits: 1,
+        flowControl: "none",
+      }),
+    );
+    expect(refresh).toHaveBeenCalled();
+    expect((screen.getByLabelText("串口") as HTMLInputElement).value).toBe("");
+    fireEvent.change(screen.getByLabelText("读卡进程"), {
+      target: { value: "external" },
+    });
+    fireEvent.change(screen.getByLabelText("进程绝对路径"), {
+      target: { value: "C:/reader.exe" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("configureReader", {
+        kind: "external",
+        executable: "C:/reader.exe",
+      }),
+    );
+    cleanup();
+    render(
+      <ReaderSettings
+        status={{ ...status, environment: "production" }}
+        refresh={refresh}
+      />,
+    );
+    expect(
+      screen.queryByRole("option", { name: "手动 UID 测试窗口" }),
+    ).toBeNull();
+  });
   it("连接测试、登录、保存密码清除和失败反馈", async () => {
     const refresh = vi.fn();
     render(<ConnectionForm status={status} refresh={refresh} />);
@@ -100,16 +174,28 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.change(screen.getByLabelText("密码"), {
       target: { value: "secret" },
     });
-    fireEvent.click(screen.getByLabelText("记住登录信息"));
-    fireEvent.click(screen.getByRole("button", { name: "保存并登录" }));
+    let submitted: unknown;
+    call.mockImplementation(async (action, input) => {
+      if (action === "login") submitted = structuredClone(input);
+      return {};
+    });
+    fireEvent.click(screen.getByLabelText("保存密码"));
+    fireEvent.click(screen.getByRole("button", { name: "覆盖连接并登录" }));
     await waitFor(() =>
-      expect(call).toHaveBeenCalledWith("login", {
+      expect(submitted).toEqual({
         username: "teacher",
         password: "secret",
         remember: true,
+        autoLogin: false,
       }),
     );
     expect((screen.getByLabelText("密码") as HTMLInputElement).value).toBe("");
+    expect((screen.getByLabelText("共享账号") as HTMLInputElement).value).toBe(
+      "",
+    );
+    expect(
+      call.mock.calls.find(([action]) => action === "login")?.[1],
+    ).toMatchObject({ password: "" });
     fireEvent.click(screen.getByRole("button", { name: "使用已保存登录" }));
     await waitFor(() => expect(call).toHaveBeenCalledWith("loginSaved", {}));
     fireEvent.click(screen.getByRole("button", { name: "清除保存项" }));

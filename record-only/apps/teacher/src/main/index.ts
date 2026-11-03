@@ -2,18 +2,23 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { z } from "zod";
 import { createWindowControlHost } from "@series/electron/main";
 import { identityConfigSchema } from "@record/protocol/identity";
 import { ApiError } from "@record/protocol";
 import { actions, type ActionName } from "../shared/bridge.js";
+import type { ReaderProcessConfig } from "../shared/reader-config.js";
 import { LocalStore } from "./store.js";
 import { Coordinator } from "./coordinator.js";
 import {
   ProcessReader,
   readerProcessSchema,
+  readerArguments,
   resolveReaderExecutable,
 } from "./reader-process.js";
+const execFileAsync = promisify(execFile);
 const configSchema = z
   .object({
     environment: z.enum(["development", "integration", "production"]),
@@ -22,8 +27,8 @@ const configSchema = z
   })
   .strict()
   .superRefine((v, c) => {
-    if (v.environment === "production" && v.readerProcess?.kind !== "external")
-      c.addIssue({ code: "custom", message: "EXTERNAL_READER_REQUIRED" });
+    if (v.environment === "production" && v.readerProcess?.kind === "mock")
+      c.addIssue({ code: "custom", message: "MOCK_READER_FORBIDDEN" });
     if (
       v.identity.uidByteLengths.length !== 1 ||
       v.identity.uidByteLengths[0] !== 4
@@ -104,6 +109,131 @@ void app.whenReady().then(async () => {
           window.webContents.send("library:event", event);
       },
     );
+    let readerConfig: ReaderProcessConfig | undefined = config.readerProcess;
+    let readerChanging = false;
+    const savedReader = await store.get("readerProcess");
+    if (savedReader) {
+      const parsed = readerProcessSchema.parse(JSON.parse(savedReader));
+      if (config.environment === "production" && parsed.kind === "mock")
+        throw new Error("MOCK_READER_FORBIDDEN");
+      readerConfig = parsed;
+    }
+    const startReader = async (choice: ReaderProcessConfig) => {
+      let executable: string;
+      try {
+        executable = resolveReaderExecutable(
+          choice,
+          config.environment,
+          app.getAppPath(),
+          process.resourcesPath,
+          app.isPackaged,
+        );
+      } catch {
+        throw new ApiError("READER_EXECUTABLE_INVALID", 422);
+      }
+      const candidate = new ProcessReader(
+        executable,
+        config.environment === "production",
+        readerArguments(choice),
+      );
+      adapter = candidate;
+      try {
+        await candidate.start(
+          (uid, source) => {
+            void coordinator!.reader.accept(uid, source).catch(() =>
+              coordinator!.log({
+                source: "reader",
+                level: "error",
+                code: "READER_FAILED",
+              }),
+            );
+          },
+          () => {
+            if (adapter !== candidate) return;
+            coordinator!.readerState = "读卡进程已断开，请检查设备或重新配置";
+            void coordinator!
+              .log({ source: "reader", level: "error", code: "READER_FAILED" })
+              .catch(() => {});
+            if (!window.isDestroyed())
+              window.webContents.send("library:event", { type: "changed" });
+          },
+          (mock) => {
+            if (adapter !== candidate) return;
+            coordinator!.readerState = mock
+              ? "Rust mock：Wiegand-34 手动输入"
+              : choice.kind === "serial"
+                ? "串口读卡进程已连接"
+                : "读卡进程已连接";
+            if (!window.isDestroyed())
+              window.webContents.send("library:event", { type: "changed" });
+          },
+        );
+        return candidate;
+      } catch {
+        if (adapter === candidate) adapter = undefined;
+        await candidate.stop();
+        throw new ApiError("READER_PROCESS_UNAVAILABLE", 503);
+      }
+    };
+    const replaceReader = async (choice: ReaderProcessConfig) => {
+      if (readerChanging) throw new ApiError("READER_CHANGE_BUSY", 409);
+      if (config.environment === "production" && choice.kind === "mock")
+        throw new ApiError("MOCK_READER_FORBIDDEN", 403);
+      readerChanging = true;
+      try {
+        const previous = readerConfig;
+        await adapter?.stop();
+        adapter = undefined;
+        let candidate: ProcessReader | undefined;
+        try {
+          candidate = await startReader(choice);
+          await store.set("readerProcess", JSON.stringify(choice));
+          readerConfig = choice;
+        } catch (error) {
+          coordinator!.readerState = "读卡进程配置失败";
+          await candidate?.stop();
+          adapter = undefined;
+          if (previous) await startReader(previous).catch(() => {});
+          throw error;
+        }
+      } finally {
+        readerChanging = false;
+      }
+    };
+    const listSerialPorts = async () => {
+      try {
+        const executable = resolveReaderExecutable(
+          {
+            kind: "serial",
+            port: "COM1",
+            baudRate: 9600,
+            dataBits: 8,
+            parity: "none",
+            stopBits: 1,
+            flowControl: "none",
+          },
+          config.environment,
+          app.getAppPath(),
+          process.resourcesPath,
+          app.isPackaged,
+        );
+        const env: NodeJS.ProcessEnv = {};
+        for (const key of ["SystemRoot", "WINDIR", "TEMP", "TMP", "PATH"])
+          if (process.env[key]) env[key] = process.env[key];
+        const { stdout } = await execFileAsync(executable, ["--list-ports"], {
+          timeout: 5000,
+          maxBuffer: 8192,
+          windowsHide: true,
+          env,
+        });
+        return z
+          .object({ ports: z.array(z.string().min(1).max(128)).max(128) })
+          .strict()
+          .parse(JSON.parse(stdout));
+      } catch {
+        throw new ApiError("READER_PORT_LIST_FAILED", 503);
+      }
+    };
     ipcMain.handle(
       "library:action",
       async (event, action: unknown, input: unknown) => {
@@ -116,6 +246,18 @@ void app.whenReady().then(async () => {
         )
           return { ok: false, code: "IPC_FORBIDDEN", status: 403 };
         try {
+          if (action === "listSerialPorts") {
+            if (!actions.listSerialPorts.safeParse(input).success)
+              throw new ApiError("INPUT_INVALID", 422);
+            return { ok: true, value: await listSerialPorts() };
+          }
+          if (action === "configureReader") {
+            const parsed = readerProcessSchema.safeParse(input);
+            if (!parsed.success) throw new ApiError("INPUT_INVALID", 422);
+            const choice = parsed.data;
+            await replaceReader(choice);
+            return { ok: true, value: { ok: true } };
+          }
           return {
             ok: true,
             value: await coordinator!.call(action as ActionName, input),
@@ -130,53 +272,17 @@ void app.whenReady().then(async () => {
       },
     );
     await coordinator.init();
-    if (config.readerProcess) {
-      adapter = new ProcessReader(
-        resolveReaderExecutable(
-          config.readerProcess,
-          config.environment,
-          app.getAppPath(),
-          process.resourcesPath,
-          app.isPackaged,
-        ),
-        config.environment === "production",
-      );
-      await adapter
-        .start(
-          (uid, source) => {
-            void coordinator!.reader.accept(uid, source).catch(() =>
-              coordinator!.log({
-                source: "reader",
-                level: "error",
-                code: "READER_FAILED",
-              }),
-            );
-          },
-          () => {
-            coordinator!.readerState = "读卡进程已断开，请检查设备后重启应用";
-            void coordinator!
-              .log({ source: "reader", level: "error", code: "READER_FAILED" })
-              .catch(() => {});
-            if (!window.isDestroyed())
-              window.webContents.send("library:event", { type: "changed" });
-          },
-          (mock) => {
-            coordinator!.readerState = mock
-              ? "Rust mock：Wiegand-34 手动输入"
-              : "读卡进程已连接";
-            if (!window.isDestroyed())
-              window.webContents.send("library:event", { type: "changed" });
-          },
-        )
-        .catch(() => {
-          coordinator!.readerState = "读卡进程启动失败，请检查配置后重启应用";
-        });
-    } else coordinator.readerState = "集成环境：测试读卡器";
+    if (readerConfig) {
+      await startReader(readerConfig).catch(() => {
+        coordinator!.readerState = "读卡进程启动失败，请检查配置";
+      });
+    } else coordinator.readerState = "未配置读卡进程";
     interval = setInterval(() => {
       void coordinator!.flush().catch(() => {});
     }, 3000);
     await window.loadURL(renderer);
     window.show();
+    void coordinator.autoLoginOnStartup().catch(() => {});
     window.on("closed", () => app.quit());
   } catch {
     dialog.showErrorBox(

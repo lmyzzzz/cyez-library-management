@@ -31,7 +31,6 @@ export class Coordinator {
   private writing = false;
   private recovering = false;
   private flushing = false;
-  private memoryLogin: { username: string; password: string } | undefined;
   readonly reader: CardReader;
   readerState = "未连接读卡器";
   constructor(
@@ -54,6 +53,15 @@ export class Coordinator {
     }
     await this.log({ source: "main", level: "info", code: "APP_STARTED" });
   }
+  async autoLoginOnStartup() {
+    if ((await this.store.get("autoLogin")) === "true") {
+      try {
+        await this.loginSaved();
+      } catch {
+        this.emit({ type: "notice", code: "AUTO_LOGIN_FAILED" });
+      }
+    }
+  }
   async log(entry: SafeLog) {
     await this.store.append({
       ...entry,
@@ -66,7 +74,6 @@ export class Coordinator {
     await this.sdk?.close();
     this.sdk = undefined;
     this.online = false;
-    this.memoryLogin = undefined;
     this.connection = connection;
     const transport = new PinnedTransport(connection);
     this.sdk = new ClientSDK(transport, this.clientId);
@@ -84,10 +91,11 @@ export class Coordinator {
         ).length
       : 0;
     return {
-      connection: this.connection,
+      connectionConfigured: !!this.connection,
       authenticated: !!this.sdk?.authenticated,
       online: this.online,
       savedCredentials: !!(await this.store.get("credentials")),
+      autoLogin: (await this.store.get("autoLogin")) === "true",
       ...metrics,
       pendingCommands: current,
       pendingOtherOrigins: metrics.pendingCommands - current,
@@ -299,10 +307,16 @@ export class Coordinator {
       this.flushing = false;
     }
   }
-  async login(username: string, password: string, remember: boolean) {
+  async login(
+    username: string,
+    password: string,
+    remember: boolean,
+    autoLogin = false,
+  ) {
+    if (autoLogin && !remember)
+      throw new ApiError("AUTO_LOGIN_REQUIRES_SAVED_PASSWORD", 422);
     const sdk = this.requireSdk();
     await this.network(() => sdk.login(username, password));
-    this.memoryLogin = { username, password };
     let saved = false;
     if (remember && safeStorage.isEncryptionAvailable()) {
       const encrypted = safeStorage.encryptString(
@@ -312,20 +326,77 @@ export class Coordinator {
           password,
         }),
       );
-      await this.store.set("credentials", encrypted.toString("base64"));
-      encrypted.fill(0);
+      try {
+        await this.saveLoginSettings(encrypted.toString("base64"), autoLogin);
+      } finally {
+        encrypted.fill(0);
+      }
       saved = true;
     } else {
-      await this.store.write(() =>
-        this.store.settings.destroy({ where: { key: "credentials" } }),
-      );
+      await this.saveLoginSettings(null, false);
       if (remember)
         this.emit({ type: "notice", code: "SECURE_STORAGE_UNAVAILABLE" });
     }
+    return saved;
+  }
+  private async saveLoginSettings(
+    credentials: string | null,
+    autoLogin: boolean,
+  ) {
+    await this.store.write(() =>
+      this.store.db.transaction(async (transaction) => {
+        if (credentials)
+          await this.store.settings.upsert(
+            { key: "credentials", value: credentials },
+            { transaction },
+          );
+        else
+          await this.store.settings.destroy({
+            where: { key: "credentials" },
+            transaction,
+          });
+        await this.store.settings.upsert(
+          { key: "autoLogin", value: String(autoLogin) },
+          { transaction },
+        );
+      }),
+    );
+  }
+  private async finishLogin(saved: boolean) {
+    const sdk = this.requireSdk();
     const recovery = await this.recover();
     await sdk.call("POST", "/api/v1/clients/startup", { version: "0.1.0" });
     await this.flush();
     return { saved, recovery };
+  }
+  async loginSaved() {
+    const stored = await this.store.get("credentials");
+    if (!stored || !safeStorage.isEncryptionAvailable())
+      throw new ApiError("SAVED_LOGIN_UNAVAILABLE", 401);
+    const encrypted = Buffer.from(stored, "base64");
+    let credentials: { origin: string; username: string; password: string };
+    try {
+      credentials = JSON.parse(safeStorage.decryptString(encrypted));
+    } finally {
+      encrypted.fill(0);
+    }
+    let saved: boolean;
+    try {
+      if (
+        credentials.origin !==
+        (this.requireSdk().transport as PinnedTransport).origin
+      )
+        throw new ApiError("SAVED_LOGIN_ORIGIN_MISMATCH", 401);
+      saved = await this.login(
+        credentials.username,
+        credentials.password,
+        true,
+        (await this.store.get("autoLogin")) === "true",
+      );
+    } finally {
+      credentials.password = "";
+    }
+    return this.finishLogin(saved);
   }
   async call(action: ActionName, input: unknown): Promise<unknown> {
     if (!(action in actions)) throw new ApiError("IPC_ACTION_INVALID", 422);
@@ -333,6 +404,8 @@ export class Coordinator {
       string,
       unknown
     >;
+    if (action === "login" && input && typeof input === "object")
+      (input as { password: string }).password = "";
     switch (action) {
       case "configure":
         return this.configure(data as Connection);
@@ -342,47 +415,27 @@ export class Coordinator {
         this.gate = data as typeof this.gate;
         return { ok: true };
       case "login":
+        let saved: boolean;
         try {
-          return await this.login(
+          saved = await this.login(
             data.username as string,
             data.password as string,
             data.remember as boolean,
+            data.autoLogin as boolean,
           );
         } finally {
           data.password = "";
         }
-      case "loginSaved": {
-        const stored = await this.store.get("credentials");
-        if (!stored || !safeStorage.isEncryptionAvailable())
-          throw new ApiError("SAVED_LOGIN_UNAVAILABLE", 401);
-        const credentials = JSON.parse(
-          safeStorage.decryptString(Buffer.from(stored, "base64")),
-        );
-        if (
-          credentials.origin !==
-          (this.requireSdk().transport as PinnedTransport).origin
-        )
-          throw new ApiError("SAVED_LOGIN_ORIGIN_MISMATCH", 401);
-        try {
-          return await this.login(
-            credentials.username,
-            credentials.password,
-            true,
-          );
-        } finally {
-          credentials.password = "";
-        }
-      }
+        return this.finishLogin(saved);
+      case "loginSaved":
+        return this.loginSaved();
       case "clearSaved":
-        this.memoryLogin = undefined;
-        await this.store.write(() =>
-          this.store.settings.destroy({ where: { key: "credentials" } }),
-        );
+        await this.saveLoginSettings(null, false);
         return { ok: true };
       case "logout":
         await this.sdk?.logout();
         this.online = false;
-        this.memoryLogin = undefined;
+        await this.store.set("autoLogin", "false");
         return { ok: true };
       case "testConnection":
         return this.network(() =>

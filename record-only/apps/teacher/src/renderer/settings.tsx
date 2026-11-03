@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Banner, Field, CheckField } from "@record/ui";
 import type { DeviceDTO, TagDTO, Page, RecordDTO } from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
+import type { ReaderProcessConfig } from "../shared/reader-config.js";
 import {
   Dialog,
   Failure,
@@ -17,12 +18,13 @@ export function ConnectionForm({
   status: LocalStatus | null;
   refresh: () => void;
 }) {
-  const [ip, setIp] = useState(status?.connection?.ip ?? ""),
-    [port, setPort] = useState(status?.connection?.port ?? 443),
-    [pin, setPin] = useState(status?.connection?.pin ?? ""),
+  const [ip, setIp] = useState(""),
+    [port, setPort] = useState(443),
+    [pin, setPin] = useState(""),
     [username, setUsername] = useState(""),
     [password, setPassword] = useState(""),
     [remember, setRemember] = useState(false),
+    [autoLogin, setAutoLogin] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>(),
     [message, setMessage] = useState("");
@@ -43,7 +45,14 @@ export function ConnectionForm({
           await window.library.call("testConnection", {});
           setMessage("连接及证书校验通过");
         } else {
-          await window.library.call("login", { username, password, remember });
+          const input = { username, password, remember, autoLogin };
+          setUsername("");
+          setPassword("");
+          try {
+            await window.library.call("login", input);
+          } finally {
+            input.password = "";
+          }
           setMessage("登录成功");
         }
       }
@@ -53,14 +62,14 @@ export function ConnectionForm({
     } finally {
       setBusy(false);
       setPassword("");
+      setUsername("");
     }
   };
   return (
     <section className="panel connection">
       <h2>连接配置</h2>
       <p className="muted">
-        填写运维提供的服务器地址与叶证书 SHA-256
-        指纹。登录信息仅保存在本机系统加密存储中。
+        输入完整的新配置以覆盖本机连接。已保存的配置不会回填；只有勾选保存密码时，登录凭证才使用本机系统加密存储。
       </p>
       <div className="form-grid">
         <Field label="服务器 IP" htmlFor="server-ip">
@@ -95,7 +104,7 @@ export function ConnectionForm({
         <Field label="共享账号" htmlFor="username">
           <input
             id="username"
-            autoComplete="username"
+            autoComplete="off"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -104,16 +113,25 @@ export function ConnectionForm({
           <input
             id="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="off"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </Field>
       </div>
       <CheckField
-        label="记住登录信息"
+        label="保存密码"
         checked={remember}
-        onChange={(e) => setRemember(e.target.checked)}
+        onChange={(e) => {
+          setRemember(e.target.checked);
+          if (!e.target.checked) setAutoLogin(false);
+        }}
+      />
+      <CheckField
+        label="启动时自动登录"
+        checked={remember && autoLogin}
+        disabled={!remember || busy}
+        onChange={(e) => setAutoLogin(e.target.checked)}
       />
       <Failure error={error} />
       {message && <Banner tone="success">{message}</Banner>}
@@ -126,7 +144,7 @@ export function ConnectionForm({
           disabled={busy || !username || !password}
           onClick={() => void run("login")}
         >
-          保存并登录
+          覆盖连接并登录
         </Button>
         <Button
           disabled={busy || !status?.savedCredentials}
@@ -136,6 +154,198 @@ export function ConnectionForm({
         </Button>
         <Button disabled={busy} onClick={() => void run("clear")}>
           清除保存项
+        </Button>
+      </div>
+    </section>
+  );
+}
+export function ReaderSettings({
+  status,
+  refresh,
+}: {
+  status: LocalStatus;
+  refresh: () => void;
+}) {
+  const [kind, setKind] = useState<ReaderProcessConfig["kind"]>("serial"),
+    [port, setPort] = useState(""),
+    [baudRate, setBaudRate] = useState(9600),
+    [dataBits, setDataBits] = useState<5 | 6 | 7 | 8>(8),
+    [parity, setParity] = useState<"none" | "odd" | "even">("none"),
+    [stopBits, setStopBits] = useState<1 | 2>(1),
+    [flowControl, setFlowControl] = useState<"none" | "hardware" | "software">(
+      "none",
+    ),
+    [executable, setExecutable] = useState(""),
+    [ports, setPorts] = useState<string[]>([]),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState<unknown>(),
+    [message, setMessage] = useState("");
+  const scanPorts = async () => {
+    setBusy(true);
+    setError(undefined);
+    try {
+      const result = await window.library.call<{ ports: string[] }>(
+        "listSerialPorts",
+        {},
+      );
+      setPorts(result.ports);
+      if (!result.ports.length) setMessage("未发现串口，可手动输入端口名称");
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const save = async () => {
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      const choice: ReaderProcessConfig =
+        kind === "serial"
+          ? { kind, port, baudRate, dataBits, parity, stopBits, flowControl }
+          : kind === "external"
+            ? { kind, executable }
+            : { kind };
+      await window.library.call("configureReader", choice);
+      setMessage("读卡进程已启动，新配置已覆盖");
+      setPort("");
+      setExecutable("");
+      refresh();
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="panel connection">
+      <h2>读卡器</h2>
+      <p className="muted">
+        当前状态：{status.reader}。输入完整参数以覆盖本机读卡配置。
+      </p>
+      <Field label="读卡进程" htmlFor="reader-kind">
+        <select
+          id="reader-kind"
+          value={kind}
+          onChange={(e) =>
+            setKind(e.target.value as ReaderProcessConfig["kind"])
+          }
+        >
+          <option value="serial">内置串口进程</option>
+          <option value="external">外部读卡进程</option>
+          {status.environment !== "production" && (
+            <option value="mock">手动 UID 测试窗口</option>
+          )}
+        </select>
+      </Field>
+      {kind === "serial" && (
+        <>
+          <div className="form-grid">
+            <Field label="串口" htmlFor="serial-port">
+              <input
+                id="serial-port"
+                list="serial-port-options"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+                placeholder="例如 COM3"
+              />
+              <datalist id="serial-port-options">
+                {ports.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+            </Field>
+            <Field label="比特率" htmlFor="serial-baud">
+              <input
+                id="serial-baud"
+                type="number"
+                min={300}
+                max={921600}
+                value={baudRate}
+                onChange={(e) => setBaudRate(Number(e.target.value))}
+              />
+            </Field>
+            <Field label="数据位" htmlFor="serial-data-bits">
+              <select
+                id="serial-data-bits"
+                value={dataBits}
+                onChange={(e) =>
+                  setDataBits(Number(e.target.value) as 5 | 6 | 7 | 8)
+                }
+              >
+                {[5, 6, 7, 8].map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="校验位" htmlFor="serial-parity">
+              <select
+                id="serial-parity"
+                value={parity}
+                onChange={(e) => setParity(e.target.value as typeof parity)}
+              >
+                <option value="none">无</option>
+                <option value="odd">奇校验</option>
+                <option value="even">偶校验</option>
+              </select>
+            </Field>
+            <Field label="停止位" htmlFor="serial-stop-bits">
+              <select
+                id="serial-stop-bits"
+                value={stopBits}
+                onChange={(e) => setStopBits(Number(e.target.value) as 1 | 2)}
+              >
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </select>
+            </Field>
+            <Field label="流控" htmlFor="serial-flow">
+              <select
+                id="serial-flow"
+                value={flowControl}
+                onChange={(e) =>
+                  setFlowControl(e.target.value as typeof flowControl)
+                }
+              >
+                <option value="none">无</option>
+                <option value="hardware">硬件</option>
+                <option value="software">软件</option>
+              </select>
+            </Field>
+          </div>
+        </>
+      )}
+      {kind === "external" && (
+        <Field label="进程绝对路径" htmlFor="reader-executable">
+          <input
+            id="reader-executable"
+            value={executable}
+            onChange={(e) => setExecutable(e.target.value)}
+            placeholder="C:/Program Files/.../reader.exe"
+          />
+        </Field>
+      )}
+      <Failure error={error} />
+      {message && <Banner tone="success">{message}</Banner>}
+      <div className="actions">
+        {kind === "serial" && (
+          <Button disabled={busy} onClick={() => void scanPorts()}>
+            刷新串口列表
+          </Button>
+        )}
+        <Button
+          variant="primary"
+          disabled={
+            busy ||
+            (kind === "serial" && !port.trim()) ||
+            (kind === "external" && !executable.trim())
+          }
+          onClick={() => void save()}
+        >
+          覆盖并启动
         </Button>
       </div>
     </section>
