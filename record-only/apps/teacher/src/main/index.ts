@@ -211,6 +211,7 @@ void app.whenReady().then(async () => {
             parity: "none",
             stopBits: 1,
             flowControl: "none",
+            format: "hex8",
           },
           config.environment,
           app.getAppPath(),

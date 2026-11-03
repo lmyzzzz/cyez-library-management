@@ -23,6 +23,9 @@ export const readerProcessSchema = z.discriminatedUnion("kind", [
       parity: z.enum(["none", "odd", "even"]),
       stopBits: z.union([z.literal(1), z.literal(2)]),
       flowControl: z.enum(["none", "hardware", "software"]),
+      format: z
+        .enum(["hex8", "hex", "decimal", "octal", "binary"])
+        .default("hex8"),
     })
     .strict(),
 ]);

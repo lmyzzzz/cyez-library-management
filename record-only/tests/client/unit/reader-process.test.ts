@@ -54,7 +54,11 @@ describe("Wiegand-34 独立读卡进程", () => {
       stopBits: 2,
       flowControl: "hardware",
     });
-    expect(choice).toMatchObject({ kind: "serial", port: "COM12" });
+    expect(choice).toMatchObject({
+      kind: "serial",
+      port: "COM12",
+      format: "hex8",
+    });
     expect(readerArguments(choice)).toEqual([
       "--port",
       "COM12",
@@ -68,7 +72,22 @@ describe("Wiegand-34 独立读卡进程", () => {
       "2",
       "--flow-control",
       "hardware",
+      "--format",
+      "hex8",
     ]);
+    for (const format of [
+      "hex8",
+      "hex",
+      "decimal",
+      "octal",
+      "binary",
+    ] as const) {
+      const parsed = readerProcessSchema.parse({ ...choice, format });
+      expect(readerArguments(parsed).slice(-2)).toEqual(["--format", format]);
+    }
+    expect(
+      readerProcessSchema.safeParse({ ...choice, format: "auto" }).success,
+    ).toBe(false);
     expect(
       resolveReaderExecutable(
         choice,

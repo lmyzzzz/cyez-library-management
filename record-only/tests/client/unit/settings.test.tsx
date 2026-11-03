@@ -108,6 +108,9 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.change(screen.getByLabelText("比特率"), {
       target: { value: "115200" },
     });
+    fireEvent.change(screen.getByLabelText("卡号格式"), {
+      target: { value: "decimal" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("configureReader", {
@@ -118,6 +121,7 @@ describe("C-U-05 设置和只读历史", () => {
         parity: "none",
         stopBits: 1,
         flowControl: "none",
+        format: "decimal",
       }),
     );
     expect(refresh).toHaveBeenCalled();

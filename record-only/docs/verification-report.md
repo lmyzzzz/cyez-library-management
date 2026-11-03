@@ -82,3 +82,15 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | 构建与静态校验 | Yarn immutable install、TypeScript、Prettier、Cargo fmt、共享包及客户端构建通过；NSIS 安装包含 `resources/readers/cyez-reader-serial.exe`（284672 字节），SHA-256 `900217b326c30440ae2f6c34d393884c3df656d0f0b2b1fabb17c1b6ab8d26e9`；仍未签名。已检查真实 Electron 设置页截图 `test-results/electron/serial-settings.png` |
 
 本轮没有真实 Windows 串口读卡器与校园系统，因此实物端口、具体设备串口参数、卡号行编码对照及校园 API 联调仍需 TBD-02/03 输入；Linux 伪终端和开发 mock 不构成目标硬件验收。服务端业务代码、Docker 镜像与 Compose 专用用例本轮未改或重跑；其既有结果见上文。
+
+## 2026-11-03 串口卡号进制配置增量验证
+
+设置页新增固定 8 位十六进制、可变宽度十六进制、十进制、八进制和二进制选项；Rust 串口进程将每行无符号 32 位数转换为统一的 8 位小写十六进制 UID。旧配置缺少 `format` 字段时默认固定 8 位十六进制。接口约束和配置示例见[读卡进程协议](reader-process.md)。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| Rust 单元与串口集成 | Windows Rust 1.94.0 单元 3 项通过；WSL Linux 单元 3 项和实际伪终端 3 项通过。覆盖前导零、各进制最大 32 位值、溢出、非法字符、CRLF、多行输入、错误帧退出与正常关闭 |
+| 客户端 | TypeScript、Prettier、Cargo fmt 通过；单元/组件 54 项通过，覆盖率 statements 89.04%、branches 84.12%、functions 86.77%、lines 89.78%，门禁通过；格式参数从界面到配置校验、进程启动参数的测试通过 |
+| 发布与真实 Electron | Windows release 串口 exe、教师端构建和 NSIS 包生成；解包发布版 Electron 集成 9 项通过，Compose 专用 1 项按默认设置跳过。安装包 SHA-256 `83ef97351ffacebd9d8134944bc832246d958825a01d9f4e3a057c0fd8336ad6`，未签名 |
+
+本轮仍未取得真实串口读卡器及其卡号对照样本，因此各进制对实际硬件输出的匹配、Windows 实体串口和校园 API 查询未完成验收。服务端与 Docker 代码未变，本轮未重跑服务端和 Compose 测试。

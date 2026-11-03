@@ -175,6 +175,9 @@ export function ReaderSettings({
     [flowControl, setFlowControl] = useState<"none" | "hardware" | "software">(
       "none",
     ),
+    [format, setFormat] = useState<
+      "hex8" | "hex" | "decimal" | "octal" | "binary"
+    >("hex8"),
     [executable, setExecutable] = useState(""),
     [ports, setPorts] = useState<string[]>([]),
     [busy, setBusy] = useState(false),
@@ -203,7 +206,16 @@ export function ReaderSettings({
     try {
       const choice: ReaderProcessConfig =
         kind === "serial"
-          ? { kind, port, baudRate, dataBits, parity, stopBits, flowControl }
+          ? {
+              kind,
+              port,
+              baudRate,
+              dataBits,
+              parity,
+              stopBits,
+              flowControl,
+              format,
+            }
           : kind === "external"
             ? { kind, executable }
             : { kind };
@@ -313,6 +325,19 @@ export function ReaderSettings({
                 <option value="none">无</option>
                 <option value="hardware">硬件</option>
                 <option value="software">软件</option>
+              </select>
+            </Field>
+            <Field label="卡号格式" htmlFor="serial-format">
+              <select
+                id="serial-format"
+                value={format}
+                onChange={(e) => setFormat(e.target.value as typeof format)}
+              >
+                <option value="hex8">十六进制（固定 8 位）</option>
+                <option value="hex">十六进制（1–8 位）</option>
+                <option value="decimal">十进制（1–10 位）</option>
+                <option value="octal">八进制（1–11 位）</option>
+                <option value="binary">二进制（1–32 位）</option>
               </select>
             </Field>
           </div>

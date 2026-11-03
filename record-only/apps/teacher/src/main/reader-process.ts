@@ -66,6 +66,8 @@ export function readerArguments(config: ReaderProcessConfig): string[] {
         String(config.stopBits),
         "--flow-control",
         config.flowControl,
+        "--format",
+        config.format,
       ];
 }
 

@@ -12,16 +12,27 @@ struct Options {
     parity: Parity,
     stop_bits: StopBits,
     flow_control: FlowControl,
+    format: UidFormat,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum UidFormat {
+    Hex8,
+    Hex,
+    Decimal,
+    Octal,
+    Binary,
 }
 
 fn parse_args(args: &[String]) -> Result<Options, ()> {
-    if args.len() != 12
+    if args.len() != 14
         || args[0] != "--port"
         || args[2] != "--baud"
         || args[4] != "--data-bits"
         || args[6] != "--parity"
         || args[8] != "--stop-bits"
         || args[10] != "--flow-control"
+        || args[12] != "--format"
     {
         return Err(());
     }
@@ -57,6 +68,14 @@ fn parse_args(args: &[String]) -> Result<Options, ()> {
         "software" => FlowControl::Software,
         _ => return Err(()),
     };
+    let format = match args[13].as_str() {
+        "hex8" => UidFormat::Hex8,
+        "hex" => UidFormat::Hex,
+        "decimal" => UidFormat::Decimal,
+        "octal" => UidFormat::Octal,
+        "binary" => UidFormat::Binary,
+        _ => return Err(()),
+    };
     Ok(Options {
         port: port.into(),
         baud_rate,
@@ -64,15 +83,29 @@ fn parse_args(args: &[String]) -> Result<Options, ()> {
         parity,
         stop_bits,
         flow_control,
+        format,
     })
 }
 
-fn parse_uid(line: &[u8]) -> Option<String> {
+fn parse_uid(line: &[u8], format: UidFormat) -> Option<String> {
     let line = line.strip_suffix(b"\r").unwrap_or(line);
-    if line.len() != 8 || !line.iter().all(u8::is_ascii_hexdigit) {
+    let (radix, max_len) = match format {
+        UidFormat::Hex8 | UidFormat::Hex => (16, 8),
+        UidFormat::Decimal => (10, 10),
+        UidFormat::Octal => (8, 11),
+        UidFormat::Binary => (2, 32),
+    };
+    if line.is_empty() || line.len() > max_len || (format == UidFormat::Hex8 && line.len() != 8) {
         return None;
     }
-    Some(String::from_utf8(line.to_ascii_lowercase()).ok()?)
+    let value = std::str::from_utf8(line).ok()?;
+    if !value
+        .bytes()
+        .all(|byte| (byte as char).to_digit(radix).is_some())
+    {
+        return None;
+    }
+    Some(format!("{:08x}", u32::from_str_radix(value, radix).ok()?))
 }
 
 #[derive(Serialize)]
@@ -99,7 +132,11 @@ fn control(input: impl Read) -> bool {
     }
 }
 
-fn read_cards(port: &mut dyn serialport::SerialPort, control: Receiver<bool>) -> io::Result<()> {
+fn read_cards(
+    port: &mut dyn serialport::SerialPort,
+    control: Receiver<bool>,
+    format: UidFormat,
+) -> io::Result<()> {
     let mut line = Vec::with_capacity(16);
     let mut bytes = [0u8; 64];
     loop {
@@ -114,7 +151,7 @@ fn read_cards(port: &mut dyn serialport::SerialPort, control: Receiver<bool>) ->
             Ok(n) => {
                 for byte in &bytes[..n] {
                     if *byte == b'\n' {
-                        let uid = parse_uid(&line);
+                        let uid = parse_uid(&line, format);
                         line.fill(0);
                         line.clear();
                         if let Some(uid) = uid {
@@ -124,7 +161,7 @@ fn read_cards(port: &mut dyn serialport::SerialPort, control: Receiver<bool>) ->
                             bytes.fill(0);
                             return Err(io::Error::other("INVALID_FRAME"));
                         }
-                    } else if line.len() < 9 {
+                    } else if line.len() < 33 {
                         line.push(*byte);
                     } else {
                         line.fill(0);
@@ -176,7 +213,7 @@ fn run() -> Result<(), ()> {
         let _ = sender.send(control(io::stdin().lock()));
     });
     send(r#"{"type":"ready","protocol":1,"kind":"hardware"}"#).map_err(|_| ())?;
-    read_cards(port.as_mut(), receiver).map_err(|_| ())
+    read_cards(port.as_mut(), receiver, options.format).map_err(|_| ())
 }
 
 fn main() {
@@ -190,11 +227,49 @@ mod tests {
     use super::*;
 
     #[test]
-    fn uid_lines_are_exactly_eight_hex_digits() {
-        assert_eq!(parse_uid(b"00AbCd01\r"), Some("00abcd01".into()));
-        assert_eq!(parse_uid(b"ffffffff"), Some("ffffffff".into()));
+    fn uid_lines_convert_selected_radix_to_the_same_four_bytes() {
+        assert_eq!(
+            parse_uid(b"00AbCd01\r", UidFormat::Hex8),
+            Some("00abcd01".into())
+        );
+        assert_eq!(
+            parse_uid(b"ABCDEF01", UidFormat::Hex),
+            Some("abcdef01".into())
+        );
+        assert_eq!(parse_uid(b"1", UidFormat::Hex), Some("00000001".into()));
+        assert_eq!(parse_uid(b"1", UidFormat::Decimal), Some("00000001".into()));
+        assert_eq!(
+            parse_uid(b"0000000001", UidFormat::Decimal),
+            Some("00000001".into())
+        );
+        assert_eq!(
+            parse_uid(b"4294967295", UidFormat::Decimal),
+            Some("ffffffff".into())
+        );
+        assert_eq!(
+            parse_uid(b"37777777777", UidFormat::Octal),
+            Some("ffffffff".into())
+        );
+        assert_eq!(
+            parse_uid(b"11111111111111111111111111111111", UidFormat::Binary),
+            Some("ffffffff".into())
+        );
+        assert_eq!(parse_uid(b"0", UidFormat::Binary), Some("00000000".into()));
         for invalid in [b"1".as_slice(), b"0000000g", b" 00000001", b"00000001 "] {
-            assert_eq!(parse_uid(invalid), None);
+            assert_eq!(parse_uid(invalid, UidFormat::Hex8), None);
+        }
+        for (input, format) in [
+            ("4294967296", UidFormat::Decimal),
+            ("40000000000", UidFormat::Octal),
+            ("100000000000000000000000000000000", UidFormat::Binary),
+            ("100000000", UidFormat::Hex),
+            ("0x1", UidFormat::Hex),
+            ("+1", UidFormat::Decimal),
+            ("1.0", UidFormat::Decimal),
+            ("8", UidFormat::Octal),
+            ("2", UidFormat::Binary),
+        ] {
+            assert_eq!(parse_uid(input.as_bytes(), format), None);
         }
     }
 
@@ -220,10 +295,12 @@ mod tests {
             "1",
             "--flow-control",
             "none",
+            "--format",
+            "hex8",
         ];
         let args: Vec<String> = valid.iter().map(|s| s.to_string()).collect();
         assert_eq!(parse_args(&args).unwrap().port, "COM3");
-        for changed in [3, 5, 7, 9, 11] {
+        for changed in [3, 5, 7, 9, 11, 13] {
             let mut malformed = args.clone();
             malformed[changed] = "invalid".into();
             assert!(parse_args(&malformed).is_err());

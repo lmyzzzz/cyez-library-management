@@ -491,6 +491,7 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
       parity: "none",
       stopBits: 1,
       flowControl: "none",
+      format: "decimal",
     }),
   ).rejects.toThrow();
   await expect

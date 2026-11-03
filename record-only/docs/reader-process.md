@@ -26,14 +26,14 @@ main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 
 
 ## Rust mock 与配置
 
-2026-11-03 新增 Rust 串口进程 `cyez-reader-serial.exe`。设置页可覆盖选择内置串口、外部原生进程或（仅开发/集成）手动 mock；main 等待新进程 ready 后才保存选择，启动失败尝试恢复旧进程。串口列表由内置 Rust 进程单次枚举，Node 不直接读取串口；亦可手动输入 `COM1` 至 `COM9999`。串口配置为端口、300–921600 比特率、5/6/7/8 数据位、无/奇/偶校验、1/2 停止位、无/硬件/软件流控。默认 9600/8N1/无流控；实际硬件参数需按设备说明设定。配置只从表单整份覆盖，界面不读取或回填旧参数。
+2026-11-03 新增 Rust 串口进程 `cyez-reader-serial.exe`。设置页可覆盖选择内置串口、外部原生进程或（仅开发/集成）手动 mock；main 等待新进程 ready 后才保存选择，启动失败尝试恢复旧进程。串口列表由内置 Rust 进程单次枚举，Node 不直接读取串口；亦可手动输入 `COM1` 至 `COM9999`。串口配置为端口、300–921600 比特率、5/6/7/8 数据位、无/奇/偶校验、1/2 停止位、无/硬件/软件流控和每行卡号的进制。默认 9600/8N1/无流控、固定 8 位十六进制；旧配置缺少进制字段时也按此默认值解析。实际硬件参数需按设备说明设定。配置只从表单整份覆盖，界面不读取或回填旧参数。
 
-串口进程打开设备成功后发送 `kind:"hardware"` 握手；串口字节流按 LF 分帧，接受 CRLF。每行必须恰为 8 位十六进制 UID，允许大小写且保留前导零；不能含空格、分隔符或十进制解释。格式错误发送固定 `INVALID_FRAME`，I/O 错误发送 `READER_IO` 并退出；不上传原始串口行。`--list-ports` 是独立的一次性枚举模式，输出严格 JSON 列表，不能代替正常读卡 IPC。Linux 伪终端测试覆盖实际串口读写与进程握手；Windows 实物串口/读卡器验收仍需 TBD-03。
+串口进程打开设备成功后发送 `kind:"hardware"` 握手；串口字节流按 LF 分帧，接受 CRLF。每行只含一个无符号整数，按设置页选择的格式解析：`hex8` 为恰好 8 位十六进制，`hex` 为 1–8 位十六进制，`decimal` 为 1–10 位十进制，`octal` 为 1–11 位八进制，`binary` 为 1–32 位二进制。十六进制允许大小写；所有格式都拒绝符号、前缀、空格、分隔符、非法数字及超过 32 位的值。进程将数值补齐为 8 位小写十六进制，再通过统一 IPC 输出 4 字节 UID；例如十进制 `1` 和十六进制 `00000001` 都输出 `00000001`。格式错误发送固定 `INVALID_FRAME`，I/O 错误发送 `READER_IO` 并退出；不上传原始串口行。`--list-ports` 是独立的一次性枚举模式，输出严格 JSON 列表，不能代替正常读卡 IPC。Linux 伪终端测试覆盖实际串口读写与进程握手；Windows 实物串口/读卡器验收仍需 TBD-03。
 
 串口配置的本机示例：
 
 ```json
-{"kind":"serial","port":"COM3","baudRate":9600,"dataBits":8,"parity":"none","stopBits":1,"flowControl":"none"}
+{"kind":"serial","port":"COM3","baudRate":9600,"dataBits":8,"parity":"none","stopBits":1,"flowControl":"none","format":"decimal"}
 ```
 
 Windows、Rust 1.94.0（MSVC 工具链）和 Visual Studio C++ Build Tools：
