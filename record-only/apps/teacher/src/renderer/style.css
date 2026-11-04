@@ -372,8 +372,73 @@ tbody tr:hover {
   font-size: 13px;
   color: var(--color-text-muted);
 }
-.flow {
-  max-width: 960px;
+.scan-workspace {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.scan-flow-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 24px 30px;
+  overflow-y: auto;
+  background: var(--color-canvas);
+}
+.scan-flow-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.scan-flow-header h1 {
+  margin: 0;
+}
+.scan-flow-screen > .student-summary {
+  margin: 0;
+}
+.scan-flow-screen > .actions {
+  position: sticky;
+  bottom: -24px;
+  z-index: 2;
+  margin-top: auto;
+  padding: 16px 0 24px;
+  background: var(--color-canvas);
+  border-top: 1px solid var(--color-border);
+}
+.scan-registration-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(460px, 1.6fr);
+  gap: 30px;
+  flex: 1;
+  min-height: 0;
+}
+.scan-registration-details,
+.scan-registration-picker {
+  min-width: 0;
+  min-height: 0;
+}
+.scan-registration-details textarea {
+  min-height: 160px;
+}
+.scan-registration-picker {
+  display: flex;
+  flex-direction: column;
+}
+.scan-registration-picker h2 {
+  margin-bottom: 12px;
+}
+.scan-registration-picker .picker-list {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 100px;
+}
+.scan-end > label {
+  width: min(100%, 960px);
 }
 .picker-list {
   max-height: 260px;
@@ -469,6 +534,25 @@ legend {
 @media (max-width: 1000px) {
   .workspace-content {
     padding: 18px;
+  }
+  .scan-flow-screen {
+    padding: 18px;
+  }
+  .scan-flow-screen > .actions {
+    bottom: -18px;
+    padding-bottom: 18px;
+  }
+  .scan-registration-body {
+    grid-template-columns: 1fr;
+    flex: none;
+    gap: 12px;
+  }
+  .scan-registration-details textarea {
+    min-height: 90px;
+  }
+  .scan-registration-picker .picker-list {
+    flex: none;
+    max-height: 40vh;
   }
   .table-scroll {
     max-height: none;

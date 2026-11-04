@@ -94,3 +94,15 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | 发布与真实 Electron | Windows release 串口 exe、教师端构建和 NSIS 包生成；解包发布版 Electron 集成 9 项通过，Compose 专用 1 项按默认设置跳过。安装包 SHA-256 `83ef97351ffacebd9d8134944bc832246d958825a01d9f4e3a057c0fd8336ad6`，未签名 |
 
 本轮仍未取得真实串口读卡器及其卡号对照样本，因此各进制对实际硬件输出的匹配、Windows 实体串口和校园 API 查询未完成验收。服务端与 Docker 代码未变，本轮未重跑服务端和 Compose 测试。
+
+## 2026-11-04 刷卡流程全屏界面验证
+
+刷卡登记与刷卡结束改为占满教师端窗口内容区的聚焦页面，保留窗口控制，隐藏侧栏与普通页面头部；手动结束和批量结束仍使用原有对话框。登记页采用备注和设备选择并排布局，窄窗口纵向排列，操作栏保持可见。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| 客户端单元/组件 | 54 项通过；覆盖率 statements 88.78%、branches 84.02%、functions 86.77%、lines 89.50%，门禁通过 |
+| 真实 Electron | 开发构建和解包发布版各 9 项通过，Compose 专用 1 项按默认设置跳过；真实 PostgreSQL、TLS、SQLite 流程中检查两种刷卡页全宽、取消后侧栏恢复，800×650 窄窗口无横向溢出 |
+| 构建与视觉 | TypeScript、Prettier、客户端构建和 Windows NSIS 打包通过；已检查 `test-results/electron/scan-registration-fullscreen.png`、`scan-registration-narrow.png`、`scan-end-fullscreen.png`。安装包 SHA-256 `fc11cb6a28d3f611ed7fd1c6206aca6cfd1ea034b8e82c22614acd7e50482a54`，未签名 |
+
+本轮仅修改教师端界面及对应测试和文档；服务端、Docker 与 Compose 专用业务用例未改或重跑。真实读卡器、校园 API 和目标发布环境验收仍需前述外部输入。

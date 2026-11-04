@@ -465,6 +465,7 @@ export function App() {
   return (
     <AppShell
       routes={routes}
+      layout={flow ? "focus" : undefined}
       title="图书馆使用登记"
       subtitle={
         status?.authenticated
@@ -475,139 +476,8 @@ export function App() {
       }
       windowControls={window.windowControls}
     >
-      <div className="workspace-content">
-        <div className="page-top">
-          <div>
-            <p className="eyebrow">SCHOOL LIBRARY</p>
-            <h1>{settings ? "设置" : flow ? "使用登记" : "使用登记"}</h1>
-          </div>
-          <div className="connection-state">
-            <span className={`dot ${status?.online ? "online" : ""}`} />
-            {status?.online ? "已连接服务器" : "未连接"}
-            <small>数据更新 {timestamp(lastUpdated)}</small>
-          </div>
-        </div>
-        {status?.environment !== "production" && status && (
-          <Banner tone="warning">
-            开发 / 集成环境 ·
-            当前使用测试适配器与测试数据；真实校园接口、读卡器和发布验收尚待完成。
-          </Banner>
-        )}
-        {status?.authenticated && !status.online && (
-          <Banner tone="error">
-            连接已中断，当前显示数据已过期。禁止新业务写入，未确认提交将在重新登录后恢复。
-          </Banner>
-        )}
-        {status?.pendingCommands ? (
-          <Banner
-            tone="warning"
-            actions={
-              <Button
-                onClick={async () => {
-                  try {
-                    const r = await window.library.call<{
-                      outcomes?: { state: string }[];
-                    }>("recover", {});
-                    toast.success(
-                      `恢复检查完成：${r.outcomes?.length ?? 0} 项`,
-                    );
-                    void load();
-                  } catch (e) {
-                    setError(e);
-                  }
-                }}
-              >
-                查询原提交
-              </Button>
-            }
-          >
-            有 {status.pendingCommands} 条提交结果待确认，请勿重复操作。
-          </Banner>
-        ) : null}
-        {status && status.storage !== "normal" && (
-          <Banner tone="warning">
-            本地存储{status.storage === "failed" ? "写入失败" : "空间预警"}
-            。未确认日志会保留，请处理磁盘空间。
-          </Banner>
-        )}
-        {service && service.mode !== "normal" && (
-          <Banner tone="warning">
-            服务器存储
-            {service.mode === "warning"
-              ? "预警"
-              : service.mode === "restricted"
-                ? "受限：暂停新登记和修改"
-                : "写入失败"}
-            ，请联系运维。
-          </Banner>
-        )}
-        {settings ? (
-          <>
-            <nav className="tabs" aria-label="设置分类">
-              {[
-                ["connection", "连接配置"],
-                ["reader", "读卡器"],
-                ["devices", "设备管理"],
-                ["history", "历史记录"],
-                ["diagnostics", "诊断"],
-              ].map(([id, name]) => (
-                <Button
-                  key={id}
-                  variant={tab === id ? "primary" : "ghost"}
-                  onClick={() => setTab(id)}
-                >
-                  {name}
-                </Button>
-              ))}
-            </nav>
-            {tab === "connection" && status && (
-              <ConnectionForm
-                status={status}
-                refresh={() => {
-                  void refreshStatus();
-                  void load();
-                }}
-              />
-            )}
-            {tab === "reader" && status && (
-              <ReaderSettings
-                status={status}
-                refresh={() => void refreshStatus()}
-              />
-            )}
-            {tab === "devices" && table}
-            {tab === "history" && (
-              <History
-                authenticated={!!status?.authenticated}
-                tagOptions={tags}
-                onModal={setChildModal}
-              />
-            )}
-            {tab === "diagnostics" && (
-              <section className="panel">
-                <h2>本机诊断</h2>
-                <dl className="summary">
-                  <dt>客户端版本</dt>
-                  <dd>{status?.version}</dd>
-                  <dt>读卡器</dt>
-                  <dd>{status?.reader}</dd>
-                  <dt>服务器</dt>
-                  <dd>{status?.connectionConfigured ? "已配置" : "未配置"}</dd>
-                  <dt>待传日志</dt>
-                  <dd>
-                    {status?.pendingLogs ?? 0} 条 · 最早未确认{" "}
-                    {Math.floor((status?.oldestLogAgeMs ?? 0) / 1000)} 秒
-                  </dd>
-                  <dt>待确认提交</dt>
-                  <dd>{status?.pendingCommands ?? 0}</dd>
-                  <dt>最近成功连接</dt>
-                  <dd>{timestamp(status?.lastSuccessMs ?? null)}</dd>
-                </dl>
-                <Button onClick={() => void refreshStatus()}>刷新诊断</Button>
-              </section>
-            )}
-          </>
-        ) : flow ? (
+      <div className={flow ? "scan-workspace" : "workspace-content"}>
+        {flow ? (
           flow.mode === "start" ? (
             <Registration
               key={flow.id}
@@ -617,8 +487,10 @@ export function App() {
               onBusy={setBusy}
             />
           ) : (
-            <section className="panel flow">
-              <h2>刷卡结束使用</h2>
+            <section className="scan-flow-screen scan-end">
+              <header className="scan-flow-header">
+                <h1>刷卡结束使用</h1>
+              </header>
               <EndForm
                 key={flow.id}
                 preview={flow}
@@ -631,119 +503,259 @@ export function App() {
           )
         ) : (
           <>
-            {table}
-            {status?.environment !== "production" && status?.authenticated && (
-              <div className="integration-controls">
-                <span>集成测试读卡器</span>
-                <Button
-                  onClick={() =>
-                    void window.library.call("integrationScan", {
-                      fixture: "allowed-1",
-                    })
-                  }
-                >
-                  测试卡 1
-                </Button>
-                <Button
-                  onClick={() =>
-                    void window.library.call("integrationScan", {
-                      fixture: "allowed-2",
-                    })
-                  }
-                >
-                  测试卡 2
-                </Button>
-                <Button
-                  onClick={() =>
-                    void window.library.call("integrationScan", {
-                      fixture: "unknown",
-                    })
-                  }
-                >
-                  未授权测试卡
-                </Button>
+            <div className="page-top">
+              <div>
+                <p className="eyebrow">SCHOOL LIBRARY</p>
+                <h1>{settings ? "设置" : "使用登记"}</h1>
               </div>
+              <div className="connection-state">
+                <span className={`dot ${status?.online ? "online" : ""}`} />
+                {status?.online ? "已连接服务器" : "未连接"}
+                <small>数据更新 {timestamp(lastUpdated)}</small>
+              </div>
+            </div>
+            {status?.environment !== "production" && status && (
+              <Banner tone="warning">
+                开发 / 集成环境 ·
+                当前使用测试适配器与测试数据；真实校园接口、读卡器和发布验收尚待完成。
+              </Banner>
+            )}
+            {status?.authenticated && !status.online && (
+              <Banner tone="error">
+                连接已中断，当前显示数据已过期。禁止新业务写入，未确认提交将在重新登录后恢复。
+              </Banner>
+            )}
+            {status?.pendingCommands ? (
+              <Banner
+                tone="warning"
+                actions={
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const r = await window.library.call<{
+                          outcomes?: { state: string }[];
+                        }>("recover", {});
+                        toast.success(
+                          `恢复检查完成：${r.outcomes?.length ?? 0} 项`,
+                        );
+                        void load();
+                      } catch (e) {
+                        setError(e);
+                      }
+                    }}
+                  >
+                    查询原提交
+                  </Button>
+                }
+              >
+                有 {status.pendingCommands} 条提交结果待确认，请勿重复操作。
+              </Banner>
+            ) : null}
+            {status && status.storage !== "normal" && (
+              <Banner tone="warning">
+                本地存储{status.storage === "failed" ? "写入失败" : "空间预警"}
+                。未确认日志会保留，请处理磁盘空间。
+              </Banner>
+            )}
+            {service && service.mode !== "normal" && (
+              <Banner tone="warning">
+                服务器存储
+                {service.mode === "warning"
+                  ? "预警"
+                  : service.mode === "restricted"
+                    ? "受限：暂停新登记和修改"
+                    : "写入失败"}
+                ，请联系运维。
+              </Banner>
+            )}
+            {settings ? (
+              <>
+                <nav className="tabs" aria-label="设置分类">
+                  {[
+                    ["connection", "连接配置"],
+                    ["reader", "读卡器"],
+                    ["devices", "设备管理"],
+                    ["history", "历史记录"],
+                    ["diagnostics", "诊断"],
+                  ].map(([id, name]) => (
+                    <Button
+                      key={id}
+                      variant={tab === id ? "primary" : "ghost"}
+                      onClick={() => setTab(id)}
+                    >
+                      {name}
+                    </Button>
+                  ))}
+                </nav>
+                {tab === "connection" && status && (
+                  <ConnectionForm
+                    status={status}
+                    refresh={() => {
+                      void refreshStatus();
+                      void load();
+                    }}
+                  />
+                )}
+                {tab === "reader" && status && (
+                  <ReaderSettings
+                    status={status}
+                    refresh={() => void refreshStatus()}
+                  />
+                )}
+                {tab === "devices" && table}
+                {tab === "history" && (
+                  <History
+                    authenticated={!!status?.authenticated}
+                    tagOptions={tags}
+                    onModal={setChildModal}
+                  />
+                )}
+                {tab === "diagnostics" && (
+                  <section className="panel">
+                    <h2>本机诊断</h2>
+                    <dl className="summary">
+                      <dt>客户端版本</dt>
+                      <dd>{status?.version}</dd>
+                      <dt>读卡器</dt>
+                      <dd>{status?.reader}</dd>
+                      <dt>服务器</dt>
+                      <dd>
+                        {status?.connectionConfigured ? "已配置" : "未配置"}
+                      </dd>
+                      <dt>待传日志</dt>
+                      <dd>
+                        {status?.pendingLogs ?? 0} 条 · 最早未确认{" "}
+                        {Math.floor((status?.oldestLogAgeMs ?? 0) / 1000)} 秒
+                      </dd>
+                      <dt>待确认提交</dt>
+                      <dd>{status?.pendingCommands ?? 0}</dd>
+                      <dt>最近成功连接</dt>
+                      <dd>{timestamp(status?.lastSuccessMs ?? null)}</dd>
+                    </dl>
+                    <Button onClick={() => void refreshStatus()}>
+                      刷新诊断
+                    </Button>
+                  </section>
+                )}
+              </>
+            ) : (
+              <>
+                {table}
+                {status?.environment !== "production" &&
+                  status?.authenticated && (
+                    <div className="integration-controls">
+                      <span>集成测试读卡器</span>
+                      <Button
+                        onClick={() =>
+                          void window.library.call("integrationScan", {
+                            fixture: "allowed-1",
+                          })
+                        }
+                      >
+                        测试卡 1
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          void window.library.call("integrationScan", {
+                            fixture: "allowed-2",
+                          })
+                        }
+                      >
+                        测试卡 2
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          void window.library.call("integrationScan", {
+                            fixture: "unknown",
+                          })
+                        }
+                      >
+                        未授权测试卡
+                      </Button>
+                    </div>
+                  )}
+              </>
+            )}
+            {modal && (
+              <Dialog
+                title={
+                  modal.kind === "end"
+                    ? "手动结束使用"
+                    : modal.kind === "batch"
+                      ? "批量结束确认"
+                      : modal.kind === "device"
+                        ? modal.device
+                          ? "编辑设备"
+                          : "新增设备"
+                        : modal.kind === "delete"
+                          ? "删除设备确认"
+                          : modal.kind === "notes"
+                            ? "编辑活动备注"
+                            : "管理标签"
+                }
+                wide={modal.kind === "batch"}
+                onClose={() => {
+                  if (!busy) {
+                    setModal(null);
+                    void load();
+                  }
+                }}
+              >
+                {modal.kind === "end" && (
+                  <EndForm
+                    preview={modal.preview}
+                    automatic={false}
+                    onBusy={setBusy}
+                    onDone={done}
+                    onCancel={() => setModal(null)}
+                  />
+                )}
+                {modal.kind === "batch" && (
+                  <BatchForm
+                    preview={modal.preview}
+                    onBusy={setBusy}
+                    onDone={done}
+                    onCancel={() => {
+                      setModal(null);
+                      void load();
+                    }}
+                  />
+                )}
+                {modal.kind === "device" && (
+                  <DeviceEditor
+                    device={modal.device}
+                    tags={tags}
+                    onBusy={setBusy}
+                    onDone={done}
+                    onCancel={() => setModal(null)}
+                  />
+                )}
+                {modal.kind === "tags" && (
+                  <TagManager
+                    tags={tags}
+                    refresh={() => void load()}
+                    onBusy={setBusy}
+                  />
+                )}
+                {modal.kind === "delete" && (
+                  <DeleteDevice
+                    device={modal.device}
+                    onDone={done}
+                    onCancel={() => setModal(null)}
+                    onBusy={setBusy}
+                  />
+                )}
+                {modal.kind === "notes" && (
+                  <NotesEditor
+                    record={modal.record}
+                    onDone={done}
+                    onCancel={() => setModal(null)}
+                    onBusy={setBusy}
+                  />
+                )}
+              </Dialog>
             )}
           </>
-        )}
-        {modal && (
-          <Dialog
-            title={
-              modal.kind === "end"
-                ? "手动结束使用"
-                : modal.kind === "batch"
-                  ? "批量结束确认"
-                  : modal.kind === "device"
-                    ? modal.device
-                      ? "编辑设备"
-                      : "新增设备"
-                    : modal.kind === "delete"
-                      ? "删除设备确认"
-                      : modal.kind === "notes"
-                        ? "编辑活动备注"
-                        : "管理标签"
-            }
-            wide={modal.kind === "batch"}
-            onClose={() => {
-              if (!busy) {
-                setModal(null);
-                void load();
-              }
-            }}
-          >
-            {modal.kind === "end" && (
-              <EndForm
-                preview={modal.preview}
-                automatic={false}
-                onBusy={setBusy}
-                onDone={done}
-                onCancel={() => setModal(null)}
-              />
-            )}
-            {modal.kind === "batch" && (
-              <BatchForm
-                preview={modal.preview}
-                onBusy={setBusy}
-                onDone={done}
-                onCancel={() => {
-                  setModal(null);
-                  void load();
-                }}
-              />
-            )}
-            {modal.kind === "device" && (
-              <DeviceEditor
-                device={modal.device}
-                tags={tags}
-                onBusy={setBusy}
-                onDone={done}
-                onCancel={() => setModal(null)}
-              />
-            )}
-            {modal.kind === "tags" && (
-              <TagManager
-                tags={tags}
-                refresh={() => void load()}
-                onBusy={setBusy}
-              />
-            )}
-            {modal.kind === "delete" && (
-              <DeleteDevice
-                device={modal.device}
-                onDone={done}
-                onCancel={() => setModal(null)}
-                onBusy={setBusy}
-              />
-            )}
-            {modal.kind === "notes" && (
-              <NotesEditor
-                record={modal.record}
-                onDone={done}
-                onCancel={() => setModal(null)}
-                onBusy={setBusy}
-              />
-            )}
-          </Dialog>
         )}
       </div>
       <AppToaster />

@@ -464,7 +464,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
     );
   });
 
-  it("使用中设备禁止删除；刷卡结束流转和设置切换释放预览", async () => {
+  it("使用中设备禁止删除；刷卡结束全屏隐藏导航，取消后恢复", async () => {
     show("/settings");
     fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
     await waitFor(() =>
@@ -482,6 +482,11 @@ describe("C-U-01/05 主页面门控和状态", () => {
       preview: { ...preview, mode: "end", record: active },
     });
     await waitFor(() => expect(screen.getByText("刷卡结束使用")).toBeTruthy());
+    expect(screen.queryByRole("link", { name: "设置" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "设置" })).toBeTruthy(),
+    );
     fireEvent.click(screen.getByRole("link", { name: "设置" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("cancelPreview", {

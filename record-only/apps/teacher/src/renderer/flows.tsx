@@ -249,8 +249,8 @@ export function Registration({
     }
   };
   return (
-    <section className="panel flow">
-      <header>
+    <section className="scan-flow-screen scan-registration">
+      <header className="scan-flow-header">
         <h1>登记使用</h1>
         <span className="badge">资料已刷新</span>
       </header>
@@ -260,77 +260,83 @@ export function Registration({
           {preview.student.className} · {preview.student.schoolNumber}
         </span>
       </div>
-      <p className="muted">刷卡时间 {timestamp(preview.atMs)}</p>
-      <label>
-        登记备注
-        <textarea
-          aria-label="登记备注"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          maxLength={8000}
-          disabled={busy}
-        />
-      </label>
-      <h2>选择设备</h2>
-      <div className="toolbar">
-        <input
-          aria-label="搜索可选设备"
-          placeholder="搜索编号或设备名称"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        <Button onClick={() => void load()}>刷新设备</Button>
-      </div>
-      <div className="picker-list">
-        {devices.items.map((d) => (
-          <div
-            className={`picker-row ${selected?.id === d.id ? "selected" : ""}`}
-            key={d.id}
-          >
-            <div>
-              <strong>{d.displayName}</strong>
-              <span>
-                {d.code} · {d.tags.map((t) => t.name).join(" / ")}
-              </span>
-            </div>
-            <span>
-              {d.isDisabled ? "已禁用" : d.active ? "使用中" : "空闲"}
-            </span>
-            {d.active ? (
-              <Button
-                disabled={busy}
-                onClick={async () => {
-                  try {
-                    setEnd(
-                      await window.library.call<EndPreview>("endPreview", {
-                        recordId: d.active!.id,
-                      }),
-                    );
-                  } catch (e) {
-                    setError(e);
-                  }
-                }}
-              >
-                先结束使用…
-              </Button>
-            ) : (
-              <Button
-                disabled={busy || d.isDisabled}
-                onClick={() => setSelected(d)}
-              >
-                {selected?.id === d.id ? "已选择" : "选择"}
-              </Button>
-            )}
+      <div className="scan-registration-body">
+        <div className="scan-registration-details">
+          <p className="muted">刷卡时间 {timestamp(preview.atMs)}</p>
+          <label>
+            登记备注
+            <textarea
+              aria-label="登记备注"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              maxLength={8000}
+              disabled={busy}
+            />
+          </label>
+        </div>
+        <div className="scan-registration-picker">
+          <h2>选择设备</h2>
+          <div className="toolbar">
+            <input
+              aria-label="搜索可选设备"
+              placeholder="搜索编号或设备名称"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+            <Button onClick={() => void load()}>刷新设备</Button>
           </div>
-        ))}
+          <div className="picker-list">
+            {devices.items.map((d) => (
+              <div
+                className={`picker-row ${selected?.id === d.id ? "selected" : ""}`}
+                key={d.id}
+              >
+                <div>
+                  <strong>{d.displayName}</strong>
+                  <span>
+                    {d.code} · {d.tags.map((t) => t.name).join(" / ")}
+                  </span>
+                </div>
+                <span>
+                  {d.isDisabled ? "已禁用" : d.active ? "使用中" : "空闲"}
+                </span>
+                {d.active ? (
+                  <Button
+                    disabled={busy}
+                    onClick={async () => {
+                      try {
+                        setEnd(
+                          await window.library.call<EndPreview>("endPreview", {
+                            recordId: d.active!.id,
+                          }),
+                        );
+                      } catch (e) {
+                        setError(e);
+                      }
+                    }}
+                  >
+                    先结束使用…
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={busy || d.isDisabled}
+                    onClick={() => setSelected(d)}
+                  >
+                    {selected?.id === d.id ? "已选择" : "选择"}
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+          {ready && !devices.items.length && (
+            <Empty text="没有可用设备，请调整筛选或联系老师添加设备" />
+          )}
+          <Pager {...devices} setPage={setPage} />
+        </div>
       </div>
-      {ready && !devices.items.length && (
-        <Empty text="没有可用设备，请调整筛选或联系老师添加设备" />
-      )}
-      <Pager {...devices} setPage={setPage} />
       <Failure error={error} />
       <div className="actions">
         <span className="muted">

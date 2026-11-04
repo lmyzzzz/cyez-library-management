@@ -275,6 +275,47 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   await expect(
     page.getByRole("heading", { name: "登记使用", exact: true }),
   ).toBeVisible();
+  await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
+    "data-layout",
+    "focus",
+  );
+  const scanBounds = async () =>
+    page.locator(".scan-flow-screen").evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        left: rect.left,
+        width: rect.width,
+        bottom: rect.bottom,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+      };
+    });
+  const registrationBounds = await scanBounds();
+  expect(registrationBounds.left).toBe(0);
+  expect(registrationBounds.width).toBe(registrationBounds.viewportWidth);
+  expect(registrationBounds.bottom).toBe(registrationBounds.viewportHeight);
+  await expect(
+    page.getByRole("button", { name: "选择", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/electron/scan-registration-fullscreen.png",
+    fullPage: true,
+  });
+  const originalViewport = page.viewportSize();
+  await page.setViewportSize({ width: 800, height: 650 });
+  const narrowBounds = await scanBounds();
+  expect(narrowBounds.left).toBe(0);
+  expect(narrowBounds.width).toBe(narrowBounds.viewportWidth);
+  expect(narrowBounds.bottom).toBe(narrowBounds.viewportHeight);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(narrowBounds.viewportWidth);
+  await expect(page.getByRole("button", { name: "取消登记" })).toBeVisible();
+  await page.screenshot({
+    path: "test-results/electron/scan-registration-narrow.png",
+    fullPage: true,
+  });
+  if (originalViewport) await page.setViewportSize(originalViewport);
   await page.getByRole("button", { name: "选择", exact: true }).click();
   await page
     .getByLabel("登记备注", { exact: true })
@@ -284,6 +325,28 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   await expect(
     page.getByText("真实 Electron 集成记录", { exact: true }),
   ).toBeVisible();
+  await page.waitForTimeout(1300); // Same-card scans within 1.2 seconds are intentionally ignored.
+  await page.getByRole("button", { name: "测试卡 1", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
+    "data-layout",
+    "focus",
+  );
+  const endBounds = await scanBounds();
+  expect(endBounds.left).toBe(0);
+  expect(endBounds.width).toBe(endBounds.viewportWidth);
+  expect(endBounds.bottom).toBe(endBounds.viewportHeight);
+  await page.screenshot({
+    path: "test-results/electron/scan-end-fullscreen.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "取消", exact: true }).click();
+  await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
+    "data-layout",
+    "standard",
+  );
   await page.getByRole("button", { name: "结束…", exact: true }).click();
   await page.getByRole("button", { name: "确认结束", exact: true }).click();
   await page.getByRole("link", { name: "设置", exact: true }).click();
