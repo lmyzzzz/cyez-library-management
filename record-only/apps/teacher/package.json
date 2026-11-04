@@ -50,6 +50,10 @@
       {
         "from": "../../target/release/cyez-reader-serial.exe",
         "to": "readers/cyez-reader-serial.exe"
+      },
+      {
+        "from": "../../target/release/cyez-reader-acr1552.exe",
+        "to": "readers/cyez-reader-acr1552.exe"
       }
     ],
     "asar": true,

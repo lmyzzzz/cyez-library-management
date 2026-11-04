@@ -543,6 +543,15 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
     path: "test-results/electron/serial-settings.png",
     fullPage: true,
   });
+  await page.getByLabel("读卡进程").selectOption("acr1552");
+  await expect(page.getByLabel("PC/SC 读卡器")).toHaveValue("");
+  await expect(page.getByLabel("状态检查间隔（毫秒）")).toHaveValue("250");
+  await expect(page.getByRole("button", { name: "覆盖并启动" })).toBeDisabled();
+  await page.screenshot({
+    path: "test-results/electron/acr1552-settings.png",
+    fullPage: true,
+  });
+  await page.getByLabel("读卡进程").selectOption("serial");
   const ports = await call<{ ports: string[] }>("listSerialPorts");
   expect(Array.isArray(ports.ports)).toBe(true);
   await expect(

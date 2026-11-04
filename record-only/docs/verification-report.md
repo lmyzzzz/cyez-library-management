@@ -106,3 +106,16 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | 构建与视觉 | TypeScript、Prettier、客户端构建和 Windows NSIS 打包通过；已检查 `test-results/electron/scan-registration-fullscreen.png`、`scan-registration-narrow.png`、`scan-end-fullscreen.png`。安装包 SHA-256 `fc11cb6a28d3f611ed7fd1c6206aca6cfd1ea034b8e82c22614acd7e50482a54`，未签名 |
 
 本轮仅修改教师端界面及对应测试和文档；服务端、Docker 与 Compose 专用业务用例未改或重跑。真实读卡器、校园 API 和目标发布环境验收仍需前述外部输入。
+
+## 2026-11-04 ACR1552U-M1 PC/SC 读卡进程验证
+
+新增独立 Rust `cyez-reader-acr1552`，通过 Windows PC/SC 枚举 ACR1552 系列非 SAM/接触式接口，按状态变化每次贴卡读取一次 `FF CA 00 00 00` 响应。只有恰好 4 字节 UID 与 `90 00` 成功状态才进入现有 JSON Lines v1；不读扇区、不截断较长 UID。教师设置页可精确选择枚举设备并配置 100–2000 ms 状态检查间隔，配置仍整份覆盖且不回填。生产打包资源包含该进程。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| Rust | Windows `cargo test --locked -p cyez-reader-acr1552` 4 项通过；参数白名单、APDU 响应长度与状态字、一次贴卡一次扫描及控制消息均有测试；release exe 构建通过，打包资源 243200 字节 |
+| 客户端 | TypeScript、Prettier、Cargo fmt 通过；单元/组件 56 项通过；覆盖率 statements 88.84%、branches 84.18%、functions 87.02%、lines 89.63%，门禁通过 |
+| 真实 Electron | 本机 PostgreSQL、TLS、SQLite 和解包发布版 Electron 集成 9 项通过，Compose 专用 1 项按条件跳过；设置页验证 ACR1552U 选项、空设备禁用提交、默认间隔，并检查 `test-results/electron/acr1552-settings.png` |
+| Windows 发布 | NSIS 安装包生成，包含 `resources/readers/cyez-reader-acr1552.exe`；SHA-256 `001fa270c47e7a07dc912f81536847224188534b5db3ed9f0041997af2efef71`；未签名 |
+
+本机未连接 ACR1552U-M1，Windows Smart Card 服务无设备时停止，`--list-readers` 返回失败且不伪造设备。**未完成真实验收**：目标机器驱动/WinSCard 枚举、实卡连续贴卡及移卡行为、4 字节 PC/SC UID 与 Wiegand-34 中间数据位及校园 API 接受的原卡号逐卡对照。7/10 字节卡按协议拒绝，若目标卡属于这类需提供业务确认的新规则。服务端与 Docker 本轮未修改或重跑。

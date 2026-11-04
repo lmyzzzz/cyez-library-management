@@ -46,6 +46,7 @@ export const actions = {
   clearSaved: z.object({}).strict(),
   configureReader: readerProcessSchema,
   listSerialPorts: z.object({}).strict(),
+  listAcr1552Readers: z.object({}).strict(),
   testConnection: z.object({}).strict(),
   logout: z.object({}).strict(),
   status: z.object({}).strict(),

@@ -150,6 +150,39 @@ describe("C-U-05 设置和只读历史", () => {
       screen.queryByRole("option", { name: "手动 UID 测试窗口" }),
     ).toBeNull();
   });
+  it("ACR1552U 设置枚举设备并整份覆盖，不回填已存参数", async () => {
+    const refresh = vi.fn();
+    render(<ReaderSettings status={status} refresh={refresh} />);
+    fireEvent.change(screen.getByLabelText("读卡进程"), {
+      target: { value: "acr1552" },
+    });
+    expect(
+      (screen.getByLabelText("PC/SC 读卡器") as HTMLSelectElement).value,
+    ).toBe("");
+    call.mockResolvedValueOnce({ readers: ["ACS ACR1552U PICC 0"] });
+    fireEvent.click(screen.getByRole("button", { name: "刷新 PC/SC 读卡器" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("listAcr1552Readers", {}),
+    );
+    fireEvent.change(screen.getByLabelText("PC/SC 读卡器"), {
+      target: { value: "ACS ACR1552U PICC 0" },
+    });
+    fireEvent.change(screen.getByLabelText("状态检查间隔（毫秒）"), {
+      target: { value: "500" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("configureReader", {
+        kind: "acr1552",
+        reader: "ACS ACR1552U PICC 0",
+        pollMs: 500,
+      }),
+    );
+    expect(refresh).toHaveBeenCalled();
+    expect(
+      (screen.getByLabelText("PC/SC 读卡器") as HTMLSelectElement).value,
+    ).toBe("");
+  });
   it("连接测试、登录、保存密码清除和失败反馈", async () => {
     const refresh = vi.fn();
     render(<ConnectionForm status={status} refresh={refresh} />);

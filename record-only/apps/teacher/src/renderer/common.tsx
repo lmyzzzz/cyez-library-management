@@ -52,6 +52,8 @@ const messages: Record<string, string> = {
     "读卡进程无法启动，请检查串口、参数或可执行文件。",
   READER_EXECUTABLE_INVALID: "请输入读卡进程的绝对 .exe 路径。",
   READER_PORT_LIST_FAILED: "无法枚举串口，请检查读卡进程安装或手动填写端口。",
+  READER_PCSC_LIST_FAILED:
+    "无法枚举 PC/SC 读卡器，请检查 ACR1552U 连接、驱动和 Windows Smart Card 服务。",
   READER_CHANGE_BUSY: "正在切换读卡进程，请稍候。",
   MOCK_READER_FORBIDDEN: "生产环境不能使用测试读卡器。",
   CONCURRENT_CONFLICT: "发生并发冲突，请刷新并重新确认。",

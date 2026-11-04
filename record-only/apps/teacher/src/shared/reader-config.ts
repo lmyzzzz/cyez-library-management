@@ -7,6 +7,23 @@ export const readerProcessSchema = z.discriminatedUnion("kind", [
     .strict(),
   z
     .object({
+      kind: z.literal("acr1552"),
+      reader: z
+        .string()
+        .min(1)
+        .max(128)
+        .refine(
+          (name) =>
+            /ACR1552/i.test(name) &&
+            /PICC/i.test(name) &&
+            !/SAM/i.test(name) &&
+            !/[\x00-\x1f\x7f]/.test(name),
+        ),
+      pollMs: z.number().int().min(100).max(2000),
+    })
+    .strict(),
+  z
+    .object({
       kind: z.literal("serial"),
       port: z
         .string()

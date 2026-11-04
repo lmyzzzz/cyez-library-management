@@ -1,6 +1,6 @@
 # 独立读卡进程接口 v1
 
-2026-10-30：读卡硬件处理由独立原生进程实现，Electron main 的 Node.js 负责启动它并通过继承管道通信。当前提供 Rust Windows 窗口 mock；更换真实读卡器时实现同一协议，不改教师业务层。不读取其他扇区、姓名或学籍资料。
+2026-10-30：读卡硬件处理由独立原生进程实现，Electron main 的 Node.js 负责启动它并通过继承管道通信。当前提供 Rust Windows 窗口 mock、串口进程和 ACR1552U-M1 PC/SC 进程；更换读卡器时实现同一协议，不改教师业务层。不读取其他扇区、姓名或学籍资料。
 
 ## UID 与职责
 
@@ -23,6 +23,20 @@ main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 
 校验不通过的硬件脉冲可以在子进程内部丢弃；若报告 `error` 则视为本连接不可继续。main 对握手超时、重复握手、ready 前 scan、无效 JSON、超长行、异常退出和上述错误统一停止接收、清除临时帧、结束进程，显示错误并生成固定 `READER_FAILED` 脱敏日志。教师检查设备后重启应用恢复；不自动重放或无限重启。历史、手动结束等业务仍可使用。
 
 正常关闭时 main 发送 shutdown 并关闭 stdin；1.5 秒未退出则 kill，2.5 秒结束等待。Rust mock 接受上述规范 shutdown 字符串（LF/CRLF）或 EOF；其他控制输入以退出码 2 退出。子进程 stdout 不得写调试信息；main 丢弃第三方 stderr，防止原始硬件诊断污染日志。需要归集的读卡故障使用固定错误码通道。main 仅传入运行 GUI 所需的有限系统环境变量，不传教师/数据库/provider 配置。
+
+## ACR1552U-M1 PC/SC 进程
+
+ACR1552U-M1 为 USB-A 版本，Windows 下使用厂商 CCID 驱动暴露的 PC/SC 读卡器，不作为串口/Wiegand D0/D1 设备打开。官方 ACR1552U Series Reference Manual v1.09 第 34–35 页定义 `FF CA 00 00 00` 取卡 UID/PUPI/SN，成功响应末尾为 `90 00`。`cyez-reader-acr1552.exe` 使用 WinSCard 的读卡器枚举、状态变化和卡片传输。仅接受成功且恰好 4 字节的结果，按响应顺序输出 8 位小写十六进制；7/10 字节、失败状态及异常长度不得截断、倒序或猜测 Wiegand 编码。每次检测到卡片进入只发送一次，移卡后才重新接收；设备消失/PCSC I/O 错误发送固定 `READER_IO`，不合格响应发送固定 `INVALID_FRAME`，然后退出。父进程 shutdown/EOF 在有界状态等待内退出。
+
+设置页选择“ACR1552U-M1 (PC/SC)”，点击“刷新 PC/SC 读卡器”，从枚举到的 ACR1552 系列 PICC 接口中选择精确设备名；SAM/接触式接口不进入列表，同型号多台设备不会自动切换。状态检查间隔可设为 100–2000 ms，默认 250 ms，它决定正常停止的最长等待时间，不改变 UID 规则。进程只支持 `--reader <name> --poll-ms <100..2000>`；`--list-readers` 一次性返回 `{"readers":[...]}`。选定设备不在枚举中或 WinSCard 服务不可用时启动失败，教师端恢复原进程并显示故障。无需在 UI 设置串口参数、APDU 字节序、扇区或厂商键盘仿真模式；键盘仿真是设备固件配置，不属于 PC/SC 读卡进程。
+
+配置示例：
+
+```json
+{"readerProcess":{"kind":"acr1552","reader":"ACS ACR1552U PICC 0","pollMs":250}}
+```
+
+官方产品页：https://www.acs.com.hk/en/products/575/acr1552u-usb-nfc-reader-iv/；参考手册：https://www.acs.com.hk/download-manual/13473/REF-ACR1552U-Series-1.09.pdf。实际 PC/SC 名称须以目标机器枚举结果为准。**尚缺实卡对照**：PC/SC 返回的 4 字节 UID 是否等于既有 Wiegand-34 中间 32 数据位及校园 API 接受的原卡号，必须用真实发卡样本核对；不能以编译、模拟响应或手动 mock 代替。仅 7/10 字节的卡不符合当前 4 字节协议，需业务方确认卡片/编码后才能支持，不能自行转换。
 
 ## Rust mock 与配置
 
@@ -49,12 +63,12 @@ corepack yarn start:client
 
 `--test-uid 00000001` 是自动化测试专用的一次性模式：发送 mock ready 和一条 scan 后退出；不会伪装成 hardware，不用于正常 GUI 运行。交互运行须由 Node/Electron 保持 stdin 管道；直接双击 exe 没有父管道会退出。
 
-生产模板可使用内置串口进程或外部进程。`readerProcess` 也可暂时省略，让生产客户端先打开设置页选择；此时读卡状态明确显示未配置，不能刷卡。外部进程示例：
+生产模板可使用内置 ACR1552U、串口进程或外部进程。`readerProcess` 也可暂时省略，让生产客户端先打开设置页选择；此时读卡状态明确显示未配置，不能刷卡。外部进程示例：
 
 ```json
 {"readerProcess":{"kind":"external","executable":"C:/Program Files/cyez-library-reader/reader.exe"}}
 ```
 
-`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。安装包将两个 Rust 进程放在 `resources/readers/`；其中 mock 只可在显式开发/集成配置使用。
+`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。安装包将三个 Rust 进程放在 `resources/readers/`；其中 mock 只可在显式开发/集成配置使用。
 
-TBD-03 现在仅保留真实读卡器型号、驱动/电气或设备传输协议、实际发行方以及真实帧到规范 UID 的对照样本与验收。Wiegand-34、4 字节数据和本 IPC 接口已经确定。Rust mock 证明管道和应用集成，不证明真实硬件已验证；校园 API 对原 UID 的转换仍依 TBD-02，不编造硬件/校园协议。
+TBD-03 已获 ACR1552U-M1 型号及其 PC/SC 获取 UID 的正式接口，仍缺目标机器驱动/WinSCard、实际发卡样本、与 Wiegand-34 数据位和校园 API 原卡号的对照及实物刷卡验收。Rust mock 和 PC/SC 单元测试不证明真实硬件已验证；校园 API 对原 UID 的转换仍依 TBD-02，不编造硬件/校园协议。

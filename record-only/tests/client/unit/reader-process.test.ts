@@ -109,6 +109,46 @@ describe("Wiegand-34 独立读卡进程", () => {
     ).toBe(false);
   });
 
+  it("ACR1552U 进程只接受已选设备和有界状态间隔", () => {
+    const choice = readerProcessSchema.parse({
+      kind: "acr1552",
+      reader: "ACS ACR1552U PICC 0",
+      pollMs: 250,
+    });
+    expect(readerArguments(choice)).toEqual([
+      "--reader",
+      "ACS ACR1552U PICC 0",
+      "--poll-ms",
+      "250",
+    ]);
+    expect(
+      resolveReaderExecutable(
+        choice,
+        "production",
+        "C:/app",
+        "C:/resources",
+        true,
+      ),
+    ).toMatch(/readers[\\/]cyez-reader-acr1552\.exe$/);
+    for (const reader of [
+      "Other Reader",
+      "ACS ACR1552U ICC 0",
+      "ACS ACR1552U SAM 0",
+      "ACS ACR1552U\nPICC 0",
+    ])
+      expect(readerProcessSchema.safeParse({ ...choice, reader }).success).toBe(
+        false,
+      );
+    for (const pollMs of [99, 2001, 250.5])
+      expect(readerProcessSchema.safeParse({ ...choice, pollMs }).success).toBe(
+        false,
+      );
+    expect(
+      readerProcessSchema.safeParse({ ...choice, uidFormat: "reverse" })
+        .success,
+    ).toBe(false);
+  });
+
   it("实际 Rust 子进程输出握手与无损 4 字节 UID", async () => {
     const reader = new ProcessReader(executable, false, [
       "--test-uid",

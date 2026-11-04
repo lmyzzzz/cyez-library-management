@@ -42,6 +42,10 @@ export function resolveReaderExecutable(
     return packaged
       ? resolve(resourcesPath, "readers", "cyez-reader-serial.exe")
       : resolve(appPath, "../../target/release/cyez-reader-serial.exe");
+  if (config.kind === "acr1552")
+    return packaged
+      ? resolve(resourcesPath, "readers", "cyez-reader-acr1552.exe")
+      : resolve(appPath, "../../target/release/cyez-reader-acr1552.exe");
   if (
     !isAbsolute(config.executable) ||
     !config.executable.toLowerCase().endsWith(".exe")
@@ -51,9 +55,10 @@ export function resolveReaderExecutable(
 }
 
 export function readerArguments(config: ReaderProcessConfig): string[] {
-  return config.kind !== "serial"
-    ? []
-    : [
+  if (config.kind === "acr1552")
+    return ["--reader", config.reader, "--poll-ms", String(config.pollMs)];
+  return config.kind === "serial"
+    ? [
         "--port",
         config.port,
         "--baud",
@@ -68,7 +73,8 @@ export function readerArguments(config: ReaderProcessConfig): string[] {
         config.flowControl,
         "--format",
         config.format,
-      ];
+      ]
+    : [];
 }
 
 /** Private inherited pipes only; no renderer/network listener, disk queue or UID logs. */

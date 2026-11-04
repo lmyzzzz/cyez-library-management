@@ -163,7 +163,9 @@ void app.whenReady().then(async () => {
               ? "Rust mock：Wiegand-34 手动输入"
               : choice.kind === "serial"
                 ? "串口读卡进程已连接"
-                : "读卡进程已连接";
+                : choice.kind === "acr1552"
+                  ? "ACR1552U-M1 读卡进程已连接"
+                  : "读卡进程已连接";
             if (!window.isDestroyed())
               window.webContents.send("library:event", { type: "changed" });
           },
@@ -235,6 +237,34 @@ void app.whenReady().then(async () => {
         throw new ApiError("READER_PORT_LIST_FAILED", 503);
       }
     };
+    const listAcr1552Readers = async () => {
+      try {
+        const executable = resolveReaderExecutable(
+          { kind: "acr1552", reader: "ACR1552", pollMs: 250 },
+          config.environment,
+          app.getAppPath(),
+          process.resourcesPath,
+          app.isPackaged,
+        );
+        const env: NodeJS.ProcessEnv = {};
+        for (const key of ["SystemRoot", "WINDIR", "TEMP", "TMP", "PATH"])
+          if (process.env[key]) env[key] = process.env[key];
+        const { stdout } = await execFileAsync(executable, ["--list-readers"], {
+          timeout: 5000,
+          maxBuffer: 8192,
+          windowsHide: true,
+          env,
+        });
+        return z
+          .object({
+            readers: z.array(z.string().min(1).max(128)).max(128),
+          })
+          .strict()
+          .parse(JSON.parse(stdout));
+      } catch {
+        throw new ApiError("READER_PCSC_LIST_FAILED", 503);
+      }
+    };
     ipcMain.handle(
       "library:action",
       async (event, action: unknown, input: unknown) => {
@@ -251,6 +281,11 @@ void app.whenReady().then(async () => {
             if (!actions.listSerialPorts.safeParse(input).success)
               throw new ApiError("INPUT_INVALID", 422);
             return { ok: true, value: await listSerialPorts() };
+          }
+          if (action === "listAcr1552Readers") {
+            if (!actions.listAcr1552Readers.safeParse(input).success)
+              throw new ApiError("INPUT_INVALID", 422);
+            return { ok: true, value: await listAcr1552Readers() };
           }
           if (action === "configureReader") {
             const parsed = readerProcessSchema.safeParse(input);

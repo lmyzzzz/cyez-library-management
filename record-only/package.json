@@ -32,9 +32,11 @@
     "seed": "yarn workspace @record/server seed",
     "build:reader:mock": "cargo build --manifest-path Cargo.toml -p cyez-reader-mock --release --locked",
     "build:reader:serial": "cargo build --manifest-path Cargo.toml -p cyez-reader-serial --release --locked",
-    "build:readers": "yarn build:reader:mock && yarn build:reader:serial",
+    "build:reader:acr1552": "cargo build --manifest-path Cargo.toml -p cyez-reader-acr1552 --release --locked",
+    "build:readers": "yarn build:reader:mock && yarn build:reader:serial && yarn build:reader:acr1552",
     "test:reader:mock": "cargo test --manifest-path Cargo.toml -p cyez-reader-mock --locked",
     "test:reader:serial": "cargo test --manifest-path Cargo.toml -p cyez-reader-serial --locked",
+    "test:reader:acr1552": "cargo test --manifest-path Cargo.toml -p cyez-reader-acr1552 --locked",
     "package:win": "yarn build:readers && yarn build:client && yarn workspace @record/teacher package:win"
   },
   "devDependencies": {

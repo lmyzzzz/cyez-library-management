@@ -178,6 +178,9 @@ export function ReaderSettings({
     [format, setFormat] = useState<
       "hex8" | "hex" | "decimal" | "octal" | "binary"
     >("hex8"),
+    [acrReader, setAcrReader] = useState(""),
+    [acrPollMs, setAcrPollMs] = useState(250),
+    [acrReaders, setAcrReaders] = useState<string[]>([]),
     [executable, setExecutable] = useState(""),
     [ports, setPorts] = useState<string[]>([]),
     [busy, setBusy] = useState(false),
@@ -193,6 +196,23 @@ export function ReaderSettings({
       );
       setPorts(result.ports);
       if (!result.ports.length) setMessage("未发现串口，可手动输入端口名称");
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const scanAcrReaders = async () => {
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      const result = await window.library.call<{ readers: string[] }>(
+        "listAcr1552Readers",
+        {},
+      );
+      setAcrReaders(result.readers);
+      if (!result.readers.length) setMessage("未发现 ACR1552U PC/SC 读卡器");
     } catch (e) {
       setError(e);
     } finally {
@@ -216,12 +236,15 @@ export function ReaderSettings({
               flowControl,
               format,
             }
-          : kind === "external"
-            ? { kind, executable }
-            : { kind };
+          : kind === "acr1552"
+            ? { kind, reader: acrReader, pollMs: acrPollMs }
+            : kind === "external"
+              ? { kind, executable }
+              : { kind };
       await window.library.call("configureReader", choice);
       setMessage("读卡进程已启动，新配置已覆盖");
       setPort("");
+      setAcrReader("");
       setExecutable("");
       refresh();
     } catch (e) {
@@ -245,6 +268,7 @@ export function ReaderSettings({
           }
         >
           <option value="serial">内置串口进程</option>
+          <option value="acr1552">ACR1552U-M1 (PC/SC)</option>
           <option value="external">外部读卡进程</option>
           {status.environment !== "production" && (
             <option value="mock">手动 UID 测试窗口</option>
@@ -343,6 +367,35 @@ export function ReaderSettings({
           </div>
         </>
       )}
+      {kind === "acr1552" && (
+        <div className="form-grid">
+          <Field label="PC/SC 读卡器" htmlFor="acr-reader">
+            <select
+              id="acr-reader"
+              value={acrReader}
+              onChange={(e) => setAcrReader(e.target.value)}
+            >
+              <option value="">选择已连接的读卡器</option>
+              {acrReaders.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="状态检查间隔（毫秒）" htmlFor="acr-poll-ms">
+            <input
+              id="acr-poll-ms"
+              type="number"
+              min={100}
+              max={2000}
+              step={1}
+              value={acrPollMs}
+              onChange={(e) => setAcrPollMs(Number(e.target.value))}
+            />
+          </Field>
+        </div>
+      )}
       {kind === "external" && (
         <Field label="进程绝对路径" htmlFor="reader-executable">
           <input
@@ -361,11 +414,17 @@ export function ReaderSettings({
             刷新串口列表
           </Button>
         )}
+        {kind === "acr1552" && (
+          <Button disabled={busy} onClick={() => void scanAcrReaders()}>
+            刷新 PC/SC 读卡器
+          </Button>
+        )}
         <Button
           variant="primary"
           disabled={
             busy ||
             (kind === "serial" && !port.trim()) ||
+            (kind === "acr1552" && !acrReader) ||
             (kind === "external" && !executable.trim())
           }
           onClick={() => void save()}
