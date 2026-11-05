@@ -14,6 +14,9 @@ on:
 jobs:
   server:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     services:
       postgres:
         image: postgres:17.6-bookworm
@@ -55,6 +58,26 @@ jobs:
       - run: docker build -t cyez-record-only:ci .
       - run: docker build -f deploy/db.Dockerfile -t cyez-record-db:ci .
       - run: docker build -f deploy/gateway.Dockerfile -t cyez-record-gateway:ci .
+      - name: Publish server images to GHCR
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          for spec in \
+            cyez-record-only:cyez-record-only-api \
+            cyez-record-db:cyez-record-only-db \
+            cyez-record-gateway:cyez-record-only-gateway; do
+            source="${spec%%:*}"
+            target="${spec#*:}"
+            image="ghcr.io/${owner}/${target}"
+            docker tag "${source}:ci" "${image}:sha-${GITHUB_SHA}"
+            docker push "${image}:sha-${GITHUB_SHA}"
+            docker tag "${source}:ci" "${image}:latest"
+            docker push "${image}:latest"
+          done
+          docker logout ghcr.io
       - name: Record build identities
         run: |
           mkdir -p test-results

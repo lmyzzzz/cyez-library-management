@@ -1,6 +1,6 @@
 name: cyez-record-only
 x-api: &api
-  image: cyez-record-only:${RELEASE_TAG:-local}
+  image: ${API_IMAGE:-cyez-record-only}:${RELEASE_TAG:-local}
   build: .
   read_only: true
   cap_drop: [ALL]
@@ -26,7 +26,7 @@ x-environment: &environment
   CAPACITY_RECOVERY_BYTES: ${CAPACITY_RECOVERY_BYTES:-2147483648}
 services:
   db:
-    image: cyez-record-db:${RELEASE_TAG:-local}
+    image: ${DB_IMAGE:-cyez-record-db}:${RELEASE_TAG:-local}
     build: { context: ., dockerfile: deploy/db.Dockerfile }
     read_only: true
     tmpfs: ["/tmp:size=32m,mode=1777", "/var/run/postgresql:size=16m,mode=1777"]
@@ -116,7 +116,7 @@ services:
       retries: 10
     stop_grace_period: 20s
   gateway:
-    image: cyez-record-gateway:${RELEASE_TAG:-local}
+    image: ${GATEWAY_IMAGE:-cyez-record-gateway}:${RELEASE_TAG:-local}
     build: { context: ., dockerfile: deploy/gateway.Dockerfile }
     entrypoint: [nginx, -g, "daemon off;"]
     ports: ["${BIND_IP:?Set BIND_IP}:${HTTPS_PORT:-443}:8443"]

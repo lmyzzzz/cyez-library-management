@@ -1,5 +1,7 @@
 # 运行、部署与升级
 
+服务端主分支 CI 在测试与构建通过后，将 API、PostgreSQL、HTTPS 网关镜像发布到 `ghcr.io/lmyzzzz/cyez-record-only-{api,db,gateway}`，各有 `sha-<完整提交号>` 和 `latest` 标签。正式部署建议固定 SHA：在宿主 `.env` 中按 `.env.example` 设置三个 `*_IMAGE` 和同一个 `RELEASE_TAG=sha-<完整提交号>`，保留原 secrets、配置、`DATA_PREFIX` 和命名卷。执行 `docker compose --env-file .env pull` 后，先在临时数据副本验证迁移，再执行 `docker compose --env-file .env up -d --no-build`。如 GHCR 包未设为公开，拉取机器须先以具有 `read:packages` 权限的账号运行 `docker login ghcr.io`。`latest` 适合临时检查，不用于需可复现的部署；本地默认镜像名和构建流程不变。
+
 2026-11-05 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.3`），仅打包串口和 ACR1552U 读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。
 
 2026-11-05：内置 Concard SQL Server 接入已经实现，部署/升级前准备新的服务端加密密钥并运行 `003-provider-config` 迁移。教师端在“设置 → 校园数据源”一次性提交完整新配置。固定只读取卡号、姓名、班级；表内账号不使用。详细字段、单向边界、密钥与命令见[Concard 接入](campus-sqlserver.md)。下文外置 module 仍是可选兼容路径，不是本次 SQL 接入的前置。
