@@ -4,6 +4,7 @@ import {
   type IdentityConfig,
   type CardScanInput,
 } from "@record/protocol/identity";
+import { ApiError } from "@record/protocol";
 export interface CardEvent {
   scanId: string;
   studentId: string;
@@ -14,11 +15,22 @@ export interface CardEvent {
 export class CardReader {
   private last: { id: string; time: number } | undefined;
   constructor(
-    private config: IdentityConfig,
+    private config: IdentityConfig | null,
     private emit: (event: CardEvent) => Promise<void>,
     private now = performance.now.bind(performance),
   ) {}
+  get configured() {
+    return this.config !== null;
+  }
+  configure(identity: IdentityConfig) {
+    if (this.config) throw new ApiError("IDENTITY_ALREADY_CONFIGURED", 409);
+    this.config = identity;
+  }
   async accept(uid: Uint8Array, source: "reader" | "integration" = "reader") {
+    if (!this.config) {
+      uid.fill(0);
+      throw new ApiError("IDENTITY_CONFIG_REQUIRED", 409);
+    }
     const card = {
       issuer: this.config.issuer,
       uidHex: Buffer.from(uid).toString("hex"),

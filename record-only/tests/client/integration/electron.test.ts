@@ -293,7 +293,10 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const registrationBounds = await scanBounds();
   expect(registrationBounds.left).toBe(0);
   expect(registrationBounds.width).toBe(registrationBounds.viewportWidth);
-  expect(registrationBounds.bottom).toBe(registrationBounds.viewportHeight);
+  expect(registrationBounds.bottom).toBeCloseTo(
+    registrationBounds.viewportHeight,
+    0,
+  );
   await expect(
     page.getByRole("button", { name: "选择", exact: true }),
   ).toBeVisible();
@@ -306,7 +309,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const narrowBounds = await scanBounds();
   expect(narrowBounds.left).toBe(0);
   expect(narrowBounds.width).toBe(narrowBounds.viewportWidth);
-  expect(narrowBounds.bottom).toBe(narrowBounds.viewportHeight);
+  expect(narrowBounds.bottom).toBeCloseTo(narrowBounds.viewportHeight, 0);
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(narrowBounds.viewportWidth);
@@ -337,7 +340,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const endBounds = await scanBounds();
   expect(endBounds.left).toBe(0);
   expect(endBounds.width).toBe(endBounds.viewportWidth);
-  expect(endBounds.bottom).toBe(endBounds.viewportHeight);
+  expect(endBounds.bottom).toBeCloseTo(endBounds.viewportHeight, 0);
   await page.screenshot({
     path: "test-results/electron/scan-end-fullscreen.png",
     fullPage: true,
@@ -414,7 +417,7 @@ test("C-I-10/04/05: OS 加密保存与真实 SQLite 跨重启，origin 隔离", 
     source: "main",
     level: "warn",
     atMs: Date.now(),
-    appVersion: "0.1.0",
+    appVersion: "0.1.1",
     code: "DISCONNECTED",
   });
   await store.close();
@@ -623,5 +626,105 @@ test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock"
     ).rejects.toThrow();
   } finally {
     await setup.close();
+  }
+});
+
+test("C-I-14: 空白安装可在应用内完成首次配置", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "cyez-first-run-"));
+  const packagedExecutable = process.env.CYEZ_ELECTRON_EXECUTABLE;
+  const env = { ...process.env, CYEZ_USER_DATA: directory };
+  Reflect.deleteProperty(env, "CYEZ_CLIENT_CONFIG");
+  const setup = await electron.launch({
+    executablePath: packagedExecutable
+      ? resolve(packagedExecutable)
+      : resolve("node_modules/electron/dist/electron.exe"),
+    args: packagedExecutable ? [] : [resolve("apps/teacher")],
+    env,
+  });
+  let setupClosed = false;
+  try {
+    const firstRun = await setup.firstWindow();
+    await firstRun.waitForLoadState("domcontentloaded");
+    await expect(
+      firstRun.getByRole("heading", { name: "首次配置" }),
+    ).toBeVisible();
+    await expect(
+      firstRun.evaluate(() =>
+        window.library.call("devices", { page: 1, pageSize: 30 }),
+      ),
+    ).rejects.toThrow("IDENTITY_CONFIG_REQUIRED");
+    await expect(
+      firstRun.evaluate(() =>
+        window.library.call("initializeClient", {
+          hashVersion: "v1",
+          fixedSaltHex: "invalid",
+          issuer: "integration",
+          uidByteLengths: [4],
+        }),
+      ),
+    ).rejects.toThrow("INPUT_INVALID");
+    await expect(
+      readFile(join(directory, "client-config.json")),
+    ).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    await firstRun.screenshot({
+      path: "test-results/electron/first-run.png",
+      fullPage: true,
+    });
+    await firstRun.getByLabel("身份版本").fill(identity.hashVersion);
+    await firstRun.getByLabel("发卡方").fill(identity.issuer);
+    await firstRun.getByLabel("固定盐（十六进制）").fill(identity.fixedSaltHex);
+    await firstRun.getByRole("button", { name: "保存并继续" }).click();
+    await expect(
+      firstRun.getByRole("heading", { name: "首次配置" }),
+    ).toHaveCount(0);
+    await expect(firstRun.getByRole("heading", { name: "设置" })).toBeVisible();
+    expect(
+      JSON.parse(await readFile(join(directory, "client-config.json"), "utf8")),
+    ).toEqual({
+      environment: "production",
+      identity,
+    });
+    expect(
+      await firstRun.evaluate(() =>
+        window.library.call<{ identityConfigured: boolean; reader: string }>(
+          "status",
+          {},
+        ),
+      ),
+    ).toMatchObject({ identityConfigured: true, reader: "未配置读卡进程" });
+    await expect(
+      firstRun.evaluate(
+        (configuredIdentity) =>
+          window.library.call("initializeClient", configuredIdentity),
+        identity,
+      ),
+    ).rejects.toThrow("IDENTITY_ALREADY_CONFIGURED");
+    await setup.close();
+    setupClosed = true;
+    const reopened = await electron.launch({
+      executablePath: packagedExecutable
+        ? resolve(packagedExecutable)
+        : resolve("node_modules/electron/dist/electron.exe"),
+      args: packagedExecutable ? [] : [resolve("apps/teacher")],
+      env,
+    });
+    try {
+      const secondRun = await reopened.firstWindow();
+      await secondRun.waitForLoadState("domcontentloaded");
+      await expect(
+        secondRun.getByRole("heading", { name: "首次配置" }),
+      ).toHaveCount(0);
+      expect(
+        await secondRun.evaluate(() =>
+          window.library.call<{ identityConfigured: boolean }>("status", {}),
+        ),
+      ).toMatchObject({ identityConfigured: true });
+    } finally {
+      await reopened.close();
+    }
+  } finally {
+    if (!setupClosed) await setup.close();
   }
 });

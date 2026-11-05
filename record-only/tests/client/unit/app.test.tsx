@@ -52,6 +52,7 @@ const free: DeviceDTO = {
   active: null,
 };
 const status: LocalStatus = {
+  identityConfigured: true,
   connectionConfigured: true,
   authenticated: true,
   online: true,

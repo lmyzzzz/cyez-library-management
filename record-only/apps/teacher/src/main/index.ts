@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { z } from "zod";
@@ -44,10 +44,21 @@ let interval: NodeJS.Timeout | undefined;
 let stopping = false;
 void app.whenReady().then(async () => {
   try {
+    const explicitConfig = process.env.CYEZ_CLIENT_CONFIG;
     const file =
-      process.env.CYEZ_CLIENT_CONFIG ??
-      join(app.getPath("userData"), "client-config.json");
-    const config = configSchema.parse(JSON.parse(await readFile(file, "utf8")));
+      explicitConfig ?? join(app.getPath("userData"), "client-config.json");
+    let config: z.infer<typeof configSchema> | null;
+    try {
+      config = configSchema.parse(JSON.parse(await readFile(file, "utf8")));
+    } catch (error) {
+      if (
+        explicitConfig !== undefined ||
+        (error as NodeJS.ErrnoException).code !== "ENOENT"
+      )
+        throw error;
+      config = null;
+    }
+    const environment = config?.environment ?? "production";
     const store = new LocalStore(
       join(app.getPath("userData"), "library.sqlite"),
     );
@@ -75,7 +86,7 @@ void app.whenReady().then(async () => {
     let renderer = pathToFileURL(join(location, "../renderer/index.html")).href;
     if (
       !app.isPackaged &&
-      config.environment !== "production" &&
+      environment !== "production" &&
       process.env.NODE_ENV === "development" &&
       process.env.ELECTRON_RENDERER_URL
     ) {
@@ -102,28 +113,33 @@ void app.whenReady().then(async () => {
     coordinator = new Coordinator(
       store,
       await store.clientId(),
-      config.environment,
-      config.identity,
+      environment,
+      config?.identity ?? null,
       (event) => {
         if (!window.isDestroyed())
           window.webContents.send("library:event", event);
       },
     );
-    let readerConfig: ReaderProcessConfig | undefined = config.readerProcess;
+    let readerConfig: ReaderProcessConfig | undefined = config?.readerProcess;
     let readerChanging = false;
     const savedReader = await store.get("readerProcess");
-    if (savedReader) {
-      const parsed = readerProcessSchema.parse(JSON.parse(savedReader));
-      if (config.environment === "production" && parsed.kind === "mock")
-        throw new Error("MOCK_READER_FORBIDDEN");
-      readerConfig = parsed;
+    let invalidSavedReader = false;
+    if (savedReader && config) {
+      try {
+        const parsed = readerProcessSchema.parse(JSON.parse(savedReader));
+        if (environment === "production" && parsed.kind === "mock")
+          invalidSavedReader = true;
+        else readerConfig = parsed;
+      } catch {
+        invalidSavedReader = true;
+      }
     }
     const startReader = async (choice: ReaderProcessConfig) => {
       let executable: string;
       try {
         executable = resolveReaderExecutable(
           choice,
-          config.environment,
+          environment,
           app.getAppPath(),
           process.resourcesPath,
           app.isPackaged,
@@ -133,7 +149,7 @@ void app.whenReady().then(async () => {
       }
       const candidate = new ProcessReader(
         executable,
-        config.environment === "production",
+        environment === "production",
         readerArguments(choice),
       );
       adapter = candidate;
@@ -179,7 +195,7 @@ void app.whenReady().then(async () => {
     };
     const replaceReader = async (choice: ReaderProcessConfig) => {
       if (readerChanging) throw new ApiError("READER_CHANGE_BUSY", 409);
-      if (config.environment === "production" && choice.kind === "mock")
+      if (environment === "production" && choice.kind === "mock")
         throw new ApiError("MOCK_READER_FORBIDDEN", 403);
       readerChanging = true;
       try {
@@ -215,7 +231,7 @@ void app.whenReady().then(async () => {
             flowControl: "none",
             format: "hex8",
           },
-          config.environment,
+          environment,
           app.getAppPath(),
           process.resourcesPath,
           app.isPackaged,
@@ -241,7 +257,7 @@ void app.whenReady().then(async () => {
       try {
         const executable = resolveReaderExecutable(
           { kind: "acr1552", reader: "ACR1552", pollMs: 250 },
-          config.environment,
+          environment,
           app.getAppPath(),
           process.resourcesPath,
           app.isPackaged,
@@ -277,6 +293,40 @@ void app.whenReady().then(async () => {
         )
           return { ok: false, code: "IPC_FORBIDDEN", status: 403 };
         try {
+          if (action === "initializeClient") {
+            if (config) throw new ApiError("IDENTITY_ALREADY_CONFIGURED", 409);
+            const parsed = configSchema.safeParse({
+              environment: "production",
+              identity: input,
+            });
+            if (!parsed.success) throw new ApiError("INPUT_INVALID", 422);
+            try {
+              await writeFile(file, JSON.stringify(parsed.data) + "\n", {
+                flag: "wx",
+                mode: 0o600,
+              });
+            } catch (error) {
+              throw new ApiError(
+                (error as NodeJS.ErrnoException).code === "EEXIST"
+                  ? "CLIENT_CONFIG_EXISTS"
+                  : "CLIENT_CONFIG_SAVE_FAILED",
+                503,
+              );
+            }
+            config = parsed.data;
+            coordinator!.reader.configure(parsed.data.identity);
+            coordinator!.readerState = "未配置读卡进程";
+            if (!window.isDestroyed())
+              window.webContents.send("library:event", { type: "changed" });
+            return { ok: true, value: { ok: true } };
+          }
+          if (
+            !config &&
+            action !== "status" &&
+            action !== "gate" &&
+            action !== "uiError"
+          )
+            throw new ApiError("IDENTITY_CONFIG_REQUIRED", 409);
           if (action === "listSerialPorts") {
             if (!actions.listSerialPorts.safeParse(input).success)
               throw new ApiError("INPUT_INVALID", 422);
@@ -312,13 +362,18 @@ void app.whenReady().then(async () => {
       await startReader(readerConfig).catch(() => {
         coordinator!.readerState = "读卡进程启动失败，请检查配置";
       });
-    } else coordinator.readerState = "未配置读卡进程";
+    } else
+      coordinator.readerState = !config
+        ? "等待首次配置"
+        : invalidSavedReader
+          ? "原读卡配置无效，请重新选择"
+          : "未配置读卡进程";
     interval = setInterval(() => {
       void coordinator!.flush().catch(() => {});
     }, 3000);
     await window.loadURL(renderer);
     window.show();
-    void coordinator.autoLoginOnStartup().catch(() => {});
+    if (config) void coordinator.autoLoginOnStartup().catch(() => {});
     window.on("closed", () => app.quit());
   } catch {
     dialog.showErrorBox(

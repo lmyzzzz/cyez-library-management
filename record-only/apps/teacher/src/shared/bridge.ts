@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { readerProcessSchema } from "./reader-config.js";
+import { identityConfigSchema } from "@record/protocol/identity";
 import {
   normalizePin,
   listSchema,
@@ -33,6 +34,7 @@ export const gateSchema = z
   })
   .strict();
 export const actions = {
+  initializeClient: identityConfigSchema,
   configure: connectionSchema,
   login: z
     .object({
@@ -80,6 +82,7 @@ export const actions = {
 export type ActionName = keyof typeof actions;
 export type ActionInput<K extends ActionName> = z.input<(typeof actions)[K]>;
 export interface LocalStatus {
+  identityConfigured: boolean;
   connectionConfigured: boolean;
   authenticated: boolean;
   online: boolean;

@@ -25,6 +25,7 @@ import {
   errorText,
 } from "./common.js";
 import {
+  InitialClientSetup,
   ConnectionForm,
   ReaderSettings,
   DeviceEditor,
@@ -462,6 +463,26 @@ export function App() {
       <Pager {...devices} page={page} setPage={setPage} />
     </section>
   );
+  if (status && !status.identityConfigured)
+    return (
+      <AppShell
+        routes={routes}
+        layout="focus"
+        title="图书馆使用登记"
+        subtitle="首次配置"
+        windowControls={window.windowControls}
+      >
+        <main className="workspace-content initial-setup">
+          <InitialClientSetup
+            onDone={() => {
+              navigate("/settings");
+              setTab("connection");
+              void refreshStatus();
+            }}
+          />
+        </main>
+      </AppShell>
+    );
   return (
     <AppShell
       routes={routes}

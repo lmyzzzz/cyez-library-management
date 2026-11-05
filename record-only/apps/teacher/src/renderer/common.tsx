@@ -54,6 +54,10 @@ const messages: Record<string, string> = {
   READER_PORT_LIST_FAILED: "无法枚举串口，请检查读卡进程安装或手动填写端口。",
   READER_PCSC_LIST_FAILED:
     "无法枚举 PC/SC 读卡器，请检查 ACR1552U 连接、驱动和 Windows Smart Card 服务。",
+  IDENTITY_CONFIG_REQUIRED: "请先完成首次配置。",
+  IDENTITY_ALREADY_CONFIGURED: "本机身份参数已经配置。",
+  CLIENT_CONFIG_EXISTS: "配置文件已存在，请重新启动客户端。",
+  CLIENT_CONFIG_SAVE_FAILED: "无法保存本机配置，请检查用户数据目录。",
   READER_CHANGE_BUSY: "正在切换读卡进程，请稍候。",
   MOCK_READER_FORBIDDEN: "生产环境不能使用测试读卡器。",
   CONCURRENT_CONFLICT: "发生并发冲突，请刷新并重新确认。",

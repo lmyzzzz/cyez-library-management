@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Banner, Field, CheckField } from "@record/ui";
 import type { DeviceDTO, TagDTO, Page, RecordDTO } from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
+import type { IdentityConfig } from "@record/protocol/identity";
 import type { ReaderProcessConfig } from "../shared/reader-config.js";
 import {
   Dialog,
@@ -11,6 +12,79 @@ import {
   timestamp,
   duration,
 } from "./common.js";
+export function InitialClientSetup({ onDone }: { onDone: () => void }) {
+  const [hashVersion, setHashVersion] = useState(""),
+    [fixedSaltHex, setFixedSaltHex] = useState(""),
+    [issuer, setIssuer] = useState(""),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState<unknown>();
+  const save = async () => {
+    setBusy(true);
+    setError(undefined);
+    const input: IdentityConfig = {
+      hashVersion,
+      fixedSaltHex,
+      issuer,
+      uidByteLengths: [4],
+    };
+    try {
+      await window.library.call("initializeClient", input);
+      onDone();
+    } catch (e) {
+      setError(e);
+    } finally {
+      input.fixedSaltHex = "";
+      setFixedSaltHex("");
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="panel connection" aria-label="首次配置">
+      <h1>首次配置</h1>
+      <p className="muted">
+        身份参数须与服务器一致。配置创建后不可在此界面读取或修改。
+      </p>
+      <div className="form-grid">
+        <Field label="身份版本" htmlFor="setup-hash-version">
+          <input
+            id="setup-hash-version"
+            value={hashVersion}
+            autoComplete="off"
+            onChange={(e) => setHashVersion(e.target.value)}
+          />
+        </Field>
+        <Field label="发卡方" htmlFor="setup-issuer">
+          <input
+            id="setup-issuer"
+            value={issuer}
+            autoComplete="off"
+            onChange={(e) => setIssuer(e.target.value)}
+          />
+        </Field>
+      </div>
+      <Field label="固定盐（十六进制）" htmlFor="setup-salt">
+        <input
+          id="setup-salt"
+          type="password"
+          value={fixedSaltHex}
+          autoComplete="off"
+          spellCheck={false}
+          onChange={(e) => setFixedSaltHex(e.target.value)}
+        />
+      </Field>
+      <Failure error={error} />
+      <div className="actions">
+        <Button
+          variant="primary"
+          disabled={busy || !hashVersion || !issuer || !fixedSaltHex}
+          onClick={() => void save()}
+        >
+          保存并继续
+        </Button>
+      </div>
+    </section>
+  );
+}
 export function ConnectionForm({
   status,
   refresh,

@@ -9,6 +9,7 @@ import {
 import type { DeviceDTO, RecordDTO, TagDTO } from "@record/protocol";
 import type { LocalStatus } from "../../../apps/teacher/src/shared/bridge.js";
 import {
+  InitialClientSetup,
   ConnectionForm,
   ReaderSettings,
   DeviceEditor,
@@ -28,6 +29,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const status = {
+  identityConfigured: true,
   connectionConfigured: true,
   authenticated: false,
   online: false,
@@ -74,6 +76,38 @@ const record: RecordDTO = {
 };
 
 describe("C-U-05 设置和只读历史", () => {
+  it("首次配置只提交固定 4 字节身份参数并清除盐输入", async () => {
+    const onDone = vi.fn();
+    let submitted: unknown;
+    call.mockImplementationOnce(async (_action, input) => {
+      submitted = structuredClone(input);
+      return {};
+    });
+    render(<InitialClientSetup onDone={onDone} />);
+    fireEvent.change(screen.getByLabelText("身份版本"), {
+      target: { value: "v1" },
+    });
+    fireEvent.change(screen.getByLabelText("发卡方"), {
+      target: { value: "school" },
+    });
+    fireEvent.change(screen.getByLabelText("固定盐（十六进制）"), {
+      target: { value: "00112233445566778899aabbccddeeff" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存并继续" }));
+    await waitFor(() =>
+      expect(submitted).toEqual({
+        hashVersion: "v1",
+        fixedSaltHex: "00112233445566778899aabbccddeeff",
+        issuer: "school",
+        uidByteLengths: [4],
+      }),
+    );
+    expect(call).toHaveBeenCalledWith("initializeClient", expect.any(Object));
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(
+      (screen.getByLabelText("固定盐（十六进制）") as HTMLInputElement).value,
+    ).toBe("");
+  });
   it("连接表单只接受完整覆盖输入；自动登录依赖保存密码", async () => {
     render(<ConnectionForm status={status} refresh={vi.fn()} />);
     expect((screen.getByLabelText("服务器 IP") as HTMLInputElement).value).toBe(

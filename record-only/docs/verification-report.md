@@ -119,3 +119,15 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | Windows 发布 | NSIS 安装包生成，包含 `resources/readers/cyez-reader-acr1552.exe`；SHA-256 `001fa270c47e7a07dc912f81536847224188534b5db3ed9f0041997af2efef71`；未签名 |
 
 本机未连接 ACR1552U-M1，Windows Smart Card 服务无设备时停止，`--list-readers` 返回失败且不伪造设备。**未完成真实验收**：目标机器驱动/WinSCard 枚举、实卡连续贴卡及移卡行为、4 字节 PC/SC UID 与 Wiegand-34 中间数据位及校园 API 接受的原卡号逐卡对照。7/10 字节卡按协议拒绝，若目标卡属于这类需提供业务确认的新规则。服务端与 Docker 本轮未修改或重跑。
+
+## 2026-11-05 Windows 空白安装首次配置验证
+
+教师端 `0.1.1` 在默认用户数据目录缺少 `client-config.json` 时进入软件内的首次配置页。身份版本、固定盐及发卡方由部署方提供，UID 长度固定为 4 字节；提交后仅在文件不存在时创建生产配置并进入连接设置。配置前业务动作和刷卡被拒绝，已有配置不可由此入口读取或覆盖。显式 `CYEZ_CLIENT_CONFIG` 缺失仍按配置错误处理。原有读取正常配置、TLS/登录、读卡进程、SQLite 待确认操作的流程保持不变。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| 客户端测试 | TypeScript、Prettier、Yarn `--immutable` 通过；单元/组件 58 项通过；覆盖率 statements 88.73%、branches 84.31%、functions 87.07%、lines 89.48%，门禁通过 |
+| 真实 Electron | 使用真实 PostgreSQL、TLS、SQLite 和 `0.1.1` 解包版运行 10 项通过，Compose 专用 1 项按条件跳过。新增用例从空白用户数据目录启动，验证配置前 IPC 拒绝、UI 提交后创建配置、进入设置、重复配置拒绝及重启后不再显示首次配置。已检查 `test-results/electron/first-run.png` |
+| Windows 发布 | NSIS 安装包 `release/cyez-library-0.1.1-x64-setup.exe` 构建通过，SHA-256 `1bcc54a0c4f57f702a48cf1df9205cec4a286ee7c87083f3e13c1c6baf1f6e0a`；Authenticode 状态 `NotSigned` |
+
+本轮没有在用户报错的另一台机器执行安装、升级或真实读卡测试；该机器仍须提供与服务器一致的正式身份参数，并手动配置服务器地址、证书指纹和读卡器。服务端与 Docker 本轮未修改或重跑。

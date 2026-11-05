@@ -241,7 +241,7 @@ describe("C-U main 协调器", () => {
       source: "main",
       level: "info",
       atMs: Date.now(),
-      appVersion: "0.1.0",
+      appVersion: "0.1.1",
       code: "APP_STARTED",
     });
     coordinator.online = true;

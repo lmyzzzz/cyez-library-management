@@ -37,7 +37,7 @@ export class Coordinator {
     readonly store: LocalStore,
     readonly clientId: string,
     readonly environment: "development" | "integration" | "production",
-    identity: IdentityConfig,
+    identity: IdentityConfig | null,
     private emit: (event: TeacherEvent) => void,
   ) {
     this.reader = new CardReader(identity, (event) => this.onCard(event));
@@ -67,7 +67,7 @@ export class Coordinator {
       ...entry,
       logId: randomUUID(),
       atMs: Date.now(),
-      appVersion: "0.1.0",
+      appVersion: "0.1.1",
     });
   }
   async configure(connection: Connection) {
@@ -91,6 +91,7 @@ export class Coordinator {
         ).length
       : 0;
     return {
+      identityConfigured: this.reader.configured,
       connectionConfigured: !!this.connection,
       authenticated: !!this.sdk?.authenticated,
       online: this.online,
@@ -101,7 +102,7 @@ export class Coordinator {
       pendingOtherOrigins: metrics.pendingCommands - current,
       reader: this.readerState,
       environment: this.environment,
-      version: "0.1.0",
+      version: "0.1.1",
       lastSuccessMs: this.lastSuccessMs,
     };
   }
@@ -365,7 +366,7 @@ export class Coordinator {
   private async finishLogin(saved: boolean) {
     const sdk = this.requireSdk();
     const recovery = await this.recover();
-    await sdk.call("POST", "/api/v1/clients/startup", { version: "0.1.0" });
+    await sdk.call("POST", "/api/v1/clients/startup", { version: "0.1.1" });
     await this.flush();
     return { saved, recovery };
   }

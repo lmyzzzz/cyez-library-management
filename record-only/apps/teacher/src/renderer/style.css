@@ -112,6 +112,10 @@ h3 {
   height: 100%;
   overflow: auto;
 }
+.initial-setup {
+  width: min(100%, 800px);
+  margin: 0 auto;
+}
 .page-top {
   display: flex;
   justify-content: space-between;

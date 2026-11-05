@@ -50,7 +50,9 @@ corepack yarn package:win
 
 生产环境不运行学生 seed。`seed` CLI 在生产配置下直接拒绝；学生缓存由每次成功的校园 API 查询新增或覆盖。`migrate` 作业包含 `002-student-cache` 和 `002-student-cache-insert`，并首次写入固定盐等身份配置的指纹；API 要求该指纹存在且匹配，防止在不再运行 seed 后意外更改身份参数。升级既有库时保留旧学生资料和历史，只放宽旧预置列并赋予运行账号学生插入权限。真实 API 对“不存在/无资格”和故障的响应映射须在 TBD-02 输入后完成。
 
-教师端生产 `client-config.json` 位于 Electron userData，字段为 `environment:"production"`、共享 `identity` 参数；可选的默认 `readerProcess` 为 `serial` 或 `external`。未预设读卡进程也可启动设置页，但刷卡不可用，须在设置/读卡器中整份覆盖选择。内置串口进程配置、参数和输入格式见[管道协议](reader-process.md)，外部进程可使用绝对路径 `C:/Program Files/cyez-library-reader/reader.exe`。main 不加载 JavaScript 硬件模块。生产配置及握手均拒绝 mock；`identity.uidByteLengths` 必须为 `[4]`。旧 `readerModule` 配置须替换。Windows 包当前未签名；签名、目标系统安装升级和多 DPI/实物串口验收需 TBD-03/06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端完整覆盖连接配置；原表单不回填。启动自动登录仅对显式加密保存的密码有效，退出登录后需重新勾选。
+安装包在空白 Windows 用户数据目录可直接启动，显示“首次配置”。输入与服务端完全一致的身份版本（`HASH_VERSION`）、固定盐（`FIXED_SALT_HEX`）和发卡方（`CARD_ISSUER`）；UID 长度固定为 4 字节。确认后客户端仅在缺失时创建 `%APPDATA%/图书馆使用登记/client-config.json`，环境为 `production`，随后进入设置页手动填写服务器 IP、HTTPS 端口、证书指纹和登录信息，再选择读卡进程。首次配置前禁用刷卡和业务动作；界面不读取/回填已保存的身份值，也不覆盖已有配置。固定盐需从受信任的部署渠道取得，不使用集成模板中的测试值。
+
+运维仍可预置 `client-config.json`（或通过 `CYEZ_CLIENT_CONFIG` 指定现有文件），字段为 `environment:"production"`、共享 `identity` 参数及可选 `readerProcess`。显式指定的配置文件缺失或内容无效时仍启动失败，避免误入另一个配置目录。默认读卡进程可为 ACR1552U PC/SC、串口或外部进程；未预设读卡进程也可进入设置页，但刷卡不可用。内置进程配置见[管道协议](reader-process.md)。main 不加载 JavaScript 硬件模块。生产配置及握手均拒绝 mock；`identity.uidByteLengths` 必须为 `[4]`。旧 `readerModule` 配置须替换。Windows 包当前未签名；签名、目标系统安装升级和实物读卡验收需 TBD-03/06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端完整覆盖连接配置；原表单不回填。启动自动登录仅对显式加密保存的密码有效，退出登录后需重新勾选。
 
 ## 升级与故障
 

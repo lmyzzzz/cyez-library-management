@@ -115,6 +115,24 @@ describe("C-U 计时和读卡边界", () => {
     await reader.accept(Buffer.from("00000001", "hex"));
     expect(events).toHaveLength(2);
   });
+  it("首次配置前读卡不生成身份且清除 UID，配置后正常工作", async () => {
+    const events: string[] = [];
+    const reader = new CardReader(null, async (event) => {
+      events.push(event.studentId);
+    });
+    const uid = Buffer.from("00000001", "hex");
+    await expect(reader.accept(uid)).rejects.toThrow(
+      "IDENTITY_CONFIG_REQUIRED",
+    );
+    expect([...uid]).toEqual([0, 0, 0, 0]);
+    expect(events).toHaveLength(0);
+    reader.configure(identity);
+    await reader.accept(Buffer.from("00000001", "hex"));
+    expect(events).toHaveLength(1);
+    expect(() => reader.configure(identity)).toThrow(
+      "IDENTITY_ALREADY_CONFIGURED",
+    );
+  });
   it("固定 IP origin，默认 443 规范化，拒绝 URL/无效 pin", () => {
     expect(
       connectionOrigin({ ip: "127.0.0.1", port: 443, pin: "ab".repeat(32) }),
