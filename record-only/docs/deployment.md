@@ -61,7 +61,7 @@ Compose secrets 本身是宿主文件挂载，不代表自动静态加密。固�
 - 只采用可兼容的扩展迁移；破坏性变更不能通过回旧镜像自动回滚。发布前在临时数据副本验证升级，不以删除数据库完成升级。正常部署禁止 down -v。此处测试副本是工程验证材料，不是产品备份模块。
 - 不同来源日志先持久 spool，再由 log-ingest 经 ORM 导入 app_logs；stdout 仅作额外运维输出，轮转不能丢弃未交接日志。数据库不可写保留磁盘队列，教师没有服务器日志查询权限。
 
-教师端构建需 Rust/MSVC；`yarn package:win` 自动构建 Rust mock、串口及 ACR1552U PC/SC 进程并复制到资源目录。生产可选择内置 ACR1552U PC/SC、串口进程或外部原生读卡 exe，配置与升级兼容性见[读卡接口](reader-process.md)；真实读卡器仍需实机验收，不能启用 mock 代替。
+教师端构建需 Rust/MSVC；`yarn package:win` 自动构建串口及 ACR1552U PC/SC 进程并复制到资源目录，正式包不含 mock、测试刷卡或调试界面，禁用 DevTools，只接受 production 客户端配置。开发/集成构建和正式包分别验证，命令见[运行说明](operations.md)。生产可选择内置 ACR1552U PC/SC、串口进程或外部原生读卡 exe，配置与升级兼容性见[读卡接口](reader-process.md)；真实读卡器仍需实机验收，不能启用 mock 代替。
 
 安装包不包含真实身份参数。无 `client-config.json` 的首次启动在客户端内完成身份配置，然后手动配置服务器连接与读卡器；已有有效配置继续直接进入正常界面。配置文件仅在缺失时由首次配置创建，显式指定 `CYEZ_CLIENT_CONFIG` 时不自动创建。具体字段和路径见[运行说明](operations.md)。
 

@@ -1,5 +1,7 @@
 # 运行、部署与升级
 
+2026-11-05 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.3`），仅打包串口和 ACR1552U 读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。
+
 2026-11-05：内置 Concard SQL Server 接入已经实现，部署/升级前准备新的服务端加密密钥并运行 `003-provider-config` 迁移。教师端在“设置 → 校园数据源”一次性提交完整新配置。固定只读取卡号、姓名、班级；表内账号不使用。详细字段、单向边界、密钥与命令见[Concard 接入](campus-sqlserver.md)。下文外置 module 仍是可选兼容路径，不是本次 SQL 接入的前置。
 
 2026-10-31 修订：生产不再预置学生，校园 API 成功查询时自动建立或刷新本地缓存。下文 `seed` 示例仅作为集成测试或旧库兼容工具；生产 CLI 已拒绝 `seed`。运行既有服务时先执行新增的 `002-student-cache` ORM 迁移和 `002-student-cache-insert` 权限迁移，再重建 API。不得删除卷；真实 API 的未找到/拒绝响应仍待 TBD-02 确认。
@@ -25,7 +27,7 @@ docker compose --env-file .env.integration up -d
 docker compose --env-file .env.integration ps
 ```
 
-集成 seed 仅用于测试或旧库兼容检查，不是启动前置；若运行，须使用 `migrate` 服务的迁移数据库角色。`api` 运行角色可在 provider 成功后新增学生缓存，不提供任意导入接口。教师端先执行 `corepack yarn build:readers` 和 `corepack yarn build:client`，设置 `$env:CYEZ_CLIENT_CONFIG = (Resolve-Path config/client.integration.json).Path` 后运行 `corepack yarn start:client`；也可运行 `corepack yarn package:win` 后启动 `release/win-unpacked/图书馆使用登记.exe`。应用设置页按 `runtime/integration-connection.json` 输入 IP、端口、指纹和共享账号。Electron 会自动启动 Rust UID 输入窗口，输入 `00000001` 并点击 Send scan；也可在设置/读卡器里覆盖选择串口进程或外部进程。详情见[读卡进程协议](reader-process.md)。测试卡按钮仅在开发/集成客户端出现；生产客户端配置拒绝 mock，生产服务端配置拒绝 fake provider。
+集成 seed 仅用于测试或旧库兼容检查，不是启动前置；若运行，须使用 `migrate` 服务的迁移数据库角色。`api` 运行角色可在 provider 成功后新增学生缓存，不提供任意导入接口。教师端先执行 `corepack yarn build:readers` 和 `corepack yarn build:client:integration`，设置 `$env:CYEZ_CLIENT_CONFIG = (Resolve-Path config/client.integration.json).Path` 后运行 `corepack yarn start:client`。应用设置页按 `runtime/integration-connection.json` 输入 IP、端口、指纹和共享账号。Electron 会自动启动 Rust UID 输入窗口，输入 `00000001` 并点击 Send scan；也可在设置/读卡器里覆盖选择串口进程或外部进程。详情见[读卡进程协议](reader-process.md)。测试卡按钮仅在开发/集成构建出现；正式安装包拒绝集成客户端配置，生产服务端配置拒绝 fake provider。
 
 日常开发在 `record-only/` 运行 `corepack yarn dev` 即可：自动增量构建 Rust mock、准备共享包并启动 Electron/Vite。默认使用集成配置和独立的 `runtime/teacher-dev` 数据目录（可用 `CYEZ_CLIENT_CONFIG` / `CYEZ_USER_DATA` 覆盖）。React 与客户端共享源码修改自动热更新，main/preload 修改自动重建并重启/刷新；修改 Rust 后重新运行 `dev` 即自动增量编译。首次安装依赖仍需 `corepack yarn install --immutable`。后端沿用上面的 Compose 启动方式，开发脚本不会创建数据库或预置数据。
 
@@ -39,12 +41,14 @@ corepack yarn typecheck
 corepack yarn format:check
 corepack yarn test:coverage:server
 corepack yarn test:coverage:client
-corepack yarn build
+corepack yarn build:server
+corepack yarn build:client:integration
 corepack yarn test:integration:client
 corepack yarn package:win
+corepack yarn test:release:client
 ```
 
-服务端集成测试需要独立真实 PostgreSQL，默认 `postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test`；可用 `TEST_DATABASE_URL` 覆盖。测试会新建随机数据库并迁移，所用账号须有 `CREATEDB`。打包端到端联调需先完成上述 Compose 和 Windows 包，无需 seed，再设置 `COMPOSE_E2E=1`、`TEST_TEACHER_USERNAME`、`TEST_TEACHER_PASSWORD` 与 `COMPOSE_HTTPS_PORT`，运行 `corepack yarn test:integration:client --grep '打包 Electron'`。此入口只用于隔离测试部署，绝不指向生产。
+服务端集成测试需要独立真实 PostgreSQL，默认 `postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test`；可用 `TEST_DATABASE_URL` 覆盖。测试会新建随机数据库并迁移，所用账号须有 `CREATEDB`。Compose 端到端联调先完成上述 Compose、`build:readers` 和 `build:client:integration`，无需 seed，不设置 `CYEZ_ELECTRON_EXECUTABLE`；再设置 `COMPOSE_E2E=1`、`TEST_TEACHER_USERNAME`、`TEST_TEACHER_PASSWORD` 与 `COMPOSE_HTTPS_PORT`，运行 `corepack yarn test:integration:client --grep '集成 Electron 连接 Compose'`。正式 exe 由 `test:release:client` 单独验收。测试入口只用于隔离测试部署，绝不指向生产。
 
 ## 生产接入
 

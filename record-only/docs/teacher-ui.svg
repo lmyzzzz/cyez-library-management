@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2760" viewBox="0 0 1800 2760" role="img" aria-labelledby="title desc">
-<title id="title">06 · 教师界面：使用登记与设置</title><desc id="desc">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口，设置内含连接、设备、历史和诊断。</desc>
+<title id="title">06 · 教师界面：使用登记与设置</title><desc id="desc">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口；正式包移除诊断与测试入口。</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
 <rect width="1800" height="2760" fill="#ffffff"/>
 <rect x="50" y="145" width="1700" height="520" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -17,7 +17,7 @@
 <rect x="1220" y="1900" width="530" height="555" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1485.0" y="2183.8" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d"></text>
 <text x="43" y="51.5" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="600" fill="#172b4d">06 · 教师界面：使用登记与设置</text>
-<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口，设置内含连接、设备、历史和诊断。</text>
+<text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口；正式包移除诊断与测试入口。</text>
 <text x="900.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">AppShell · 两个并列入口 · 共享业务账号，无管理员或机房权限</text>
 <rect x="80" y="225" width="250" height="80" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="205.0" y="273.05" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#172b4d">使用登记</text>
@@ -37,7 +37,7 @@
 <text x="695.0" y="547.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">全系统设备均可用，标签不授予权限</text>
 <rect x="1060" y="345" width="650" height="245" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1385.0" y="402.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设置 · 内部页签</text>
-<text x="1385.0" y="431.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连接配置   |   设备管理   |   历史记录   |   诊断</text>
+<text x="1385.0" y="431.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连接配置 | 读卡器 | 校园数据源 | 设备 | 历史</text>
 <text x="1385.0" y="460.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连接：IP / pin / 账号密码 / 本地保存</text>
 <text x="1385.0" y="489.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">设备：新增、修改、删除，历史引用保留</text>
 <text x="1385.0" y="518.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">历史：漂亮、清晰的只读分页列表</text>
@@ -147,7 +147,7 @@
 <text x="1485.0" y="2380.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Modal 内刷卡仍只 Toast</text>
 <rect x="50" y="2530" width="1700" height="115" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="900.0" y="2565.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">cyez-ui 主题 / 间距 / 圆角 / 清晰字级；状态不只靠颜色，窄窗口筛选换行与表格横向滚动</text>
-<text x="900.0" y="2594.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">诊断只显示本机连接、读卡、版本与待传数量；无服务器系统日志、密钥、任意表或管理权限</text>
+<text x="900.0" y="2594.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">正式包无调试入口；保留离线、容量与待确认提示；无服务器日志、密钥或任意表访问</text>
 <text x="900.0" y="2623.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">TBD-03 读卡硬件；TBD-05 保留期；TBD-06 Windows 发布材料；UI 使用授权已确认</text>
 <rect x="40" y="2688" width="1720" height="48" rx="10" fill="#e8effa" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="2717.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">本图是正式交互结构，不是已实现截图。所有请求经 pin 校验 HTTPS；历史页、设备页与手动结束不调用校园 API。</text>

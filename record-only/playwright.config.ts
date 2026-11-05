@@ -1,6 +1,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/client/integration",
+  testIgnore: "**/release.test.ts",
   workers: 1,
   fullyParallel: false,
   timeout: 60000,

@@ -1,5 +1,7 @@
 # 服务端与客户端测试设计
 
+2026-11-05 发布检查：客户端 CI 先用 `build:client:integration` 运行原业务回归，再用 `package:win` 重建正式安装包，最后执行 `test:release:client`。正式包验收须实际读取 asar/资源清单确认无测试进程、测试入口和应用 source map，启动真实 exe 验证首次配置、TLS 登录、设备管理、校园设置，以及 DevTools/测试 IPC/运行环境变量无法开启调试入口。开发测试用例不得算作正式包通过。
+
 2026-11-05 增补：必须验证 SQL Server 真实三列权限/TLS/中文 varchar、无匹配/多行/空姓名拒绝；PostgreSQL 配置原子覆盖/密文/重启恢复；拒绝配置 GET/PATCH；Electron 表单、IPC 输入发送后清空，磁盘无配置正文。入口及真实 SQL 与显式替身的区别见[Concard 测试入口](campus-sqlserver.md#真实驱动测试入口)。外部固定 SQL 查询与独立 SQL Server fixture 是内部 PG ORM 约束之外的接入测试；不触及学校真实数据库。
 
 2026-10-31 覆盖修订：S-I-06/07/12/18 与 E2E 改按“API 权威、本地仅缓存”验收。空学生表首次有效刷卡须调用 provider 并创建缓存；再次刷卡须调用 provider 并覆盖缓存；provider 拒绝或故障不得插入、覆盖或用旧缓存放行；错配 ID 仍不得查询 provider；历史/列表只读缓存；并发旧响应不得覆盖新资料。旧文中“预置合法学生、未知本地 ID/停用拒绝且不查询 provider”的断言已撤回。集成 seed 只用于旧数据兼容测试，不是生产前置。

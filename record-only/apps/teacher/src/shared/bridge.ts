@@ -77,12 +77,18 @@ export const actions = {
   batchConfirm: batchConfirmSchema.omit({ requestId: true }),
   cancelPreview: z.object({ previewId: uuid }).strict(),
   uiError: z.object({}).strict(),
-  integrationScan: z
-    .object({ fixture: z.enum(["allowed-1", "allowed-2", "unknown"]) })
-    .strict(),
+  ...(__CYEZ_TEST_FEATURES__
+    ? {
+        integrationScan: z
+          .object({ fixture: z.enum(["allowed-1", "allowed-2", "unknown"]) })
+          .strict(),
+      }
+    : {}),
 } as const;
 export type ActionName = keyof typeof actions;
-export type ActionInput<K extends ActionName> = z.input<(typeof actions)[K]>;
+export type ActionInput<K extends ActionName> = z.input<
+  NonNullable<(typeof actions)[K]>
+>;
 export interface LocalStatus {
   identityConfigured: boolean;
   connectionConfigured: boolean;

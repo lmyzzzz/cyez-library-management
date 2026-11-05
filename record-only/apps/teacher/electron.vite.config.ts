@@ -2,8 +2,10 @@ import { defineConfig } from "electron-vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   const development = command === "serve";
+  const testFeatures = development || mode === "integration";
+  const define = { __CYEZ_TEST_FEATURES__: JSON.stringify(testFeatures) };
   const fromRoot = (path: string) =>
     fileURLToPath(new URL(`../../${path}`, import.meta.url));
   if (development) {
@@ -24,8 +26,11 @@ export default defineConfig(({ command }) => {
     : {};
   return {
     main: {
+      define,
       resolve: { alias },
       build: {
+        sourcemap: false,
+        minify: !testFeatures,
         externalizeDeps: {
           exclude: [
             "@record/protocol",
@@ -37,7 +42,10 @@ export default defineConfig(({ command }) => {
       },
     },
     preload: {
+      define,
       build: {
+        sourcemap: false,
+        minify: !testFeatures,
         externalizeDeps: { exclude: ["@series/electron"] },
         rollupOptions: {
           input: "src/preload/index.ts",
@@ -46,6 +54,7 @@ export default defineConfig(({ command }) => {
       },
     },
     renderer: {
+      define,
       resolve: { alias },
       server: { host: "127.0.0.1" },
       plugins: [
@@ -63,7 +72,10 @@ export default defineConfig(({ command }) => {
           },
         },
       ],
-      build: { rollupOptions: { input: "src/renderer/index.html" } },
+      build: {
+        sourcemap: false,
+        rollupOptions: { input: "src/renderer/index.html" },
+      },
     },
   };
 });

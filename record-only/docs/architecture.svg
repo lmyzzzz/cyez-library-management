@@ -20,9 +20,9 @@
 <text x="43" y="91.95" text-anchor="start" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">当前实施范围：教师 Electron + Docker 服务端；设备仅是登记资源。箭头表示调用或数据流，虚线表示日志归集。</text>
 <text x="300.0" y="185.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">教师 Windows · 可有多个客户端</text>
 <rect x="75" y="225" width="450" height="120" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="300.0" y="264.09999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">独立读卡进程 · Rust mock / 硬件</text>
+<text x="300.0" y="264.09999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">独立读卡进程 · 串口 / PC/SC / 外部</text>
 <text x="300.0" y="291.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">stdin/stdout JSON Lines v1 · 4 字节 UID</text>
-<text x="300.0" y="319.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Wiegand-34；TBD-03：真实硬件验收</text>
+<text x="300.0" y="319.2" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">mock 仅开发；TBD-03：真实硬件验收</text>
 <rect x="75" y="420" width="450" height="150" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="300.0" y="460.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">React renderer + cyez-ui</text>
 <text x="300.0" y="487.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">上：使用登记；下：设置</text>

@@ -10,7 +10,7 @@
 
 ## 通道与消息
 
-main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 启动；外部进程路径必须是绝对 `.exe`，内置 mock/serial 使用构建产物或打包资源。进程不监听网络或公共命名管道。stdout 仅输出协议；UTF-8 JSON，每条一行并立即 flush，LF 分隔（接收兼容 CRLF），一行不含 LF 最多 256 字节。消息可跨多个 pipe chunk，也可多条合并；不以 chunk 边界当帧边界。字段严格校验，未知字段/类型/版本不忽略。
+main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 启动；外部进程路径必须是绝对 `.exe`，内置 serial/acr1552 使用构建产物或打包资源，mock 仅用于开发/集成构建。进程不监听网络或公共命名管道。stdout 仅输出协议；UTF-8 JSON，每条一行并立即 flush，LF 分隔（接收兼容 CRLF），一行不含 LF 最多 256 字节。消息可跨多个 pipe chunk，也可多条合并；不以 chunk 边界当帧边界。字段严格校验，未知字段/类型/版本不忽略。
 
 | 方向 | 消息 | 语义 |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ Windows、Rust 1.94.0（MSVC 工具链）和 Visual Studio C++ Build Tools：
 
 ```powershell
 corepack yarn build:reader:mock
-corepack yarn build:client
+corepack yarn build:client:integration
 $env:CYEZ_CLIENT_CONFIG = (Resolve-Path config/client.integration.json).Path
 corepack yarn start:client
 ```
@@ -69,6 +69,6 @@ corepack yarn start:client
 {"readerProcess":{"kind":"external","executable":"C:/Program Files/cyez-library-reader/reader.exe"}}
 ```
 
-`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。安装包将三个 Rust 进程放在 `resources/readers/`；其中 mock 只可在显式开发/集成配置使用。
+`environment:"production"` 拒绝 mock 配置及自报 mock 的外部进程。`identity.uidByteLengths` 固定为 `[4]`，盐/issuer/hashVersion 必须与服务端一致。旧 `readerModule`/JavaScript 动态加载接口已移除，需更新配置。正式安装包仅将 serial/acr1552 两个 Rust 进程放在 `resources/readers/`，不含 mock，也不能通过运行配置或环境变量启用测试功能。mock 只可在显式开发/集成构建使用。
 
 TBD-03 已获 ACR1552U-M1 型号及其 PC/SC 获取 UID 的正式接口，仍缺目标机器驱动/WinSCard、实际发卡样本、与 Wiegand-34 数据位和校园 API 原卡号的对照及实物刷卡验收。Rust mock 和 PC/SC 单元测试不证明真实硬件已验证；校园 API 对原 UID 的转换仍依 TBD-02，不编造硬件/校园协议。

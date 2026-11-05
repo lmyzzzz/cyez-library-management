@@ -1,6 +1,7 @@
 import { aliases } from "./vitest.aliases.js";
 import { defineConfig } from "vitest/config";
 export default defineConfig({
+  define: { __CYEZ_TEST_FEATURES__: "true" },
   resolve: { alias: aliases },
   test: {
     include: ["tests/client/unit/**/*.test.{ts,tsx}"],

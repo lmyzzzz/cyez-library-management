@@ -116,9 +116,10 @@ jobs:
       - run: yarn build:reader:acr1552
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
-      - run: yarn build:client
-      - run: yarn package:win
+      - run: yarn build:client:integration
       - run: yarn test:integration:client
+      - run: yarn package:win
+      - run: yarn test:release:client
         env:
           CYEZ_ELECTRON_EXECUTABLE: release/win-unpacked/图书馆使用登记.exe
       - uses: actions/upload-artifact@v4
@@ -128,4 +129,6 @@ jobs:
           path: |
             record-only/coverage/client-unit
             record-only/test-results/electron
+            record-only/test-results/release
+            record-only/test-results/client-release.xml
             record-only/release/*-setup.exe

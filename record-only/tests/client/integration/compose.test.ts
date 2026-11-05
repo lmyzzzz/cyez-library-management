@@ -9,16 +9,16 @@ test.skip(
   "Requires explicit integration Compose stack",
 );
 
-test("打包 Electron 连接 Compose gateway：登记、结束、只读历史", async () => {
+test("集成 Electron 连接 Compose gateway：登记、结束、只读历史", async () => {
   const username = process.env.TEST_TEACHER_USERNAME;
   const password = process.env.TEST_TEACHER_PASSWORD;
   if (!username || !password) throw Error("TEST_TEACHER_CREDENTIALS_REQUIRED");
   const cert = new X509Certificate(
     await readFile(resolve("secrets/server.crt")),
   );
-  const userData = await mkdtemp(join(tmpdir(), "cyez-packaged-e2e-"));
+  const userData = await mkdtemp(join(tmpdir(), "cyez-compose-e2e-"));
   const app = await electron.launch({
-    executablePath: resolve("release/win-unpacked/图书馆使用登记.exe"),
+    args: [resolve("apps/teacher/out/main/index.js")],
     env: {
       ...process.env,
       CYEZ_USER_DATA: userData,

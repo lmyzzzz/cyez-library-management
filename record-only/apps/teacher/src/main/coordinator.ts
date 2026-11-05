@@ -67,7 +67,7 @@ export class Coordinator {
       ...entry,
       logId: randomUUID(),
       atMs: Date.now(),
-      appVersion: "0.1.2",
+      appVersion: "0.1.3",
     });
   }
   async configure(connection: Connection) {
@@ -102,7 +102,7 @@ export class Coordinator {
       pendingOtherOrigins: metrics.pendingCommands - current,
       reader: this.readerState,
       environment: this.environment,
-      version: "0.1.2",
+      version: "0.1.3",
       lastSuccessMs: this.lastSuccessMs,
     };
   }
@@ -424,6 +424,22 @@ export class Coordinator {
     >;
     if (action === "login" && input && typeof input === "object")
       (input as { password: string }).password = "";
+    if (__CYEZ_TEST_FEATURES__ && action === "integrationScan") {
+      if (this.environment === "production")
+        throw new ApiError("INTEGRATION_DISABLED", 403);
+      await this.reader.accept(
+        Buffer.from(
+          data.fixture === "allowed-1"
+            ? "00000001"
+            : data.fixture === "allowed-2"
+              ? "00000002"
+              : "ffffffff",
+          "hex",
+        ),
+        "integration",
+      );
+      return { ok: true };
+    }
     switch (action) {
       case "configure":
         return this.configure(data as Connection);
@@ -467,21 +483,6 @@ export class Coordinator {
           level: "error",
           code: "UI_ERROR",
         });
-        return { ok: true };
-      case "integrationScan":
-        if (this.environment === "production")
-          throw new ApiError("INTEGRATION_DISABLED", 403);
-        await this.reader.accept(
-          Buffer.from(
-            data.fixture === "allowed-1"
-              ? "00000001"
-              : data.fixture === "allowed-2"
-                ? "00000002"
-                : "ffffffff",
-            "hex",
-          ),
-          "integration",
-        );
         return { ok: true };
     }
     const sdk = this.requireSdk();

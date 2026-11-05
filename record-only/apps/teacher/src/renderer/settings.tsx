@@ -211,7 +211,7 @@ export function ConnectionForm({
       {message && <Banner tone="success">{message}</Banner>}
       <div className="actions">
         <Button disabled={busy} onClick={() => void run("test")}>
-          测试连接
+          检查连接
         </Button>
         <Button
           variant="primary"
@@ -493,7 +493,7 @@ export function ReaderSettings({
           <option value="serial">内置串口进程</option>
           <option value="acr1552">ACR1552U-M1 (PC/SC)</option>
           <option value="external">外部读卡进程</option>
-          {status.environment !== "production" && (
+          {__CYEZ_TEST_FEATURES__ && status.environment !== "production" && (
             <option value="mock">手动 UID 测试窗口</option>
           )}
         </select>

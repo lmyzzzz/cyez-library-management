@@ -32,7 +32,7 @@
 <text x="1340.0" y="436.675" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">record-only/apps/teacher · Electron / React</text>
 <text x="1340.0" y="467.125" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">依赖 protocol + client-sdk + ui</text>
 <text x="1340.0" y="497.575" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">renderer：页面；preload：受限桥；main：子进程/网络</text>
-<text x="1340.0" y="528.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">main spawn apps/reader-mock；Cargo.lock 锁定原生依赖</text>
+<text x="1340.0" y="528.025" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">main 启动原生读卡进程；正式包仅含串口 / PC/SC</text>
 <text x="155.0" y="705.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">共享包</text>
 <text x="155.0" y="731.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">workspace:^</text>
 <rect x="85" y="755" width="385" height="170" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>

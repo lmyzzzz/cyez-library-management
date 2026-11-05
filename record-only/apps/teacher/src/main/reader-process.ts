@@ -33,7 +33,8 @@ export function resolveReaderExecutable(
   packaged: boolean,
 ): string {
   if (config.kind === "mock") {
-    if (environment === "production") throw new Error("MOCK_READER_FORBIDDEN");
+    if (!__CYEZ_TEST_FEATURES__ || environment === "production")
+      throw new Error("MOCK_READER_FORBIDDEN");
     return packaged
       ? resolve(resourcesPath, "readers", "cyez-reader-mock.exe")
       : resolve(appPath, "../../target/release/cyez-reader-mock.exe");

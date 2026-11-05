@@ -33,7 +33,7 @@ def overview():
              '当前实施范围：教师 Electron + Docker 服务端；设备仅是登记资源。箭头表示调用或数据流，虚线表示日志归集。', 1800, 1660)
     panel(p, 'teacher', 40, 145, 520, 1140, '教师 Windows · 可有多个客户端', GREEN)
     card(p, 'reader', 75, 225, 450, 120,
-         '独立读卡进程 · Rust mock / 硬件\nstdin/stdout JSON Lines v1 · 4 字节 UID\nWiegand-34；TBD-03：真实硬件验收', YELLOW)
+         '独立读卡进程 · 串口 / PC/SC / 外部\nstdin/stdout JSON Lines v1 · 4 字节 UID\nmock 仅开发；TBD-03：真实硬件验收', YELLOW)
     card(p, 'renderer', 75, 420, 450, 150,
          'React renderer + cyez-ui\n上：使用登记；下：设置\n设备编辑 / 只读历史 / 连接配置\n无原 UID、密码/token 或数据库权限')
     card(p, 'preload', 75, 640, 450, 95,
@@ -281,7 +281,7 @@ def docker():
 
 def teacher_ui():
     p = page('teacher-ui', '06 · 教师界面：使用登记与设置',
-             '结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口，设置内含连接、设备、历史和诊断。',1800,2760)
+             '结构线框与交互规格；使用 cyez-ui 统一主题。左侧只有上下两个一级入口；正式包移除诊断与测试入口。',1800,2760)
     panel(p,'shell',50,145,1700,520,'AppShell · 两个并列入口 · 共享业务账号，无管理员或机房权限',BLUE)
     card(p,'nav-top',80,225,250,80,'使用登记',GREEN,23)
     card(p,'nav-bottom',80,545,250,80,'设置',PURPLE,23)
@@ -290,7 +290,7 @@ def teacher_ui():
     card(p,'business',380,345,630,245,
          '使用登记\n使用中 / 未使用，搜索 / 标签筛选\n设备、学生、时间、备注、手动结束\n结束选中… / 结束全部记录…\n唯一允许刷卡跳转的设备列表\n全系统设备均可用，标签不授予权限',size=20)
     card(p,'settings',1060,345,650,245,
-         '设置 · 内部页签\n连接配置   |   设备管理   |   历史记录   |   诊断\n连接：IP / pin / 账号密码 / 本地保存\n设备：新增、修改、删除，历史引用保留\n历史：漂亮、清晰的只读分页列表\n本页任何刷卡都只 Toast，不跳转、不查 API',size=20)
+         '设置 · 内部页签\n连接配置 | 读卡器 | 校园数据源 | 设备 | 历史\n连接：IP / pin / 账号密码 / 本地保存\n设备：新增、修改、删除，历史引用保留\n历史：漂亮、清晰的只读分页列表\n本页任何刷卡都只 Toast，不跳转、不查 API',size=20)
     panel(p,'connect',50,760,800,400,'设置 / 连接配置',GREEN)
     card(p,'connection-fields',80,840,740,140,
          '服务端 IP   [                 ]    端口 [443]\n叶证书 SHA-256 指纹   [规范化的 64 位十六进制]\n账号 [          ]   密码 [••••••••]   □ 记住登录',size=21)
@@ -329,7 +329,7 @@ def teacher_ui():
     card(p,'batch-card',1245,2200,480,210,
          '批量 Modal：固定列表 + 数量 + 范围\n公共备注初始为空，提交只追加一次\n结束全部 = 全系统活动记录\n单批冲突整体回滚；分批结果透明\n已结束历史不可修改或删除\nModal 内刷卡仍只 Toast',size=19)
     note(p,'visual',50,2530,1700,115,
-         'cyez-ui 主题 / 间距 / 圆角 / 清晰字级；状态不只靠颜色，窄窗口筛选换行与表格横向滚动\n诊断只显示本机连接、读卡、版本与待传数量；无服务器系统日志、密钥、任意表或管理权限\nTBD-03 读卡硬件；TBD-05 保留期；TBD-06 Windows 发布材料；UI 使用授权已确认',YELLOW,20)
+         'cyez-ui 主题 / 间距 / 圆角 / 清晰字级；状态不只靠颜色，窄窗口筛选换行与表格横向滚动\n正式包无调试入口；保留离线、容量与待确认提示；无服务器日志、密钥或任意表访问\nTBD-03 读卡硬件；TBD-05 保留期；TBD-06 Windows 发布材料；UI 使用授权已确认',YELLOW,20)
     caption(p,'本图是正式交互结构，不是已实现截图。所有请求经 pin 校验 HTTPS；历史页、设备页与手动结束不调用校园 API。')
     return p
 
@@ -342,7 +342,7 @@ def workspaces():
     card(p,'server-app',60,390,800,170,
          'record-only/apps/server · Fastify / Sequelize\nprotocol + domain；共享账号、刷卡刷新、占用事务\nAPI 成功后新增/覆盖缓存；设备编辑 / 只读历史\n通过 ORM 操作 PostgreSQL，不手写 SQL',GREEN,21)
     card(p,'teacher-app',940,390,800,170,
-         'record-only/apps/teacher · Electron / React\n依赖 protocol + client-sdk + ui\nrenderer：页面；preload：受限桥；main：子进程/网络\nmain spawn apps/reader-mock；Cargo.lock 锁定原生依赖',GREEN,21)
+         'record-only/apps/teacher · Electron / React\n依赖 protocol + client-sdk + ui\nrenderer：页面；preload：受限桥；main：子进程/网络\nmain 启动原生读卡进程；正式包仅含串口 / PC/SC',GREEN,21)
     route(p,'root-server','root','server-app',[(460,290),(460,390)])
     route(p,'root-teacher','root','teacher-app',[(1340,290),(1340,390)])
     panel(p,'packages',60,670,1680,300,'本项目共享 packages · 边界与运行时 schema 比相同语言更重要',PURPLE)

@@ -62,7 +62,7 @@ const messages: Record<string, string> = {
   CLIENT_CONFIG_EXISTS: "配置文件已存在，请重新启动客户端。",
   CLIENT_CONFIG_SAVE_FAILED: "无法保存本机配置，请检查用户数据目录。",
   READER_CHANGE_BUSY: "正在切换读卡进程，请稍候。",
-  MOCK_READER_FORBIDDEN: "生产环境不能使用测试读卡器。",
+  MOCK_READER_FORBIDDEN: "不支持此读卡进程，请重新选择。",
   CONCURRENT_CONFLICT: "发生并发冲突，请刷新并重新确认。",
   INPUT_INVALID: "输入不符合要求，请检查字段。",
   TAG_VERSION_CONFLICT: "标签已变化，请刷新后重试。",
@@ -70,10 +70,7 @@ const messages: Record<string, string> = {
 };
 export function errorText(error: unknown) {
   const code = error instanceof Error ? error.message : String(error);
-  return (
-    messages[code] ??
-    `操作失败（${/^[A-Z_]+$/.test(code) ? code : "REQUEST_FAILED"}），请重试或查看诊断。`
-  );
+  return messages[code] ?? "操作未完成，请重试；如仍失败，请联系维护人员。";
 }
 export function LibraryIcon(props: SVGProps<SVGSVGElement>) {
   return (

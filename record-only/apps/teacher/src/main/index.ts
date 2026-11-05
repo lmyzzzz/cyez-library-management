@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
@@ -27,6 +27,8 @@ const configSchema = z
   })
   .strict()
   .superRefine((v, c) => {
+    if (!__CYEZ_TEST_FEATURES__ && v.environment !== "production")
+      c.addIssue({ code: "custom", message: "PRODUCTION_CONFIG_REQUIRED" });
     if (v.environment === "production" && v.readerProcess?.kind === "mock")
       c.addIssue({ code: "custom", message: "MOCK_READER_FORBIDDEN" });
     if (
@@ -44,6 +46,7 @@ let interval: NodeJS.Timeout | undefined;
 let stopping = false;
 void app.whenReady().then(async () => {
   try {
+    if (!__CYEZ_TEST_FEATURES__) Menu.setApplicationMenu(null);
     const explicitConfig = process.env.CYEZ_CLIENT_CONFIG;
     const file =
       explicitConfig ?? join(app.getPath("userData"), "client-config.json");
@@ -73,6 +76,7 @@ void app.whenReady().then(async () => {
       frame: false,
       backgroundColor: "#fffaf3",
       webPreferences: {
+        devTools: __CYEZ_TEST_FEATURES__,
         preload: join(location, "../preload/index.cjs"),
         sandbox: true,
         contextIsolation: true,
@@ -85,6 +89,7 @@ void app.whenReady().then(async () => {
     controls.bind(window);
     let renderer = pathToFileURL(join(location, "../renderer/index.html")).href;
     if (
+      __CYEZ_TEST_FEATURES__ &&
       !app.isPackaged &&
       environment !== "production" &&
       process.env.NODE_ENV === "development" &&
@@ -175,13 +180,14 @@ void app.whenReady().then(async () => {
           },
           (mock) => {
             if (adapter !== candidate) return;
-            coordinator!.readerState = mock
-              ? "Rust mock：Wiegand-34 手动输入"
-              : choice.kind === "serial"
-                ? "串口读卡进程已连接"
-                : choice.kind === "acr1552"
-                  ? "ACR1552U-M1 读卡进程已连接"
-                  : "读卡进程已连接";
+            coordinator!.readerState =
+              __CYEZ_TEST_FEATURES__ && mock
+                ? "Rust mock：Wiegand-34 手动输入"
+                : choice.kind === "serial"
+                  ? "串口读卡进程已连接"
+                  : choice.kind === "acr1552"
+                    ? "ACR1552U-M1 读卡进程已连接"
+                    : "读卡进程已连接";
             if (!window.isDestroyed())
               window.webContents.send("library:event", { type: "changed" });
           },

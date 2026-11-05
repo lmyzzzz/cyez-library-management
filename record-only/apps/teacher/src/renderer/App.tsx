@@ -536,12 +536,14 @@ export function App() {
                 <small>数据更新 {timestamp(lastUpdated)}</small>
               </div>
             </div>
-            {status?.environment !== "production" && status && (
-              <Banner tone="warning">
-                开发 / 集成环境 ·
-                当前使用测试适配器与测试数据；真实校园接口、读卡器和发布验收尚待完成。
-              </Banner>
-            )}
+            {__CYEZ_TEST_FEATURES__ &&
+              status?.environment !== "production" &&
+              status && (
+                <Banner tone="warning">
+                  开发 / 集成环境 ·
+                  当前使用测试适配器与测试数据；真实校园接口、读卡器和发布验收尚待完成。
+                </Banner>
+              )}
             {status?.authenticated && !status.online && (
               <Banner tone="error">
                 连接已中断，当前显示数据已过期。禁止新业务写入，未确认提交将在重新登录后恢复。
@@ -599,7 +601,9 @@ export function App() {
                     ["provider", "校园数据源"],
                     ["devices", "设备管理"],
                     ["history", "历史记录"],
-                    ["diagnostics", "诊断"],
+                    ...(__CYEZ_TEST_FEATURES__
+                      ? [["diagnostics", "诊断"]]
+                      : []),
                   ].map(([id, name]) => (
                     <Button
                       key={id}
@@ -638,7 +642,7 @@ export function App() {
                     onModal={setChildModal}
                   />
                 )}
-                {tab === "diagnostics" && (
+                {__CYEZ_TEST_FEATURES__ && tab === "diagnostics" && (
                   <section className="panel">
                     <h2>本机诊断</h2>
                     <dl className="summary">
@@ -669,9 +673,17 @@ export function App() {
             ) : (
               <>
                 {table}
-                {status?.environment !== "production" &&
+                {__CYEZ_TEST_FEATURES__ &&
+                  status?.environment !== "production" &&
                   status?.authenticated && (
-                    <div className="integration-controls">
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                        fontSize: 11,
+                      }}
+                    >
                       <span>集成测试读卡器</span>
                       <Button
                         onClick={() =>

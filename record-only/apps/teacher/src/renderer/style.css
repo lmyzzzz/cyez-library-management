@@ -510,13 +510,6 @@ legend {
 .history-filters {
   align-items: flex-end;
 }
-.integration-controls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 11px;
-  color: #95825b;
-}
 .skeleton {
   display: block;
   height: 24px;

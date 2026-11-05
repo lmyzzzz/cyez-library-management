@@ -1,5 +1,22 @@
 # 产品验证报告
 
+## 2026-11-05 教师端 0.1.3 发布清理
+
+正式构建在编译阶段移除开发提示、测试卡按钮/IPC、手动 UID 选项和诊断面板；NSIS 资源只包含串口与 ACR1552U 进程。禁用 DevTools 和默认 Electron 菜单，拒绝非 production 客户端配置，运行环境变量不能打开测试功能。保留必要的连接、读卡、容量、断线与待确认提交提示以及持久化脱敏日志。开发使用 `yarn dev` 或显式 `build:client:integration`。
+
+| 检查 | 本次实际结果 |
+| --- | --- |
+| 依赖与静态检查 | `yarn install --immutable --mode=skip-build`、TypeScript、Prettier 通过；标准打包随后完成 SQLite 原生依赖重建 |
+| 客户端单元/组件 | 60 项通过；覆盖率 statements 88.96%、branches 84.45%、functions 87.31%、lines 89.77%，门禁通过 |
+| Electron 集成构建 | 11 项通过；Compose 专用用例在默认套件显式跳过。使用真实 Electron、PostgreSQL、SQLite 和 TLS；本次 SQL 配置用例使用显式替身，未重跑真实 SQL Server fixture |
+| Compose 专用回归 | 改为启动显式集成构建后单独执行 1 项通过：Electron → HTTPS gateway → API → PostgreSQL 的登记、结束、只读历史；使用现有隔离集成服务及测试资料 |
+| 正式 exe 验收 | 2 项通过：读取实际 asar/资源清单，无 mock exe、测试动作/文案或应用源码映射；启动实际 `release/win-unpacked/图书馆使用登记.exe`，完成首次配置、TLS 登录与设备显示，验证设置页无诊断/mock、测试 IPC 被拒绝，强行调用 `openDevTools` 仍未打开，默认菜单为空；检查主界面与校园设置截图 |
+| Windows 发布构建 | 标准 `corepack yarn package:win` 成功；`release/cyez-library-0.1.3-x64-setup.exe`，SHA-256 `e3e196585f20dd608bc593d8e5c1ff0ecc789583109b17ccc7acfa9a57310f9a`，Authenticode `NotSigned` |
+
+CI 已拆分集成构建业务回归与正式包验收；发布检查入口为 `yarn test:release:client`，输出 `test-results/client-release.xml` 和界面截图。本次未修改服务端业务逻辑，未重跑 Docker 镜像构建或学校 SQL Server/真实读卡器验收。学校连接资料、实卡对照、Windows 签名与目标机器安装升级等待验收项继续保留；以上实际 exe 验证不等于已在另一台机器执行 NSIS 安装或升级。
+
+## 历次验证记录
+
 2026-10-29，Windows 11 / WSL Linux Docker Engine，Node 22、Yarn 4.10.3、PostgreSQL 17。测试仅使用随机凭证、测试证书和集成学生，无生产资料。此报告区分真实基础设施联调与受控替身；不代表目标学校的实机验收。
 
 | 项目 | 实际结果 |

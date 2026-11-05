@@ -281,7 +281,7 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.change(screen.getByLabelText("叶证书 SHA-256 指纹"), {
       target: { value: "cd".repeat(32) },
     });
-    fireEvent.click(screen.getByRole("button", { name: "测试连接" }));
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("testConnection", {}),
     );
@@ -324,7 +324,7 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.click(screen.getByRole("button", { name: "清除保存项" }));
     await waitFor(() => expect(call).toHaveBeenCalledWith("clearSaved", {}));
     call.mockRejectedValueOnce(Error("PIN_INVALID"));
-    fireEvent.click(screen.getByRole("button", { name: "测试连接" }));
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
     await waitFor(() => expect(screen.getByText(/64 位 SHA-256/)).toBeTruthy());
     expect(refresh).toHaveBeenCalled();
   });
