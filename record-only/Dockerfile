@@ -19,6 +19,7 @@ COPY packages/domain ./packages/domain
 RUN yarn build:server && yarn workspaces focus @record/server --production
 
 FROM node:22.22.2-bookworm-slim@sha256:9f6d5975c7dca860947d3915877f85607946403fc55349f39b4bc3688448bb6e AS runtime
+LABEL org.opencontainers.image.source="https://github.com/lmyzzzz/cyez-library-management"
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /app/node_modules ./node_modules

@@ -67,8 +67,8 @@ jobs:
           owner="${GITHUB_REPOSITORY_OWNER,,}"
           for spec in \
             cyez-record-only:cyez-record-only-api \
-            cyez-record-db:cyez-record-only-db \
-            cyez-record-gateway:cyez-record-only-gateway; do
+            cyez-record-db:cyez-record-only-postgres17 \
+            cyez-record-gateway:cyez-record-only-https-gateway; do
             source="${spec%%:*}"
             target="${spec#*:}"
             image="ghcr.io/${owner}/${target}"
