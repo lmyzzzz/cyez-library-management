@@ -13,7 +13,7 @@
 | 正式 exe 验收 | 2 项通过：读取实际 asar/资源清单，无 mock exe、测试动作/文案或应用源码映射；启动实际 `release/win-unpacked/图书馆使用登记.exe`，完成首次配置、TLS 登录与设备显示，验证设置页无诊断/mock、测试 IPC 被拒绝，强行调用 `openDevTools` 仍未打开，默认菜单为空；检查主界面与校园设置截图 |
 | Windows 发布构建 | 标准 `corepack yarn package:win` 成功；`release/cyez-library-0.1.3-x64-setup.exe`，SHA-256 `e3e196585f20dd608bc593d8e5c1ff0ecc789583109b17ccc7acfa9a57310f9a`，Authenticode `NotSigned` |
 
-CI 已拆分集成构建业务回归与正式包验收；发布检查入口为 `yarn test:release:client`，输出 `test-results/client-release.xml` 和界面截图。本次未修改服务端业务逻辑，未重跑 Docker 镜像构建或学校 SQL Server/真实读卡器验收。学校连接资料、实卡对照、Windows 签名与目标机器安装升级等待验收项继续保留；以上实际 exe 验证不等于已在另一台机器执行 NSIS 安装或升级。
+CI 已拆分集成构建业务回归与正式包验收；发布检查入口为 `yarn test:release:client`，输出 `test-results/client-release.xml` 和界面截图。首次 CI 服务端检查通过；Windows 暴露原有集成用例写死 Electron 下载路径的问题，已改用 Playwright 的官方 Electron 解析并在 CI 显式执行 `install-electron`，适配全新机器的按需下载行为。本次未修改服务端业务逻辑，未在本机重跑 Docker 镜像构建或学校 SQL Server/真实读卡器验收。学校连接资料、实卡对照、Windows 签名与目标机器安装升级等待验收项继续保留；以上实际 exe 验证不等于已在另一台机器执行 NSIS 安装或升级。
 
 ## 历次验证记录
 

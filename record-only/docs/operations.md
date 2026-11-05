@@ -43,6 +43,7 @@ corepack yarn test:coverage:server
 corepack yarn test:coverage:client
 corepack yarn build:server
 corepack yarn build:client:integration
+corepack yarn workspace @record/teacher exec install-electron
 corepack yarn test:integration:client
 corepack yarn package:win
 corepack yarn test:release:client

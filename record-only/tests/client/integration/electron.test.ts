@@ -79,7 +79,7 @@ async function launch() {
   desktop = await electron.launch({
     executablePath: packagedExecutable
       ? resolve(packagedExecutable)
-      : resolve("node_modules/electron/dist/electron.exe"),
+      : undefined,
     args: packagedExecutable ? [] : [resolve("apps/teacher")],
     env: {
       ...process.env,
@@ -592,7 +592,7 @@ test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock"
   const setup = await electron.launch({
     executablePath: packagedExecutable
       ? resolve(packagedExecutable)
-      : resolve("node_modules/electron/dist/electron.exe"),
+      : undefined,
     args: packagedExecutable ? [] : [resolve("apps/teacher")],
     env: {
       ...process.env,
@@ -637,7 +637,7 @@ test("C-I-14: 空白安装可在应用内完成首次配置", async () => {
   const setup = await electron.launch({
     executablePath: packagedExecutable
       ? resolve(packagedExecutable)
-      : resolve("node_modules/electron/dist/electron.exe"),
+      : undefined,
     args: packagedExecutable ? [] : [resolve("apps/teacher")],
     env,
   });
@@ -706,7 +706,7 @@ test("C-I-14: 空白安装可在应用内完成首次配置", async () => {
     const reopened = await electron.launch({
       executablePath: packagedExecutable
         ? resolve(packagedExecutable)
-        : resolve("node_modules/electron/dist/electron.exe"),
+        : undefined,
       args: packagedExecutable ? [] : [resolve("apps/teacher")],
       env,
     });

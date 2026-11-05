@@ -99,9 +99,7 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
   const port = (tls.address() as { port: number }).port;
   const executable = process.env.CYEZ_ELECTRON_EXECUTABLE;
   const desktop = await electron.launch({
-    executablePath: resolve(
-      executable ?? "node_modules/electron/dist/electron.exe",
-    ),
+    executablePath: executable ? resolve(executable) : undefined,
     args: executable ? [] : [resolve("apps/teacher")],
     env: {
       ...process.env,

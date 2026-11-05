@@ -117,6 +117,7 @@ jobs:
       - run: yarn test:unit:client
       - run: yarn test:coverage:client
       - run: yarn build:client:integration
+      - run: yarn workspace @record/teacher exec install-electron
       - run: yarn test:integration:client
       - run: yarn package:win
       - run: yarn test:release:client
