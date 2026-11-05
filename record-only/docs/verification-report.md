@@ -131,3 +131,21 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 | Windows 发布 | NSIS 安装包 `release/cyez-library-0.1.1-x64-setup.exe` 构建通过，SHA-256 `1bcc54a0c4f57f702a48cf1df9205cec4a286ee7c87083f3e13c1c6baf1f6e0a`；Authenticode 状态 `NotSigned` |
 
 本轮没有在用户报错的另一台机器执行安装、升级或真实读卡测试；该机器仍须提供与服务器一致的正式身份参数，并手动配置服务器地址、证书指纹和读卡器。服务端与 Docker 本轮未修改或重跑。
+
+## 2026-11-05 Concard 接入与校园配置单向覆盖
+
+教师端 `0.1.2` 新增“校园数据源”设置页；SQL Server 适配器只读取固定视图的卡号、姓名、班级，不读取账号、证件号、身份证号、卡状态或身份。原固定盐哈希 ID 不变。输入发送后清空，不进入本机持久层；服务端验证新连接后加密保存，同事务记录无配置值的审计，后续查询切换。完整契约、迁移及启动说明见 [Concard 接入](campus-sqlserver.md)。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| 服务端单元/集成及门禁 | 41 项通过，含真实 PostgreSQL 和 TLS SQL Server。覆盖率 statements 92.35%、branches 88.74%、functions 95.62%、lines 93.81%，门禁通过 |
+| SQL Server 真实行为 | 独立 SQL Server 2022 Docker fixture，固定镜像 digest；仅授权三列的 SQL 登录成功读取中文 varchar 姓名/班级；十进制与十六进制查询、零行拒绝、多行和空姓名拒绝、不受信任证书拒绝均实测。无校园真实学生资料 |
+| 配置故障与持久层 | 真实 PG 验证无配置拒绝、未认证拒绝、未知字段拒绝、GET/PATCH/PUT/DELETE 不存在、密文持久化、失败保留旧配置、重启恢复、完整覆盖后切换；审计写失败事务回滚、错误密钥不能重置旧数据 |
+| 客户端单元/组件 | 60 项通过；覆盖率 statements 88.96%、branches 84.23%、functions 87.31%、lines 89.76%，门禁通过。发送后立即清空，网络失败不进入本机设置/队列/日志；不请求已有校园配置 |
+| 真实发布版 Electron | `0.1.2` 解包版完整套件 11 项通过，Compose 专用 1 项显式跳过。本次新增用例走真实 Electron → HTTPS → Fastify/PG → TLS SQL Server，验证覆盖、清空、页面重载不回填、刷卡取得资料及本机文件无 SQL 用户名/密码（UTF-8/UTF-16）；已有 pin、持久队列、首次配置等回归通过 |
+| 构建/静态 | Yarn immutable（本机 skip-build）、TypeScript、Prettier、server/client 构建通过；Docker API 镜像 `cyez-record-only:sqlserver-check` 构建成功，image ID 前缀 `afe1ab06c3ac`；图册生成源/产物同步 |
+| Windows 安装包 | `release/cyez-library-0.1.2-x64-setup.exe`，SHA-256 `7cb0bf7d78755965508799fae5926f7cd873ce8ee7aaa3095af0b486ad2b9fff`，未签名。本机已有进程锁住 sqlite3 原生模块，因此本次以 `--config.npmRebuild=false` 打包已通过实际 Electron 验证的原生模块；仓库/CI 标准打包仍重建原生依赖。发布版随后已完整验证 |
+
+Linux CI 新增独立 SQL Server fixture，服务端覆盖率显式启用真实 SQL 测试。Windows CI 未提供 SQL 实例时，新 Electron 用例使用明确 SQL 替身；本机上述发布版用例设置了 `TEST_SQLSERVER_CONFIG`，实际使用 SQL 驱动。已检查截图 `test-results/electron/provider-settings.png`。
+
+未完成：学校正式 SQL Server 的地址/认证/TLS 信任链和网络联通；真实卡 UID 与视图卡号文本的进制、大小写、前导零和字节序对照；目标读卡器、另一台 Windows 的安装升级与签名。三列已确定，不再等待可配置字段映射；校园表账号不稳定，绝不替换既有标识。目标输入只能在设置页本次输入，不能用开发 fixture 冒充正式联通。NEXT 项仍延期。

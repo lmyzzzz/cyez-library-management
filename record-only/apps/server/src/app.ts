@@ -10,12 +10,14 @@ import { Auth } from "./auth.js";
 import { Service } from "./service.js";
 import { Spool, Capacity, ingestLogs, type StorageProbe } from "./storage.js";
 import { loadProvider, type CampusProvider } from "./provider.js";
+import { ProviderSettings, type ProviderFactory } from "./provider-settings.js";
 import type { Context } from "./previews.js";
 export async function createApp(
   config: Config,
   options: {
     database?: Database;
     provider?: CampusProvider;
+    providerFactory?: ProviderFactory;
     probe?: () => Promise<StorageProbe>;
     now?: () => number;
   } = {},
@@ -35,13 +37,25 @@ export async function createApp(
     config.sessionTtlMs,
     options.now,
   );
+  const providerSettings =
+    config.providerMode === "sqlserver"
+      ? await ProviderSettings.create(
+          db,
+          config.providerConfigKeyFile!,
+          config.providerTimeoutMs,
+          options.providerFactory,
+        )
+      : undefined;
   const service = new Service(
     db,
     config,
-    options.provider ?? (await loadProvider(config)),
+    options.provider ??
+      providerSettings?.provider ??
+      (await loadProvider(config)),
     capacity,
     options.now,
   );
+  if (providerSettings) service.providerHealthy = providerSettings.configured;
   const app = Fastify({
     logger: false,
     bodyLimit: 65536,
@@ -146,6 +160,31 @@ export async function createApp(
     ]);
     return { ok: true };
   });
+  app.post(
+    "/api/v1/provider-config",
+    { config: { rateLimit: { max: 5, timeWindow: 60000 } } },
+    async (req) => {
+      let input: P.SqlServerProviderConfig | undefined;
+      try {
+        if (!providerSettings)
+          throw new P.ApiError("PROVIDER_CONFIGURATION_DISABLED", 409);
+        input = P.parse(P.sqlServerProviderSchema, req.body);
+        await capacity.require("modify");
+        await providerSettings.replace(ctx(req), input);
+        service.providerHealthy = true;
+        return { ok: true };
+      } finally {
+        if (input)
+          for (const key of Object.keys(input))
+            (input as Record<string, unknown>)[key] = undefined;
+        if (req.body && typeof req.body === "object") {
+          for (const key of Object.keys(req.body))
+            (req.body as Record<string, unknown>)[key] = undefined;
+        }
+        req.body = undefined;
+      }
+    },
+  );
   app.get("/api/v1/service-status", async () => {
     const status = await capacity.status();
     if (!service.providerHealthy)
@@ -259,5 +298,5 @@ export async function createApp(
   app.addHook("onClose", async () => {
     await db.close();
   });
-  return { app, db, auth, service, capacity, spool };
+  return { app, db, auth, service, capacity, spool, providerSettings };
 }

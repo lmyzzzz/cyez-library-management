@@ -20,6 +20,9 @@ const messages: Record<string, string> = {
     "校园资料服务未确认该学生的登记资格。请联系学校数据负责人。",
   CARD_ID_MISMATCH: "卡号与学生标识不一致，请重新刷卡。",
   PROVIDER_UNAVAILABLE: "校园资料服务暂不可用。已有使用记录仍可手动结束。",
+  PROVIDER_CONFIGURATION_INVALID:
+    "校园数据源连接、TLS 或视图字段校验失败，原配置未变。",
+  PROVIDER_CONFIGURATION_DISABLED: "服务器尚未启用 SQL Server 校园数据源模式。",
   PROFILE_MISMATCH: "校园资料不符合字段要求，请稍后重刷。",
   PROFILE_VERSION_CONFLICT: "学生资料已刷新，请重新刷卡。",
   DEVICE_UNAVAILABLE: "设备已被占用、禁用或删除，请刷新后重选。",

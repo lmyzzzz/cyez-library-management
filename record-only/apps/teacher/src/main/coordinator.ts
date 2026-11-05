@@ -67,7 +67,7 @@ export class Coordinator {
       ...entry,
       logId: randomUUID(),
       atMs: Date.now(),
-      appVersion: "0.1.1",
+      appVersion: "0.1.2",
     });
   }
   async configure(connection: Connection) {
@@ -102,7 +102,7 @@ export class Coordinator {
       pendingOtherOrigins: metrics.pendingCommands - current,
       reader: this.readerState,
       environment: this.environment,
-      version: "0.1.1",
+      version: "0.1.2",
       lastSuccessMs: this.lastSuccessMs,
     };
   }
@@ -401,6 +401,23 @@ export class Coordinator {
   }
   async call(action: ActionName, input: unknown): Promise<unknown> {
     if (!(action in actions)) throw new ApiError("IPC_ACTION_INVALID", 422);
+    if (action === "replaceProviderConfig") {
+      let data: Record<string, unknown> | undefined;
+      let pending: Promise<unknown>;
+      try {
+        data = parse(actions.replaceProviderConfig, input);
+        // Transport serializes synchronously; never retain this body while awaiting ACK.
+        pending = this.network(() =>
+          this.requireSdk().call("POST", "/api/v1/provider-config", data),
+        );
+      } finally {
+        for (const object of [input, data])
+          if (object && typeof object === "object")
+            for (const key of Object.keys(object))
+              (object as Record<string, unknown>)[key] = undefined;
+      }
+      return pending;
+    }
     const data = parse(actions[action] as z.ZodTypeAny, input) as Record<
       string,
       unknown

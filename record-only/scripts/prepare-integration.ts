@@ -33,9 +33,12 @@ await Promise.all([
   writeFile("secrets/provider-credential", "integration-unused", {
     mode: 0o600,
   }),
+  writeFile("secrets/provider-config-key", randomBytes(32).toString("hex"), {
+    mode: 0o600,
+  }),
   writeFile(
     ".env.integration",
-    `APP_ENV=integration\nRELEASE_TAG=local\nDATA_PREFIX=cyez-record-integration\nBIND_IP=127.0.0.1\nHTTPS_PORT=8443\nTEACHER_USERNAME=teacher-integration\nTEACHER_PASSWORD=${teacherPassword}\nHASH_VERSION=${identity.hashVersion}\nFIXED_SALT_HEX=${identity.fixedSaltHex}\nCARD_ISSUER=${identity.issuer}\nUID_BYTE_LENGTHS=4\nPROVIDER_MODE=fake\nPROFILE_CONTRACT_CONFIRMED=false\n`,
+    `APP_ENV=integration\nRELEASE_TAG=local\nDATA_PREFIX=cyez-record-integration\nBIND_IP=127.0.0.1\nHTTPS_PORT=8443\nTEACHER_USERNAME=teacher-integration\nTEACHER_PASSWORD=${teacherPassword}\nHASH_VERSION=${identity.hashVersion}\nFIXED_SALT_HEX=${identity.fixedSaltHex}\nCARD_ISSUER=${identity.issuer}\nUID_BYTE_LENGTHS=4\nPROVIDER_MODE=fake\nPROVIDER_CONFIG_KEY_HOST_PATH=./secrets/provider-config-key\nPROFILE_CONTRACT_CONFIRMED=false\n`,
     { mode: 0o600 },
   ),
   writeFile(

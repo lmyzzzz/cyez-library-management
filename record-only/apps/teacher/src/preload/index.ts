@@ -3,7 +3,15 @@ import { createWindowControlsBridge } from "@series/electron/preload";
 import type { TeacherBridge, TeacherEvent } from "../shared/bridge.js";
 const bridge: TeacherBridge = {
   async call(action, input) {
-    const result = await ipcRenderer.invoke("library:action", action, input);
+    const pending = ipcRenderer.invoke("library:action", action, input);
+    if (
+      action === "replaceProviderConfig" &&
+      input &&
+      typeof input === "object"
+    )
+      for (const key of Object.keys(input))
+        (input as Record<string, unknown>)[key] = undefined;
+    const result = await pending;
     if (!result.ok) throw new Error(result.code);
     return result.value;
   },

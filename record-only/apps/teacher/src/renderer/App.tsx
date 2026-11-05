@@ -31,6 +31,7 @@ import {
   DeviceEditor,
   TagManager,
   History,
+  ProviderSettingsForm,
 } from "./settings.js";
 import { Registration, EndForm, BatchForm } from "./flows.js";
 const routes: AppRouteRegistration[] = [
@@ -595,6 +596,7 @@ export function App() {
                   {[
                     ["connection", "连接配置"],
                     ["reader", "读卡器"],
+                    ["provider", "校园数据源"],
                     ["devices", "设备管理"],
                     ["history", "历史记录"],
                     ["diagnostics", "诊断"],
@@ -621,6 +623,11 @@ export function App() {
                   <ReaderSettings
                     status={status}
                     refresh={() => void refreshStatus()}
+                  />
+                )}
+                {tab === "provider" && (
+                  <ProviderSettingsForm
+                    authenticated={!!status?.authenticated}
                   />
                 )}
                 {tab === "devices" && table}

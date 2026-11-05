@@ -52,10 +52,10 @@
 <text x="920.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">每次查 API；成功新增或覆盖缓存</text>
 <text x="920.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">预览 TTL / 幂等 / 版本 / 事务</text>
 <rect x="1260" y="455" width="460" height="180" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1490.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">校园卡 API · 用本次原卡号查询</text>
-<text x="1490.0" y="537.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">正常 TLS；查询后释放原卡号</text>
-<text x="1490.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：协议、认证、卡号格式</text>
-<text x="1490.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-01：学生资料白名单</text>
+<text x="1490.0" y="510.325" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">Concard SQL Server · TLS</text>
+<text x="1490.0" y="537.875" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定视图：仅卡号 / 姓名 / 班级</text>
+<text x="1490.0" y="565.425" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">查询后释放原卡号；无账号/证件</text>
+<text x="1490.0" y="592.975" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：目标连接与卡号对照</text>
 <rect x="680" y="725" width="480" height="125" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="920.0" y="766.6" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">共享账号 · .env 修改后重建 API</text>
 <text x="920.0" y="794.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">所有合法教师可分配全部设备</text>

@@ -1,5 +1,7 @@
 # 学校图书馆刷卡使用登记系统
 
+2026-11-05：已实现 [Concard SQL Server 接入与单向配置](docs/campus-sqlserver.md)。固定只读卡号、姓名、班级，不读账号/证件等列；学生标识保持固定盐哈希。教师端只提交完整配置覆盖服务端，随后清空，本机不保存或回填。此修订覆盖下文待定字段/接口与不提供服务端配置入口的旧表述；学校网络、认证/TLS 和实卡对照仍须验收。
+
 2026-10-31 需求修订：校园 API 是学生资料与登记资格的权威来源。本地 `students` 仅缓存成功刷卡得到的资料；每次有效刷卡都重新查询 API，成功时新增或覆盖缓存，失败时不使用旧缓存继续登记。下文与图册中关于“学生必须预置、先查本地授权、未知本地 ID 禁止查询”的旧规则均已撤回。生产不再需要学生 seed；集成 seed 只用于旧数据迁移和测试。
 
 修订日期：2026-10-30。本目录现包含可运行的 Yarn 4 工作区、教师 Electron 客户端、Docker 服务端、数据库迁移、受控 seed、测试及 Windows 打包配置。正式设计仍以本目录文档为准；当前可在明确标识的集成环境运行，生产接入与发布仍需 [TBD 输入](docs/decisions.md#待定输入与延期)。实际验证见[测试报告](docs/verification-report.md)，启动和升级见[运行说明](docs/operations.md)。
@@ -21,7 +23,7 @@
 
 ![刷卡登记版总体架构](docs/architecture.svg)
 
-服务端采用 **Fastify + Sequelize + PostgreSQL**，通过库 API 查询和迁移，不手写 SQL；客户端采用 **Electron + React + cyez-ui**；工程使用 **Yarn 4 workspaces**。UI 实际包名为 `@series/ui` 和 `@series/electron`，使用授权已由用户确认。
+服务端采用 **Fastify + Sequelize + PostgreSQL**，内部业务通过库 API 查询和迁移；外部 Concard 使用固定参数化三列查询。客户端采用 **Electron + React + cyez-ui**；工程使用 **Yarn 4 workspaces**。UI 实际包名为 `@series/ui` 和 `@series/electron`，使用授权已由用户确认。
 
 所有教师共用一个业务账号，可分配所有设备，无 admin/机房权限。设置页配置 IP、叶证书 SHA-256 指纹和账号密码，应用内固定证书，不安装系统自签名证书；服务端在 `.env` 修改密码后重建 API。
 

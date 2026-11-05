@@ -84,6 +84,11 @@ export interface SettingRow {
   key: string;
   value: string;
 }
+export interface ProviderConfigRow {
+  key: string;
+  sealed: string;
+  updatedAt: Date;
+}
 type Table<T extends object> = ModelStatic<Model<T, T>>;
 const pk = () => ({ type: D.UUID, primaryKey: true, allowNull: false });
 const str = (length: number, allowNull = false) => ({
@@ -178,6 +183,11 @@ function definitions() {
       receivedAt: date(),
     },
     settings: { key: { ...str(80), primaryKey: true }, value: str(256) },
+    provider_configs: {
+      key: { ...str(80), primaryKey: true },
+      sealed: { type: D.TEXT, allowNull: false },
+      updatedAt: date(),
+    },
   };
 }
 export class Database {
@@ -191,6 +201,7 @@ export class Database {
   readonly audits: Table<AuditRow>;
   readonly logs: Table<LogRow>;
   readonly settings: Table<SettingRow>;
+  readonly providerConfigs: Table<ProviderConfigRow>;
   readonly migrator: Umzug<QueryInterface>;
   constructor(url: string) {
     this.sequelize = new Sequelize(url, {
@@ -212,6 +223,7 @@ export class Database {
     this.audits = define("audit_events");
     this.logs = define("app_logs");
     this.settings = define("settings");
+    this.providerConfigs = define("provider_configs");
     this.migrator = new Umzug({
       context: this.sequelize.getQueryInterface(),
       storage: new SequelizeStorage({ sequelize: this.sequelize }),
@@ -223,6 +235,7 @@ export class Database {
             await this.sequelize.transaction(async (transaction) => {
               const q = this.sequelize.getQueryInterface();
               for (const [name, attributes] of Object.entries(defs)) {
+                if (name === "provider_configs") continue;
                 // Keep the original migration stable; 002 relaxes these legacy columns.
                 const initialAttributes =
                   name === "students"
@@ -296,6 +309,18 @@ export class Database {
             });
           },
         },
+        {
+          name: "003-provider-config",
+          up: async () => {
+            await this.sequelize.transaction(async (transaction) => {
+              await this.sequelize
+                .getQueryInterface()
+                .createTable("provider_configs", defs.provider_configs, {
+                  transaction,
+                });
+            });
+          },
+        },
       ],
     });
   }
@@ -318,7 +343,7 @@ export class Database {
         { tableName: "SequelizeMeta", timestamps: false },
       );
     const completed = await metadata.findAll();
-    if (!completed.some((row) => row.get("name") === "002-student-cache"))
+    if (!completed.some((row) => row.get("name") === "003-provider-config"))
       throw new Error("SCHEMA_NOT_READY");
   }
   async close() {

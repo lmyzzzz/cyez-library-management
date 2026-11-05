@@ -354,6 +354,14 @@ void app.whenReady().then(async () => {
             code: e instanceof ApiError ? e.code : "LOCAL_OPERATION_FAILED",
             status: e instanceof ApiError ? e.status : 503,
           };
+        } finally {
+          if (
+            action === "replaceProviderConfig" &&
+            input &&
+            typeof input === "object"
+          )
+            for (const key of Object.keys(input))
+              (input as Record<string, unknown>)[key] = undefined;
         }
       },
     );

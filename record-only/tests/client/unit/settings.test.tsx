@@ -11,6 +11,7 @@ import type { LocalStatus } from "../../../apps/teacher/src/shared/bridge.js";
 import {
   InitialClientSetup,
   ConnectionForm,
+  ProviderSettingsForm,
   ReaderSettings,
   DeviceEditor,
   TagManager,
@@ -125,6 +126,57 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.click(screen.getByLabelText("保存密码"));
     expect(auto.disabled).toBe(true);
     expect(auto.checked).toBe(false);
+  });
+  it("校园数据源只写入一次，发送后马上清空表单且不读取旧值", async () => {
+    let submitted: unknown;
+    let finish!: (value: unknown) => void;
+    call.mockImplementationOnce((_action, input) => {
+      submitted = structuredClone(input);
+      return new Promise((resolve) => {
+        finish = resolve;
+      });
+    });
+    render(<ProviderSettingsForm authenticated />);
+    expect(call).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("SQL Server 地址"), {
+      target: { value: "school.example" },
+    });
+    fireEvent.change(screen.getByLabelText("端口"), {
+      target: { value: "1433" },
+    });
+    fireEvent.change(screen.getByLabelText("数据库账号"), {
+      target: { value: "reader" },
+    });
+    fireEvent.change(screen.getByLabelText("数据库密码"), {
+      target: { value: "temporary-password" },
+    });
+    fireEvent.change(screen.getByLabelText("卡号表示"), {
+      target: { value: "hex8" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖服务端配置" }));
+    expect(call).toHaveBeenCalledWith(
+      "replaceProviderConfig",
+      expect.any(Object),
+    );
+    expect(submitted).toMatchObject({
+      host: "school.example",
+      port: 1433,
+      username: "reader",
+      password: "temporary-password",
+      uidEncoding: "hex8",
+    });
+    expect(
+      (screen.getByLabelText("数据库密码") as HTMLInputElement).value,
+    ).toBe("");
+    expect(
+      (screen.getByLabelText("SQL Server 地址") as HTMLInputElement).value,
+    ).toBe("");
+    finish({ ok: true });
+    await waitFor(() =>
+      expect(screen.getByText("服务端已覆盖校园数据源配置。")).toBeTruthy(),
+    );
+    expect(call).toHaveBeenCalledTimes(1);
+    expect(screen.queryByLabelText("卡号列")).toBeNull();
   });
 
   it("串口参数与进程选择按整份配置提交，生产隐藏 mock", async () => {

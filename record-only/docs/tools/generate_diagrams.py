@@ -53,7 +53,7 @@ def overview():
     card(p, 'services', 680, 455, 480, 180,
          'Fastify + Sequelize · 服务端规则\n按原卡号重算 studentId，拒绝错配\n每次查 API；成功新增或覆盖缓存\n预览 TTL / 幂等 / 版本 / 事务')
     card(p, 'provider', 1260, 455, 460, 180,
-         '校园卡 API · 用本次原卡号查询\n正常 TLS；查询后释放原卡号\nTBD-02：协议、认证、卡号格式\nTBD-01：学生资料白名单', YELLOW)
+         'Concard SQL Server · TLS\n固定视图：仅卡号 / 姓名 / 班级\n查询后释放原卡号；无账号/证件\nTBD-02：目标连接与卡号对照', YELLOW)
     card(p, 'credentials', 680, 725, 480, 125,
          '共享账号 · .env 修改后重建 API\n所有合法教师可分配全部设备\nclientId 只区分来源，不代表个人身份')
     card(p, 'previews', 1260, 725, 460, 125,
@@ -147,7 +147,7 @@ def registration():
          '③ main → 已 pin HTTPS /scan-previews\ncard + studentId / hashVersion / scanId\n服务端重算 ID 拒绝错配，记 scanAtMs\n本地有无缓存都查询校园 API\nAPI 确认学生后才创建预览', BLUE)
     down(p, 'gate-preview', 'gate', 'preview', '是')
     card(p, 'provider', 1240, 395, 500, 155,
-         '本次原卡号查询校园 API\n查询/校验后释放；不入预览或队列\nTBD-02：协议/认证/拒绝语义/字段\n正常请求关联，无需额外绑定证明\nTBD-01：资料白名单；新增或覆盖缓存', YELLOW)
+         '本次原卡号参数化查询 Concard\n固定三列；查询后释放原卡号\n零行拒绝 / 多行或空姓名报错\n不读账号、证件、卡状态或身份\n姓名 / 班级新增或覆盖缓存', YELLOW)
     route(p, 'preview-provider', 'preview', 'provider', [(1150,470),(1240,470)], both=True)
     note(p, 'failed-preview', 60, 395, 500, 155,
          'API 拒绝 / 外部失败 / 卡号 ID 错配\n失败不写缓存，不以旧缓存放行\n显示错误，重刷或返回；无手动注册\n已有记录可从内部列表手动结束', RED)
@@ -234,7 +234,7 @@ def docker():
     card(p,'client',60,155,720,145,
          '教师 Electron · 设置连接\nIP / 端口 / SHA-256 叶证书指纹 / 共享账号密码\n应用内 pin 后才发 HTTPS，不改系统证书库',GREEN,21)
     card(p,'campus',1020,155,720,145,
-         '校园卡 API · 本次原卡号查询，用后释放\n固定 HTTPS 目的地，正常 TLS，拒绝重定向\nTBD-02：协议、认证、原卡号格式与字段',YELLOW,21)
+         'Concard SQL Server · 固定视图三列\nTDS + 验证 TLS；原卡号用后释放\n教师仅提交新配置覆盖，服务端加密保存',YELLOW,21)
     panel(p,'host',60,420,1680,1000,'Compose 项目 · frontend / backend 网络隔离 · 不发布 PostgreSQL 端口',BLUE)
     card(p,'gateway',100,530,430,165,
          'gateway · Nginx 非特权容器\n宿主 443 → 容器 8443\nTLS / body 上限 / 限速 / 日志脱敏\n刷卡 body 禁磁盘缓冲与缓存',size=20)

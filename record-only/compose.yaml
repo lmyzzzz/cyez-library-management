@@ -5,7 +5,7 @@ x-api: &api
   read_only: true
   cap_drop: [ALL]
   security_opt: [no-new-privileges:true]
-  tmpfs: ['/tmp:size=64m,mode=1777']
+  tmpfs: ["/tmp:size=64m,mode=1777"]
   restart: unless-stopped
 x-environment: &environment
   APP_ENV: ${APP_ENV:?Set APP_ENV explicitly}
@@ -17,6 +17,7 @@ x-environment: &environment
   UID_BYTE_LENGTHS: ${UID_BYTE_LENGTHS:?Set UID_BYTE_LENGTHS}
   PROVIDER_MODE: ${PROVIDER_MODE:?Set PROVIDER_MODE}
   PROVIDER_MODULE: ${PROVIDER_MODULE:-}
+  PROVIDER_CONFIG_KEY_FILE: /run/secrets/provider_config_key
   PROFILE_CONTRACT_CONFIRMED: ${PROFILE_CONTRACT_CONFIRMED:-false}
   SPOOL_DIR: /data/api-spool
   CAPACITY_PATHS: /capacity/db;/capacity/gateway;/capacity/db-logs
@@ -26,9 +27,9 @@ x-environment: &environment
 services:
   db:
     image: cyez-record-db:${RELEASE_TAG:-local}
-    build: {context: ., dockerfile: deploy/db.Dockerfile}
+    build: { context: ., dockerfile: deploy/db.Dockerfile }
     read_only: true
-    tmpfs: ['/tmp:size=32m,mode=1777', '/var/run/postgresql:size=16m,mode=1777']
+    tmpfs: ["/tmp:size=32m,mode=1777", "/var/run/postgresql:size=16m,mode=1777"]
     cap_drop: [ALL]
     environment:
       POSTGRES_USER: cyez_migrate
@@ -38,7 +39,34 @@ services:
     volumes: [pgdata:/var/lib/postgresql/data, db_spool:/var/log/cyez]
     networks: [backend]
     restart: unless-stopped
-    command: [postgres, -c, logging_collector=on, -c, log_destination=jsonlog, -c, log_directory=/var/log/cyez, -c, log_filename=db-%Y%m%d-%H%M%S.json, -c, log_file_mode=0644, -c, log_rotation_age=60, -c, log_truncate_on_rotation=off, -c, log_statement=none, -c, log_min_error_statement=panic, -c, log_error_verbosity=terse, -c, log_parameter_max_length=0, -c, log_parameter_max_length_on_error=0]
+    command:
+      [
+        postgres,
+        -c,
+        logging_collector=on,
+        -c,
+        log_destination=jsonlog,
+        -c,
+        log_directory=/var/log/cyez,
+        -c,
+        log_filename=db-%Y%m%d-%H%M%S.json,
+        -c,
+        log_file_mode=0644,
+        -c,
+        log_rotation_age=60,
+        -c,
+        log_truncate_on_rotation=off,
+        -c,
+        log_statement=none,
+        -c,
+        log_min_error_statement=panic,
+        -c,
+        log_error_verbosity=terse,
+        -c,
+        log_parameter_max_length=0,
+        -c,
+        log_parameter_max_length_on_error=0,
+      ]
     healthcheck:
       test: [CMD-SHELL, pg_isready -U cyez_migrate -d cyez]
       interval: 5s
@@ -48,7 +76,7 @@ services:
     shm_size: 128mb
   migrate:
     <<: *api
-    restart: 'no'
+    restart: "no"
     command: [node, apps/server/dist/cli.js, migrate]
     environment:
       <<: *environment
@@ -57,38 +85,55 @@ services:
     secrets: [migration_database_url, runtime_database_url]
     networks: [backend]
     depends_on:
-      db: {condition: service_healthy}
+      db: { condition: service_healthy }
   api:
     <<: *api
     environment:
       <<: *environment
       DATABASE_URL_FILE: /run/secrets/runtime_database_url
-    secrets: [runtime_database_url, provider_credential]
-    volumes: [api_spool:/data/api-spool, pgdata:/capacity/db:ro, gateway_spool:/capacity/gateway:ro, db_spool:/capacity/db-logs:ro, './runtime/adapters:/adapters:ro']
+    secrets: [runtime_database_url, provider_credential, provider_config_key]
+    volumes:
+      [
+        api_spool:/data/api-spool,
+        pgdata:/capacity/db:ro,
+        gateway_spool:/capacity/gateway:ro,
+        db_spool:/capacity/db-logs:ro,
+        "./runtime/adapters:/adapters:ro",
+      ]
     networks: [frontend, backend, egress]
     depends_on:
-      migrate: {condition: service_completed_successfully}
+      migrate: { condition: service_completed_successfully }
     healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 5s
       timeout: 3s
       retries: 10
     stop_grace_period: 20s
   gateway:
     image: cyez-record-gateway:${RELEASE_TAG:-local}
-    build: {context: ., dockerfile: deploy/gateway.Dockerfile}
-    entrypoint: [nginx, -g, 'daemon off;']
-    ports: ['${BIND_IP:?Set BIND_IP}:${HTTPS_PORT:-443}:8443']
+    build: { context: ., dockerfile: deploy/gateway.Dockerfile }
+    entrypoint: [nginx, -g, "daemon off;"]
+    ports: ["${BIND_IP:?Set BIND_IP}:${HTTPS_PORT:-443}:8443"]
     networks: [frontend]
     secrets: [tls_cert, tls_key]
-    volumes: ['./deploy/nginx.conf:/etc/nginx/nginx.conf:ro', gateway_spool:/var/log/cyez]
+    volumes:
+      [
+        "./deploy/nginx.conf:/etc/nginx/nginx.conf:ro",
+        gateway_spool:/var/log/cyez,
+      ]
     read_only: true
-    tmpfs: ['/tmp:size=64m,mode=1777']
+    tmpfs: ["/tmp:size=64m,mode=1777"]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
   log-ingest:
     <<: *api
     command: [node, apps/server/dist/ingest.js]
@@ -98,24 +143,32 @@ services:
       INGEST_FILE_SOURCES: gateway:/data/gateway;db:/data/db-logs
       INGEST_CURSOR_DIR: /data/cursors
     secrets: [runtime_database_url]
-    volumes: [api_spool:/data/api-spool, gateway_spool:/data/gateway:ro, db_spool:/data/db-logs:ro, ingest_cursors:/data/cursors]
+    volumes:
+      [
+        api_spool:/data/api-spool,
+        gateway_spool:/data/gateway:ro,
+        db_spool:/data/db-logs:ro,
+        ingest_cursors:/data/cursors,
+      ]
     networks: [backend]
     depends_on:
-      migrate: {condition: service_completed_successfully}
+      migrate: { condition: service_completed_successfully }
 secrets:
-  db_password: {file: ./secrets/db-password}
-  migration_database_url: {file: ./secrets/migration-database-url}
-  runtime_database_url: {file: ./secrets/runtime-database-url}
-  provider_credential: {file: ./secrets/provider-credential}
-  tls_cert: {file: ./secrets/server.crt}
-  tls_key: {file: ./secrets/server.key}
+  db_password: { file: ./secrets/db-password }
+  migration_database_url: { file: ./secrets/migration-database-url }
+  runtime_database_url: { file: ./secrets/runtime-database-url }
+  provider_credential: { file: ./secrets/provider-credential }
+  provider_config_key:
+    { file: "${PROVIDER_CONFIG_KEY_HOST_PATH:-./secrets/provider-config-key}" }
+  tls_cert: { file: ./secrets/server.crt }
+  tls_key: { file: ./secrets/server.key }
 volumes:
-  pgdata: {name: '${DATA_PREFIX:?Set stable DATA_PREFIX}-pgdata'}
-  api_spool: {name: '${DATA_PREFIX}-api-spool'}
-  gateway_spool: {name: '${DATA_PREFIX}-gateway-spool'}
-  db_spool: {name: '${DATA_PREFIX}-db-spool'}
-  ingest_cursors: {name: '${DATA_PREFIX}-ingest-cursors'}
+  pgdata: { name: "${DATA_PREFIX:?Set stable DATA_PREFIX}-pgdata" }
+  api_spool: { name: "${DATA_PREFIX}-api-spool" }
+  gateway_spool: { name: "${DATA_PREFIX}-gateway-spool" }
+  db_spool: { name: "${DATA_PREFIX}-db-spool" }
+  ingest_cursors: { name: "${DATA_PREFIX}-ingest-cursors" }
 networks:
   frontend: {}
-  backend: {internal: true}
+  backend: { internal: true }
   egress: {}

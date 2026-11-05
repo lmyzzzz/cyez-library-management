@@ -12,6 +12,31 @@ export const profileSchema = z
   })
   .strict();
 export type Profile = z.infer<typeof profileSchema>;
+export const sqlServerProviderSchema = z
+  .object({
+    host: z
+      .string()
+      .trim()
+      .min(1)
+      .max(253)
+      .regex(/^[A-Za-z0-9.:-]+$/),
+    port: z.number().int().min(1).max(65535),
+    username: z.string().min(1).max(128),
+    password: z.string().min(1).max(1024),
+    caPem: z
+      .string()
+      .max(16384)
+      .refine(
+        (value) =>
+          value === "" ||
+          /^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----\s*$/.test(
+            value,
+          ),
+      ),
+    uidEncoding: z.enum(["hex8", "decimal"]),
+  })
+  .strict();
+export type SqlServerProviderConfig = z.infer<typeof sqlServerProviderSchema>;
 export const studentSchema = profileSchema.extend({
   id: hashId,
   version,

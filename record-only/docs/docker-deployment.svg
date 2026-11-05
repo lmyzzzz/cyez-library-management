@@ -21,9 +21,9 @@
 <text x="420.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">IP / 端口 / SHA-256 叶证书指纹 / 共享账号密码</text>
 <text x="420.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">应用内 pin 后才发 HTTPS，不改系统证书库</text>
 <rect x="1020" y="155" width="720" height="145" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">校园卡 API · 本次原卡号查询，用后释放</text>
-<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">固定 HTTPS 目的地，正常 TLS，拒绝重定向</text>
-<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TBD-02：协议、认证、原卡号格式与字段</text>
+<text x="1380.0" y="204.4" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">Concard SQL Server · 固定视图三列</text>
+<text x="1380.0" y="234.85" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">TDS + 验证 TLS；原卡号用后释放</text>
+<text x="1380.0" y="265.3" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#172b4d">教师仅提交新配置覆盖，服务端加密保存</text>
 <text x="900.0" y="460.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">Compose 项目 · frontend / backend 网络隔离 · 不发布 PostgreSQL 端口</text>
 <rect x="100" y="530" width="430" height="165" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="315.0" y="576.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">gateway · Nginx 非特权容器</text>

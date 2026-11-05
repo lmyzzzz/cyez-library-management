@@ -233,6 +233,155 @@ export function ConnectionForm({
     </section>
   );
 }
+export function ProviderSettingsForm({
+  authenticated,
+}: {
+  authenticated: boolean;
+}) {
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState<unknown>(),
+    [saved, setSaved] = useState(false);
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (busy || !authenticated) return;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const value = (key: string) => String(data.get(key) ?? "").trim();
+    const input = {
+      host: value("host"),
+      port: Number(value("port")),
+      username: value("username"),
+      password: String(data.get("password") ?? ""),
+      caPem: value("caPem"),
+      uidEncoding: value("uidEncoding") as "hex8" | "decimal",
+    };
+    setBusy(true);
+    setError(undefined);
+    setSaved(false);
+    const clear = () => {
+      form.reset();
+      for (const field of Array.from(form.elements))
+        if (
+          field instanceof HTMLInputElement ||
+          field instanceof HTMLTextAreaElement
+        )
+          field.value = "";
+      for (const key of Array.from(data.keys())) data.delete(key);
+      Object.assign(input, {
+        host: "",
+        port: 0,
+        username: "",
+        password: "",
+        caPem: "",
+        uidEncoding: "hex8",
+      });
+    };
+    try {
+      const pending = window.library.call("replaceProviderConfig", {
+        ...input,
+      });
+      clear();
+      await pending;
+      setSaved(true);
+    } catch (e) {
+      setError(e);
+    } finally {
+      clear();
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="panel connection">
+      <h2>校园数据源</h2>
+      <p className="muted">
+        从 Concard.dbo.v_ViewCardInfo
+        按卡号查询，只读取卡号、姓名、班级。连接使用 SQL Server 账号和经验证的
+        TLS。
+      </p>
+      <p className="muted">
+        完整填写新配置以覆盖服务端配置；提交后立即清空，本机不保存或回填。失败后须重新输入；若响应丢失，结果可能尚未确认。
+      </p>
+      {!authenticated && <Banner tone="warning">请先登录服务器。</Banner>}
+      <form onSubmit={(event) => void submit(event)} autoComplete="off">
+        <fieldset
+          disabled={busy || !authenticated}
+          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+        >
+          <div className="form-grid">
+            <Field label="SQL Server 地址" htmlFor="provider-host">
+              <input
+                id="provider-host"
+                name="host"
+                required
+                autoComplete="off"
+              />
+            </Field>
+            <Field label="端口" htmlFor="provider-port">
+              <input
+                id="provider-port"
+                name="port"
+                type="number"
+                min={1}
+                max={65535}
+                placeholder="1433"
+                required
+              />
+            </Field>
+            <Field label="数据库账号" htmlFor="provider-user">
+              <input
+                id="provider-user"
+                name="username"
+                required
+                autoComplete="off"
+              />
+            </Field>
+            <Field label="数据库密码" htmlFor="provider-password">
+              <input
+                id="provider-password"
+                name="password"
+                type="password"
+                required
+                autoComplete="new-password"
+              />
+            </Field>
+          </div>
+          <Field label="TLS CA 证书（PEM，可留空）" htmlFor="provider-ca">
+            <textarea id="provider-ca" name="caPem" spellCheck={false} />
+          </Field>
+          <div className="form-grid">
+            <Field label="卡号表示" htmlFor="provider-uid-encoding">
+              <select
+                id="provider-uid-encoding"
+                name="uidEncoding"
+                required
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  请选择与校园卡库一致的表示
+                </option>
+                <option value="hex8">8 位十六进制</option>
+                <option value="decimal">无符号十进制</option>
+              </select>
+            </Field>
+          </div>
+          <Failure error={error} />
+          {saved && (
+            <Banner tone="success">服务端已覆盖校园数据源配置。</Banner>
+          )}
+          <div className="actions">
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={busy || !authenticated}
+            >
+              覆盖服务端配置
+            </Button>
+          </div>
+        </fieldset>
+      </form>
+    </section>
+  );
+}
 export function ReaderSettings({
   status,
   refresh,

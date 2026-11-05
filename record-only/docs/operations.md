@@ -1,5 +1,7 @@
 # 运行、部署与升级
 
+2026-11-05：内置 Concard SQL Server 接入已经实现，部署/升级前准备新的服务端加密密钥并运行 `003-provider-config` 迁移。教师端在“设置 → 校园数据源”一次性提交完整新配置。固定只读取卡号、姓名、班级；表内账号不使用。详细字段、单向边界、密钥与命令见[Concard 接入](campus-sqlserver.md)。下文外置 module 仍是可选兼容路径，不是本次 SQL 接入的前置。
+
 2026-10-31 修订：生产不再预置学生，校园 API 成功查询时自动建立或刷新本地缓存。下文 `seed` 示例仅作为集成测试或旧库兼容工具；生产 CLI 已拒绝 `seed`。运行既有服务时先执行新增的 `002-student-cache` ORM 迁移和 `002-student-cache-insert` 权限迁移，再重建 API。不得删除卷；真实 API 的未找到/拒绝响应仍待 TBD-02 确认。
 
 本目录是独立的 Yarn 4 工作区。需要 Node.js 22、Corepack；Windows 教师端构建需要 Windows、Rust 1.94.0 与 MSVC C++ Build Tools，服务端需要 Linux Docker Engine + Compose。`nodeLinker: node-modules` 和 `yarn.lock` 固定依赖。无真实校园 API 或读卡器时，只能运行显式 `integration` 环境；生产不再依赖学生预置名单。

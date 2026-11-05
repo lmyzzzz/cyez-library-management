@@ -32,6 +32,8 @@ export async function loadProvider(config: Config): Promise<CampusProvider> {
       throw new Error("FAKE_PROVIDER_FORBIDDEN");
     return new FakeProvider();
   }
+  if (config.providerMode === "sqlserver")
+    throw new Error("PROVIDER_SETTINGS_REQUIRED");
   const module = await import(pathToFileURL(config.providerModule!).href);
   const provider = await module.createProvider();
   if (typeof provider?.lookup !== "function")

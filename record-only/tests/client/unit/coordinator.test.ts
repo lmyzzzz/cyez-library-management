@@ -80,6 +80,48 @@ async function login() {
 }
 
 describe("C-U main 协调器", () => {
+  it("校园配置发送后立即清除，失败也不写本地队列、设置或日志", async () => {
+    await login();
+    const beforeSettings = JSON.stringify(await store.settings.findAll());
+    const beforeMetrics = await store.metrics();
+    let received: unknown;
+    let reject!: (error: unknown) => void;
+    response = (_method, path, body) => {
+      expect(path).toBe("/api/v1/provider-config");
+      received = structuredClone(body);
+      return new Promise((_resolve, fail) => {
+        reject = fail;
+      });
+    };
+    const input = {
+      host: "sql.example",
+      port: 1433,
+      username: "readonly",
+      password: "never-save-this-api-password",
+      caPem: "",
+      uidEncoding: "decimal",
+    };
+    const pending = coordinator.call("replaceProviderConfig", input);
+    expect(received).toMatchObject({
+      host: "sql.example",
+      password: "never-save-this-api-password",
+    });
+    expect(Object.values(input).every((value) => value === undefined)).toBe(
+      true,
+    );
+    reject(new ApiError("NETWORK_TIMEOUT", 503));
+    await expect(pending).rejects.toMatchObject({ code: "NETWORK_TIMEOUT" });
+    expect(JSON.stringify(await store.settings.findAll())).toBe(beforeSettings);
+    expect(await store.metrics()).toMatchObject({
+      pendingCommands: beforeMetrics.pendingCommands,
+      pendingLogs: beforeMetrics.pendingLogs,
+    });
+    const invalid = { password: "invalid-not-persisted" };
+    await expect(
+      coordinator.call("replaceProviderConfig", invalid),
+    ).rejects.toThrow();
+    expect(invalid.password).toBeUndefined();
+  });
   it("自动登录只在加密保存密码后启用，启动按来源恢复，退出后禁用", async () => {
     await coordinator.call("configure", {
       ip: "127.0.0.1",

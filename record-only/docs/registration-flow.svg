@@ -42,11 +42,11 @@
 <rect x="730.0" y="327.0" width="340" height="46" rx="10" fill="#ffffff" stroke="none" stroke-width="1.5"/>
 <text x="900.0" y="355.95" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="17" font-weight="400" fill="#172b4d">是</text>
 <rect x="1240" y="395" width="500" height="155" rx="10" fill="#fff4dc" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1490.0" y="424.04999999999995" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本次原卡号查询校园 API</text>
-<text x="1490.0" y="451.59999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">查询/校验后释放；不入预览或队列</text>
-<text x="1490.0" y="479.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-02：协议/认证/拒绝语义/字段</text>
-<text x="1490.0" y="506.69999999999993" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">正常请求关联，无需额外绑定证明</text>
-<text x="1490.0" y="534.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">TBD-01：资料白名单；新增或覆盖缓存</text>
+<text x="1490.0" y="424.04999999999995" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">本次原卡号参数化查询 Concard</text>
+<text x="1490.0" y="451.59999999999997" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">固定三列；查询后释放原卡号</text>
+<text x="1490.0" y="479.15" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">零行拒绝 / 多行或空姓名报错</text>
+<text x="1490.0" y="506.69999999999993" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不读账号、证件、卡状态或身份</text>
+<text x="1490.0" y="534.25" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">姓名 / 班级新增或覆盖缓存</text>
 <rect x="60" y="395" width="500" height="155" rx="10" fill="#fcebea" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="310.0" y="439.65000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">API 拒绝 / 外部失败 / 卡号 ID 错配</text>
 <text x="310.0" y="465.75000000000006" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="18" font-weight="400" fill="#172b4d">失败不写缓存，不以旧缓存放行</text>

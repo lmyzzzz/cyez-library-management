@@ -3,6 +3,7 @@ import { readerProcessSchema } from "./reader-config.js";
 import { identityConfigSchema } from "@record/protocol/identity";
 import {
   normalizePin,
+  sqlServerProviderSchema,
   listSchema,
   startSchema,
   endSchema,
@@ -47,6 +48,7 @@ export const actions = {
   loginSaved: z.object({}).strict(),
   clearSaved: z.object({}).strict(),
   configureReader: readerProcessSchema,
+  replaceProviderConfig: sqlServerProviderSchema,
   listSerialPorts: z.object({}).strict(),
   listAcr1552Readers: z.object({}).strict(),
   testConnection: z.object({}).strict(),

@@ -10,8 +10,9 @@ export const configSchema = z
     username: z.string().min(1).max(100),
     password: z.string().min(12).max(1024),
     identity: identityConfigSchema,
-    providerMode: z.enum(["fake", "module"]),
+    providerMode: z.enum(["fake", "module", "sqlserver"]),
     providerModule: z.string().optional(),
+    providerConfigKeyFile: z.string().min(1).optional(),
     profileContractConfirmed: z.boolean(),
     providerTimeoutMs: z.number().int().positive(),
     previewTtlMs: z.number().int().positive(),
@@ -29,11 +30,14 @@ export const configSchema = z
   .superRefine((v, c) => {
     if (
       v.environment === "production" &&
-      (v.providerMode === "fake" || !v.profileContractConfirmed)
+      (v.providerMode === "fake" ||
+        (v.providerMode === "module" && !v.profileContractConfirmed))
     )
       c.addIssue({ code: "custom", message: "PRODUCTION_INPUTS_REQUIRED" });
     if (v.providerMode === "module" && !v.providerModule)
       c.addIssue({ code: "custom", message: "PROVIDER_MODULE_REQUIRED" });
+    if (v.providerMode === "sqlserver" && !v.providerConfigKeyFile)
+      c.addIssue({ code: "custom", message: "PROVIDER_CONFIG_KEY_REQUIRED" });
     if (
       v.capacity.reserveBytes >= v.capacity.warningBytes ||
       v.capacity.recoveryBytes <= v.capacity.warningBytes
@@ -63,6 +67,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     },
     providerMode: env.PROVIDER_MODE,
     providerModule: env.PROVIDER_MODULE,
+    providerConfigKeyFile: env.PROVIDER_CONFIG_KEY_FILE,
     profileContractConfirmed: env.PROFILE_CONTRACT_CONFIRMED === "true",
     providerTimeoutMs: n("PROVIDER_TIMEOUT_MS", 5000),
     previewTtlMs: n("PREVIEW_TTL_MS", 120000),
