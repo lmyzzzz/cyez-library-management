@@ -39,6 +39,12 @@ describe.skipIf(!process.env.TEST_SQLSERVER_CONFIG)(
       await expect(
         new SqlServerCampusProvider({ ...config, caPem: "" }, 3000).probe(),
       ).rejects.toMatchObject({ code: "PROVIDER_CONFIGURATION_INVALID" });
+      await expect(
+        new SqlServerCampusProvider(
+          { ...config, caPem: "", tlsValidation: "trustServerCertificate" },
+          3000,
+        ).probe(),
+      ).resolves.toBeUndefined();
       const pool = await new sql.ConnectionPool({
         server: config.host,
         port: config.port,

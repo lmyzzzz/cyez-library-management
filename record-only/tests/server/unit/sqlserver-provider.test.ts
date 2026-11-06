@@ -33,6 +33,25 @@ describe("SQL Server 固定视图查询", () => {
     expect(
       sqlServerProviderSchema.safeParse({
         ...config,
+        tlsValidation: "trustServerCertificate",
+      }).success,
+    ).toBe(true);
+    expect(
+      sqlServerProviderSchema.safeParse({
+        ...config,
+        tlsValidation: "trustServerCertificate",
+        caPem: "-----BEGIN CERTIFICATE-----\nunused\n-----END CERTIFICATE-----",
+      }).success,
+    ).toBe(false);
+    expect(
+      sqlServerProviderSchema.safeParse({
+        ...config,
+        tlsValidation: "disabled",
+      }).success,
+    ).toBe(false);
+    expect(
+      sqlServerProviderSchema.safeParse({
+        ...config,
         cardColumn: "卡号]; DROP TABLE students;--",
       }).success,
     ).toBe(false);

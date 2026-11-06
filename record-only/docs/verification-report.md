@@ -181,3 +181,18 @@ CI 已新增 Rust fmt/test/release 构建步骤；客户端自动化需先构建
 Linux CI 新增独立 SQL Server fixture，服务端覆盖率显式启用真实 SQL 测试。Windows CI 未提供 SQL 实例时，新 Electron 用例使用明确 SQL 替身；本机上述发布版用例设置了 `TEST_SQLSERVER_CONFIG`，实际使用 SQL 驱动。已检查截图 `test-results/electron/provider-settings.png`。
 
 未完成：学校正式 SQL Server 的地址/认证/TLS 信任链和网络联通；真实卡 UID 与视图卡号文本的进制、大小写、前导零和字节序对照；目标读卡器、另一台 Windows 的安装升级与签名。三列已确定，不再等待可配置字段映射；校园表账号不稳定，绝不替换既有标识。目标输入只能在设置页本次输入，不能用开发 fixture 冒充正式联通。NEXT 项仍延期。
+
+## 2026-11-06 校园 SQL Server 证书校验选项
+
+教师端“校园数据源”新增证书校验模式。默认及旧配置继续验证证书，可提供 PEM CA；显式选择“跳过证书校验”时服务端仍启用 TLS，但不验证 SQL Server 的证书链或主机名。该模式不接受 CA，教师端切换模式和提交后清空 CA 与其余输入，不回填服务端配置。它不是证书指纹绑定。
+
+| 项目 | 本轮实际结果 |
+| --- | --- |
+| 构建与静态 | 服务端、客户端构建及 TypeScript 检查通过；`git diff --check` 通过 |
+| 单元与 PostgreSQL 集成 | 服务端 19 项单元测试通过；客户端 61 项单元/组件测试通过；真实 PostgreSQL 集成 21 项通过 |
+| SQL Server TLS | 本机隔离 SQL Server 2022 fixture：默认模式在未提供 CA 时拒绝自签名证书；显式跳过模式仍以 TLS 连接并完成固定三列查询，真实驱动用例通过 |
+| Electron 全链路 | 真实 Electron → HTTPS → Fastify/PostgreSQL → TLS SQL Server 用例通过；切换模式后不带旧 CA，覆盖成功后输入和模式恢复默认、重载后不回填，刷卡取得资料，本机文件无 SQL 登录凭据 |
+| 覆盖率门禁与镜像 | 服务端 41 项通过，statements 92.36%、branches 88.78%、functions 95.65%、lines 93.82%；客户端 61 项通过，statements 89.03%、branches 84.57%、functions 87.34%、lines 89.83%；Docker API 镜像 `cyez-record-only:tls-option` 构建成功（image ID `51cf75951d18`） |
+| Windows 发布 | `release/0.1.5/cyez-library-0.1.5-x64-setup.exe`，119650370 字节，SHA-256 `22de7ed7406c6324252aa5264c329b150ff25ad87b74a1de66430b7eda4afb0b`，Authenticode `NotSigned`；独立目录解包版发布检查 2 项通过。旧 `release/win-unpacked` 被现有进程占用，因此未覆盖旧包 |
+
+尚未在学校正式 SQL Server 上验证网络、认证、证书及实卡数据；也未实现精确证书 SHA-256 指纹绑定。跳过校验只应在已确认数据库地址及可信网络的环境中使用。此前反馈的正式安装包手动输入后教师端无提示问题仍未修复，本次发布检查没有覆盖该按钮端到端故障。

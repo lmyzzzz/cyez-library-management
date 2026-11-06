@@ -127,10 +127,15 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
     await page.getByLabel("数据库账号").fill(supplied.username);
     await page.getByLabel("数据库密码").fill(supplied.password);
     await page.getByLabel("TLS CA 证书（PEM，可留空）").fill(supplied.caPem);
+    await page
+      .getByLabel("数据源证书校验")
+      .selectOption("trustServerCertificate");
+    await expect(page.getByLabel("TLS CA 证书（PEM，可留空）")).toHaveCount(0);
     await page.getByLabel("卡号表示").selectOption(supplied.uidEncoding);
     await page.getByRole("button", { name: "覆盖服务端配置" }).click();
     await expect(page.getByLabel("数据库密码")).toHaveValue("");
     await expect(page.getByLabel("SQL Server 地址")).toHaveValue("");
+    await expect(page.getByLabel("数据源证书校验")).toHaveValue("verify");
     await expect(page.getByText("服务端已覆盖校园数据源配置。")).toBeVisible();
     expect(seen.filter((r) => r.url === "/api/v1/provider-config")).toEqual([
       { method: "POST", url: "/api/v1/provider-config" },
@@ -142,6 +147,7 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
     await page.getByRole("button", { name: "校园数据源", exact: true }).click();
     await expect(page.getByLabel("SQL Server 地址")).toHaveValue("");
     await expect(page.getByLabel("数据库账号")).toHaveValue("");
+    await expect(page.getByLabel("数据源证书校验")).toHaveValue("verify");
     await page.screenshot({
       path: "test-results/electron/provider-settings.png",
     });

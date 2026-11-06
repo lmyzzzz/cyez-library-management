@@ -240,7 +240,10 @@ export function ProviderSettingsForm({
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>(),
-    [saved, setSaved] = useState(false);
+    [saved, setSaved] = useState(false),
+    [tlsValidation, setTlsValidation] = useState<
+      "verify" | "trustServerCertificate"
+    >("verify");
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (busy || !authenticated) return;
@@ -253,6 +256,9 @@ export function ProviderSettingsForm({
       username: value("username"),
       password: String(data.get("password") ?? ""),
       caPem: value("caPem"),
+      tlsValidation: value("tlsValidation") as
+        | "verify"
+        | "trustServerCertificate",
       uidEncoding: value("uidEncoding") as "hex8" | "decimal",
     };
     setBusy(true);
@@ -260,6 +266,7 @@ export function ProviderSettingsForm({
     setSaved(false);
     const clear = () => {
       form.reset();
+      setTlsValidation("verify");
       for (const field of Array.from(form.elements))
         if (
           field instanceof HTMLInputElement ||
@@ -273,6 +280,7 @@ export function ProviderSettingsForm({
         username: "",
         password: "",
         caPem: "",
+        tlsValidation: "verify",
         uidEncoding: "hex8",
       });
     };
@@ -295,8 +303,7 @@ export function ProviderSettingsForm({
       <h2>校园数据源</h2>
       <p className="muted">
         从 Concard.dbo.v_ViewCardInfo
-        按卡号查询，只读取卡号、姓名、班级。连接使用 SQL Server 账号和经验证的
-        TLS。
+        按卡号查询，只读取卡号、姓名、班级。连接使用 SQL Server 账号和 TLS。
       </p>
       <p className="muted">
         完整填写新配置以覆盖服务端配置；提交后立即清空，本机不保存或回填。失败后须重新输入；若响应丢失，结果可能尚未确认。
@@ -345,9 +352,38 @@ export function ProviderSettingsForm({
               />
             </Field>
           </div>
-          <Field label="TLS CA 证书（PEM，可留空）" htmlFor="provider-ca">
-            <textarea id="provider-ca" name="caPem" spellCheck={false} />
+          <Field label="数据源证书校验" htmlFor="provider-tls-validation">
+            <select
+              id="provider-tls-validation"
+              name="tlsValidation"
+              value={tlsValidation}
+              onChange={(event) => {
+                const next = event.target.value as typeof tlsValidation;
+                if (next === "trustServerCertificate") {
+                  const ca =
+                    event.currentTarget.form?.elements.namedItem("caPem");
+                  if (ca instanceof HTMLTextAreaElement) ca.value = "";
+                }
+                setTlsValidation(next);
+              }}
+            >
+              <option value="verify">验证证书（默认）</option>
+              <option value="trustServerCertificate">
+                跳过证书校验（仍使用 TLS 加密）
+              </option>
+            </select>
           </Field>
+          {tlsValidation === "verify" && (
+            <Field label="TLS CA 证书（PEM，可留空）" htmlFor="provider-ca">
+              <textarea id="provider-ca" name="caPem" spellCheck={false} />
+            </Field>
+          )}
+          {tlsValidation === "trustServerCertificate" && (
+            <Banner tone="warning">
+              此模式不验证 SQL Server
+              的身份，仅加密传输。请确认数据库地址来自可信网络。
+            </Banner>
+          )}
           <div className="form-grid">
             <Field label="卡号表示" htmlFor="provider-uid-encoding">
               <select

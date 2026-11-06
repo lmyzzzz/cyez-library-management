@@ -33,9 +33,18 @@ export const sqlServerProviderSchema = z
             value,
           ),
       ),
+    tlsValidation: z.enum(["verify", "trustServerCertificate"]).optional(),
     uidEncoding: z.enum(["hex8", "decimal"]),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) =>
+      value.tlsValidation !== "trustServerCertificate" || value.caPem === "",
+    {
+      message: "CA_NOT_USED_WITH_TRUST_SERVER_CERTIFICATE",
+      path: ["caPem"],
+    },
+  );
 export type SqlServerProviderConfig = z.infer<typeof sqlServerProviderSchema>;
 export const studentSchema = profileSchema.extend({
   id: hashId,

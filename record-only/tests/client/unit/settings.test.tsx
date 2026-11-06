@@ -179,6 +179,48 @@ describe("C-U-05 设置和只读历史", () => {
     expect(screen.queryByLabelText("卡号列")).toBeNull();
   });
 
+  it("切换为跳过数据源证书校验时清除 CA，提交后恢复默认模式", async () => {
+    call.mockResolvedValueOnce({ ok: true });
+    render(<ProviderSettingsForm authenticated />);
+    fireEvent.change(screen.getByLabelText("SQL Server 地址"), {
+      target: { value: "school.example" },
+    });
+    fireEvent.change(screen.getByLabelText("端口"), {
+      target: { value: "1433" },
+    });
+    fireEvent.change(screen.getByLabelText("数据库账号"), {
+      target: { value: "reader" },
+    });
+    fireEvent.change(screen.getByLabelText("数据库密码"), {
+      target: { value: "temporary-password" },
+    });
+    fireEvent.change(screen.getByLabelText("TLS CA 证书（PEM，可留空）"), {
+      target: { value: "old-ca" },
+    });
+    fireEvent.change(screen.getByLabelText("数据源证书校验"), {
+      target: { value: "trustServerCertificate" },
+    });
+    expect(screen.queryByLabelText("TLS CA 证书（PEM，可留空）")).toBeNull();
+    fireEvent.change(screen.getByLabelText("卡号表示"), {
+      target: { value: "hex8" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖服务端配置" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "replaceProviderConfig",
+        expect.objectContaining({
+          caPem: "",
+          tlsValidation: "trustServerCertificate",
+        }),
+      ),
+    );
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText("数据源证书校验") as HTMLSelectElement).value,
+      ).toBe("verify"),
+    );
+  });
+
   it("串口参数与进程选择按整份配置提交，生产可选手动输入", async () => {
     const refresh = vi.fn();
     render(<ReaderSettings status={status} refresh={refresh} />);

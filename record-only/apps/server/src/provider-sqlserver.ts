@@ -39,7 +39,8 @@ export class SqlServerCampusProvider implements CampusProvider {
       pool: { max: 1, min: 0, idleTimeoutMillis: 1000 },
       options: {
         encrypt: true,
-        trustServerCertificate: false,
+        trustServerCertificate:
+          this.config.tlsValidation === "trustServerCertificate",
         enableArithAbort: true,
         cryptoCredentialsDetails: this.config.caPem
           ? { ca: this.config.caPem }
