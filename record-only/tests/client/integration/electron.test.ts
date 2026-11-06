@@ -126,7 +126,7 @@ async function login() {
 }
 test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口", async () => {
   expect(await call<{ reader: string }>("status")).toMatchObject({
-    reader: "Rust mock：Wiegand-34 手动输入",
+    reader: "手动输入已就绪",
   });
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
   await expect(
@@ -571,7 +571,7 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
   ).rejects.toThrow();
   await expect
     .poll(async () => (await call<{ reader: string }>("status")).reader)
-    .toContain("Rust mock");
+    .toContain("手动输入已就绪");
   await call("configureReader", { kind: "mock" });
   const store = new LocalStore(join(userData, "library.sqlite"));
   await store.init();
@@ -581,7 +581,7 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
   expect((await call<{ autoLogin: boolean }>("status")).autoLogin).toBe(false);
 });
 
-test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock", async () => {
+test("C-I-13: 生产客户端可在设置页启动手动输入", async () => {
   const directory = await mkdtemp(join(tmpdir(), "cyez-reader-setup-"));
   const configFile = join(directory, "client-config.json");
   await writeFile(
@@ -589,7 +589,7 @@ test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock"
     JSON.stringify({ environment: "production", identity }),
   );
   const packagedExecutable = process.env.CYEZ_ELECTRON_EXECUTABLE;
-  const setup = await electron.launch({
+  let setup = await electron.launch({
     executablePath: packagedExecutable
       ? resolve(packagedExecutable)
       : undefined,
@@ -617,13 +617,31 @@ test("C-I-13: 生产客户端可先启动设置页选择读卡器且禁止 mock"
       setupPage.getByRole("heading", { name: "读卡器" }),
     ).toBeVisible();
     await expect(
-      setupPage.getByRole("option", { name: "手动 UID 测试窗口" }),
-    ).toHaveCount(0);
-    await expect(
-      setupPage.evaluate(() =>
-        window.library.call("configureReader", { kind: "mock" }),
+      setupPage.getByRole("option", { name: "手动输入" }),
+    ).toHaveCount(1);
+    await setupPage.getByLabel("读卡进程").selectOption("mock");
+    await setupPage.getByRole("button", { name: "覆盖并启动" }).click();
+    await expect(setupPage.getByText(/手动输入已就绪/)).toBeVisible();
+    await setup.close();
+    setup = await electron.launch({
+      executablePath: packagedExecutable
+        ? resolve(packagedExecutable)
+        : undefined,
+      args: packagedExecutable ? [] : [resolve("apps/teacher")],
+      env: {
+        ...process.env,
+        CYEZ_USER_DATA: directory,
+        CYEZ_CLIENT_CONFIG: configFile,
+      },
+    });
+    const restarted = await setup.firstWindow();
+    await expect(restarted.getByRole("link", { name: "设置" })).toBeVisible();
+    expect(
+      await restarted.evaluate(
+        async () =>
+          (await window.library.call<{ reader: string }>("status", {})).reader,
       ),
-    ).rejects.toThrow();
+    ).toBe("手动输入已就绪");
   } finally {
     await setup.close();
   }

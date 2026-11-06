@@ -39,7 +39,7 @@
     "test:reader:mock": "cargo test --manifest-path Cargo.toml -p cyez-reader-mock --locked",
     "test:reader:serial": "cargo test --manifest-path Cargo.toml -p cyez-reader-serial --locked",
     "test:reader:acr1552": "cargo test --manifest-path Cargo.toml -p cyez-reader-acr1552 --locked",
-    "package:win": "yarn build:reader:serial && yarn build:reader:acr1552 && yarn build:client && yarn workspace @record/teacher package:win"
+    "package:win": "yarn build:readers && yarn build:client && yarn workspace @record/teacher package:win"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

@@ -179,7 +179,7 @@ describe("C-U-05 设置和只读历史", () => {
     expect(screen.queryByLabelText("卡号列")).toBeNull();
   });
 
-  it("串口参数与进程选择按整份配置提交，生产隐藏 mock", async () => {
+  it("串口参数与进程选择按整份配置提交，生产可选手动输入", async () => {
     const refresh = vi.fn();
     render(<ReaderSettings status={status} refresh={refresh} />);
     expect((screen.getByLabelText("串口") as HTMLInputElement).value).toBe("");
@@ -232,9 +232,14 @@ describe("C-U-05 设置和只读历史", () => {
         refresh={refresh}
       />,
     );
-    expect(
-      screen.queryByRole("option", { name: "手动 UID 测试窗口" }),
-    ).toBeNull();
+    expect(screen.getByRole("option", { name: "手动输入" })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("读卡进程"), {
+      target: { value: "mock" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("configureReader", { kind: "mock" }),
+    );
   });
   it("ACR1552U 设置枚举设备并整份覆盖，不回填已存参数", async () => {
     const refresh = vi.fn();

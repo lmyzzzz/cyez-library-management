@@ -27,14 +27,12 @@ const messageSchema = z.discriminatedUnion("type", [
 ]);
 export function resolveReaderExecutable(
   config: ReaderProcessConfig,
-  environment: string,
+  _environment: string,
   appPath: string,
   resourcesPath: string,
   packaged: boolean,
 ): string {
   if (config.kind === "mock") {
-    if (!__CYEZ_TEST_FEATURES__ || environment === "production")
-      throw new Error("MOCK_READER_FORBIDDEN");
     return packaged
       ? resolve(resourcesPath, "readers", "cyez-reader-mock.exe")
       : resolve(appPath, "../../target/release/cyez-reader-mock.exe");
@@ -87,6 +85,7 @@ export class ProcessReader {
     private executable: string,
     private production = false,
     private args: string[] = [],
+    private expectedKind?: "mock" | "hardware",
   ) {}
 
   async start(
@@ -192,7 +191,13 @@ export class ProcessReader {
             );
             start = i + 1;
             if (message.type === "ready") {
-              if (ready || (this.production && message.kind === "mock"))
+              if (
+                ready ||
+                (this.expectedKind && message.kind !== this.expectedKind) ||
+                (this.production &&
+                  message.kind === "mock" &&
+                  this.expectedKind !== "mock")
+              )
                 throw new Error("READER_HANDSHAKE_INVALID");
               ready = true;
               mock = message.kind === "mock";
@@ -203,7 +208,10 @@ export class ProcessReader {
               const uid = Buffer.from(message.uidHex, "hex");
               message.uidHex = "";
               try {
-                accept(uid, mock ? "integration" : "reader");
+                accept(
+                  uid,
+                  mock && !this.production ? "integration" : "reader",
+                );
               } finally {
                 uid.fill(0);
               }

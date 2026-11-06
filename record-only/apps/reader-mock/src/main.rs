@@ -81,11 +81,11 @@ fn main() {
         .flags(nwg::WindowFlags::WINDOW | nwg::WindowFlags::VISIBLE)
         .size((380, 180))
         .position((300, 260))
-        .title("Wiegand-34 UID Mock")
+        .title("手动输入")
         .build(&mut window)
         .expect("WINDOW_INIT_FAILED");
     nwg::Label::builder()
-        .text("UID (8 hex digits, 32 data bits)")
+        .text("UID（8 位十六进制）")
         .position((20, 16))
         .size((330, 24))
         .parent(&window)
@@ -101,14 +101,14 @@ fn main() {
         .build(&mut input)
         .expect("INPUT_INIT_FAILED");
     nwg::Button::builder()
-        .text("Send scan")
+        .text("提交")
         .position((260, 45))
         .size((95, 30))
         .parent(&window)
         .build(&mut button)
         .expect("BUTTON_INIT_FAILED");
     nwg::Label::builder()
-        .text("Enter a UID, then send it to the teacher app.")
+        .text("输入卡片 UID 后提交至教师端。")
         .position((20, 91))
         .size((335, 45))
         .parent(&window)
@@ -128,13 +128,13 @@ fn main() {
                 Some(uid) => {
                     let uid = wiegand34_uid(wiegand34_frame(uid)).expect("generated parity");
                     if send(&format!(r#"{{"type":"scan","uidHex":"{uid:08x}"}}"#)).is_ok() {
-                        status.set_text("Scan sent.");
+                        status.set_text("已发送，请在教师端确认结果。");
                         input.set_text("");
                     } else {
-                        status.set_text("Teacher app disconnected.");
+                        status.set_text("教师端连接已断开。");
                     }
                 }
-                None => status.set_text("Enter exactly 8 hexadecimal digits (0-9, A-F)."),
+                None => status.set_text("请输入恰好 8 位十六进制字符（0-9、A-F）。"),
             }
         }
     });

@@ -16,10 +16,11 @@ const executablePath = resolve(
     "release/win-unpacked/图书馆使用登记.exe",
 );
 
-test("发布包不含测试进程、开发入口、源码映射和注入刷卡动作", async () => {
+test("发布包包含手动输入、硬件进程且不含开发入口和注入刷卡动作", async () => {
   const resources = join(dirname(executablePath), "resources");
   expect((await readdir(join(resources, "readers"))).sort()).toEqual([
     "cyez-reader-acr1552.exe",
+    "cyez-reader-mock.exe",
     "cyez-reader-serial.exe",
   ]);
   const asar = createRequire(import.meta.url)("@electron/asar") as {
@@ -43,12 +44,12 @@ test("发布包不含测试进程、开发入口、源码映射和注入刷卡�
       .extractFile(archive, file.split("/").join(sep))
       .toString();
     expect(code, file).not.toMatch(
-      /integrationScan|allowed-1|allowed-2|cyez-reader-mock|测试卡 1|测试卡 2|未授权测试卡|本机诊断|刷新诊断|手动 UID 测试窗口|开发 \/ 集成环境|sourceMappingURL/,
+      /integrationScan|allowed-1|allowed-2|测试卡 1|测试卡 2|未授权测试卡|本机诊断|刷新诊断|手动 UID 测试窗口|开发 \/ 集成环境|sourceMappingURL/,
     );
   }
 });
 
-test("正式安装包首次配置、登录、设备管理可用；运行时不能启用测试功能", async () => {
+test("正式安装包首次配置、登录、设备管理与手动输入可用；测试入口仍禁用", async () => {
   const dir = await mkdtemp(join(tmpdir(), "cyez-release-"));
   const adminUrl =
     process.env.TEST_DATABASE_URL ??
@@ -123,15 +124,11 @@ test("正式安装包首次配置、登录、设备管理可用；运行时不�
         window.library.call("integrationScan", { fixture: "allowed-1" }),
       ),
     ).rejects.toThrow("IPC_FORBIDDEN");
-    await expect(
-      page.evaluate(() =>
-        window.library.call("configureReader", { kind: "mock" }),
-      ),
-    ).rejects.toThrow();
     await page.getByRole("button", { name: "读卡器", exact: true }).click();
-    await expect(
-      page.getByRole("option", { name: "手动 UID 测试窗口" }),
-    ).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "手动输入" })).toHaveCount(1);
+    await page.getByLabel("读卡进程").selectOption("mock");
+    await page.getByRole("button", { name: "覆盖并启动" }).click();
+    await expect(page.getByText(/手动输入已就绪/)).toBeVisible();
     const preferences = await desktop.evaluate(
       async ({ BrowserWindow, Menu }) => {
         const window = BrowserWindow.getAllWindows()[0];

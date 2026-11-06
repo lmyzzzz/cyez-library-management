@@ -75,9 +75,9 @@
 
 ## 读卡子进程验证
 
-2026-10-30 增补：Rust `cargo test --locked` 校验 Wiegand-34 位/奇偶、8 位 UID 与 shutdown；客户端实际 spawn Rust release exe 校验握手、前导零、生产拒绝 mock、关闭和重启；用独立故障子进程验证分片/多帧/CRLF、超长/畸形消息、握手超时、缺少可执行文件、提前退出和强制关闭。真实 Electron 套件验证自动启动及打包资源路径；另用原生窗口手动输入验证 scan 输出。所有这些均不能替代 TBD-03 真实硬件。
+2026-11-06 增补：Rust `cargo test --locked` 校验 Wiegand-34 位/奇偶、8 位 UID 与 shutdown；客户端实际 spawn Rust release exe 校验握手、前导零、正式环境仅对显式选择的手动输入允许 mock 握手、提交来源、关闭和重启；用独立故障子进程验证分片/多帧/CRLF、超长/畸形消息、握手超时、缺少可执行文件、提前退出和强制关闭。真实 Electron 套件验证自动启动及打包资源路径；另用原生窗口手动输入验证 scan 输出。所有这些均不能替代 TBD-03 真实硬件。
 
-2026-11-03 增补：内置 Rust 串口进程使用 `serialport` 打开所选端口，不由 Node 解析硬件输入。Linux `cargo test -p cyez-reader-serial --locked` 的伪终端测试执行实际进程读写；Windows Rust 单测和发布构建检查参数校验、打包资源。客户端组件/Electron 检查配置整份覆盖、mock 生产限制、失败恢复、加密凭证自动登录与表单无回填。
+2026-11-06 增补：内置 Rust 串口进程使用 `serialport` 打开所选端口，不由 Node 解析硬件输入。Linux `cargo test -p cyez-reader-serial --locked` 的伪终端测试执行实际进程读写；Windows Rust 单测和发布构建检查参数校验、打包资源。客户端组件/Electron 检查配置整份覆盖、生产手动输入、失败恢复、加密凭证自动登录与表单无回填。
 
 ## 联调与门禁
 

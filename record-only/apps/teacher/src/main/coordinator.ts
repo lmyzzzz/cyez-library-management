@@ -67,7 +67,7 @@ export class Coordinator {
       ...entry,
       logId: randomUUID(),
       atMs: Date.now(),
-      appVersion: "0.1.3",
+      appVersion: "0.1.4",
     });
   }
   async configure(connection: Connection) {
@@ -102,7 +102,7 @@ export class Coordinator {
       pendingOtherOrigins: metrics.pendingCommands - current,
       reader: this.readerState,
       environment: this.environment,
-      version: "0.1.3",
+      version: "0.1.4",
       lastSuccessMs: this.lastSuccessMs,
     };
   }

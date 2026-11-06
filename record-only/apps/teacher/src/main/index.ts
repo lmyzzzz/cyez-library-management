@@ -29,8 +29,6 @@ const configSchema = z
   .superRefine((v, c) => {
     if (!__CYEZ_TEST_FEATURES__ && v.environment !== "production")
       c.addIssue({ code: "custom", message: "PRODUCTION_CONFIG_REQUIRED" });
-    if (v.environment === "production" && v.readerProcess?.kind === "mock")
-      c.addIssue({ code: "custom", message: "MOCK_READER_FORBIDDEN" });
     if (
       v.identity.uidByteLengths.length !== 1 ||
       v.identity.uidByteLengths[0] !== 4
@@ -132,9 +130,7 @@ void app.whenReady().then(async () => {
     if (savedReader && config) {
       try {
         const parsed = readerProcessSchema.parse(JSON.parse(savedReader));
-        if (environment === "production" && parsed.kind === "mock")
-          invalidSavedReader = true;
-        else readerConfig = parsed;
+        readerConfig = parsed;
       } catch {
         invalidSavedReader = true;
       }
@@ -156,6 +152,7 @@ void app.whenReady().then(async () => {
         executable,
         environment === "production",
         readerArguments(choice),
+        choice.kind === "mock" ? "mock" : "hardware",
       );
       adapter = candidate;
       try {
@@ -180,14 +177,13 @@ void app.whenReady().then(async () => {
           },
           (mock) => {
             if (adapter !== candidate) return;
-            coordinator!.readerState =
-              __CYEZ_TEST_FEATURES__ && mock
-                ? "Rust mock：Wiegand-34 手动输入"
-                : choice.kind === "serial"
-                  ? "串口读卡进程已连接"
-                  : choice.kind === "acr1552"
-                    ? "ACR1552U-M1 读卡进程已连接"
-                    : "读卡进程已连接";
+            coordinator!.readerState = mock
+              ? "手动输入已就绪"
+              : choice.kind === "serial"
+                ? "串口读卡进程已连接"
+                : choice.kind === "acr1552"
+                  ? "ACR1552U-M1 读卡进程已连接"
+                  : "读卡进程已连接";
             if (!window.isDestroyed())
               window.webContents.send("library:event", { type: "changed" });
           },
@@ -201,8 +197,6 @@ void app.whenReady().then(async () => {
     };
     const replaceReader = async (choice: ReaderProcessConfig) => {
       if (readerChanging) throw new ApiError("READER_CHANGE_BUSY", 409);
-      if (environment === "production" && choice.kind === "mock")
-        throw new ApiError("MOCK_READER_FORBIDDEN", 403);
       readerChanging = true;
       try {
         const previous = readerConfig;
@@ -392,7 +386,7 @@ void app.whenReady().then(async () => {
   } catch {
     dialog.showErrorBox(
       "启动失败",
-      "请提供有效的 client-config.json，并检查本地存储和读卡进程。生产环境需配置真实读卡可执行文件。",
+      "请提供有效的 client-config.json，并检查本地存储和读卡进程。",
     );
     app.quit();
   }

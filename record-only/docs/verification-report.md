@@ -1,5 +1,20 @@
 # 产品验证报告
 
+## 2026-11-06 教师端 0.1.4 手动输入发布
+
+正式包加入可选“手动输入”读卡进程，窗口标题和设置项均使用该名称；内部 `kind:"mock"` 保持配置兼容。正式环境只对显式选择的内置进程接受 mock 握手，UID 作为普通读卡来源提交，仍须由服务端查询校园数据源确认。测试卡按钮、注入刷卡 IPC、诊断面板和 DevTools 保持禁用。手动输入不构成实物读卡器验收。
+
+| 检查 | 本次实际结果 |
+| --- | --- |
+| 依赖、静态与格式 | `yarn install --immutable --mode=skip-build`、TypeScript、Prettier、`cargo fmt --check` 通过 |
+| 客户端单元/组件 | 60 项通过；覆盖率 statements 88.96%、branches 84.54%、functions 87.31%、lines 89.76% |
+| Rust 手动进程 | 3 项测试通过，release 可执行文件已重新构建 |
+| Electron 集成 | 11 项通过，Compose 专用 1 项按默认配置跳过；生产配置下设置页启动手动进程成功，新增重启恢复用例单独复测通过 |
+| 正式 exe | 2 项通过：实际 asar/资源包含三个读卡进程，无测试刷卡入口；实际 `win-unpacked` exe 完成首次配置、TLS 登录、设备管理并启动手动进程 |
+| Windows 安装包 | `release/cyez-library-0.1.4-x64-setup.exe`，119649986 字节，SHA-256 `b7dad05005003e6d0530705290a2ce303af0036d44142f4b79937377fc7fe67f`，Authenticode `NotSigned` |
+
+本次没有在目标机器执行 NSIS 安装或实物读卡器测试；学校正式 SQL Server 与卡号对照验收仍待完成。发布测试验证进程可启动，`--test-uid` 进程测试验证正式来源标记；原生窗口按钮的端到端点击未自动化。
+
 ## 2026-11-05 教师端 0.1.3 发布清理
 
 正式构建在编译阶段移除开发提示、测试卡按钮/IPC、手动 UID 选项和诊断面板；NSIS 资源只包含串口与 ACR1552U 进程。禁用 DevTools 和默认 Electron 菜单，拒绝非 production 客户端配置，运行环境变量不能打开测试功能。保留必要的连接、读卡、容量、断线与待确认提交提示以及持久化脱敏日志。开发使用 `yarn dev` 或显式 `build:client:integration`。

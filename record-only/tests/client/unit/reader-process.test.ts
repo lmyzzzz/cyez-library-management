@@ -10,12 +10,12 @@ import {
 const executable = resolve("target/release/cyez-reader-mock.exe");
 
 describe("Wiegand-34 独立读卡进程", () => {
-  it("配置只允许集成 mock 或绝对路径生产进程", () => {
+  it("手动输入可在正式包解析，外部进程仍需绝对路径", () => {
     expect(readerProcessSchema.safeParse({ kind: "mock" }).success).toBe(true);
     expect(
       readerProcessSchema.safeParse({ kind: "external", executable }).success,
     ).toBe(true);
-    expect(() =>
+    expect(
       resolveReaderExecutable(
         { kind: "mock" },
         "production",
@@ -23,7 +23,7 @@ describe("Wiegand-34 独立读卡进程", () => {
         "C:/resources",
         true,
       ),
-    ).toThrow("MOCK_READER_FORBIDDEN");
+    ).toMatch(/readers[\\/]cyez-reader-mock\.exe$/);
     expect(() =>
       resolveReaderExecutable(
         { kind: "external", executable: "reader.exe" },
@@ -164,7 +164,7 @@ describe("Wiegand-34 独立读卡进程", () => {
     await reader.stop();
   });
 
-  it("生产进程拒绝 mock 握手，且未就绪不能发送 UID", async () => {
+  it("正式环境仅对显式选择的手动进程接受 mock 握手", async () => {
     const reader = new ProcessReader(executable, true, [
       "--test-uid",
       "00000001",
@@ -177,6 +177,18 @@ describe("Wiegand-34 独立读卡进程", () => {
     expect(accept).not.toHaveBeenCalled();
     expect(error).toHaveBeenCalled();
     await reader.stop();
+    const manual = new ProcessReader(
+      executable,
+      true,
+      ["--test-uid", "00000001"],
+      "mock",
+    );
+    const scans: string[] = [];
+    await manual.start((uid, source) => {
+      scans.push(`${Buffer.from(uid).toString("hex")}:${source}`);
+    }, vi.fn());
+    await vi.waitFor(() => expect(scans).toEqual(["00000001:reader"]));
+    await manual.stop();
   });
 
   it("畸形帧和缺少 ready 的消息不得变成刷卡", async () => {

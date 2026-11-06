@@ -1,6 +1,6 @@
 {
   "name": "@record/teacher",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "main": "out/main/index.js",
@@ -44,6 +44,10 @@
       "package.json"
     ],
     "extraResources": [
+      {
+        "from": "../../target/release/cyez-reader-mock.exe",
+        "to": "readers/cyez-reader-mock.exe"
+      },
       {
         "from": "../../target/release/cyez-reader-serial.exe",
         "to": "readers/cyez-reader-serial.exe"

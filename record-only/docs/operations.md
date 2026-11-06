@@ -2,7 +2,7 @@
 
 服务端主分支 CI 在测试与构建通过后，将 API、PostgreSQL、HTTPS 网关镜像分别发布到 `ghcr.io/lmyzzzz/cyez-record-only-api`、`ghcr.io/lmyzzzz/cyez-record-only-postgres17`、`ghcr.io/lmyzzzz/cyez-record-only-https-gateway`，各有 `sha-<完整提交号>` 和 `latest` 标签。正式部署建议固定 SHA：在宿主 `.env` 中按 `.env.example` 设置三个 `*_IMAGE` 和同一个 `RELEASE_TAG=sha-<完整提交号>`，保留原 secrets、配置、`DATA_PREFIX` 和命名卷。执行 `docker compose --env-file .env pull` 后，先在临时数据副本验证迁移，再执行 `docker compose --env-file .env up -d --no-build`。如 GHCR 包未设为公开，拉取机器须先以具有 `read:packages` 权限的账号运行 `docker login ghcr.io`。`latest` 适合临时检查，不用于需可复现的部署；本地默认镜像名和构建流程不变。
 
-2026-11-05 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.3`），仅打包串口和 ACR1552U 读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。
+2026-11-06 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.4`），打包手动输入、串口和 ACR1552U 三个读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。
 
 2026-11-05：内置 Concard SQL Server 接入已经实现，部署/升级前准备新的服务端加密密钥并运行 `003-provider-config` 迁移。教师端在“设置 → 校园数据源”一次性提交完整新配置。固定只读取卡号、姓名、班级；表内账号不使用。详细字段、单向边界、密钥与命令见[Concard 接入](campus-sqlserver.md)。下文外置 module 仍是可选兼容路径，不是本次 SQL 接入的前置。
 
@@ -61,7 +61,7 @@ corepack yarn test:release:client
 
 安装包在空白 Windows 用户数据目录可直接启动，显示“首次配置”。输入与服务端完全一致的身份版本（`HASH_VERSION`）、固定盐（`FIXED_SALT_HEX`）和发卡方（`CARD_ISSUER`）；UID 长度固定为 4 字节。确认后客户端仅在缺失时创建 `%APPDATA%/图书馆使用登记/client-config.json`，环境为 `production`，随后进入设置页手动填写服务器 IP、HTTPS 端口、证书指纹和登录信息，再选择读卡进程。首次配置前禁用刷卡和业务动作；界面不读取/回填已保存的身份值，也不覆盖已有配置。固定盐需从受信任的部署渠道取得，不使用集成模板中的测试值。
 
-运维仍可预置 `client-config.json`（或通过 `CYEZ_CLIENT_CONFIG` 指定现有文件），字段为 `environment:"production"`、共享 `identity` 参数及可选 `readerProcess`。显式指定的配置文件缺失或内容无效时仍启动失败，避免误入另一个配置目录。默认读卡进程可为 ACR1552U PC/SC、串口或外部进程；未预设读卡进程也可进入设置页，但刷卡不可用。内置进程配置见[管道协议](reader-process.md)。main 不加载 JavaScript 硬件模块。生产配置及握手均拒绝 mock；`identity.uidByteLengths` 必须为 `[4]`。旧 `readerModule` 配置须替换。Windows 包当前未签名；签名、目标系统安装升级和实物读卡验收需 TBD-03/06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端完整覆盖连接配置；原表单不回填。启动自动登录仅对显式加密保存的密码有效，退出登录后需重新勾选。
+运维仍可预置 `client-config.json`（或通过 `CYEZ_CLIENT_CONFIG` 指定现有文件），字段为 `environment:"production"`、共享 `identity` 参数及可选 `readerProcess`。显式指定的配置文件缺失或内容无效时仍启动失败，避免误入另一个配置目录。默认读卡进程可为 ACR1552U PC/SC、串口、手动输入或外部进程；未预设读卡进程也可进入设置页，但刷卡不可用。内置进程配置见[管道协议](reader-process.md)。main 不加载 JavaScript 硬件模块。生产仅对显式选择的内置手动输入接受 mock 握手，外部进程不得伪装；`identity.uidByteLengths` 必须为 `[4]`。旧 `readerModule` 配置须替换。Windows 包当前未签名；签名、目标系统安装升级和实物读卡验收需 TBD-03/06。证书更换时按受信任渠道分发新的叶证书指纹，在教师端完整覆盖连接配置；原表单不回填。启动自动登录仅对显式加密保存的密码有效，退出登录后需重新勾选。
 
 ## 升级与故障
 
