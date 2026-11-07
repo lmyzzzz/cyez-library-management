@@ -1,5 +1,7 @@
 # 教师端界面与 cyez-ui 接入
 
+2026-11-07 页面骨架统一：标准页使用 cyez-ui `Page`/`PageHeader`，内容区使用 `Card`、`Toolbar`、`TableContainer`、`Badge`；设置表单使用 `SettingsContent`/`SettingsSection`/`SettingsRow` 与 `Input`/`Select`/`Switch`；弹窗统一 `ModalPanel`，标签删除使用 `ConfirmModal`，设备行操作收进 `ActionMenu`。应用 CSS 仅保留布局类，颜色/圆角/间距取自主题 token。
+
 2026-11-05 正式发布：正式构建不含开发环境横幅、测试刷卡按钮、手动 UID 选项或诊断面板，不能经运行配置启用。保留连接、读卡器、校园数据源、设备管理、历史记录设置和必要的离线/容量/待确认提交提示。“测试连接”改为“检查连接”；未知错误使用可理解的失败提示，不向教师展示内部错误码。开发测试入口仅在显式开发/集成构建中出现。
 
 2026-11-05：新增“设置 → 校园数据源”。只输入完整 SQL Server 连接新配置（地址、端口、数据库登录、证书校验方式、可选 CA、卡号表示）；不读取服务端现有配置，不提供列映射。提交后立即清空，只有成功/失败/结果可能未确认的状态，不保存草稿或后台重试。仅三列权限及数据源设置契约见[Concard 接入](campus-sqlserver.md)。

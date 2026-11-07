@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Banner } from "@record/ui";
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  Input,
+  PageHeader,
+  Textarea,
+  Toolbar,
+} from "@record/ui";
 import type {
   DeviceDTO,
   ScanPreview,
@@ -12,9 +21,9 @@ import {
   Failure,
   Empty,
   Pager,
+  StatusBadge,
   timestamp,
   duration,
-  errorText,
 } from "./common.js";
 import { IdleTimer, EndTimer } from "./timers.js";
 type EndFlow = EndPreview | ScanPreview;
@@ -90,12 +99,12 @@ export function EndForm({
   }, []);
   return (
     <>
-      <div className="student-summary">
+      <Card className="student-summary">
         <strong>{record.student.name}</strong>
         <span>
           {record.student.className} · {record.student.schoolNumber}
         </span>
-      </div>
+      </Card>
       <dl className="summary">
         <dt>设备</dt>
         <dd>
@@ -108,10 +117,11 @@ export function EndForm({
         <dt>使用时长</dt>
         <dd>{duration(record.startedAtMs, preview.atMs)}</dd>
       </dl>
-      <label>
+      <label className="block-label">
         使用备注
-        <textarea
+        <Textarea
           aria-label="使用备注"
+          className="settings-textarea"
           value={notes}
           maxLength={8000}
           disabled={busy}
@@ -130,12 +140,13 @@ export function EndForm({
             : `${Math.ceil(remaining / 1000)} 秒后自动结束本条记录`}
         </Banner>
       )}
-      <div className="actions">
-        <Button disabled={busy} onClick={onCancel}>
+      <div className={automatic ? "flow-actions" : "form-actions"}>
+        <Button size="small" disabled={busy} onClick={onCancel}>
           取消
         </Button>
         {automatic && remaining === null && !error && (
           <Button
+            size="small"
             onClick={() => {
               timer.current?.resume();
               setRemaining(5000);
@@ -144,7 +155,12 @@ export function EndForm({
             继续倒计时
           </Button>
         )}
-        <Button variant="primary" disabled={busy} onClick={() => void submit()}>
+        <Button
+          size="small"
+          variant="primary"
+          disabled={busy}
+          onClick={() => void submit()}
+        >
           {busy ? "确认中…" : "确认结束"}
         </Button>
       </div>
@@ -250,34 +266,35 @@ export function Registration({
   };
   return (
     <section className="scan-flow-screen scan-registration">
-      <header className="scan-flow-header">
-        <h1>登记使用</h1>
-        <span className="badge">资料已刷新</span>
-      </header>
-      <div className="student-summary">
+      <PageHeader
+        title="登记使用"
+        actions={<Badge tone="success">资料已刷新</Badge>}
+      />
+      <Card className="student-summary">
         <strong>{preview.student.name}</strong>
         <span>
           {preview.student.className} · {preview.student.schoolNumber}
         </span>
-      </div>
+      </Card>
       <div className="scan-registration-body">
-        <div className="scan-registration-details">
+        <Card className="scan-registration-details">
           <p className="muted">刷卡时间 {timestamp(preview.atMs)}</p>
-          <label>
+          <label className="block-label">
             登记备注
-            <textarea
+            <Textarea
               aria-label="登记备注"
+              className="settings-textarea"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               maxLength={8000}
               disabled={busy}
             />
           </label>
-        </div>
-        <div className="scan-registration-picker">
+        </Card>
+        <Card className="scan-registration-picker">
           <h2>选择设备</h2>
-          <div className="toolbar">
-            <input
+          <Toolbar>
+            <Input
               aria-label="搜索可选设备"
               placeholder="搜索编号或设备名称"
               value={search}
@@ -286,66 +303,78 @@ export function Registration({
                 setPage(1);
               }}
             />
-            <Button onClick={() => void load()}>刷新设备</Button>
-          </div>
+            <Button size="small" onClick={() => void load()}>
+              刷新设备
+            </Button>
+          </Toolbar>
           <div className="picker-list">
-            {devices.items.map((d) => (
-              <div
-                className={`picker-row ${selected?.id === d.id ? "selected" : ""}`}
-                key={d.id}
-              >
-                <div>
-                  <strong>{d.displayName}</strong>
-                  <span>
-                    {d.code} · {d.tags.map((t) => t.name).join(" / ")}
-                  </span>
+            {devices.items.map((d) => {
+              const status = d.isDisabled
+                ? "disabled"
+                : d.active
+                  ? "active"
+                  : "free";
+              return (
+                <div
+                  className={`picker-row ${selected?.id === d.id ? "selected" : ""}`}
+                  key={d.id}
+                >
+                  <div>
+                    <strong>{d.displayName}</strong>
+                    <span>
+                      {d.code} · {d.tags.map((t) => t.name).join(" / ")}
+                    </span>
+                  </div>
+                  <StatusBadge status={status} />
+                  {d.active ? (
+                    <Button
+                      size="small"
+                      disabled={busy}
+                      onClick={async () => {
+                        try {
+                          setEnd(
+                            await window.library.call<EndPreview>(
+                              "endPreview",
+                              { recordId: d.active!.id },
+                            ),
+                          );
+                        } catch (e) {
+                          setError(e);
+                        }
+                      }}
+                    >
+                      先结束使用…
+                    </Button>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant={selected?.id === d.id ? "primary" : "secondary"}
+                      disabled={busy || d.isDisabled}
+                      onClick={() => setSelected(d)}
+                    >
+                      {selected?.id === d.id ? "已选择" : "选择"}
+                    </Button>
+                  )}
                 </div>
-                <span>
-                  {d.isDisabled ? "已禁用" : d.active ? "使用中" : "空闲"}
-                </span>
-                {d.active ? (
-                  <Button
-                    disabled={busy}
-                    onClick={async () => {
-                      try {
-                        setEnd(
-                          await window.library.call<EndPreview>("endPreview", {
-                            recordId: d.active!.id,
-                          }),
-                        );
-                      } catch (e) {
-                        setError(e);
-                      }
-                    }}
-                  >
-                    先结束使用…
-                  </Button>
-                ) : (
-                  <Button
-                    disabled={busy || d.isDisabled}
-                    onClick={() => setSelected(d)}
-                  >
-                    {selected?.id === d.id ? "已选择" : "选择"}
-                  </Button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           {ready && !devices.items.length && (
             <Empty text="没有可用设备，请调整筛选或联系老师添加设备" />
           )}
           <Pager {...devices} setPage={setPage} />
-        </div>
+        </Card>
       </div>
       <Failure error={error} />
-      <div className="actions">
+      <div className="flow-actions">
         <span className="muted">
           连续 {Math.ceil(remaining / 1000)} 秒无操作后取消
         </span>
-        <Button disabled={busy} onClick={onCancel}>
+        <Button size="small" disabled={busy} onClick={onCancel}>
           取消登记
         </Button>
         <Button
+          size="small"
           variant="primary"
           disabled={!selected || busy || sending.current || !ready}
           onClick={() => void submit()}
@@ -428,16 +457,19 @@ export function BatchForm({
       </Banner>
       <div className="batch-list">
         {preview.units.map((unit, i) => (
-          <section key={unit.id}>
+          <Card className="batch-unit" key={unit.id}>
             <h3>
-              批次 {i + 1} · {unit.records.length} 条 · {states[i]}
+              批次 {i + 1} · {unit.records.length} 条 ·{" "}
+              <Badge tone={states[i] === "已完成" ? "success" : "neutral"}>
+                {states[i]}
+              </Badge>
             </h3>
             {unit.records.map((r) => (
               <p key={r.id}>
                 {r.device.code} · {r.student.name} · {timestamp(r.startedAtMs)}
               </p>
             ))}
-          </section>
+          </Card>
         ))}
       </div>
       {preview.units.length > 1 && (
@@ -445,10 +477,11 @@ export function BatchForm({
           每批独立提交，跨批不保证一起成功；失败后保留已完成批次。
         </p>
       )}
-      <label>
+      <label className="block-label">
         追加公共备注
-        <textarea
+        <Textarea
           aria-label="追加公共备注"
+          className="settings-textarea"
           maxLength={4000}
           value={notes}
           disabled={busy || latch.current}
@@ -456,11 +489,12 @@ export function BatchForm({
         />
       </label>
       <Failure error={error} />
-      <div className="actions">
-        <Button disabled={busy} onClick={onCancel}>
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
           {error ? "关闭并刷新" : "取消"}
         </Button>
         <Button
+          size="small"
           variant="danger"
           disabled={busy || !preview.total || latch.current}
           onClick={() => void confirm()}

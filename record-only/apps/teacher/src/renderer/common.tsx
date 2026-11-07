@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactNode, type SVGProps } from "react";
 import {
-  Button,
+  Badge,
   Banner,
-  Modal,
-  ModalTitle,
-  ModalDescription,
+  Button,
   EmptyState,
+  Modal,
+  ModalDescription,
+  ModalPanel,
 } from "@record/ui";
 import type { TeacherBridge } from "../shared/bridge.js";
 import type { WindowControlsBridge } from "@series/electron/shared";
@@ -99,6 +100,32 @@ export function SettingsIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+export function EditIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      {...props}
+    >
+      <path d="M4 20h4l10-10-4-4L4 16v4zM14 6l4 4" />
+    </svg>
+  );
+}
+export function TrashIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      {...props}
+    >
+      <path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5m4-5v5" />
+    </svg>
+  );
+}
 export function timestamp(ms: number | null) {
   return ms === null
     ? "—"
@@ -113,13 +140,13 @@ export function Dialog({
   description,
   children,
   onClose,
-  wide = false,
+  width = "medium",
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   onClose: () => void;
-  wide?: boolean;
+  width?: "small" | "medium" | "large";
 }) {
   return (
     <Modal
@@ -128,18 +155,12 @@ export function Dialog({
         if (!open) onClose();
       }}
     >
-      <section className={`dialog ${wide ? "wide" : ""}`}>
-        <header>
-          <ModalTitle>{title}</ModalTitle>
-          <Button aria-label="关闭对话框" variant="ghost" onClick={onClose}>
-            ×
-          </Button>
-        </header>
-        <ModalDescription>
+      <ModalPanel title={title} close={onClose} width={width}>
+        <ModalDescription className="dialog-description">
           {description ?? "请核对内容后操作。"}
         </ModalDescription>
         {children}
-      </section>
+      </ModalPanel>
     </Modal>
   );
 }
@@ -178,19 +199,68 @@ export function Pager({
       <span>
         共 {total} 条 · 每页 {pageSize} 条
       </span>
-      <Button disabled={page === 1} onClick={() => setPage(page - 1)}>
+      <Button
+        size="small"
+        disabled={page === 1}
+        onClick={() => setPage(page - 1)}
+      >
         上一页
       </Button>
       <span>
         {page} / {Math.max(1, Math.ceil(total / pageSize))}
       </span>
       <Button
+        size="small"
         disabled={page * pageSize >= total}
         onClick={() => setPage(page + 1)}
       >
         下一页
       </Button>
     </footer>
+  );
+}
+type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
+export function StatusBadge({
+  status,
+}: {
+  status: "active" | "free" | "disabled";
+}) {
+  const text =
+    status === "active" ? "使用中" : status === "disabled" ? "禁用" : "空闲";
+  const tone: BadgeTone =
+    status === "active"
+      ? "accent"
+      : status === "disabled"
+        ? "neutral"
+        : "success";
+  return (
+    <Badge tone={tone} data-status={status}>
+      {text}
+    </Badge>
+  );
+}
+export function ConnectionState({
+  authenticated,
+  online,
+  lastUpdated,
+}: {
+  authenticated: boolean;
+  online: boolean;
+  lastUpdated: number | null;
+}) {
+  const tone: BadgeTone = !authenticated
+    ? "neutral"
+    : online
+      ? "success"
+      : "warning";
+  return (
+    <div className="connection-state">
+      <Badge tone={tone}>
+        <span className={`dot ${online ? "online" : ""}`} aria-hidden="true" />
+        {!authenticated ? "未登录" : online ? "已连接服务器" : "连接中断"}
+      </Badge>
+      <small>数据更新 {timestamp(lastUpdated)}</small>
+    </div>
   );
 }
 export function useClock() {

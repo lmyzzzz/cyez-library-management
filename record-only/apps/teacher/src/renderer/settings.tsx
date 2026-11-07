@@ -1,6 +1,30 @@
 import { useEffect, useState } from "react";
-import { Button, Banner, Field, CheckField } from "@record/ui";
-import type { DeviceDTO, TagDTO, Page, RecordDTO } from "@record/protocol";
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  CheckField,
+  ConfirmModal,
+  Field,
+  Input,
+  Page,
+  PageHeader,
+  Select,
+  SettingsContent,
+  SettingsRow,
+  SettingsSection,
+  Switch,
+  TableContainer,
+  Textarea,
+  Toolbar,
+} from "@record/ui";
+import type {
+  DeviceDTO,
+  TagDTO,
+  Page as PageData,
+  RecordDTO,
+} from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
 import type { IdentityConfig } from "@record/protocol/identity";
 import type { ReaderProcessConfig } from "../shared/reader-config.js";
@@ -11,6 +35,7 @@ import {
   Pager,
   timestamp,
   duration,
+  errorText,
 } from "./common.js";
 export function InitialClientSetup({ onDone }: { onDone: () => void }) {
   const [hashVersion, setHashVersion] = useState(""),
@@ -39,50 +64,54 @@ export function InitialClientSetup({ onDone }: { onDone: () => void }) {
     }
   };
   return (
-    <section className="panel connection" aria-label="首次配置">
-      <h1>首次配置</h1>
-      <p className="muted">
-        身份参数须与服务器一致。配置创建后不可在此界面读取或修改。
-      </p>
-      <div className="form-grid">
-        <Field label="身份版本" htmlFor="setup-hash-version">
-          <input
-            id="setup-hash-version"
-            value={hashVersion}
-            autoComplete="off"
-            onChange={(e) => setHashVersion(e.target.value)}
-          />
-        </Field>
-        <Field label="发卡方" htmlFor="setup-issuer">
-          <input
-            id="setup-issuer"
-            value={issuer}
-            autoComplete="off"
-            onChange={(e) => setIssuer(e.target.value)}
-          />
-        </Field>
+    <Page>
+      <div className="page-stack initial-setup-page">
+        <PageHeader title="首次配置" />
+        <Card className="initial-setup-card">
+          <p className="muted">
+            身份参数须与服务器一致。配置创建后不可在此界面读取或修改。
+          </p>
+          <div className="form-grid">
+            <Field label="身份版本" htmlFor="setup-hash-version">
+              <Input
+                id="setup-hash-version"
+                value={hashVersion}
+                autoComplete="off"
+                onChange={(e) => setHashVersion(e.target.value)}
+              />
+            </Field>
+            <Field label="发卡方" htmlFor="setup-issuer">
+              <Input
+                id="setup-issuer"
+                value={issuer}
+                autoComplete="off"
+                onChange={(e) => setIssuer(e.target.value)}
+              />
+            </Field>
+          </div>
+          <Field label="固定盐（十六进制）" htmlFor="setup-salt">
+            <Input
+              id="setup-salt"
+              type="password"
+              value={fixedSaltHex}
+              autoComplete="off"
+              spellCheck={false}
+              onChange={(e) => setFixedSaltHex(e.target.value)}
+            />
+          </Field>
+          <Failure error={error} />
+          <div className="form-actions">
+            <Button
+              variant="primary"
+              disabled={busy || !hashVersion || !issuer || !fixedSaltHex}
+              onClick={() => void save()}
+            >
+              保存并继续
+            </Button>
+          </div>
+        </Card>
       </div>
-      <Field label="固定盐（十六进制）" htmlFor="setup-salt">
-        <input
-          id="setup-salt"
-          type="password"
-          value={fixedSaltHex}
-          autoComplete="off"
-          spellCheck={false}
-          onChange={(e) => setFixedSaltHex(e.target.value)}
-        />
-      </Field>
-      <Failure error={error} />
-      <div className="actions">
-        <Button
-          variant="primary"
-          disabled={busy || !hashVersion || !issuer || !fixedSaltHex}
-          onClick={() => void save()}
-        >
-          保存并继续
-        </Button>
-      </div>
-    </section>
+    </Page>
   );
 }
 export function ConnectionForm({
@@ -140,80 +169,96 @@ export function ConnectionForm({
     }
   };
   return (
-    <section className="panel connection">
-      <h2>连接配置</h2>
-      <p className="muted">
-        输入完整的新配置以覆盖本机连接。已保存的配置不会回填；只有勾选保存密码时，登录凭证才使用本机系统加密存储。
-      </p>
-      <div className="form-grid">
-        <Field label="服务器 IP" htmlFor="server-ip">
-          <input
-            id="server-ip"
+    <SettingsContent>
+      <SettingsSection
+        title="服务器连接"
+        description="输入完整的新配置以覆盖本机连接。已保存的配置不会回填，也不安装系统自签名证书。"
+      >
+        <SettingsRow label="服务器 IP">
+          <Input
+            aria-label="服务器 IP"
             value={ip}
             onChange={(e) => setIp(e.target.value)}
             placeholder="例如 192.168.1.10"
           />
-        </Field>
-        <Field label="HTTPS 端口" htmlFor="server-port">
-          <input
-            id="server-port"
+        </SettingsRow>
+        <SettingsRow label="HTTPS 端口">
+          <Input
+            aria-label="HTTPS 端口"
+            className="settings-number"
             type="number"
             min={1}
             max={65535}
             value={port}
             onChange={(e) => setPort(Number(e.target.value))}
           />
-        </Field>
-      </div>
-      <Field label="叶证书 SHA-256 指纹" htmlFor="server-pin">
-        <textarea
-          id="server-pin"
-          className="fingerprint"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          placeholder="64 位十六进制，支持冒号分隔"
-        />
-      </Field>
-      <div className="form-grid">
-        <Field label="共享账号" htmlFor="username">
-          <input
-            id="username"
+        </SettingsRow>
+        <SettingsRow
+          label="叶证书 SHA-256 指纹"
+          description="64 位十六进制，支持冒号分隔；不是 SHA-1 指纹。"
+        >
+          <Textarea
+            aria-label="叶证书 SHA-256 指纹"
+            className="settings-textarea fingerprint"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder="64 位十六进制，支持冒号分隔"
+          />
+        </SettingsRow>
+      </SettingsSection>
+      <SettingsSection
+        title="共享账号"
+        description="所有教师共用一个业务账号。只有勾选保存密码时，登录凭证才使用本机系统加密存储。"
+      >
+        <SettingsRow label="账号">
+          <Input
+            aria-label="共享账号"
             autoComplete="off"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-        </Field>
-        <Field label="密码" htmlFor="password">
-          <input
-            id="password"
+        </SettingsRow>
+        <SettingsRow label="密码">
+          <Input
+            aria-label="密码"
             type="password"
             autoComplete="off"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </Field>
-      </div>
-      <CheckField
-        label="保存密码"
-        checked={remember}
-        onChange={(e) => {
-          setRemember(e.target.checked);
-          if (!e.target.checked) setAutoLogin(false);
-        }}
-      />
-      <CheckField
-        label="启动时自动登录"
-        checked={remember && autoLogin}
-        disabled={!remember || busy}
-        onChange={(e) => setAutoLogin(e.target.checked)}
-      />
+        </SettingsRow>
+        <SettingsRow label="保存密码" description="使用本机系统加密存储">
+          <Switch
+            label=""
+            aria-label="保存密码"
+            checked={remember}
+            onChange={(e) => {
+              setRemember(e.target.checked);
+              if (!e.target.checked) setAutoLogin(false);
+            }}
+          />
+        </SettingsRow>
+        <SettingsRow
+          label="启动时自动登录"
+          description="需要先保存密码；已保存账号属于其他服务器时不会自动登录。"
+        >
+          <Switch
+            label=""
+            aria-label="启动时自动登录"
+            checked={remember && autoLogin}
+            disabled={!remember || busy}
+            onChange={(e) => setAutoLogin(e.target.checked)}
+          />
+        </SettingsRow>
+      </SettingsSection>
       <Failure error={error} />
       {message && <Banner tone="success">{message}</Banner>}
-      <div className="actions">
-        <Button disabled={busy} onClick={() => void run("test")}>
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={() => void run("test")}>
           检查连接
         </Button>
         <Button
+          size="small"
           variant="primary"
           disabled={busy || !username || !password}
           onClick={() => void run("login")}
@@ -221,16 +266,17 @@ export function ConnectionForm({
           覆盖连接并登录
         </Button>
         <Button
+          size="small"
           disabled={busy || !status?.savedCredentials}
           onClick={() => void run("saved")}
         >
           使用已保存登录
         </Button>
-        <Button disabled={busy} onClick={() => void run("clear")}>
+        <Button size="small" disabled={busy} onClick={() => void run("clear")}>
           清除保存项
         </Button>
       </div>
-    </section>
+    </SettingsContent>
   );
 }
 export function ProviderSettingsForm({
@@ -299,33 +345,29 @@ export function ProviderSettingsForm({
     }
   };
   return (
-    <section className="panel connection">
-      <h2>校园数据源</h2>
-      <p className="muted">
-        从 Concard.dbo.v_ViewCardInfo
-        按卡号查询，只读取卡号、姓名、班级。连接使用 SQL Server 账号和 TLS。
-      </p>
-      <p className="muted">
-        完整填写新配置以覆盖服务端配置；提交后立即清空，本机不保存或回填。失败后须重新输入；若响应丢失，结果可能尚未确认。
-      </p>
+    <SettingsContent>
       {!authenticated && <Banner tone="warning">请先登录服务器。</Banner>}
       <form onSubmit={(event) => void submit(event)} autoComplete="off">
         <fieldset
+          className="settings-fieldset"
           disabled={busy || !authenticated}
-          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
         >
-          <div className="form-grid">
-            <Field label="SQL Server 地址" htmlFor="provider-host">
-              <input
-                id="provider-host"
+          <SettingsSection
+            title="SQL Server 数据源"
+            description="从 Concard.dbo.v_ViewCardInfo 按卡号查询，只读取卡号、姓名、班级。连接使用 SQL Server 账号和 TLS。"
+          >
+            <SettingsRow label="SQL Server 地址">
+              <Input
+                aria-label="SQL Server 地址"
                 name="host"
                 required
                 autoComplete="off"
               />
-            </Field>
-            <Field label="端口" htmlFor="provider-port">
-              <input
-                id="provider-port"
+            </SettingsRow>
+            <SettingsRow label="端口">
+              <Input
+                aria-label="端口"
+                className="settings-number"
                 name="port"
                 type="number"
                 min={1}
@@ -333,61 +375,58 @@ export function ProviderSettingsForm({
                 placeholder="1433"
                 required
               />
-            </Field>
-            <Field label="数据库账号" htmlFor="provider-user">
-              <input
-                id="provider-user"
+            </SettingsRow>
+            <SettingsRow label="数据库账号">
+              <Input
+                aria-label="数据库账号"
                 name="username"
                 required
                 autoComplete="off"
               />
-            </Field>
-            <Field label="数据库密码" htmlFor="provider-password">
-              <input
-                id="provider-password"
+            </SettingsRow>
+            <SettingsRow label="数据库密码">
+              <Input
+                aria-label="数据库密码"
                 name="password"
                 type="password"
                 required
                 autoComplete="new-password"
               />
-            </Field>
-          </div>
-          <Field label="数据源证书校验" htmlFor="provider-tls-validation">
-            <select
-              id="provider-tls-validation"
-              name="tlsValidation"
-              value={tlsValidation}
-              onChange={(event) => {
-                const next = event.target.value as typeof tlsValidation;
-                if (next === "trustServerCertificate") {
-                  const ca =
-                    event.currentTarget.form?.elements.namedItem("caPem");
-                  if (ca instanceof HTMLTextAreaElement) ca.value = "";
-                }
-                setTlsValidation(next);
-              }}
-            >
-              <option value="verify">验证证书（默认）</option>
-              <option value="trustServerCertificate">
-                跳过证书校验（仍使用 TLS 加密）
-              </option>
-            </select>
-          </Field>
-          {tlsValidation === "verify" && (
-            <Field label="TLS CA 证书（PEM，可留空）" htmlFor="provider-ca">
-              <textarea id="provider-ca" name="caPem" spellCheck={false} />
-            </Field>
-          )}
-          {tlsValidation === "trustServerCertificate" && (
-            <Banner tone="warning">
-              此模式不验证 SQL Server
-              的身份，仅加密传输。请确认数据库地址来自可信网络。
-            </Banner>
-          )}
-          <div className="form-grid">
-            <Field label="卡号表示" htmlFor="provider-uid-encoding">
-              <select
-                id="provider-uid-encoding"
+            </SettingsRow>
+            <SettingsRow label="数据源证书校验">
+              <Select
+                aria-label="数据源证书校验"
+                name="tlsValidation"
+                value={tlsValidation}
+                onChange={(event) => {
+                  const next = event.target.value as typeof tlsValidation;
+                  if (next === "trustServerCertificate") {
+                    const ca =
+                      event.currentTarget.form?.elements.namedItem("caPem");
+                    if (ca instanceof HTMLTextAreaElement) ca.value = "";
+                  }
+                  setTlsValidation(next);
+                }}
+              >
+                <option value="verify">验证证书（默认）</option>
+                <option value="trustServerCertificate">
+                  跳过证书校验（仍使用 TLS 加密）
+                </option>
+              </Select>
+            </SettingsRow>
+            {tlsValidation === "verify" && (
+              <SettingsRow label="TLS CA 证书（PEM，可留空）">
+                <Textarea
+                  aria-label="TLS CA 证书（PEM，可留空）"
+                  className="settings-textarea fingerprint"
+                  name="caPem"
+                  spellCheck={false}
+                />
+              </SettingsRow>
+            )}
+            <SettingsRow label="卡号表示">
+              <Select
+                aria-label="卡号表示"
                 name="uidEncoding"
                 required
                 defaultValue=""
@@ -397,15 +436,25 @@ export function ProviderSettingsForm({
                 </option>
                 <option value="hex8">8 位十六进制</option>
                 <option value="decimal">无符号十进制</option>
-              </select>
-            </Field>
-          </div>
+              </Select>
+            </SettingsRow>
+          </SettingsSection>
+          {tlsValidation === "trustServerCertificate" && (
+            <Banner tone="warning">
+              此模式不验证 SQL Server
+              的身份，仅加密传输。请确认数据库地址来自可信网络。
+            </Banner>
+          )}
+          <p className="muted">
+            完整填写新配置以覆盖服务端配置；提交后立即清空，本机不保存或回填。失败后须重新输入；若响应丢失，结果可能尚未确认。
+          </p>
           <Failure error={error} />
           {saved && (
             <Banner tone="success">服务端已覆盖校园数据源配置。</Banner>
           )}
-          <div className="actions">
+          <div className="form-actions">
             <Button
+              size="small"
               variant="primary"
               type="submit"
               disabled={busy || !authenticated}
@@ -415,7 +464,7 @@ export function ProviderSettingsForm({
           </div>
         </fieldset>
       </form>
-    </section>
+    </SettingsContent>
   );
 }
 export function ReaderSettings({
@@ -513,122 +562,122 @@ export function ReaderSettings({
     }
   };
   return (
-    <section className="panel connection">
-      <h2>读卡器</h2>
-      <p className="muted">
-        当前状态：{status.reader}。输入完整参数以覆盖本机读卡配置。
-      </p>
-      <Field label="读卡进程" htmlFor="reader-kind">
-        <select
-          id="reader-kind"
-          value={kind}
-          onChange={(e) =>
-            setKind(e.target.value as ReaderProcessConfig["kind"])
-          }
-        >
-          <option value="serial">内置串口进程</option>
-          <option value="acr1552">ACR1552U-M1 (PC/SC)</option>
-          <option value="external">外部读卡进程</option>
-          <option value="mock">手动输入</option>
-        </select>
-      </Field>
+    <SettingsContent>
+      <SettingsSection
+        title="读卡进程"
+        description={`当前状态：${status.reader}。输入完整参数以覆盖本机读卡配置。`}
+      >
+        <SettingsRow label="读卡进程">
+          <Select
+            aria-label="读卡进程"
+            value={kind}
+            onChange={(e) =>
+              setKind(e.target.value as ReaderProcessConfig["kind"])
+            }
+          >
+            <option value="serial">内置串口进程</option>
+            <option value="acr1552">ACR1552U-M1 (PC/SC)</option>
+            <option value="external">外部读卡进程</option>
+            <option value="mock">手动输入</option>
+          </Select>
+        </SettingsRow>
+      </SettingsSection>
       {kind === "serial" && (
-        <>
-          <div className="form-grid">
-            <Field label="串口" htmlFor="serial-port">
-              <input
-                id="serial-port"
-                list="serial-port-options"
-                value={port}
-                onChange={(e) => setPort(e.target.value)}
-                placeholder="例如 COM3"
-              />
-              <datalist id="serial-port-options">
-                {ports.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
-            </Field>
-            <Field label="比特率" htmlFor="serial-baud">
-              <input
-                id="serial-baud"
-                type="number"
-                min={300}
-                max={921600}
-                value={baudRate}
-                onChange={(e) => setBaudRate(Number(e.target.value))}
-              />
-            </Field>
-            <Field label="数据位" htmlFor="serial-data-bits">
-              <select
-                id="serial-data-bits"
-                value={dataBits}
-                onChange={(e) =>
-                  setDataBits(Number(e.target.value) as 5 | 6 | 7 | 8)
-                }
-              >
-                {[5, 6, 7, 8].map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="校验位" htmlFor="serial-parity">
-              <select
-                id="serial-parity"
-                value={parity}
-                onChange={(e) => setParity(e.target.value as typeof parity)}
-              >
-                <option value="none">无</option>
-                <option value="odd">奇校验</option>
-                <option value="even">偶校验</option>
-              </select>
-            </Field>
-            <Field label="停止位" htmlFor="serial-stop-bits">
-              <select
-                id="serial-stop-bits"
-                value={stopBits}
-                onChange={(e) => setStopBits(Number(e.target.value) as 1 | 2)}
-              >
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-              </select>
-            </Field>
-            <Field label="流控" htmlFor="serial-flow">
-              <select
-                id="serial-flow"
-                value={flowControl}
-                onChange={(e) =>
-                  setFlowControl(e.target.value as typeof flowControl)
-                }
-              >
-                <option value="none">无</option>
-                <option value="hardware">硬件</option>
-                <option value="software">软件</option>
-              </select>
-            </Field>
-            <Field label="卡号格式" htmlFor="serial-format">
-              <select
-                id="serial-format"
-                value={format}
-                onChange={(e) => setFormat(e.target.value as typeof format)}
-              >
-                <option value="hex8">十六进制（固定 8 位）</option>
-                <option value="hex">十六进制（1–8 位）</option>
-                <option value="decimal">十进制（1–10 位）</option>
-                <option value="octal">八进制（1–11 位）</option>
-                <option value="binary">二进制（1–32 位）</option>
-              </select>
-            </Field>
-          </div>
-        </>
+        <SettingsSection title="串口参数">
+          <SettingsRow label="串口">
+            <Input
+              aria-label="串口"
+              list="serial-port-options"
+              value={port}
+              onChange={(e) => setPort(e.target.value)}
+              placeholder="例如 COM3"
+            />
+            <datalist id="serial-port-options">
+              {ports.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+          </SettingsRow>
+          <SettingsRow label="比特率">
+            <Input
+              aria-label="比特率"
+              className="settings-number"
+              type="number"
+              min={300}
+              max={921600}
+              value={baudRate}
+              onChange={(e) => setBaudRate(Number(e.target.value))}
+            />
+          </SettingsRow>
+          <SettingsRow label="数据位">
+            <Select
+              aria-label="数据位"
+              value={dataBits}
+              onChange={(e) =>
+                setDataBits(Number(e.target.value) as 5 | 6 | 7 | 8)
+              }
+            >
+              {[5, 6, 7, 8].map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+          </SettingsRow>
+          <SettingsRow label="校验位">
+            <Select
+              aria-label="校验位"
+              value={parity}
+              onChange={(e) => setParity(e.target.value as typeof parity)}
+            >
+              <option value="none">无</option>
+              <option value="odd">奇校验</option>
+              <option value="even">偶校验</option>
+            </Select>
+          </SettingsRow>
+          <SettingsRow label="停止位">
+            <Select
+              aria-label="停止位"
+              value={stopBits}
+              onChange={(e) => setStopBits(Number(e.target.value) as 1 | 2)}
+            >
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+            </Select>
+          </SettingsRow>
+          <SettingsRow label="流控">
+            <Select
+              aria-label="流控"
+              value={flowControl}
+              onChange={(e) =>
+                setFlowControl(e.target.value as typeof flowControl)
+              }
+            >
+              <option value="none">无</option>
+              <option value="hardware">硬件</option>
+              <option value="software">软件</option>
+            </Select>
+          </SettingsRow>
+          <SettingsRow label="卡号格式">
+            <Select
+              aria-label="卡号格式"
+              value={format}
+              onChange={(e) => setFormat(e.target.value as typeof format)}
+            >
+              <option value="hex8">十六进制（固定 8 位）</option>
+              <option value="hex">十六进制（1–8 位）</option>
+              <option value="decimal">十进制（1–10 位）</option>
+              <option value="octal">八进制（1–11 位）</option>
+              <option value="binary">二进制（1–32 位）</option>
+            </Select>
+          </SettingsRow>
+        </SettingsSection>
       )}
       {kind === "acr1552" && (
-        <div className="form-grid">
-          <Field label="PC/SC 读卡器" htmlFor="acr-reader">
-            <select
-              id="acr-reader"
+        <SettingsSection title="ACR1552U-M1 PC/SC">
+          <SettingsRow label="PC/SC 读卡器">
+            <Select
+              aria-label="PC/SC 读卡器"
               value={acrReader}
               onChange={(e) => setAcrReader(e.target.value)}
             >
@@ -638,11 +687,12 @@ export function ReaderSettings({
                   {name}
                 </option>
               ))}
-            </select>
-          </Field>
-          <Field label="状态检查间隔（毫秒）" htmlFor="acr-poll-ms">
-            <input
-              id="acr-poll-ms"
+            </Select>
+          </SettingsRow>
+          <SettingsRow label="状态检查间隔（毫秒）">
+            <Input
+              aria-label="状态检查间隔（毫秒）"
+              className="settings-number"
               type="number"
               min={100}
               max={2000}
@@ -650,33 +700,41 @@ export function ReaderSettings({
               value={acrPollMs}
               onChange={(e) => setAcrPollMs(Number(e.target.value))}
             />
-          </Field>
-        </div>
+          </SettingsRow>
+        </SettingsSection>
       )}
       {kind === "external" && (
-        <Field label="进程绝对路径" htmlFor="reader-executable">
-          <input
-            id="reader-executable"
-            value={executable}
-            onChange={(e) => setExecutable(e.target.value)}
-            placeholder="C:/Program Files/.../reader.exe"
-          />
-        </Field>
+        <SettingsSection title="外部读卡进程">
+          <SettingsRow label="进程绝对路径">
+            <Input
+              aria-label="进程绝对路径"
+              className="settings-path"
+              value={executable}
+              onChange={(e) => setExecutable(e.target.value)}
+              placeholder="C:/Program Files/.../reader.exe"
+            />
+          </SettingsRow>
+        </SettingsSection>
       )}
       <Failure error={error} />
       {message && <Banner tone="success">{message}</Banner>}
-      <div className="actions">
+      <div className="form-actions">
         {kind === "serial" && (
-          <Button disabled={busy} onClick={() => void scanPorts()}>
+          <Button size="small" disabled={busy} onClick={() => void scanPorts()}>
             刷新串口列表
           </Button>
         )}
         {kind === "acr1552" && (
-          <Button disabled={busy} onClick={() => void scanAcrReaders()}>
+          <Button
+            size="small"
+            disabled={busy}
+            onClick={() => void scanAcrReaders()}
+          >
             刷新 PC/SC 读卡器
           </Button>
         )}
         <Button
+          size="small"
           variant="primary"
           disabled={
             busy ||
@@ -689,7 +747,7 @@ export function ReaderSettings({
           覆盖并启动
         </Button>
       </div>
-    </section>
+    </SettingsContent>
   );
 }
 export function DeviceEditor({
@@ -739,64 +797,75 @@ export function DeviceEditor({
     }
   };
   return (
-    <>
-      <div className="form-grid">
-        <Field label="设备编号" htmlFor="device-code">
-          <input
-            id="device-code"
-            value={code}
-            maxLength={60}
-            onChange={(e) => setCode(e.target.value)}
-          />
-        </Field>
-        <Field label="设备名称" htmlFor="device-name">
-          <input
-            id="device-name"
-            value={name}
-            maxLength={120}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </Field>
-      </div>
-      <label>
-        设备备注
-        <textarea
-          aria-label="设备备注"
-          value={notes}
-          maxLength={8000}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-      </label>
-      <CheckField
-        label="禁用新登记（不会结束现有使用）"
-        checked={disabled}
-        onChange={(e) => setDisabled(e.target.checked)}
-      />
-      <fieldset>
-        <legend>筛选标签</legend>
-        <div className="tag-checks">
-          {tags.map((t) => (
-            <CheckField
-              key={t.id}
-              label={t.name}
-              checked={tagIds.includes(t.id)}
-              onChange={(e) =>
-                setTagIds(
-                  e.target.checked
-                    ? [...tagIds, t.id]
-                    : tagIds.filter((id) => id !== t.id),
-                )
-              }
+    <div className="dialog-settings">
+      <SettingsContent>
+        <SettingsSection title="设备信息">
+          <SettingsRow label="设备编号">
+            <Input
+              aria-label="设备编号"
+              value={code}
+              maxLength={60}
+              onChange={(e) => setCode(e.target.value)}
             />
-          ))}
-        </div>
-      </fieldset>
+          </SettingsRow>
+          <SettingsRow label="设备名称">
+            <Input
+              aria-label="设备名称"
+              value={name}
+              maxLength={120}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </SettingsRow>
+          <SettingsRow label="设备备注">
+            <Textarea
+              aria-label="设备备注"
+              className="settings-textarea"
+              value={notes}
+              maxLength={8000}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </SettingsRow>
+          <SettingsRow
+            label="禁用新登记"
+            description="不会结束现有使用；活动设备需先结束记录才能删除。"
+          >
+            <Switch
+              label=""
+              aria-label="禁用新登记（不会结束现有使用）"
+              checked={disabled}
+              onChange={(e) => setDisabled(e.target.checked)}
+            />
+          </SettingsRow>
+        </SettingsSection>
+        <SettingsSection
+          title="筛选标签"
+          description="标签仅用于筛选，不授予权限。"
+        >
+          <div className="tag-checks">
+            {tags.map((t) => (
+              <CheckField
+                key={t.id}
+                label={t.name}
+                checked={tagIds.includes(t.id)}
+                onChange={(e) =>
+                  setTagIds(
+                    e.target.checked
+                      ? [...tagIds, t.id]
+                      : tagIds.filter((id) => id !== t.id),
+                  )
+                }
+              />
+            ))}
+          </div>
+        </SettingsSection>
+      </SettingsContent>
       <Failure error={error} />
-      <div className="actions">
-        <Button disabled={busy} onClick={onCancel}>
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
           取消
         </Button>
         <Button
+          size="small"
           variant="primary"
           disabled={busy || !code.trim() || !name.trim()}
           onClick={() => void save()}
@@ -804,7 +873,7 @@ export function DeviceEditor({
           {busy ? "保存中…" : "保存设备"}
         </Button>
       </div>
-    </>
+    </div>
   );
 }
 export function TagManager({
@@ -850,19 +919,24 @@ export function TagManager({
   };
   return (
     <>
-      <div className="toolbar">
-        <input
+      <Toolbar className="tag-toolbar">
+        <Input
           aria-label="标签名称"
           placeholder="标签名称"
           maxLength={80}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <Button disabled={busy || !name.trim()} onClick={() => void mutate()}>
+        <Button
+          size="small"
+          disabled={busy || !name.trim()}
+          onClick={() => void mutate()}
+        >
           {editing ? "保存标签" : "新增标签"}
         </Button>
         {editing && (
           <Button
+            size="small"
             onClick={() => {
               setEditing(null);
               setName("");
@@ -871,50 +945,48 @@ export function TagManager({
             取消编辑
           </Button>
         )}
-      </div>
+      </Toolbar>
       <Failure error={error} />
-      {tags.map((t) => (
-        <div className="picker-row" key={t.id}>
-          <strong>{t.name}</strong>
-          <Button
-            disabled={busy}
-            onClick={() => {
-              setEditing(t);
-              setName(t.name);
-            }}
-          >
-            编辑
-          </Button>
-          <Button
-            disabled={busy}
-            variant="ghost"
-            onClick={() => setDeleting(t)}
-          >
-            删除…
-          </Button>
-        </div>
-      ))}
-      {deleting && (
-        <Banner
-          tone="warning"
-          actions={
-            <>
-              <Button disabled={busy} onClick={() => setDeleting(null)}>
-                取消
+      <div className="tag-list">
+        {tags.map((t) => (
+          <div className="tag-row" key={t.id}>
+            <strong>{t.name}</strong>
+            <div className="row-actions">
+              <Button
+                size="small"
+                disabled={busy}
+                onClick={() => {
+                  setEditing(t);
+                  setName(t.name);
+                }}
+              >
+                编辑
               </Button>
               <Button
+                size="small"
+                variant="ghost"
                 disabled={busy}
-                variant="danger"
-                onClick={() => void mutate(true)}
+                onClick={() => setDeleting(t)}
               >
-                确认删除标签
+                删除…
               </Button>
-            </>
-          }
-        >
-          删除“{deleting.name}”将移除其设备关联，不影响使用记录。
-        </Banner>
-      )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {!tags.length && <Empty text="尚未创建标签" />}
+      <ConfirmModal
+        open={!!deleting}
+        title="删除标签确认"
+        message={`删除“${deleting?.name ?? ""}”将移除其设备关联，不影响使用记录。`}
+        confirmLabel="确认删除标签"
+        danger
+        busy={busy}
+        closeOnConfirm={false}
+        error={error ? errorText(error) : null}
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => void mutate(true)}
+      />
     </>
   );
 }
@@ -927,7 +999,7 @@ export function History({
   tagOptions: TagDTO[];
   onModal: (value: boolean) => void;
 }) {
-  const [data, setData] = useState<Page<RecordDTO>>({
+  const [data, setData] = useState<PageData<RecordDTO>>({
       items: [],
       total: 0,
       page: 1,
@@ -946,7 +1018,7 @@ export function History({
     if (!authenticated) return;
     setBusy(true);
     try {
-      const value = await window.library.call<Page<RecordDTO>>("history", {
+      const value = await window.library.call<PageData<RecordDTO>>("history", {
         page,
         pageSize: 30,
         search,
@@ -980,15 +1052,15 @@ export function History({
     setTo("");
   };
   return (
-    <section className="panel">
-      <header>
+    <Card>
+      <div className="card-header">
         <h2>历史记录</h2>
         <span className="muted">{data.total} 条 · 只读</span>
-      </header>
-      <div className="toolbar history-filters">
-        <label>
+      </div>
+      <Toolbar className="history-filters">
+        <label className="history-field">
           开始时间从
-          <input
+          <Input
             aria-label="历史开始时间从"
             type="datetime-local"
             value={from}
@@ -998,9 +1070,9 @@ export function History({
             }}
           />
         </label>
-        <label>
+        <label className="history-field">
           至
-          <input
+          <Input
             aria-label="历史开始时间至"
             type="datetime-local"
             value={to}
@@ -1010,7 +1082,7 @@ export function History({
             }}
           />
         </label>
-        <input
+        <Input
           aria-label="搜索学生"
           placeholder="姓名、班级、校内学号"
           value={search}
@@ -1019,7 +1091,7 @@ export function History({
             setPage(1);
           }}
         />
-        <select
+        <Select
           aria-label="历史标签"
           value={tagId}
           onChange={(e) => {
@@ -1033,8 +1105,8 @@ export function History({
               {t.name}
             </option>
           ))}
-        </select>
-        <input
+        </Select>
+        <Input
           aria-label="历史设备搜索"
           placeholder="设备名称或编号"
           value={deviceSearch}
@@ -1043,11 +1115,15 @@ export function History({
             setPage(1);
           }}
         />
-        <Button onClick={reset}>重置筛选</Button>
-        <Button onClick={() => void load()}>刷新</Button>
-      </div>
+        <Button size="small" onClick={reset}>
+          重置筛选
+        </Button>
+        <Button size="small" onClick={() => void load()}>
+          刷新
+        </Button>
+      </Toolbar>
       <Failure error={error} retry={() => void load()} />
-      <div className="table-scroll" aria-busy={busy}>
+      <TableContainer className="table-scroll" aria-busy={busy}>
         <table>
           <thead>
             <tr>
@@ -1091,12 +1167,14 @@ export function History({
                       {r.device.displayName}
                       <small>{r.device.code}</small>
                     </td>
-                    <td className="truncate">{r.notes || "—"}</td>
+                    <td>
+                      <span className="truncate">{r.notes || "—"}</span>
+                    </td>
                   </tr>
                 ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
       {!busy && !data.items.length && (
         <Empty text="没有符合条件的已结束记录。可调整筛选条件。" />
       )}
@@ -1125,22 +1203,26 @@ export function History({
             <dd>{duration(detail.startedAtMs, detail.endedAtMs)}</dd>
             <dt>结束方式</dt>
             <dd>
-              {detail.endReason === "scan"
-                ? "刷卡"
-                : detail.endReason === "batch"
-                  ? "批量"
-                  : "手动"}
+              {detail.endReason === "scan" ? (
+                <Badge tone="accent">刷卡</Badge>
+              ) : detail.endReason === "batch" ? (
+                <Badge tone="neutral">批量</Badge>
+              ) : (
+                <Badge tone="neutral">手动</Badge>
+              )}
             </dd>
             <dt>记录 ID</dt>
             <dd className="mono">{detail.id}</dd>
           </dl>
           <h3>备注</h3>
           <p className="full-notes">{detail.notes || "无备注"}</p>
-          <div className="actions">
-            <Button onClick={() => setDetail(null)}>关闭</Button>
+          <div className="form-actions">
+            <Button size="small" onClick={() => setDetail(null)}>
+              关闭
+            </Button>
           </div>
         </Dialog>
       )}
-    </section>
+    </Card>
   );
 }

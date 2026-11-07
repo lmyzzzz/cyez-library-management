@@ -1,11 +1,27 @@
 import { useCallback, useEffect, useRef, useState, forwardRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AppShell, Button, Banner, AppToaster, toast } from "@record/ui";
+import {
+  ActionMenu,
+  ActionMenuItem,
+  AppShell,
+  AppToaster,
+  Banner,
+  Button,
+  Card,
+  Input,
+  Page,
+  PageHeader,
+  Select,
+  TableContainer,
+  Textarea,
+  Toolbar,
+  toast,
+} from "@record/ui";
 import type { AppRouteRegistration } from "@series/ui";
 import type {
   DeviceDTO,
   RecordDTO,
-  Page,
+  Page as PageData,
   TagDTO,
   ScanPreview,
   EndPreview,
@@ -14,12 +30,16 @@ import type {
 } from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
 import {
+  ConnectionState,
   Dialog,
-  Failure,
+  EditIcon,
   Empty,
+  Failure,
   Pager,
   LibraryIcon,
   SettingsIcon,
+  StatusBadge,
+  TrashIcon,
   timestamp,
   LiveDuration,
   errorText,
@@ -69,7 +89,7 @@ export function App() {
     settings = location.pathname === "/settings";
   const [status, setStatus] = useState<LocalStatus | null>(null),
     [service, setService] = useState<ServiceStatus | null>(null),
-    [devices, setDevices] = useState<Page<DeviceDTO>>({
+    [devices, setDevices] = useState<PageData<DeviceDTO>>({
       items: [],
       total: 0,
       page: 1,
@@ -106,7 +126,7 @@ export function App() {
         if (!local.authenticated) return;
         const [{ devices: d, status: s }, t] = await Promise.all([
           window.library.call<{
-            devices: Page<DeviceDTO>;
+            devices: PageData<DeviceDTO>;
             status: ServiceStatus;
           }>("devices", {
             page,
@@ -250,81 +270,99 @@ export function App() {
       setBusy(false);
     }
   };
+  const connectionState = (
+    <ConnectionState
+      authenticated={!!status?.authenticated}
+      online={!!status?.online}
+      lastUpdated={lastUpdated}
+    />
+  );
   const table = (
-    <section className="panel">
-      <div className="toolbar">
-        <input
-          aria-label="搜索设备"
-          placeholder="搜索设备名称或编号"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          aria-label="设备标签"
-          value={tagId}
-          onChange={(e) => setTagId(e.target.value)}
-        >
-          <option value="">全部标签</option>
-          {tags.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-        <Button disabled={loading} onClick={() => void load()}>
-          刷新
-        </Button>
-        {settings ? (
-          <>
-            <Button
-              disabled={!canWrite}
-              onClick={() => setModal({ kind: "tags" })}
-            >
-              管理标签
-            </Button>
-            <Button
-              variant="primary"
-              disabled={
-                !canWrite || !service?.allowedActions.includes("modify")
-              }
-              onClick={() => setModal({ kind: "device", device: null })}
-            >
-              新增设备
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              disabled={!canWrite || !selected.length}
-              onClick={() => void openBatch("selected")}
-            >
-              结束选中 ({selected.length})
-            </Button>
-            <Button
-              disabled={!canWrite}
-              onClick={() => void openBatch("filtered")}
-            >
-              结束筛选结果…
-            </Button>
-            <Button
-              variant="danger"
-              disabled={!canWrite}
-              onClick={() => void openBatch("all")}
-            >
-              结束全部…
-            </Button>
-          </>
-        )}
-      </div>
+    <Card>
+      <Toolbar className="table-toolbar">
+        <Toolbar className="table-toolbar-filters">
+          <Input
+            aria-label="搜索设备"
+            placeholder="搜索设备名称或编号"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <Select
+            aria-label="设备标签"
+            value={tagId}
+            onChange={(e) => setTagId(e.target.value)}
+          >
+            <option value="">全部标签</option>
+            {tags.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </Select>
+          <Button size="small" disabled={loading} onClick={() => void load()}>
+            刷新
+          </Button>
+        </Toolbar>
+        <Toolbar className="table-toolbar-actions">
+          {settings ? (
+            <>
+              <Button
+                size="small"
+                disabled={!canWrite}
+                onClick={() => setModal({ kind: "tags" })}
+              >
+                管理标签
+              </Button>
+              <Button
+                size="small"
+                variant="primary"
+                disabled={
+                  !canWrite || !service?.allowedActions.includes("modify")
+                }
+                onClick={() => setModal({ kind: "device", device: null })}
+              >
+                新增设备
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="small"
+                disabled={!canWrite || !selected.length}
+                onClick={() => void openBatch("selected")}
+              >
+                结束选中 ({selected.length})
+              </Button>
+              <Button
+                size="small"
+                disabled={!canWrite}
+                onClick={() => void openBatch("filtered")}
+              >
+                结束筛选结果…
+              </Button>
+              <Button
+                size="small"
+                variant="danger"
+                disabled={!canWrite}
+                onClick={() => void openBatch("all")}
+              >
+                结束全部…
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </Toolbar>
       {!settings && (
-        <div className="tabs" aria-label="设备状态">
+        <div className="tabs" role="group" aria-label="设备状态">
           <Button
+            size="small"
             variant={state === "active" ? "primary" : "ghost"}
             onClick={() => setState("active")}
           >
             使用中
           </Button>
           <Button
+            size="small"
             variant={state === "free" ? "primary" : "ghost"}
             onClick={() => setState("free")}
           >
@@ -333,7 +371,7 @@ export function App() {
         </div>
       )}
       <Failure error={error} retry={() => void load()} />
-      <div className="table-scroll" aria-busy={loading}>
+      <TableContainer className="table-scroll" aria-busy={loading}>
         <table>
           <thead>
             <tr>
@@ -348,7 +386,7 @@ export function App() {
             {loading && !devices.items.length
               ? Array.from({ length: 5 }, (_, i) => (
                   <tr key={i}>
-                    <td colSpan={5}>
+                    <td colSpan={settings ? 4 : 5}>
                       <span className="skeleton" />
                     </td>
                   </tr>
@@ -380,11 +418,15 @@ export function App() {
                       <small>{d.code}</small>
                     </td>
                     <td>
-                      <span
-                        className={`badge ${d.isDisabled ? "disabled" : d.active ? "active" : "free"}`}
-                      >
-                        {d.isDisabled ? "禁用" : d.active ? "使用中" : "空闲"}
-                      </span>
+                      <StatusBadge
+                        status={
+                          d.isDisabled
+                            ? "disabled"
+                            : d.active
+                              ? "active"
+                              : "free"
+                        }
+                      />
                       <small>
                         {d.tags.map((t) => t.name).join(" · ") || "无标签"}
                       </small>
@@ -411,52 +453,54 @@ export function App() {
                       )}
                     </td>
                     <td>
-                      <div className="row-actions">
-                        {settings ? (
-                          <>
-                            <Button
-                              disabled={!canWrite}
-                              onClick={() =>
+                      {settings ? (
+                        <div className="row-actions">
+                          <ActionMenu label="设备操作">
+                            <ActionMenuItem
+                              icon={EditIcon}
+                              onSelect={() =>
                                 setModal({ kind: "device", device: d })
                               }
                             >
                               编辑
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              disabled={!canWrite}
-                              onClick={() =>
+                            </ActionMenuItem>
+                            <ActionMenuItem
+                              icon={TrashIcon}
+                              danger
+                              onSelect={() =>
                                 setModal({ kind: "delete", device: d })
                               }
                             >
                               删除…
-                            </Button>
-                          </>
-                        ) : d.active ? (
-                          <>
-                            <Button
-                              disabled={!canWrite}
-                              onClick={() =>
-                                setModal({ kind: "notes", record: d.active! })
-                              }
-                            >
-                              备注
-                            </Button>
-                            <Button
-                              disabled={!canWrite}
-                              onClick={() => void end(d.active!.id)}
-                            >
-                              结束…
-                            </Button>
-                          </>
-                        ) : null}
-                      </div>
+                            </ActionMenuItem>
+                          </ActionMenu>
+                        </div>
+                      ) : d.active ? (
+                        <div className="row-actions">
+                          <Button
+                            size="small"
+                            disabled={!canWrite}
+                            onClick={() =>
+                              setModal({ kind: "notes", record: d.active! })
+                            }
+                          >
+                            备注
+                          </Button>
+                          <Button
+                            size="small"
+                            disabled={!canWrite}
+                            onClick={() => void end(d.active!.id)}
+                          >
+                            结束…
+                          </Button>
+                        </div>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
       {!loading && !devices.items.length && (
         <Empty
           text={
@@ -467,7 +511,7 @@ export function App() {
         />
       )}
       <Pager {...devices} page={page} setPage={setPage} />
-    </section>
+    </Card>
   );
   if (status && !status.identityConfigured)
     return (
@@ -478,15 +522,14 @@ export function App() {
         subtitle="首次配置"
         windowControls={window.windowControls}
       >
-        <main className="workspace-content initial-setup">
-          <InitialClientSetup
-            onDone={() => {
-              navigate("/settings");
-              setTab("connection");
-              void refreshStatus();
-            }}
-          />
-        </main>
+        <InitialClientSetup
+          onDone={() => {
+            navigate("/settings");
+            setTab("connection");
+            void refreshStatus();
+          }}
+        />
+        <AppToaster />
       </AppShell>
     );
   return (
@@ -503,21 +546,23 @@ export function App() {
       }
       windowControls={window.windowControls}
     >
-      <div className={flow ? "scan-workspace" : "workspace-content"}>
-        {notice && (
-          <div className="workspace-notice">
-            <Banner
-              tone="error"
-              actions={
-                <Button onClick={() => setNotice(undefined)}>关闭</Button>
-              }
-            >
-              {notice}
-            </Banner>
-          </div>
-        )}
-        {flow ? (
-          flow.mode === "start" ? (
+      {flow ? (
+        <div className="scan-workspace">
+          {notice && (
+            <div className="workspace-notice">
+              <Banner
+                tone="error"
+                actions={
+                  <Button size="small" onClick={() => setNotice(undefined)}>
+                    关闭
+                  </Button>
+                }
+              >
+                {notice}
+              </Banner>
+            </div>
+          )}
+          {flow.mode === "start" ? (
             <Registration
               key={flow.id}
               preview={flow}
@@ -527,9 +572,7 @@ export function App() {
             />
           ) : (
             <section className="scan-flow-screen scan-end">
-              <header className="scan-flow-header">
-                <h1>刷卡结束使用</h1>
-              </header>
+              <PageHeader title="刷卡结束使用" />
               <EndForm
                 key={flow.id}
                 preview={flow}
@@ -539,20 +582,27 @@ export function App() {
                 onBusy={setBusy}
               />
             </section>
-          )
-        ) : (
-          <>
-            <div className="page-top">
-              <div>
-                <p className="eyebrow">SCHOOL LIBRARY</p>
-                <h1>{settings ? "设置" : "使用登记"}</h1>
-              </div>
-              <div className="connection-state">
-                <span className={`dot ${status?.online ? "online" : ""}`} />
-                {status?.online ? "已连接服务器" : "未连接"}
-                <small>数据更新 {timestamp(lastUpdated)}</small>
-              </div>
-            </div>
+          )}
+        </div>
+      ) : (
+        <Page>
+          <div className="page-stack">
+            <PageHeader
+              title={settings ? "设置" : "使用登记"}
+              actions={connectionState}
+            />
+            {notice && (
+              <Banner
+                tone="error"
+                actions={
+                  <Button size="small" onClick={() => setNotice(undefined)}>
+                    关闭
+                  </Button>
+                }
+              >
+                {notice}
+              </Banner>
+            )}
             {__CYEZ_TEST_FEATURES__ &&
               status?.environment !== "production" &&
               status && (
@@ -571,6 +621,7 @@ export function App() {
                 tone="warning"
                 actions={
                   <Button
+                    size="small"
                     onClick={async () => {
                       try {
                         const r = await window.library.call<{
@@ -611,7 +662,7 @@ export function App() {
             )}
             {settings ? (
               <>
-                <nav className="tabs" aria-label="设置分类">
+                <div className="tabs" role="group" aria-label="设置分类">
                   {[
                     ["connection", "连接配置"],
                     ["reader", "读卡器"],
@@ -624,13 +675,15 @@ export function App() {
                   ].map(([id, name]) => (
                     <Button
                       key={id}
+                      size="small"
+                      aria-current={tab === id ? "page" : undefined}
                       variant={tab === id ? "primary" : "ghost"}
                       onClick={() => setTab(id)}
                     >
                       {name}
                     </Button>
                   ))}
-                </nav>
+                </div>
                 {tab === "connection" && status && (
                   <ConnectionForm
                     status={status}
@@ -660,7 +713,7 @@ export function App() {
                   />
                 )}
                 {__CYEZ_TEST_FEATURES__ && tab === "diagnostics" && (
-                  <section className="panel">
+                  <Card>
                     <h2>本机诊断</h2>
                     <dl className="summary">
                       <dt>客户端版本</dt>
@@ -681,10 +734,12 @@ export function App() {
                       <dt>最近成功连接</dt>
                       <dd>{timestamp(status?.lastSuccessMs ?? null)}</dd>
                     </dl>
-                    <Button onClick={() => void refreshStatus()}>
-                      刷新诊断
-                    </Button>
-                  </section>
+                    <div className="form-actions">
+                      <Button size="small" onClick={() => void refreshStatus()}>
+                        刷新诊断
+                      </Button>
+                    </div>
+                  </Card>
                 )}
               </>
             ) : (
@@ -693,16 +748,10 @@ export function App() {
                 {__CYEZ_TEST_FEATURES__ &&
                   status?.environment !== "production" &&
                   status?.authenticated && (
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                        fontSize: 11,
-                      }}
-                    >
+                    <Toolbar className="integration-tools">
                       <span>集成测试读卡器</span>
                       <Button
+                        size="small"
                         onClick={() =>
                           void window.library.call("integrationScan", {
                             fixture: "allowed-1",
@@ -712,6 +761,7 @@ export function App() {
                         测试卡 1
                       </Button>
                       <Button
+                        size="small"
                         onClick={() =>
                           void window.library.call("integrationScan", {
                             fixture: "allowed-2",
@@ -721,6 +771,7 @@ export function App() {
                         测试卡 2
                       </Button>
                       <Button
+                        size="small"
                         onClick={() =>
                           void window.library.call("integrationScan", {
                             fixture: "unknown",
@@ -729,7 +780,7 @@ export function App() {
                       >
                         未授权测试卡
                       </Button>
-                    </div>
+                    </Toolbar>
                   )}
               </>
             )}
@@ -750,7 +801,7 @@ export function App() {
                             ? "编辑活动备注"
                             : "管理标签"
                 }
-                wide={modal.kind === "batch"}
+                width={modal.kind === "batch" ? "large" : "medium"}
                 onClose={() => {
                   if (!busy) {
                     setModal(null);
@@ -812,9 +863,9 @@ export function App() {
                 )}
               </Dialog>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </Page>
+      )}
       <AppToaster />
     </AppShell>
   );
@@ -842,11 +893,12 @@ function DeleteDevice({
         <Banner tone="warning">此设备仍在使用，需要先结束记录。</Banner>
       )}
       <Failure error={error} />
-      <div className="actions">
-        <Button disabled={busy} onClick={onCancel}>
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
           取消
         </Button>
         <Button
+          size="small"
           variant="danger"
           disabled={busy || !!device.active}
           onClick={async () => {
@@ -888,21 +940,23 @@ function NotesEditor({
     [busy, setBusy] = useState(false);
   return (
     <>
-      <label>
+      <label className="block-label" htmlFor="record-notes">
         当前使用备注
-        <textarea
-          aria-label="当前使用备注"
-          value={notes}
-          maxLength={8000}
-          onChange={(e) => setNotes(e.target.value)}
-        />
       </label>
+      <Textarea
+        id="record-notes"
+        aria-label="当前使用备注"
+        value={notes}
+        maxLength={8000}
+        onChange={(e) => setNotes(e.target.value)}
+      />
       <Failure error={error} />
-      <div className="actions">
-        <Button disabled={busy} onClick={onCancel}>
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
           取消
         </Button>
         <Button
+          size="small"
           variant="primary"
           disabled={busy}
           onClick={async () => {

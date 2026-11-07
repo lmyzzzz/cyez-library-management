@@ -15,6 +15,21 @@ import type {
 } from "../../../apps/teacher/src/shared/bridge.js";
 import { App } from "../../../apps/teacher/src/renderer/App.js";
 
+if (!(globalThis as { ResizeObserver?: unknown }).ResizeObserver)
+  (globalThis as { ResizeObserver?: unknown }).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+for (const name of [
+  "hasPointerCapture",
+  "setPointerCapture",
+  "releasePointerCapture",
+] as const)
+  if (!(Element.prototype as unknown as Record<string, unknown>)[name])
+    (Element.prototype as unknown as Record<string, unknown>)[name] = () =>
+      false;
+
 const student = {
   id: "a".repeat(64),
   name: "测试学生",
@@ -157,6 +172,13 @@ function show(path = "/") {
       <App />
     </MemoryRouter>,
   );
+}
+async function openDeviceMenu(index: number) {
+  fireEvent.keyDown(
+    screen.getAllByRole("button", { name: "设备操作" })[index],
+    { key: "Enter" },
+  );
+  await screen.findByRole("menuitem", { name: "编辑" });
 }
 
 describe("C-U-01/05 主页面门控和状态", () => {
@@ -328,10 +350,12 @@ describe("C-U-01/05 主页面门控和状态", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "新增设备" })).toBeTruthy(),
     );
-    fireEvent.click(screen.getAllByRole("button", { name: "编辑" })[0]);
+    await openDeviceMenu(0);
+    fireEvent.click(screen.getByRole("menuitem", { name: "编辑" }));
     expect(screen.getByText("编辑设备")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
-    fireEvent.click(screen.getAllByRole("button", { name: "删除…" })[1]);
+    await openDeviceMenu(1);
+    fireEvent.click(screen.getByRole("menuitem", { name: "删除…" }));
     expect(screen.getByText("删除设备确认")).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "确认删除" }).hasAttribute("disabled"),
@@ -469,7 +493,8 @@ describe("C-U-01/05 主页面门控和状态", () => {
     fireEvent.click(screen.getByRole("button", { name: "管理标签" }));
     expect(screen.getByRole("heading", { name: "管理标签" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "关闭对话框" }));
-    fireEvent.click(screen.getAllByRole("button", { name: "删除…" })[1]);
+    await openDeviceMenu(1);
+    fireEvent.click(screen.getByRole("menuitem", { name: "删除…" }));
     fireEvent.click(screen.getByRole("button", { name: "确认删除" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("deleteDevice", {
@@ -490,9 +515,12 @@ describe("C-U-01/05 主页面门控和状态", () => {
     show("/settings");
     fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
     await waitFor(() =>
-      expect(screen.getAllByRole("button", { name: "删除…" })).toHaveLength(2),
+      expect(screen.getAllByRole("button", { name: "设备操作" })).toHaveLength(
+        2,
+      ),
     );
-    fireEvent.click(screen.getAllByRole("button", { name: "删除…" })[0]);
+    await openDeviceMenu(0);
+    fireEvent.click(screen.getByRole("menuitem", { name: "删除…" }));
     expect(
       screen.getByRole("button", { name: "确认删除" }).hasAttribute("disabled"),
     ).toBe(true);
