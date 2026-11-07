@@ -195,7 +195,7 @@ Linux CI 新增独立 SQL Server fixture，服务端覆盖率显式启用真实 
 | 覆盖率门禁与镜像       | 服务端 41 项通过，statements 92.36%、branches 88.78%、functions 95.65%、lines 93.82%；客户端 61 项通过，statements 89.03%、branches 84.57%、functions 87.34%、lines 89.83%；Docker API 镜像 `cyez-record-only:tls-option` 构建成功（image ID `51cf75951d18`）     |
 | Windows 发布           | `release/0.1.5/cyez-library-0.1.5-x64-setup.exe`，119650370 字节，SHA-256 `22de7ed7406c6324252aa5264c329b150ff25ad87b74a1de66430b7eda4afb0b`，Authenticode `NotSigned`；独立目录解包版发布检查 2 项通过。旧 `release/win-unpacked` 被现有进程占用，因此未覆盖旧包 |
 
-尚未在学校正式 SQL Server 上验证网络、认证、证书及实卡数据；也未实现精确证书 SHA-256 指纹绑定。跳过校验只应在已确认数据库地址及可信网络的环境中使用。此前反馈的正式安装包手动输入后教师端无提示问题仍未修复，本次发布检查没有覆盖该按钮端到端故障。
+尚未在学校正式 SQL Server 上验证网络、认证、证书及实卡数据；也未实现精确证书 SHA-256 指纹绑定。跳过校验只应在已确认数据库地址及可信网络的环境中使用。上一版发布检查没有覆盖手动输入按钮端到端故障；该问题已在下节修复并验证。
 
 ## 2026-11-07 正式包未连接刷卡提示修复
 
