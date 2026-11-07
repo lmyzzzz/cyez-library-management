@@ -387,10 +387,17 @@ describe("C-U-01/05 主页面门控和状态", () => {
   it("刷卡事件只在主页面打开登记，取消释放 preview", async () => {
     show();
     await waitFor(() => expect(listener).toBeTypeOf("function"));
-    listener!({ type: "scan", preview });
+    await act(async () => {
+      listener!({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+    });
+    expect(screen.getByRole("alert").textContent).toContain("请返回主页面");
+    await act(async () => {
+      listener!({ type: "scan", preview });
+    });
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: "登记使用" })).toBeTruthy(),
     );
+    expect(screen.queryByRole("alert")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("cancelPreview", {

@@ -206,3 +206,16 @@ Linux CI 新增独立 SQL Server fixture，服务端覆盖率显式启用真实 
 | 回归测试 | 客户端 App 单元/组件测试 12 项通过，新增未连接刷卡通知横幅测试；客户端完整测试与覆盖率门禁通过                                                                                                                                          |
 | 行为验证 | 隔离正式包手动输入提交 UID 后，观察到 renderer 收到 `OFFLINE_NO_WRITE`；修复后页面横幅直接由该事件驱动，不依赖 toast 生命周期                                                                                                           |
 | 发布     | 版本升至 `0.1.6`，`release/0.1.6/cyez-library-0.1.6-x64-setup.exe`，119650250 字节，SHA-256 `d228d2148a30a742c82fabc8aa4bcf09448b24687c233cbdb26cb3076345518d`，Authenticode `NotSigned`；独立解包版发布检查 2 项通过，旧解包目录未覆盖 |
+
+## 2026-11-07 全屏刷卡通知与 Windows CI 回归修复
+
+设置页刷卡留下的通知曾在随后进入全屏登记页时占用文档流高度，使登记页底边超出窗口。现在成功刷卡清除旧通知；流程中再次刷卡产生的新通知作为可关闭的浮层显示，不改变登记或结束页面的尺寸。客户端版本升至 `0.1.7`。
+
+| 项目 | 本次实际结果 |
+| ---- | ------------ |
+| 客户端单元与覆盖率 | 62 项通过；statements 89.15%、branches 84.87%、functions 87.38%、lines 89.88%，覆盖率门禁通过 |
+| 真实 Electron 集成 | 本机真实 PostgreSQL、TLS、SQLite 和 Electron 套件 11 项通过，Compose 专用 1 项按现有条件跳过；新增设置页旧通知清除及全屏期间新通知可见、边界不变的断言 |
+| 静态与正式包 | Yarn immutable install、TypeScript、Prettier、客户端集成/生产构建和标准 `yarn package:win` 通过；解包正式版发布检查 2 项通过 |
+| Windows 安装包 | `release/0.1.7/cyez-library-0.1.7-x64-setup.exe`，119650838 字节，SHA-256 `6a276ab6f9c660f4effbae7585098ae0eecf87333ce2ed85ee5aa0ce56302b91`，Authenticode `NotSigned` |
+
+本次没有修改服务端或读卡进程，未重跑服务端/Docker 套件或学校正式校园数据源与实卡验收；其余外部验收边界仍按前述报告执行。

@@ -377,9 +377,18 @@ tbody tr:hover {
   color: var(--color-text-muted);
 }
 .scan-workspace {
+  position: relative;
   height: 100%;
   min-height: 0;
   overflow: hidden;
+}
+.scan-workspace > .workspace-notice {
+  position: absolute;
+  z-index: 3;
+  top: 80px;
+  right: 24px;
+  width: min(380px, calc(100% - 48px));
+  box-shadow: var(--shadow-popover);
 }
 .scan-flow-screen {
   display: flex;

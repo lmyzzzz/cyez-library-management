@@ -268,6 +268,9 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const before = scans;
   await call("integrationScan", { fixture: "allowed-1" });
   expect(scans).toBe(before);
+  await expect(page.locator(".workspace-notice")).toContainText(
+    "接收到刷卡消息，请返回主页面以触发登记",
+  );
   await page.getByRole("link", { name: "使用登记", exact: true }).click();
   await page.getByRole("button", { name: "未使用", exact: true }).click();
   await page.waitForTimeout(1300);
@@ -275,6 +278,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   await expect(
     page.getByRole("heading", { name: "登记使用", exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".workspace-notice")).toHaveCount(0);
   await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
     "data-layout",
     "focus",
@@ -297,6 +301,16 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
     registrationBounds.viewportHeight,
     0,
   );
+  const scansDuringFlow = scans;
+  await call("integrationScan", { fixture: "allowed-2" });
+  expect(scans).toBe(scansDuringFlow);
+  await expect(page.locator(".workspace-notice")).toContainText("请返回主页面");
+  const noticedBounds = await scanBounds();
+  expect(noticedBounds).toEqual(registrationBounds);
+  await page
+    .locator(".workspace-notice")
+    .getByRole("button", { name: "关闭" })
+    .click();
   await expect(
     page.getByRole("button", { name: "选择", exact: true }),
   ).toBeVisible();

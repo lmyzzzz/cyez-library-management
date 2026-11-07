@@ -163,6 +163,7 @@ export function App() {
     () =>
       window.library.subscribe((event) => {
         if (event.type === "scan") {
+          setNotice(undefined);
           setFlow(event.preview);
           navigate("/");
         } else if (event.type === "notice") {
@@ -504,12 +505,16 @@ export function App() {
     >
       <div className={flow ? "scan-workspace" : "workspace-content"}>
         {notice && (
-          <Banner
-            tone="error"
-            actions={<Button onClick={() => setNotice(undefined)}>关闭</Button>}
-          >
-            {notice}
-          </Banner>
+          <div className="workspace-notice">
+            <Banner
+              tone="error"
+              actions={
+                <Button onClick={() => setNotice(undefined)}>关闭</Button>
+              }
+            >
+              {notice}
+            </Banner>
+          </div>
         )}
         {flow ? (
           flow.mode === "start" ? (
