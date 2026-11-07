@@ -88,6 +88,7 @@ export function App() {
     [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(false),
     [error, setError] = useState<unknown>(),
+    [notice, setNotice] = useState<string>(),
     [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const polling = useRef(false),
     delay = useRef(3000);
@@ -164,8 +165,11 @@ export function App() {
         if (event.type === "scan") {
           setFlow(event.preview);
           navigate("/");
-        } else if (event.type === "notice") toast.error(errorText(event.code));
-        else void refreshStatus();
+        } else if (event.type === "notice") {
+          const message = errorText(event.code);
+          setNotice(message);
+          toast.error(message);
+        } else void refreshStatus();
       }),
     [],
   );
@@ -499,6 +503,14 @@ export function App() {
       windowControls={window.windowControls}
     >
       <div className={flow ? "scan-workspace" : "workspace-content"}>
+        {notice && (
+          <Banner
+            tone="error"
+            actions={<Button onClick={() => setNotice(undefined)}>关闭</Button>}
+          >
+            {notice}
+          </Banner>
+        )}
         {flow ? (
           flow.mode === "start" ? (
             <Registration

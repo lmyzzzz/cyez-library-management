@@ -370,6 +370,20 @@ describe("C-U-01/05 主页面门控和状态", () => {
     await waitFor(() => expect(call).toHaveBeenCalledWith("recover", {}));
   });
 
+  it("未连接时刷卡拒绝以页面错误横幅显示，不依赖短暂 toast", async () => {
+    local = { ...status, authenticated: false, online: false };
+    show();
+    await waitFor(() => expect(listener).toBeTypeOf("function"));
+    await act(async () => {
+      listener!({ type: "notice", code: "OFFLINE_NO_WRITE" });
+    });
+    expect(screen.getByRole("alert").textContent).toContain(
+      "连接已中断，禁止新业务写入。请恢复连接。",
+    );
+    fireEvent.click(screen.getByRole("alert").querySelector("button")!);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("刷卡事件只在主页面打开登记，取消释放 preview", async () => {
     show();
     await waitFor(() => expect(listener).toBeTypeOf("function"));
