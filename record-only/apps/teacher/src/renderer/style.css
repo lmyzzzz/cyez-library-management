@@ -1338,10 +1338,10 @@ input[type="checkbox"] {
 [data-ui="app-shell"] {
   background: linear-gradient(
     180deg,
-    #ffcf8f 0%,
-    #ffe3bb 18%,
-    #fff1de 38%,
-    #fffaf3 66%,
+    #ffddb2 0%,
+    #ffead1 18%,
+    #fff5e9 38%,
+    #fffcf8 66%,
     #ffffff 100%
   );
 }
