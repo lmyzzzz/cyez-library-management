@@ -1533,6 +1533,501 @@ input[type="checkbox"] {
   background: transparent;
 }
 
+/* ===== Bento 工作台 ===== */
+
+[data-ui="app-shell"] {
+  background: linear-gradient(180deg, #fbf6ed 0%, #f7f2e9 24%, #f7f2e9 100%);
+}
+
+[data-ui="sidebar"] {
+  border-right-color: #ece2d4;
+  background: #fbf8f2;
+}
+
+[data-ui="titlebar"] {
+  border-bottom: 1px solid #efe5d7;
+  background: rgba(255, 252, 247, 0.9);
+}
+
+[data-ui="page"] {
+  padding-top: 26px;
+  padding-bottom: 34px;
+}
+
+.bento-page,
+.bento-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bento-page {
+  min-height: calc(100vh - 148px);
+}
+
+.bento-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 2px 0 4px;
+}
+
+.bento-heading {
+  min-width: 0;
+}
+
+.bento-greet {
+  display: block;
+  margin-bottom: 3px;
+  color: #b1885c;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.bento-head h1 {
+  margin: 0;
+  color: #2a231a;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.bento-head p {
+  margin: 5px 0 0;
+  color: #958673;
+  font-size: 11px;
+}
+
+.bento-head-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 3px;
+  flex: none;
+}
+
+.bento-clock {
+  text-align: right;
+  line-height: 1.45;
+}
+
+.bento-clock b {
+  display: block;
+  color: #5c5144;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.bento-clock span {
+  color: #a29380;
+  font-size: 9px;
+}
+
+/* 概览卡片 */
+.bento-stats {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.bento-tile {
+  position: relative;
+  min-height: 102px;
+  padding: 12px 15px;
+  overflow: hidden;
+  border: 1px solid #ece1d2;
+  border-radius: 17px;
+  background: #fffdfa;
+  box-shadow: 0 8px 22px rgba(120, 85, 30, 0.05);
+}
+
+.bento-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a1907c;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+.bento-tile-top svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.55;
+}
+
+.bento-number {
+  margin-top: 9px;
+  color: #33291c;
+  font-size: 31px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bento-number small {
+  margin-left: 4px;
+  color: #a2907b;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.bento-number.time {
+  margin-top: 10px;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.bento-tile-hint {
+  margin-top: 7px;
+  color: #a29380;
+  font-size: 9px;
+}
+
+.bento-tile.hot {
+  border-color: #ff9d2e;
+  background: #ff9d2e;
+  box-shadow: 0 12px 28px rgba(220, 130, 20, 0.22);
+}
+
+.bento-tile.hot::before {
+  content: "";
+  position: absolute;
+  right: -34px;
+  top: -45px;
+  width: 142px;
+  height: 142px;
+  border: 22px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.bento-tile.hot::after {
+  content: "";
+  position: absolute;
+  right: 30px;
+  bottom: -50px;
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.bento-tile.hot .bento-tile-top,
+.bento-tile.hot .bento-number,
+.bento-tile.hot .bento-number small {
+  position: relative;
+  z-index: 1;
+  color: #2b1a05;
+}
+
+.bento-tile.hot .bento-tile-top {
+  color: #6b3a06;
+}
+
+.bento-tile.hot .bento-number small {
+  color: #7a4407;
+}
+
+.bento-tile.hot .bento-tile-hint {
+  position: relative;
+  z-index: 1;
+  color: #7a4407;
+}
+
+/* 主列 + 右侧状态栏 */
+.bento-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+
+.bento-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bento-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bento-card {
+  border: 1px solid #ece1d2;
+  border-radius: 17px;
+  background: #fffdfa;
+  box-shadow: 0 8px 22px rgba(120, 85, 30, 0.05);
+  padding: 13px 15px;
+}
+
+.bento-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bento-card-head h2 {
+  margin: 0;
+  color: #3c3226;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bento-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: #b18a62;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.bento-live i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7cb67e;
+}
+
+.bento-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-rows > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f4ebde;
+  font-size: 9px;
+  color: #9b8b75;
+}
+
+.bento-rows > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.bento-rows b {
+  max-width: 64%;
+  color: #574a3a;
+  font-weight: 500;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bento-rows b.ok {
+  color: #43834d;
+}
+
+.bento-rows b.warn {
+  color: #b96300;
+}
+
+.bento-quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bento-quick [data-ui="button"] {
+  justify-content: center;
+  height: 32px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.bento-tip {
+  background: #fff8ed;
+}
+
+.bento-tip p {
+  margin: 0;
+  color: #8b7b67;
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+.bento-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  color: #c06b0d;
+  font-size: 8px;
+}
+
+.bento-steps svg {
+  width: 11px;
+  height: 11px;
+  color: #d4b28a;
+}
+
+/* 设备卡片 */
+.bento-device-card {
+  border: 1px solid #ece1d2;
+  border-radius: 17px;
+  background: #fffdfa;
+  box-shadow: 0 8px 22px rgba(120, 85, 30, 0.05);
+  padding: 14px 16px 10px;
+}
+
+.bento-device-card .bento-card-head {
+  margin-bottom: 10px;
+}
+
+.bento-count {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fff0da;
+  color: #b96300;
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.bento-device-card .bento-card-head .tabs {
+  margin: 0 0 0 auto;
+}
+
+.bento-device-card .table-toolbar {
+  margin-bottom: 10px;
+}
+
+.bento-device-card .table-toolbar-filters {
+  gap: 8px;
+}
+
+.bento-device-card [data-ui="input"],
+.bento-device-card [data-ui="select"] {
+  height: 30px;
+  border-color: #eee2d2;
+  border-radius: 8px;
+  background: #fdfaf5;
+  font-size: 10px;
+}
+
+.bento-device-card [data-ui="table-container"] {
+  border-color: #f1e7d9;
+  border-radius: 12px;
+}
+
+.bento-device-card [data-ui="table-container"] th {
+  padding: 8px 12px;
+  background: #fbf6ee;
+  color: #a1907c;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+.bento-device-card [data-ui="table-container"] td {
+  padding: 9px 12px;
+}
+
+.bento-device-card [data-ui="table-container"] td strong {
+  font-size: 12px;
+}
+
+.bento-device-card [data-ui="table-container"] td small {
+  font-size: 9px;
+}
+
+.bento-device-card [data-ui="table-container"] tbody tr:hover td {
+  background: #fffaf2;
+}
+
+.bento-device-card .row-actions [data-ui="icon-button"] {
+  border-color: #eee2d2;
+  border-radius: 7px;
+}
+
+.bento-device-card input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #ff9d2e;
+}
+
+.bento-device-card .pager {
+  margin-top: 8px;
+  padding: 2px 2px 0;
+  font-size: 9px;
+}
+
+.bento-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 2px 0;
+  color: #b3a48f;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+/* 设置页沿用 bento 面板 */
+.bento-settings .tabs {
+  margin: 0;
+}
+
+.bento-settings [data-ui="settings-section"] > div {
+  border-color: #ece1d2;
+  border-radius: 17px;
+  background: #fffdfa;
+  box-shadow: 0 8px 22px rgba(120, 85, 30, 0.05);
+}
+
+.bento-settings [data-ui="settings-row"]:hover {
+  background: #fffaf2;
+}
+
+/* 设置页页签与卡片间距 */
+.bento-settings {
+  gap: 14px;
+}
+
+@media (max-width: 1180px) {
+  .bento-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-side {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .bento-head {
+    flex-wrap: wrap;
+  }
+
+  .bento-head-side {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .bento-side {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1000px) {
   .form-grid {
     grid-template-columns: 1fr;

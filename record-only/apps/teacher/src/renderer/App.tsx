@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CircleCheck, Clock3, Inbox, Monitor } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ActionMenu,
@@ -11,7 +12,6 @@ import {
   IconButton,
   Input,
   Page,
-  PageHeader,
   Select,
   TableContainer,
   Textarea,
@@ -31,6 +31,7 @@ import type {
 } from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
 import {
+  ChevronRightIcon,
   ConnectionState,
   Dialog,
   EditIcon,
@@ -102,6 +103,10 @@ export function App() {
       page: 1,
       pageSize: 30,
     }),
+    [counts, setCounts] = useState<{
+      active: number | null;
+      free: number | null;
+    }>({ active: null, free: null }),
     [tags, setTags] = useState<TagDTO[]>([]),
     [page, setPage] = useState(1),
     [state, setState] = useState<"active" | "free" | "all">("active"),
@@ -131,7 +136,32 @@ export function App() {
         const local = await window.library.call<LocalStatus>("status", {});
         setStatus(local);
         if (!local.authenticated) return;
-        const [{ devices: d, status: s }, t] = await Promise.all([
+        // 概览需要同时展示使用中/未使用总数；只在非后台、无筛选时补两次轻量计数。
+        const countsTask =
+          !settings && !background && !search && !tagId
+            ? Promise.all([
+                window.library.call<{
+                  devices: PageData<DeviceDTO>;
+                }>("devices", {
+                  page: 1,
+                  pageSize: 1,
+                  state: "active",
+                }),
+                window.library.call<{
+                  devices: PageData<DeviceDTO>;
+                }>("devices", {
+                  page: 1,
+                  pageSize: 1,
+                  state: "free",
+                }),
+              ])
+                .then(([a, f]) => ({
+                  active: a.devices.total,
+                  free: f.devices.total,
+                }))
+                .catch(() => null)
+            : Promise.resolve(null);
+        const [{ devices: d, status: s }, t, countData] = await Promise.all([
           window.library.call<{
             devices: PageData<DeviceDTO>;
             status: ServiceStatus;
@@ -143,10 +173,15 @@ export function App() {
             tagId: tagId || undefined,
           }),
           window.library.call<{ items: TagDTO[] }>("tags", {}),
+          countsTask,
         ]);
         setDevices(d);
         setService(s);
         setTags(t.items);
+        setCounts(
+          (prev) =>
+            countData ?? (settings ? prev : { ...prev, [state]: d.total }),
+        );
         setLastUpdated(Date.now());
         setError(undefined);
         delay.current = 3000;
@@ -284,8 +319,95 @@ export function App() {
       lastUpdated={lastUpdated}
     />
   );
+  const nowDate = new Date();
+  const clockText = nowDate.toLocaleTimeString("zh-CN", { hour12: false });
+  const weekday = "日一二三四五六"[nowDate.getDay()];
+  const dateText = `${nowDate.getFullYear()}/${String(
+    nowDate.getMonth() + 1,
+  ).padStart(
+    2,
+    "0",
+  )}/${String(nowDate.getDate()).padStart(2, "0")} · 周${weekday}`;
+  const greeting =
+    nowDate.getHours() < 11
+      ? "上午好"
+      : nowDate.getHours() < 18
+        ? "下午好"
+        : "晚上好";
+  const activeCount =
+    counts.active ?? (state === "active" ? devices.total : null);
+  const freeCount = counts.free ?? (state === "free" ? devices.total : null);
+  const activeLabel =
+    activeCount === null ? "—" : String(activeCount).padStart(2, "0");
+  const freeLabel =
+    freeCount === null ? "—" : String(freeCount).padStart(2, "0");
+  const pendingCount = status?.pendingCommands ?? 0;
+  const lastSync = lastUpdated
+    ? new Date(lastUpdated).toLocaleTimeString("zh-CN", { hour12: false })
+    : "—";
+  const storageLabel =
+    status?.storage === "failed"
+      ? "写入失败"
+      : status?.storage === "warning"
+        ? "空间预警"
+        : "正常";
+  const pageHeader = (
+    <header className="bento-head">
+      <div className="bento-heading">
+        {!settings && <span className="bento-greet">{greeting}，图书馆</span>}
+        <h1>{settings ? "设置" : "使用登记"}</h1>
+        <p>
+          {settings
+            ? "连接、读卡器、设备与历史记录"
+            : status?.authenticated
+              ? `${activeCount ?? "—"} 台设备正在使用，列表每 3 秒自动刷新。`
+              : "等待连接服务器后加载设备。"}
+        </p>
+      </div>
+      <div className="bento-head-side">
+        {!settings && (
+          <div className="bento-clock">
+            <b>{clockText}</b>
+            <span>{dateText}</span>
+          </div>
+        )}
+        {connectionState}
+        <Button
+          size="small"
+          variant="primary"
+          icon={RefreshIcon}
+          disabled={loading}
+          onClick={() => void load()}
+        >
+          刷新数据
+        </Button>
+      </div>
+    </header>
+  );
   const table = (
-    <Card>
+    <Card className="bento-device-card">
+      <div className="bento-card-head">
+        <h2>{settings ? "设备管理" : "设备使用"}</h2>
+        <span className="bento-count">{devices.total} 条</span>
+        {!settings && (
+          <div className="tabs" role="group" aria-label="设备状态">
+            <Button
+              size="small"
+              variant={state === "active" ? "primary" : "ghost"}
+              onClick={() => setState("active")}
+            >
+              使用中
+            </Button>
+            <Button
+              size="small"
+              variant={state === "free" ? "primary" : "ghost"}
+              onClick={() => setState("free")}
+            >
+              未使用
+            </Button>
+          </div>
+        )}
+      </div>
       <Toolbar className="table-toolbar">
         <Toolbar className="table-toolbar-filters">
           <Input
@@ -366,24 +488,6 @@ export function App() {
           )}
         </Toolbar>
       </Toolbar>
-      {!settings && (
-        <div className="tabs" role="group" aria-label="设备状态">
-          <Button
-            size="small"
-            variant={state === "active" ? "primary" : "ghost"}
-            onClick={() => setState("active")}
-          >
-            使用中
-          </Button>
-          <Button
-            size="small"
-            variant={state === "free" ? "primary" : "ghost"}
-            onClick={() => setState("free")}
-          >
-            未使用
-          </Button>
-        </div>
-      )}
       <Failure error={error} retry={() => void load()} />
       <TableContainer className="table-scroll" aria-busy={loading}>
         <table>
@@ -601,11 +705,10 @@ export function App() {
         </div>
       ) : (
         <Page>
-          <div className="page-stack">
-            <PageHeader
-              title={settings ? "设置" : "使用登记"}
-              actions={connectionState}
-            />
+          <div
+            className={settings ? "page-stack bento-settings" : "bento-page"}
+          >
+            {pageHeader}
             {notice && (
               <Banner
                 tone="error"
@@ -763,44 +866,181 @@ export function App() {
               </>
             ) : (
               <>
-                {table}
-                {__CYEZ_TEST_FEATURES__ &&
-                  status?.environment !== "production" &&
-                  status?.authenticated && (
-                    <Toolbar className="integration-tools">
-                      <span>集成测试读卡器</span>
-                      <Button
-                        size="small"
-                        onClick={() =>
-                          void window.library.call("integrationScan", {
-                            fixture: "allowed-1",
-                          })
-                        }
-                      >
-                        测试卡 1
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() =>
-                          void window.library.call("integrationScan", {
-                            fixture: "allowed-2",
-                          })
-                        }
-                      >
-                        测试卡 2
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() =>
-                          void window.library.call("integrationScan", {
-                            fixture: "unknown",
-                          })
-                        }
-                      >
-                        未授权测试卡
-                      </Button>
-                    </Toolbar>
-                  )}
+                <section className="bento-stats" aria-label="使用概览">
+                  <div className="bento-tile hot">
+                    <div className="bento-tile-top">
+                      <span>正在使用</span>
+                      <Monitor aria-hidden="true" />
+                    </div>
+                    <div className="bento-number">
+                      {activeLabel}
+                      <small>台</small>
+                    </div>
+                    <div className="bento-tile-hint">
+                      {status?.online ? "数据实时同步" : "等待网络恢复"}
+                    </div>
+                  </div>
+                  <div className="bento-tile">
+                    <div className="bento-tile-top">
+                      <span>未使用设备</span>
+                      <CircleCheck aria-hidden="true" />
+                    </div>
+                    <div className="bento-number">
+                      {freeLabel}
+                      <small>台</small>
+                    </div>
+                    <div className="bento-tile-hint">含维护中设备</div>
+                  </div>
+                  <div className="bento-tile">
+                    <div className="bento-tile-top">
+                      <span>待确认提交</span>
+                      <Inbox aria-hidden="true" />
+                    </div>
+                    <div className="bento-number">
+                      {pendingCount}
+                      <small>条</small>
+                    </div>
+                    <div className="bento-tile-hint">
+                      {pendingCount ? "请先查询原提交" : "没有待处理提交"}
+                    </div>
+                  </div>
+                  <div className="bento-tile">
+                    <div className="bento-tile-top">
+                      <span>数据同步</span>
+                      <Clock3 aria-hidden="true" />
+                    </div>
+                    <div className="bento-number time">{lastSync}</div>
+                    <div className="bento-tile-hint">每 3 秒自动刷新</div>
+                  </div>
+                </section>
+                <div className="bento-grid">
+                  <div className="bento-main">
+                    {table}
+                    {__CYEZ_TEST_FEATURES__ &&
+                      status?.environment !== "production" &&
+                      status?.authenticated && (
+                        <Toolbar className="integration-tools">
+                          <span>集成测试读卡器</span>
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              void window.library.call("integrationScan", {
+                                fixture: "allowed-1",
+                              })
+                            }
+                          >
+                            测试卡 1
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              void window.library.call("integrationScan", {
+                                fixture: "allowed-2",
+                              })
+                            }
+                          >
+                            测试卡 2
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              void window.library.call("integrationScan", {
+                                fixture: "unknown",
+                              })
+                            }
+                          >
+                            未授权测试卡
+                          </Button>
+                        </Toolbar>
+                      )}
+                  </div>
+                  <aside className="bento-side">
+                    <div className="bento-card">
+                      <div className="bento-card-head">
+                        <h2>终端状态</h2>
+                        <span className="bento-live">
+                          <i aria-hidden="true" />
+                          LIVE
+                        </span>
+                      </div>
+                      <div className="bento-rows">
+                        <div>
+                          <span>服务器</span>
+                          <b className={status?.online ? "ok" : "warn"}>
+                            {status?.online
+                              ? "连接正常"
+                              : status?.authenticated
+                                ? "连接中断"
+                                : "未登录"}
+                          </b>
+                        </div>
+                        <div>
+                          <span>读卡器</span>
+                          <b className="truncate" title={status?.reader}>
+                            {status?.reader || "未检测"}
+                          </b>
+                        </div>
+                        <div>
+                          <span>本地存储</span>
+                          <b
+                            className={
+                              status?.storage === "normal" ? "" : "warn"
+                            }
+                          >
+                            {storageLabel}
+                          </b>
+                        </div>
+                        <div>
+                          <span>最近成功</span>
+                          <b>{timestamp(status?.lastSuccessMs ?? null)}</b>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bento-card">
+                      <div className="bento-card-head">
+                        <h2>快捷操作</h2>
+                      </div>
+                      <div className="bento-quick">
+                        <Button
+                          size="small"
+                          variant="primary"
+                          icon={RefreshIcon}
+                          disabled={loading}
+                          onClick={() => void load()}
+                        >
+                          刷新数据
+                        </Button>
+                        <Button
+                          size="small"
+                          icon={SettingsIcon}
+                          onClick={() => navigate("/settings")}
+                        >
+                          打开设置
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="bento-card bento-tip">
+                      <div className="bento-card-head">
+                        <h2>使用提示</h2>
+                      </div>
+                      <p>
+                        学生刷卡后选择空闲设备；离开时再次刷卡结束使用。10
+                        秒无操作会自动取消。
+                      </p>
+                      <div className="bento-steps">
+                        <span>刷卡</span>
+                        <ChevronRightIcon aria-hidden="true" />
+                        <span>选设备</span>
+                        <ChevronRightIcon aria-hidden="true" />
+                        <span>确认</span>
+                      </div>
+                    </div>
+                  </aside>
+                </div>
+                <div className="bento-foot">
+                  <span>学校图书馆 · 自助登记终端</span>
+                  <span>把时间留给阅读。</span>
+                </div>
               </>
             )}
             {modal && (
