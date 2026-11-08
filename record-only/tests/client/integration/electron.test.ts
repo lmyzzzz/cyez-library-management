@@ -268,23 +268,24 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const before = scans;
   await call("integrationScan", { fixture: "allowed-1" });
   expect(scans).toBe(before);
-  await expect(page.locator(".workspace-notice")).toContainText(
-    "接收到刷卡消息，请返回主页面以触发登记",
-  );
+  const scanNotice = page.getByRole("alert").filter({
+    hasText: "接收到刷卡消息，请返回主页面以触发登记",
+  });
+  await expect(scanNotice).toBeVisible();
   await page.getByRole("link", { name: "使用登记", exact: true }).click();
   await page.getByRole("button", { name: "未使用", exact: true }).click();
   await page.waitForTimeout(1300);
   await page.getByRole("button", { name: "测试卡 1", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "登记使用", exact: true }),
+    page.getByRole("heading", { name: "选择设备", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".workspace-notice")).toHaveCount(0);
+  await expect(scanNotice).toHaveCount(0);
   await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
     "data-layout",
     "focus",
   );
   const scanBounds = async () =>
-    page.locator(".scan-flow-screen").evaluate((element) => {
+    page.locator(".bflow").evaluate((element) => {
       const rect = element.getBoundingClientRect();
       return {
         left: rect.left,
@@ -304,15 +305,12 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const scansDuringFlow = scans;
   await call("integrationScan", { fixture: "allowed-2" });
   expect(scans).toBe(scansDuringFlow);
-  await expect(page.locator(".workspace-notice")).toContainText("请返回主页面");
+  await expect(scanNotice).toBeVisible();
   const noticedBounds = await scanBounds();
   expect(noticedBounds).toEqual(registrationBounds);
-  await page
-    .locator(".workspace-notice")
-    .getByRole("button", { name: "关闭" })
-    .click();
+  await scanNotice.getByRole("button", { name: "关闭" }).click();
   await expect(
-    page.getByRole("button", { name: "选择", exact: true }),
+    page.getByRole("button", { name: "选择 E2E-001", exact: true }),
   ).toBeVisible();
   await page.screenshot({
     path: "test-results/electron/scan-registration-fullscreen.png",
@@ -333,7 +331,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
     fullPage: true,
   });
   if (originalViewport) await page.setViewportSize(originalViewport);
-  await page.getByRole("button", { name: "选择", exact: true }).click();
+  await page.getByRole("button", { name: "选择 E2E-001", exact: true }).click();
   await page
     .getByLabel("登记备注", { exact: true })
     .fill("真实 Electron 集成记录");
@@ -496,7 +494,8 @@ test("C-I-08: 自动局部更新保留真实滚动、焦点与编辑草稿", asy
   await expect(page.getByLabel("搜索设备")).toBeFocused();
   await expect(page.getByLabel("搜索设备")).toHaveValue("SCROLL-");
   const row = page.locator("tbody tr").filter({ hasText: "SCROLL-04" });
-  await row.getByRole("button", { name: "编辑", exact: true }).click();
+  await row.getByRole("button", { name: "设备操作", exact: true }).click();
+  await page.getByRole("menuitem", { name: "编辑", exact: true }).click();
   const notes = page.getByLabel("设备备注", { exact: true });
   await notes.fill("尚未保存的草稿");
   await notes.evaluate((element) => {
@@ -555,13 +554,17 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
     .toBe(true);
   await page.getByRole("link", { name: "设置", exact: true }).click();
   await page.getByRole("button", { name: "读卡器", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "读卡器" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "读卡进程", exact: true }),
+  ).toBeVisible();
   await page.screenshot({
     path: "test-results/electron/serial-settings.png",
     fullPage: true,
   });
   await page.getByLabel("读卡进程").selectOption("acr1552");
-  await expect(page.getByLabel("PC/SC 读卡器")).toHaveValue("");
+  await expect(page.getByLabel("PC/SC 读卡器", { exact: true })).toHaveValue(
+    "",
+  );
   await expect(page.getByLabel("状态检查间隔（毫秒）")).toHaveValue("250");
   await expect(page.getByRole("button", { name: "覆盖并启动" })).toBeDisabled();
   await page.screenshot({
@@ -628,7 +631,7 @@ test("C-I-13: 生产客户端可在设置页启动手动输入", async () => {
       .getByRole("button", { name: "读卡器", exact: true })
       .click();
     await expect(
-      setupPage.getByRole("heading", { name: "读卡器" }),
+      setupPage.getByRole("heading", { name: "读卡进程", exact: true }),
     ).toBeVisible();
     await expect(
       setupPage.getByRole("option", { name: "手动输入" }),

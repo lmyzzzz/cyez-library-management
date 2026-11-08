@@ -56,13 +56,11 @@ test("集成 Electron 连接 Compose gateway：登记、结束、只读历史", 
     await expect(page.getByText(code, { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "测试卡 1", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "登记使用", exact: true }),
+      page.getByRole("heading", { name: "选择设备", exact: true }),
     ).toBeVisible();
     await page.getByLabel("搜索可选设备").fill(code);
     await page
-      .locator(".picker-row")
-      .filter({ hasText: code })
-      .getByRole("button", { name: "选择", exact: true })
+      .getByRole("button", { name: `选择 ${code}`, exact: true })
       .click();
     await page.getByLabel("登记备注").fill("打包端到端记录");
     await page.getByRole("button", { name: "确认登记", exact: true }).click();
