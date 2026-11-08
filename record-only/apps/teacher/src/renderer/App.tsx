@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, forwardRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ActionMenu,
@@ -8,6 +8,7 @@ import {
   Banner,
   Button,
   Card,
+  IconButton,
   Input,
   Page,
   PageHeader,
@@ -35,7 +36,13 @@ import {
   EditIcon,
   Empty,
   Failure,
+  NoteIcon,
   Pager,
+  PlusIcon,
+  PowerIcon,
+  RefreshIcon,
+  StopIcon,
+  TagIcon,
   LibraryIcon,
   SettingsIcon,
   StatusBadge,
@@ -61,7 +68,7 @@ const routes: AppRouteRegistration[] = [
     component: () => null,
     navigation: {
       label: "使用登记",
-      icon: forwardRef((p, r) => <LibraryIcon {...p} ref={r} />),
+      icon: LibraryIcon,
     },
   },
   {
@@ -71,7 +78,7 @@ const routes: AppRouteRegistration[] = [
     navigation: {
       label: "设置",
       placement: "footer",
-      icon: forwardRef((p, r) => <SettingsIcon {...p} ref={r} />),
+      icon: SettingsIcon,
     },
   },
 ];
@@ -299,23 +306,30 @@ export function App() {
               </option>
             ))}
           </Select>
-          <Button size="small" disabled={loading} onClick={() => void load()}>
-            刷新
-          </Button>
+          <IconButton
+            size="small"
+            variant="ghost"
+            label="刷新"
+            icon={RefreshIcon}
+            disabled={loading}
+            onClick={() => void load()}
+          />
         </Toolbar>
         <Toolbar className="table-toolbar-actions">
           {settings ? (
             <>
-              <Button
+              <IconButton
                 size="small"
+                variant="ghost"
+                label="管理标签"
+                icon={TagIcon}
                 disabled={!canWrite}
                 onClick={() => setModal({ kind: "tags" })}
-              >
-                管理标签
-              </Button>
+              />
               <Button
                 size="small"
                 variant="primary"
+                icon={PlusIcon}
                 disabled={
                   !canWrite || !service?.allowedActions.includes("modify")
                 }
@@ -325,30 +339,30 @@ export function App() {
               </Button>
             </>
           ) : (
-            <>
-              <Button
-                size="small"
+            <ActionMenu label="批量结束">
+              <ActionMenuItem
+                icon={StopIcon}
                 disabled={!canWrite || !selected.length}
-                onClick={() => void openBatch("selected")}
+                onSelect={() => void openBatch("selected")}
               >
                 结束选中 ({selected.length})
-              </Button>
-              <Button
-                size="small"
+              </ActionMenuItem>
+              <ActionMenuItem
+                icon={StopIcon}
                 disabled={!canWrite}
-                onClick={() => void openBatch("filtered")}
+                onSelect={() => void openBatch("filtered")}
               >
                 结束筛选结果…
-              </Button>
-              <Button
-                size="small"
-                variant="danger"
+              </ActionMenuItem>
+              <ActionMenuItem
+                icon={TrashIcon}
+                danger
                 disabled={!canWrite}
-                onClick={() => void openBatch("all")}
+                onSelect={() => void openBatch("all")}
               >
                 结束全部…
-              </Button>
-            </>
+              </ActionMenuItem>
+            </ActionMenu>
           )}
         </Toolbar>
       </Toolbar>
@@ -477,22 +491,24 @@ export function App() {
                         </div>
                       ) : d.active ? (
                         <div className="row-actions">
-                          <Button
+                          <IconButton
                             size="small"
+                            variant="ghost"
+                            label="备注"
+                            icon={NoteIcon}
                             disabled={!canWrite}
                             onClick={() =>
                               setModal({ kind: "notes", record: d.active! })
                             }
-                          >
-                            备注
-                          </Button>
-                          <Button
+                          />
+                          <IconButton
                             size="small"
+                            variant="ghost"
+                            label="结束…"
+                            icon={PowerIcon}
                             disabled={!canWrite}
                             onClick={() => void end(d.active!.id)}
-                          >
-                            结束…
-                          </Button>
+                          />
                         </div>
                       ) : null}
                     </td>
@@ -734,9 +750,13 @@ export function App() {
                       <dd>{timestamp(status?.lastSuccessMs ?? null)}</dd>
                     </dl>
                     <div className="form-actions">
-                      <Button size="small" onClick={() => void refreshStatus()}>
-                        刷新诊断
-                      </Button>
+                      <IconButton
+                        size="small"
+                        variant="ghost"
+                        label="刷新诊断"
+                        icon={RefreshIcon}
+                        onClick={() => void refreshStatus()}
+                      />
                     </div>
                   </Card>
                 )}

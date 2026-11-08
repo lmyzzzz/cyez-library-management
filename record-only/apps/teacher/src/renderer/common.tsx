@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactNode, type SVGProps } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Badge,
   Banner,
   Button,
   EmptyState,
+  IconButton,
   Modal,
   ModalDescription,
   ModalPanel,
@@ -72,60 +73,41 @@ export function errorText(error: unknown) {
   const code = error instanceof Error ? error.message : String(error);
   return messages[code] ?? "操作未完成，请重试；如仍失败，请联系维护人员。";
 }
-export function LibraryIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      {...props}
-    >
-      <path d="M4 4h6v16H4zM14 4h6v16h-6zM6 8h2m8 0h2M6 16h2m8 0h2" />
-    </svg>
-  );
-}
-export function SettingsIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      {...props}
-    >
-      <path d="M4 7h16M4 17h16" />
-      <circle cx="9" cy="7" r="3" fill="var(--surface,#fff)" />
-      <circle cx="16" cy="17" r="3" fill="var(--surface,#fff)" />
-    </svg>
-  );
-}
-export function EditIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      {...props}
-    >
-      <path d="M4 20h4l10-10-4-4L4 16v4zM14 6l4 4" />
-    </svg>
-  );
-}
-export function TrashIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      {...props}
-    >
-      <path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5m4-5v5" />
-    </svg>
-  );
-}
+import {
+  BookOpen as LibraryIcon,
+  Check as CheckIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  FileText as NoteIcon,
+  LogIn as LoginIcon,
+  Pencil as EditIcon,
+  Plus as PlusIcon,
+  Power as PowerIcon,
+  RefreshCw as RefreshIcon,
+  RotateCcw as ResetIcon,
+  Settings as SettingsIcon,
+  Square as StopIcon,
+  Tag as TagIcon,
+  Trash2 as TrashIcon,
+} from "lucide-react";
+export {
+  LibraryIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  NoteIcon,
+  LoginIcon,
+  EditIcon,
+  PlusIcon,
+  PowerIcon,
+  RefreshIcon,
+  ResetIcon,
+  SettingsIcon,
+  StopIcon,
+  TagIcon,
+  TrashIcon,
+};
+
 export function timestamp(ms: number | null) {
   return ms === null
     ? "—"
@@ -199,23 +181,25 @@ export function Pager({
       <span>
         共 {total} 条 · 每页 {pageSize} 条
       </span>
-      <Button
+      <IconButton
         size="small"
+        variant="ghost"
+        label="上一页"
+        icon={ChevronLeftIcon}
         disabled={page === 1}
         onClick={() => setPage(page - 1)}
-      >
-        上一页
-      </Button>
+      />
       <span>
         {page} / {Math.max(1, Math.ceil(total / pageSize))}
       </span>
-      <Button
+      <IconButton
         size="small"
+        variant="ghost"
+        label="下一页"
+        icon={ChevronRightIcon}
         disabled={page * pageSize >= total}
         onClick={() => setPage(page + 1)}
-      >
-        下一页
-      </Button>
+      />
     </footer>
   );
 }

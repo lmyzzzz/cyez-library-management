@@ -1,5 +1,7 @@
 # 教师端界面与 cyez-ui 接入
 
+2026-11-08 图标与背景规范：窗口只保留一层统一的顶部橙色→白色背景渐变，侧栏、内容区、登记/结束左右分栏共用，不另设分栏底色；卡片、表头、按钮和弹窗不使用渐变。所有界面图标统一使用直接依赖的 `lucide-react`，禁止以 Unicode emoji 或 `✓`、`→`、`×` 等字符充当图标；仅进度环等数据图形保留内联 SVG。登记/结束页的设备列表行高与主列表同步收紧。
+
 2026-11-08 登记/结束页改为面向教师与学生的浅色全屏版式：左侧身份区（姓名/班级上下同级、不使用姓名首字头像），右侧设备列表与操作；使用中设备用无文字图标触发“释放”，需二次确认后结束记录；不再展示未配置的 `schoolNumber`。登记仍为 10 秒无操作取消，结束仍为 5 秒自动确认。
 
 2026-11-07 页面骨架统一：标准页使用 cyez-ui `Page`/`PageHeader`，内容区使用 `Card`、`Toolbar`、`TableContainer`、`Badge`；设置表单使用 `SettingsContent`/`SettingsSection`/`SettingsRow` 与 `Input`/`Select`/`Switch`；弹窗统一 `ModalPanel`，标签删除使用 `ConfirmModal`，设备行操作收进 `ActionMenu`。应用 CSS 仅保留布局类，颜色/圆角/间距取自主题 token。

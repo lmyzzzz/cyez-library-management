@@ -1,4 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  Check,
+  CircleCheck,
+  CreditCard,
+  LockOpen,
+} from "lucide-react";
 import { Badge, Banner, Button, Card, Textarea } from "@record/ui";
 import type {
   DeviceDTO,
@@ -60,22 +68,6 @@ function Ring({
       </svg>
       <b>{remaining === null ? "–" : Math.ceil(remaining / 1000)}</b>
     </span>
-  );
-}
-function UnlockIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      aria-hidden="true"
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 7.5-2" />
-    </svg>
   );
 }
 export function EndForm({
@@ -257,23 +249,7 @@ export function EndForm({
           </div>
         </div>
         <div className="bflow-watermark" aria-hidden="true">
-          <svg
-            viewBox="0 0 170 170"
-            fill="none"
-            stroke="#efd5b2"
-            strokeWidth="1.4"
-          >
-            <circle cx="85" cy="85" r="58" />
-            <circle cx="85" cy="85" r="44" stroke="#f5e3c9" />
-            <path
-              d="m62 86 16 16 31-34"
-              stroke="#e8c493"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d="M85 12v10M85 148v10M12 85h10M148 85h10" stroke="#f3ddc0" />
-          </svg>
+          <CircleCheck size={190} strokeWidth={1.2} />
         </div>
         <div className="bflow-quote">
           <p>期待与你下次再见。</p>
@@ -312,7 +288,9 @@ export function EndForm({
               <span>开始</span>
               <b>{clock(record.startedAtMs)}</b>
             </div>
-            <div className="arrow">→</div>
+            <div className="arrow">
+              <ArrowRight size={15} aria-hidden="true" />
+            </div>
             <div className="right">
               <span>结束</span>
               <b>{clock(preview.atMs)}</b>
@@ -338,18 +316,7 @@ export function EndForm({
             确认后本条记录结束并写入历史，历史记录只读。
           </p>
           <div className="bflow-success">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="m8 12 2.5 2.5L16 9" />
-            </svg>
+            <CircleCheck size={15} aria-hidden="true" />
             <span>
               确认后设备 {record.device.code} 将立即释放，其他同学可以继续使用。
             </span>
@@ -396,6 +363,7 @@ export function EndForm({
               onClick={() => void submit()}
             >
               {busy ? "确认中…" : "确认结束"}
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
           </div>
         </footer>
@@ -611,36 +579,12 @@ export function Registration({
             </div>
           </div>
           <div className="bflow-leave">
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-            >
-              <rect x="3" y="5" width="18" height="14" rx="2" />
-              <path d="M3 10h18M8 15h4" />
-            </svg>
+            <CreditCard size={19} aria-hidden="true" />
             <span>离开时请刷卡结束使用</span>
           </div>
         </div>
         <div className="bflow-watermark" aria-hidden="true">
-          <svg
-            viewBox="0 0 200 150"
-            fill="none"
-            stroke="#efd5b2"
-            strokeWidth="1.4"
-          >
-            <path d="M22 32c18-8 38-8 58 2v84c-20-10-40-10-58-2V32Z" />
-            <path d="M178 32c-18-8-38-8-58 2v84c20-10 40-10 58-2V32Z" />
-            <path d="M80 34v84M120 34v84" stroke="#f6e5cb" />
-            <path
-              d="M38 52c8-3 16-3 24 0M38 66c8-3 16-3 24 0M38 80c8-3 16-3 24 0M138 52c8 3 16 3 24 0M138 66c8 3 16 3 24 0M138 80c8 3 16 3 24 0"
-              stroke="#f3dcbc"
-            />
-          </svg>
+          <BookOpen size={190} strokeWidth={1.2} />
         </div>
         <div className="bflow-quote">
           <p>把时间留给阅读。</p>
@@ -713,7 +657,7 @@ export function Registration({
                     disabled={busy || releaseBusy}
                     onClick={() => void startRelease(d)}
                   >
-                    <UnlockIcon />
+                    <LockOpen size={15} aria-hidden="true" />
                   </button>
                 ) : d.isDisabled ? (
                   <span className="bflow-noop" aria-hidden="true" />
@@ -732,7 +676,9 @@ export function Registration({
                       setSelected(selected?.id === d.id ? null : d)
                     }
                   >
-                    {selected?.id === d.id ? "✓" : ""}
+                    {selected?.id === d.id ? (
+                      <Check size={13} aria-hidden="true" />
+                    ) : null}
                   </button>
                 )}
               </div>
@@ -788,6 +734,7 @@ export function Registration({
               onClick={() => void submit()}
             >
               {busy ? "正在登记…" : "确认登记"}
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
           </div>
         </footer>

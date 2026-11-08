@@ -140,7 +140,7 @@ input[type="checkbox"] {
 
 .table-toolbar {
   justify-content: space-between;
-  margin-bottom: var(--space-4);
+  margin-bottom: 12px;
 }
 
 .table-toolbar-filters {
@@ -215,7 +215,7 @@ input[type="checkbox"] {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  margin-top: 10px;
   color: var(--color-text-muted);
   font-size: 12px;
 }
@@ -228,19 +228,13 @@ input[type="checkbox"] {
   display: block;
   height: 22px;
   border-radius: var(--radius-xs);
-  background: linear-gradient(
-    90deg,
-    var(--color-surface-subtle),
-    var(--color-accent-soft),
-    var(--color-surface-subtle)
-  );
-  background-size: 200%;
-  animation: pulse 1.5s ease infinite;
+  background: var(--color-surface-subtle);
+  animation: pulse 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes pulse {
   to {
-    background-position: -200% 0;
+    opacity: 0.5;
   }
 }
 
@@ -461,7 +455,7 @@ input[type="checkbox"] {
   width: 100%;
   height: 100%;
   min-height: 0;
-  background: var(--bf-bg);
+  background: transparent;
   color: var(--bf-text);
   font-size: 13px;
 }
@@ -482,24 +476,6 @@ input[type="checkbox"] {
   flex-direction: column;
   padding: 28px 38px 30px;
   overflow: hidden;
-  border-right: 1px solid var(--bf-line);
-  background:
-    radial-gradient(
-      420px 320px at 104% 6%,
-      #fff0d8 0%,
-      rgb(255 240 216 / 0%) 62%
-    ),
-    linear-gradient(180deg, #ffffff 0%, #fffdf9 100%);
-}
-
-.bflow-ident::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 3px;
-  background: var(--bf-orange);
 }
 
 .bflow-top {
@@ -846,6 +822,9 @@ input[type="checkbox"] {
 }
 
 .bflow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   height: 38px;
   padding: 0 20px;
   border: 1px solid var(--bf-line-strong);
@@ -878,11 +857,6 @@ input[type="checkbox"] {
   border: 1.5px solid var(--bf-orange-deep);
   background: transparent;
   color: var(--bf-orange-dark);
-}
-
-.bflow-btn.primary::after {
-  content: "→";
-  margin-left: 8px;
 }
 
 .bflow-btn.primary:hover {
@@ -1356,6 +1330,207 @@ input[type="checkbox"] {
 .integration-tools {
   color: var(--color-text-muted);
   font-size: 11px;
+}
+
+/* ===== 整体视觉升级 ===== */
+
+/* 唯一的背景渐变：整个窗口自上而下，左右分栏共用 */
+[data-ui="app-shell"] {
+  background: linear-gradient(
+    180deg,
+    #ffcf8f 0%,
+    #ffe3bb 18%,
+    #fff1de 38%,
+    #fffaf3 66%,
+    #ffffff 100%
+  );
+}
+
+[data-ui="app-shell"] [data-part="content"],
+[data-ui="sidebar"],
+[data-ui="titlebar"] {
+  background: transparent;
+}
+
+/* 卡片与面板 */
+.page-stack > [data-ui="card"] {
+  padding: 18px;
+  border-color: #f1e2cd;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(122, 82, 32, 0.07);
+}
+
+[data-ui="settings-section"] > div {
+  border-color: #f1e2cd;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(122, 82, 32, 0.05);
+}
+
+[data-ui="settings-row"]:hover {
+  background: #fffaf2;
+}
+
+/* 表格 */
+[data-ui="table-container"] {
+  border-color: #f1e2cd;
+  border-radius: 12px;
+}
+
+[data-ui="table-container"] th {
+  padding: 8px 16px;
+  background: #fff3e3;
+  color: #8a7157;
+  font-weight: 550;
+}
+
+[data-ui="table-container"] td {
+  padding: 9px 16px;
+}
+
+[data-ui="table-container"] td {
+  border-top-color: #f6ecdf;
+}
+
+[data-ui="table-container"] tbody tr:hover td {
+  background: #fffaf2;
+}
+
+/* 分段式页签 */
+.tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 3px;
+  border: 1px solid #f2e2cc;
+  border-radius: 10px;
+  background: #fff6e8;
+}
+
+.tabs [data-ui="button"] {
+  border-color: transparent;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tabs [data-ui="button"][data-variant="primary"] {
+  border-color: #f0dcc0;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(150, 100, 30, 0.1);
+  color: var(--color-text-strong);
+}
+
+/* 侧栏激活项 */
+[data-ui="sidebar"] [data-part="navigation-link"] {
+  border-radius: 8px;
+}
+
+[data-ui="sidebar"] [data-part="navigation-link"][aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-text-strong);
+  font-weight: 650;
+}
+
+/* 按钮与图标按钮 */
+[data-ui="button"],
+[data-ui="icon-button"] {
+  border-radius: 8px;
+}
+
+[data-ui="icon-button"][data-variant="ghost"] {
+  color: var(--color-text-muted);
+}
+
+.row-actions [data-ui="icon-button"] {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+}
+
+.row-actions [data-ui="icon-button"]:hover,
+.form-actions [data-ui="icon-button"]:hover,
+.history-filters [data-ui="icon-button"]:hover,
+.table-toolbar [data-ui="icon-button"]:hover {
+  border-color: var(--color-border-strong);
+  background: #fff8ec;
+}
+
+.form-actions [data-ui="icon-button"],
+.history-filters [data-ui="icon-button"],
+.table-toolbar [data-ui="icon-button"] {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+[data-ui="icon-button"][data-variant="ghost"]:hover {
+  background: #fff1dc;
+  color: var(--color-text-strong);
+}
+
+[data-ui="button"][data-variant="primary"] {
+  box-shadow: 0 6px 16px rgba(232, 143, 0, 0.22);
+}
+
+[data-ui="button"][data-variant="primary"]:hover {
+  box-shadow: 0 8px 20px rgba(232, 143, 0, 0.28);
+}
+
+/* 弹窗 */
+[data-ui="modal-overlay"] {
+  background: rgba(60, 38, 16, 0.34);
+  backdrop-filter: blur(3px);
+}
+
+[data-ui="modal-panel"] {
+  border: 1px solid #f1e2cd;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(60, 35, 10, 0.24);
+}
+
+[data-ui="modal-panel"] > header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f6ecdf;
+}
+
+/* 页面节奏 */
+[data-ui="page"] {
+  padding-top: 36px;
+  padding-bottom: 44px;
+}
+
+.page-stack {
+  gap: 18px;
+}
+
+[data-ui="page-header"] {
+  margin-bottom: 26px;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background: #e6d3b8;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d8bf9d;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 @media (max-width: 1000px) {

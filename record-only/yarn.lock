@@ -2024,6 +2024,7 @@ __metadata:
     electron: "npm:44.9.1"
     electron-builder: "npm:26.15.3"
     electron-vite: "npm:5.0.0"
+    lucide-react: "npm:1.64.0"
     react: "npm:19.2.8"
     react-dom: "npm:19.2.8"
     react-router-dom: "npm:7.18.2"
@@ -5805,7 +5806,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^1.33.0":
+"lucide-react@npm:1.64.0, lucide-react@npm:^1.33.0":
   version: 1.64.0
   resolution: "lucide-react@npm:1.64.0"
   peerDependencies:

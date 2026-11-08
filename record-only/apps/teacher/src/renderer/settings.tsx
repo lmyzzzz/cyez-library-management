@@ -7,6 +7,7 @@ import {
   CheckField,
   ConfirmModal,
   Field,
+  IconButton,
   Input,
   Page,
   PageHeader,
@@ -30,9 +31,14 @@ import type { IdentityConfig } from "@record/protocol/identity";
 import type { ReaderProcessConfig } from "../shared/reader-config.js";
 import {
   Dialog,
+  EditIcon,
   Failure,
   Empty,
+  LoginIcon,
   Pager,
+  RefreshIcon,
+  ResetIcon,
+  TrashIcon,
   timestamp,
   duration,
   errorText,
@@ -265,16 +271,22 @@ export function ConnectionForm({
         >
           覆盖连接并登录
         </Button>
-        <Button
+        <IconButton
           size="small"
+          variant="ghost"
+          label="使用已保存登录"
+          icon={LoginIcon}
           disabled={busy || !status?.savedCredentials}
           onClick={() => void run("saved")}
-        >
-          使用已保存登录
-        </Button>
-        <Button size="small" disabled={busy} onClick={() => void run("clear")}>
-          清除保存项
-        </Button>
+        />
+        <IconButton
+          size="small"
+          variant="ghost"
+          label="清除保存项"
+          icon={TrashIcon}
+          disabled={busy}
+          onClick={() => void run("clear")}
+        />
       </div>
     </SettingsContent>
   );
@@ -720,18 +732,24 @@ export function ReaderSettings({
       {message && <Banner tone="success">{message}</Banner>}
       <div className="form-actions">
         {kind === "serial" && (
-          <Button size="small" disabled={busy} onClick={() => void scanPorts()}>
-            刷新串口列表
-          </Button>
+          <IconButton
+            size="small"
+            variant="ghost"
+            label="刷新串口列表"
+            icon={RefreshIcon}
+            disabled={busy}
+            onClick={() => void scanPorts()}
+          />
         )}
         {kind === "acr1552" && (
-          <Button
+          <IconButton
             size="small"
+            variant="ghost"
+            label="刷新 PC/SC 读卡器"
+            icon={RefreshIcon}
             disabled={busy}
             onClick={() => void scanAcrReaders()}
-          >
-            刷新 PC/SC 读卡器
-          </Button>
+          />
         )}
         <Button
           size="small"
@@ -952,24 +970,25 @@ export function TagManager({
           <div className="tag-row" key={t.id}>
             <strong>{t.name}</strong>
             <div className="row-actions">
-              <Button
+              <IconButton
                 size="small"
+                variant="ghost"
+                label="编辑"
+                icon={EditIcon}
                 disabled={busy}
                 onClick={() => {
                   setEditing(t);
                   setName(t.name);
                 }}
-              >
-                编辑
-              </Button>
-              <Button
+              />
+              <IconButton
                 size="small"
                 variant="ghost"
+                label="删除…"
+                icon={TrashIcon}
                 disabled={busy}
                 onClick={() => setDeleting(t)}
-              >
-                删除…
-              </Button>
+              />
             </div>
           </div>
         ))}
@@ -1115,12 +1134,20 @@ export function History({
             setPage(1);
           }}
         />
-        <Button size="small" onClick={reset}>
-          重置筛选
-        </Button>
-        <Button size="small" onClick={() => void load()}>
-          刷新
-        </Button>
+        <IconButton
+          size="small"
+          variant="ghost"
+          label="重置筛选"
+          icon={ResetIcon}
+          onClick={reset}
+        />
+        <IconButton
+          size="small"
+          variant="ghost"
+          label="刷新"
+          icon={RefreshIcon}
+          onClick={() => void load()}
+        />
       </Toolbar>
       <Failure error={error} retry={() => void load()} />
       <TableContainer className="table-scroll" aria-busy={busy}>

@@ -181,6 +181,13 @@ async function openDeviceMenu(index: number) {
   await screen.findByRole("menuitem", { name: "编辑" });
 }
 
+async function openBatchMenu() {
+  fireEvent.keyDown(screen.getByRole("button", { name: "批量结束" }), {
+    key: "Enter",
+  });
+  await screen.findByRole("menuitem", { name: /结束选中/ });
+}
+
 describe("C-U-01/05 主页面门控和状态", () => {
   it("自动更新只修改数据，保留勾选、滚动和弹窗草稿及焦点", async () => {
     vi.useFakeTimers();
@@ -334,7 +341,8 @@ describe("C-U-01/05 主页面门控和状态", () => {
       expect(call).toHaveBeenCalledWith("endPreview", { recordId: active.id }),
     );
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
-    fireEvent.click(screen.getByRole("button", { name: "结束全部…" }));
+    await openBatchMenu();
+    fireEvent.click(screen.getByRole("menuitem", { name: "结束全部…" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("batchPreview", { scope: "all" }),
     );
@@ -384,11 +392,13 @@ describe("C-U-01/05 主页面门控和状态", () => {
     await waitFor(() =>
       expect(screen.getByText(/请先在设置中配置连接并登录/)).toBeTruthy(),
     );
+    await openBatchMenu();
     expect(
       screen
-        .getByRole("button", { name: "结束全部…" })
-        .hasAttribute("disabled"),
-    ).toBe(true);
+        .getByRole("menuitem", { name: "结束全部…" })
+        .getAttribute("aria-disabled"),
+    ).toBe("true");
+    fireEvent.keyDown(document.body, { key: "Escape" });
     expect(screen.getByText(/有 1 条提交结果待确认/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "查询原提交" }));
     await waitFor(() => expect(call).toHaveBeenCalledWith("recover", {}));
@@ -436,7 +446,8 @@ describe("C-U-01/05 主页面门控和状态", () => {
       expect(screen.getByLabelText("选择 PC-01")).toBeTruthy(),
     );
     fireEvent.click(screen.getByLabelText("选择 PC-01"));
-    fireEvent.click(screen.getByRole("button", { name: "结束选中 (1)" }));
+    await openBatchMenu();
+    fireEvent.click(screen.getByRole("menuitem", { name: "结束选中 (1)" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("batchPreview", {
         scope: "selected",
@@ -445,15 +456,18 @@ describe("C-U-01/05 主页面门控和状态", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
     fireEvent.click(screen.getByLabelText("选择 PC-01"));
+    await openBatchMenu();
     expect(
       screen
-        .getByRole("button", { name: "结束选中 (0)" })
-        .hasAttribute("disabled"),
-    ).toBe(true);
+        .getByRole("menuitem", { name: "结束选中 (0)" })
+        .getAttribute("aria-disabled"),
+    ).toBe("true");
+    fireEvent.keyDown(document.body, { key: "Escape" });
     fireEvent.change(screen.getByLabelText("搜索设备"), {
       target: { value: "PC" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "结束筛选结果…" }));
+    await openBatchMenu();
+    fireEvent.click(screen.getByRole("menuitem", { name: "结束筛选结果…" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith(
         "batchPreview",
