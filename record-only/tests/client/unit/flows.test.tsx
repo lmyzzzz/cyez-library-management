@@ -90,7 +90,7 @@ describe("C-U 登记、结束与批量确认", () => {
       />,
     );
     await waitFor(() =>
-      expect(screen.getAllByRole("button", { name: "选择" })).toHaveLength(2),
+      expect(screen.getAllByRole("button", { name: /^选择 / })).toHaveLength(1),
     );
     expect(
       screen.getByRole("button", { name: "确认登记" }).hasAttribute("disabled"),
@@ -98,7 +98,7 @@ describe("C-U 登记、结束与批量确认", () => {
     fireEvent.change(screen.getByLabelText("登记备注"), {
       target: { value: "需要设备" },
     });
-    fireEvent.click(screen.getAllByRole("button", { name: "选择" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: /^选择 / }));
     fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("start", {
@@ -140,11 +140,11 @@ describe("C-U 登记、结束与批量确认", () => {
         onBusy={vi.fn()}
       />,
     );
-    fireEvent.click(await screen.findByRole("button", { name: "先结束使用…" }));
+    fireEvent.click(await screen.findByRole("button", { name: /^释放 / }));
     await waitFor(() =>
-      expect(screen.getByText("先结束当前使用")).toBeTruthy(),
+      expect(screen.getByText("释放这台设备？")).toBeTruthy(),
     );
-    fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认释放" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith(
         "end",

@@ -566,22 +566,21 @@ export function App() {
             <Registration
               key={flow.id}
               preview={flow}
+              online={!!status?.online}
               onDone={done}
               onCancel={closeFlow}
               onBusy={setBusy}
             />
           ) : (
-            <section className="scan-flow-screen scan-end">
-              <PageHeader title="刷卡结束使用" />
-              <EndForm
-                key={flow.id}
-                preview={flow}
-                automatic
-                onDone={done}
-                onCancel={closeFlow}
-                onBusy={setBusy}
-              />
-            </section>
+            <EndForm
+              key={flow.id}
+              preview={flow}
+              automatic
+              online={!!status?.online}
+              onDone={done}
+              onCancel={closeFlow}
+              onBusy={setBusy}
+            />
           )}
         </div>
       ) : (

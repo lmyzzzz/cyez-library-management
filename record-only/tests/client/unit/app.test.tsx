@@ -419,7 +419,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
       listener!({ type: "scan", preview });
     });
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: "登记使用" })).toBeTruthy(),
+      expect(screen.getByRole("heading", { name: "选择设备" })).toBeTruthy(),
     );
     expect(screen.queryByRole("alert")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "取消登记" }));

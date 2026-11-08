@@ -1188,8 +1188,10 @@ export function History({
           <dl className="summary">
             <dt>学生</dt>
             <dd>
-              {detail.student.name} · {detail.student.className} ·{" "}
-              {detail.student.schoolNumber}
+              {detail.student.name} · {detail.student.className}
+              {detail.student.schoolNumber
+                ? ` · ${detail.student.schoolNumber}`
+                : ""}
             </dd>
             <dt>设备</dt>
             <dd>
