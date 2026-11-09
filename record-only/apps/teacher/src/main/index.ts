@@ -38,11 +38,22 @@ const configSchema = z
 if (process.env.CYEZ_USER_DATA)
   app.setPath("userData", process.env.CYEZ_USER_DATA);
 app.disableHardwareAcceleration();
+const primaryInstance = app.requestSingleInstanceLock();
+if (!primaryInstance) app.quit();
+else
+  app.on("second-instance", () => {
+    const window = BrowserWindow.getAllWindows()[0];
+    if (!window || window.isDestroyed()) return;
+    if (window.isMinimized()) window.restore();
+    window.show();
+    window.focus();
+  });
 let coordinator: Coordinator | undefined;
 let adapter: ProcessReader | undefined;
 let interval: NodeJS.Timeout | undefined;
 let stopping = false;
 void app.whenReady().then(async () => {
+  if (!primaryInstance) return;
   try {
     if (!__CYEZ_TEST_FEATURES__) Menu.setApplicationMenu(null);
     const explicitConfig = process.env.CYEZ_CLIENT_CONFIG;
@@ -122,6 +133,7 @@ void app.whenReady().then(async () => {
         if (!window.isDestroyed())
           window.webContents.send("library:event", event);
       },
+      app.getVersion(),
     );
     let readerConfig: ReaderProcessConfig | undefined = config?.readerProcess;
     let readerChanging = false;
@@ -159,11 +171,13 @@ void app.whenReady().then(async () => {
         await candidate.start(
           (uid, source) => {
             void coordinator!.reader.accept(uid, source).catch(() =>
-              coordinator!.log({
-                source: "reader",
-                level: "error",
-                code: "READER_FAILED",
-              }),
+              coordinator!
+                .log({
+                  source: "reader",
+                  level: "error",
+                  code: "READER_FAILED",
+                })
+                .catch(() => {}),
             );
           },
           () => {

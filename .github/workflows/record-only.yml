@@ -41,6 +41,38 @@ jobs:
           node-version: "22"
       - run: npm install --global corepack@0.34.1
       - run: corepack enable
+      - name: Validate Docker Compose configuration
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          # Validate in a temporary copy so no real secrets or build artifacts
+          # are touched. `config -q` only parses/interpolates: no up, pull or build.
+          cp compose.yaml "$tmp/compose.yaml"
+          cp -R deploy "$tmp/deploy"
+          mkdir -p "$tmp/runtime/adapters" "$tmp/secrets"
+          for name in db-password migration-database-url runtime-database-url provider-config-key server.crt server.key; do
+            printf 'compose-check-only\n' > "$tmp/secrets/$name"
+          done
+          cat > "$tmp/compose-check.env" <<'EOF'
+          APP_ENV=production
+          TEACHER_USERNAME=compose-check
+          TEACHER_PASSWORD=compose-check-password
+          HASH_VERSION=compose-check-v1
+          FIXED_SALT_HEX=0000000000000000000000000000000000000000000000000000000000000000
+          CARD_ISSUER=compose-check
+          UID_BYTE_LENGTHS=4
+          PROVIDER_MODE=sqlserver
+          DATA_PREFIX=compose-check
+          BIND_IP=127.0.0.1
+          HTTPS_PORT=8443
+          EOF
+          docker compose -f "$tmp/compose.yaml" --env-file "$tmp/compose-check.env" config -q
+          if docker compose -f "$tmp/compose.yaml" --env-file "$tmp/compose-check.env" config | grep -q 'provider_credential'; then
+            echo "::error::compose must not mount the unused provider_credential secret"
+            exit 1
+          fi
+          echo "Compose configuration is valid; no containers started, no images pulled or built."
       - run: yarn install --immutable
       - run: yarn build:shared
       - run: python docs/tools/generate_diagrams.py --check

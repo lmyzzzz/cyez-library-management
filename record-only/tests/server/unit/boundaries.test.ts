@@ -1,5 +1,13 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
-import { mkdtemp, writeFile, mkdir, readdir } from "node:fs/promises";
+import {
+  mkdtemp,
+  writeFile,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+} from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { loadConfig, configSchema } from "../../../apps/server/src/config.js";
@@ -9,7 +17,33 @@ import {
   refreshProfile,
 } from "../../../apps/server/src/provider.js";
 import { Capacity, Spool } from "../../../apps/server/src/storage.js";
+import { FileCollector } from "../../../apps/server/src/file-collector.js";
+import { cardMatches } from "../../../apps/server/src/provider-sqlserver.js";
+import { errorResponse } from "../../../apps/server/src/app.js";
+import { Service } from "../../../apps/server/src/service.js";
+import { ApiError } from "@record/protocol";
+import { studentId } from "@record/protocol/identity";
+import type { Database } from "../../../apps/server/src/database.js";
 import { testConfig, identity } from "../../helpers/config.js";
+function fakeLogDb() {
+  const received: string[] = [];
+  const unique = new Set<string>();
+  const db = {
+    sequelize: {
+      transaction: async (work: (transaction: object) => Promise<unknown>) =>
+        work({}),
+    },
+    logs: {
+      bulkCreate: async (rows: { logId: string }[]) => {
+        for (const row of rows) {
+          received.push(row.logId);
+          unique.add(row.logId);
+        }
+      },
+    },
+  } as unknown as Database;
+  return { db, received, unique };
+}
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -212,7 +246,7 @@ describe("真实文件系统 spool 与容量规则", () => {
     });
     expect((await failure.status()).allowedActions).toEqual(["read"]);
   });
-  it("不可写的真实路径不返回成功，损坏 spool 不被删除", async () => {
+  it("不可写的真实路径不返回成功，损坏 spool 隔离后继续归集", async () => {
     const dir = await mkdtemp(join(tmpdir(), "cyez-storage-fail-")),
       file = join(dir, "not-a-directory");
     await writeFile(file, "occupied");
@@ -222,10 +256,275 @@ describe("真实文件系统 spool 与容量规则", () => {
     expect((await new Capacity(config, spool).status()).mode).toBe("failed");
     const corrupt = new Spool(join(dir, "queue"));
     await corrupt.init();
+    await writeFile(join(corrupt.directory, "a-bad.json"), "incomplete");
+    const good = {
+      logId: randomUUID(),
+      source: "api" as const,
+      level: "info" as const,
+      atMs: Date.now(),
+      appVersion: "0.1.0",
+      code: "APP_STARTED" as const,
+    };
+    await writeFile(
+      join(corrupt.directory, "z-good.json"),
+      JSON.stringify(good),
+    );
+    const legacy = { ...good, logId: randomUUID() };
+    await writeFile(
+      join(corrupt.directory, `${legacy.logId}.json.pending`),
+      JSON.stringify(legacy),
+    );
     await writeFile(join(corrupt.directory, "bad.pending"), "incomplete");
-    await expect(corrupt.drain({} as never, "api")).rejects.toMatchObject({
-      code: "SPOOL_CORRUPT",
+    const { db, unique } = fakeLogDb();
+    await corrupt.drain(db, "api");
+    expect([...unique]).toEqual([good.logId, legacy.logId]);
+    expect((await corrupt.metrics()).count).toBe(0);
+    const names = await readdir(corrupt.directory);
+    expect(names).not.toContain("a-bad.json");
+    expect(names).not.toContain("z-good.json");
+    expect(names).not.toContain("bad.pending");
+    expect(names.some((n) => n.startsWith("a-bad.json.corrupt-"))).toBe(true);
+    expect(names.some((n) => n.startsWith("bad.pending.corrupt-"))).toBe(true);
+    // The quarantined payload is retained for inspection, not silently dropped.
+    expect(
+      await readFile(
+        join(
+          corrupt.directory,
+          names.find((n) => n.startsWith("a-bad.json.corrupt-"))!,
+        ),
+        "utf8",
+      ),
+    ).toBe("incomplete");
+  });
+  it("append 原子写入，失败时清理临时文件", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "cyez-spool-append-")),
+      spool = new Spool(dir);
+    const log = {
+      logId: randomUUID(),
+      source: "api" as const,
+      level: "info" as const,
+      atMs: Date.now(),
+      appVersion: "0.1.0",
+      code: "APP_STARTED" as const,
+    };
+    await spool.append(log);
+    let names = await readdir(dir);
+    expect(names).toContain(`${log.logId}.json`);
+    expect(names.filter((n) => n.endsWith(".tmp"))).toHaveLength(0);
+    // Force the final rename to fail: the staged temp file must be removed.
+    const blockedId = randomUUID();
+    await mkdir(join(dir, `${blockedId}.json`));
+    await expect(spool.append({ ...log, logId: blockedId })).rejects.toThrow();
+    names = await readdir(dir);
+    expect(names.filter((n) => n.endsWith(".tmp"))).toHaveLength(0);
+    expect(
+      names.filter((n) => n.startsWith(`${blockedId}.json.`)),
+    ).toHaveLength(0);
+  });
+});
+describe("HTTP 错误语义映射", () => {
+  it("已知 ApiError 保留状态，413/429 明确，其余 4xx 归 422，未知/5xx 归 503", () => {
+    expect(errorResponse(new ApiError("DEVICE_IN_USE", 409))).toEqual({
+      status: 409,
+      code: "DEVICE_IN_USE",
     });
-    expect(await readdir(corrupt.directory)).toContain("bad.pending");
+    for (const statusCode of [400, 401, 403, 404, 415, 418, 422]) {
+      expect(
+        errorResponse(Object.assign(Error("request detail"), { statusCode })),
+      ).toEqual({ status: 422, code: "INPUT_INVALID" });
+    }
+    expect(
+      errorResponse(
+        Object.assign(Error("payload detail"), { statusCode: 413 }),
+      ),
+    ).toEqual({ status: 413, code: "BODY_TOO_LARGE" });
+    expect(
+      errorResponse(Object.assign(Error("rate detail"), { statusCode: 429 })),
+    ).toEqual({ status: 429, code: "RATE_LIMITED" });
+    for (const statusCode of [500, 502, 503]) {
+      expect(
+        errorResponse(Object.assign(Error("secret detail"), { statusCode })),
+      ).toEqual({ status: 503, code: "SERVICE_UNAVAILABLE" });
+    }
+    const unknown = errorResponse(new Error("secret request body"));
+    expect(unknown).toEqual({ status: 503, code: "SERVICE_UNAVAILABLE" });
+    expect(JSON.stringify(unknown)).not.toContain("secret");
+  });
+});
+describe("文件采集游标轮转安全", () => {
+  it("未变更文件回退重放不重复，截断/轮转后换代号继续归集", async () => {
+    const root = await mkdtemp(join(tmpdir(), "cyez-collector-")),
+      sourceDir = join(root, "source"),
+      cursorDir = join(root, "cursors"),
+      source = join(sourceDir, "gateway.jsonl");
+    await mkdir(sourceDir);
+    await writeFile(source, "a\nb\n");
+    const { db, unique } = fakeLogDb();
+    const collector = new FileCollector(sourceDir, cursorDir, "gateway");
+    await collector.drain(db);
+    expect(unique.size).toBe(2);
+    const [cursorFile] = await readdir(cursorDir);
+    expect(cursorFile).toBeDefined();
+    const cursorPath = join(cursorDir, cursorFile);
+    expect(JSON.parse(await readFile(cursorPath, "utf8"))).toMatchObject({
+      offset: 4,
+      generation: 0,
+    });
+    // Legacy `{offset:0}` rollback replays the same deterministic IDs.
+    await writeFile(cursorPath, JSON.stringify({ offset: 0 }));
+    await collector.drain(db);
+    expect(unique.size).toBe(2);
+    // Truncation: shorter file restarts from zero under a new generation.
+    await writeFile(source, "c\n");
+    await collector.drain(db);
+    expect(unique.size).toBe(3);
+    expect(JSON.parse(await readFile(cursorPath, "utf8"))).toMatchObject({
+      offset: 2,
+      generation: 1,
+    });
+    // Rotation: replacing the inode with a larger file also resets and continues.
+    await rename(source, source + ".rotated");
+    await writeFile(source, "d\ne\nf\n");
+    await collector.drain(db);
+    expect(unique.size).toBe(6);
+    expect(JSON.parse(await readFile(cursorPath, "utf8"))).toMatchObject({
+      offset: 6,
+      generation: 2,
+    });
+    await collector.drain(db);
+    expect(unique.size).toBe(6);
+  });
+  it("损坏游标隔离并换新代号，源文件不被删除", async () => {
+    const root = await mkdtemp(join(tmpdir(), "cyez-collector-bad-")),
+      sourceDir = join(root, "source"),
+      cursorDir = join(root, "cursors"),
+      source = join(sourceDir, "db.jsonl");
+    await mkdir(sourceDir);
+    await writeFile(source, "a\nb\n");
+    const { db, unique } = fakeLogDb();
+    const collector = new FileCollector(sourceDir, cursorDir, "db");
+    await collector.drain(db);
+    expect(unique.size).toBe(2);
+    const [cursorFile] = await readdir(cursorDir);
+    const cursorPath = join(cursorDir, cursorFile);
+    // Unparseable cursor: quarantine, restart, and continue.
+    await writeFile(cursorPath, "{not-json");
+    await collector.drain(db);
+    expect(unique.size).toBe(4);
+    let names = await readdir(cursorDir);
+    expect(names.some((n) => n.startsWith(`${cursorFile}.corrupt-`))).toBe(
+      true,
+    );
+    expect(names).toContain(cursorFile);
+    // Parseable but invalid offset: salvage generation and restart as well.
+    await writeFile(cursorPath, JSON.stringify({ offset: -2, generation: 3 }));
+    await collector.drain(db);
+    expect(unique.size).toBe(6);
+    names = await readdir(cursorDir);
+    expect(
+      names.filter((n) => n.startsWith(`${cursorFile}.corrupt-`)),
+    ).toHaveLength(2);
+    expect(JSON.parse(await readFile(cursorPath, "utf8"))).toMatchObject({
+      offset: 4,
+      generation: 4,
+    });
+    expect(await readFile(source, "utf8")).toBe("a\nb\n");
+  });
+});
+describe("SQL Server 卡号列兼容", () => {
+  it("接受字符串或数值卡号并保持大小写不敏感比较", () => {
+    expect(cardMatches("0000000A", "0000000a")).toBe(true);
+    expect(cardMatches(1, "1")).toBe(true);
+    expect(cardMatches(4294967295, "4294967295")).toBe(true);
+    expect(cardMatches("00000001", "00000002")).toBe(false);
+    expect(cardMatches(null, "1")).toBe(false);
+    expect(cardMatches({}, "1")).toBe(false);
+    expect(cardMatches(Number.NaN, "NaN")).toBe(false);
+  });
+});
+describe("通用操作审计与 provider 健康", () => {
+  function serviceDb(audits: Record<string, unknown>[]) {
+    return {
+      sequelize: {
+        transaction: async (work: (tx: object) => Promise<unknown>) =>
+          work({ LOCK: { UPDATE: "UPDATE" } }),
+      },
+      operations: { findOne: async () => null, create: async () => {} },
+      audits: {
+        create: async (values: Record<string, unknown>) => {
+          audits.push(values);
+        },
+      },
+      logs: { create: async () => {} },
+      students: { findByPk: async () => null },
+    } as unknown as Database;
+  }
+  function service(db: Database, provider: { lookup: () => Promise<unknown> }) {
+    return new Service(
+      db,
+      testConfig("postgres://a:b@localhost/d", "unused"),
+      provider,
+      { require: async () => {} } as unknown as Capacity,
+      () => 1,
+    );
+  }
+  it("operation 解析器把业务 ID 写入审计且请求 ID 不被覆盖", async () => {
+    const audits: Record<string, unknown>[] = [];
+    const serviceUnderTest = service(serviceDb(audits), {
+      lookup: async () => ({ name: "x", className: "", schoolNumber: "" }),
+    });
+    const requestId = randomUUID();
+    await serviceUnderTest.operation(
+      { username: "teacher", clientId: randomUUID(), sessionId: randomUUID() },
+      "device.create:",
+      { requestId },
+      "modify",
+      async () => ({ deviceId: "device-1" }),
+      (result) => ({
+        deviceId: (result as { deviceId?: string }).deviceId,
+      }),
+    );
+    expect(audits).toHaveLength(1);
+    expect(audits[0]).toMatchObject({
+      requestId,
+      deviceId: "device-1",
+      action: "device.create:",
+      fields: [],
+    });
+    // audit_events has no tag column, so a tag ID must never be smuggled into
+    // the row through an unchecked cast.
+    expect(audits[0]).not.toHaveProperty("tagId");
+  });
+  it("provider 明确拒绝/资料错配视为可连通，仅不可用标记故障", async () => {
+    let mode: "mismatch" | "unavailable" = "mismatch";
+    const serviceUnderTest = service(serviceDb([]), {
+      lookup: async () => {
+        if (mode === "mismatch") throw new ApiError("PROFILE_MISMATCH", 422);
+        throw new ApiError("PROVIDER_UNAVAILABLE", 503);
+      },
+    });
+    const uidHex = "00000001";
+    const card = () => ({ issuer: identity.issuer, uidHex });
+    const ctx = {
+      username: "teacher",
+      clientId: randomUUID(),
+      sessionId: randomUUID(),
+    };
+    const input = () => ({
+      scanId: randomUUID(),
+      studentId: studentId(card(), identity),
+      hashVersion: identity.hashVersion,
+      card: card(),
+      source: "integration" as const,
+    });
+    await expect(serviceUnderTest.scan(ctx, input())).rejects.toMatchObject({
+      code: "PROFILE_MISMATCH",
+    });
+    expect(serviceUnderTest.providerHealthy).toBe(true);
+    mode = "unavailable";
+    await expect(serviceUnderTest.scan(ctx, input())).rejects.toMatchObject({
+      code: "PROVIDER_UNAVAILABLE",
+    });
+    expect(serviceUnderTest.providerHealthy).toBe(false);
   });
 });

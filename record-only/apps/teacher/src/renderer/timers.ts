@@ -31,6 +31,10 @@ export class IdleTimer {
   stop() {
     this.stopped = true;
   }
+  restart() {
+    this.stopped = false;
+    this.deadline = this.now() + this.duration;
+  }
 }
 export class EndTimer {
   private deadline: number;

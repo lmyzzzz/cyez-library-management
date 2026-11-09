@@ -120,6 +120,22 @@ fn send(message: &str) -> io::Result<()> {
     output.flush()
 }
 
+#[cfg(windows)]
+fn listable_port(name: &str) -> bool {
+    // The teacher UI accepts only COM1..COM9999, so hide other Windows device names.
+    let bytes = name.as_bytes();
+    (4..=7).contains(&bytes.len())
+        && bytes[..3].eq_ignore_ascii_case(b"COM")
+        && (b'1'..=b'9').contains(&bytes[3])
+        && bytes[4..].iter().all(|byte| byte.is_ascii_digit())
+}
+
+#[cfg(not(windows))]
+fn listable_port(_name: &str) -> bool {
+    // Other platforms expose pty/device names that the UI must still be able to select.
+    true
+}
+
 fn control(input: impl Read) -> bool {
     use io::BufRead;
     let mut line = Vec::new();
@@ -148,6 +164,14 @@ fn read_cards(
             };
         }
         match port.read(&mut bytes) {
+            // EOF/zero-byte reads mean the device went away. Report it instead of
+            // looping without progress and burning CPU.
+            Ok(0) => {
+                line.fill(0);
+                bytes.fill(0);
+                send(r#"{"type":"error","code":"READER_IO"}"#)?;
+                return Err(io::Error::other("READER_IO"));
+            }
             Ok(n) => {
                 for byte in &bytes[..n] {
                     if *byte == b'\n' {
@@ -172,7 +196,13 @@ fn read_cards(
                 }
                 bytes.fill(0);
             }
-            Err(error) if error.kind() == io::ErrorKind::TimedOut => continue,
+            // EINTR is transient; retry on the next iteration like a read timeout.
+            Err(error)
+                if error.kind() == io::ErrorKind::Interrupted
+                    || error.kind() == io::ErrorKind::TimedOut =>
+            {
+                continue;
+            }
             Err(_) => {
                 line.fill(0);
                 bytes.fill(0);
@@ -190,13 +220,12 @@ fn run() -> Result<(), ()> {
             .map_err(|_| ())?
             .into_iter()
             .map(|p| p.port_name)
+            .filter(|name| listable_port(name))
             .collect();
         ports.sort();
         ports.dedup();
-        println!(
-            "{}",
-            serde_json::to_string(&Ports { ports }).map_err(|_| ())?
-        );
+        let output = serde_json::to_string(&Ports { ports }).map_err(|_| ())?;
+        send(&output).map_err(|_| ())?;
         return Ok(());
     }
     let options = parse_args(&args)?;

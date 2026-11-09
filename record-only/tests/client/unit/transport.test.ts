@@ -135,6 +135,30 @@ describe("C-U 固定 TLS 目标传输", () => {
     );
   });
 
+  it("无请求体的 GET/DELETE 不发送 content-type，有请求体才发送", async () => {
+    const transport = new PinnedTransport(connection);
+    await transport.request("GET", "/health/ready");
+    await transport.request(
+      "DELETE",
+      "/api/v1/scan-previews/00000000-0000-4000-8000-000000000000",
+    );
+    await transport.request("POST", "/api/v1/scan-previews", {});
+    expect(harness.requests.map((request) => request.method)).toEqual([
+      "GET",
+      "DELETE",
+      "POST",
+    ]);
+    for (const request of harness.requests.slice(0, 2)) {
+      expect(request.headers).not.toHaveProperty("content-type");
+      expect(request.body).toBe("");
+    }
+    expect(harness.requests[2]).toMatchObject({
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    });
+    await transport.close();
+  });
+
   it("证书校验回调拒绝错误 pin，接受正确 pin", () => {
     const valid = certificate();
     const transport = new PinnedTransport({ ...connection, pin: valid.pin });

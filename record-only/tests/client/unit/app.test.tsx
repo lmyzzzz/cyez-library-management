@@ -559,6 +559,117 @@ describe("C-U-01/05 主页面门控和状态", () => {
     );
   });
 
+  it("自动刷新失败不会停掉轮询，恢复后继续更新数据", async () => {
+    vi.useFakeTimers();
+    try {
+      let failures = 2;
+      const original = call.getMockImplementation()!;
+      call.mockImplementation((action, input) => {
+        if (action === "status") {
+          if (failures > 0) {
+            failures -= 1;
+            return Promise.reject(Error("NETWORK_TIMEOUT"));
+          }
+          return Promise.resolve({ ...local });
+        }
+        return original(action, input);
+      });
+      await act(async () => {
+        show();
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6500);
+      });
+      expect(
+        call.mock.calls.filter(([action]) => action === "devices").length,
+      ).toBeGreaterThan(0);
+    } finally {
+      cleanup();
+      vi.useRealTimers();
+    }
+  });
+
+  it("认证失效后清除旧设备、标签与进行中的刷卡流程", async () => {
+    show();
+    await waitFor(() => expect(screen.getByText("活动备注")).toBeTruthy());
+    await act(async () => {
+      listener!({ type: "scan", preview });
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "选择设备" })).toBeTruthy(),
+    );
+    local = { ...local, authenticated: false, online: false };
+    await act(async () => {
+      listener!({ type: "changed" });
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: "选择设备" })).toBeNull(),
+    );
+    expect(screen.queryByText("活动备注")).toBeNull();
+    expect(screen.getByText(/请先在设置中配置连接并登录/)).toBeTruthy();
+  });
+
+  it("取消手动结束与批量结束弹窗会撤销服务器预览", async () => {
+    show();
+    await waitFor(() => expect(screen.getByText("活动备注")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "结束…" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("endPreview", { recordId: active.id }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("cancelPreview", {
+        previewId: "end-preview",
+      }),
+    );
+    await openBatchMenu();
+    fireEvent.click(screen.getByRole("menuitem", { name: "结束全部…" }));
+    await waitFor(() =>
+      expect(screen.getByText(/后来新增的记录不会加入本次操作/)).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("cancelPreview", {
+        previewId: "batch-1",
+      }),
+    );
+  });
+
+  it("设置设备管理按全部、使用中和未使用筛选", async () => {
+    show("/settings");
+    fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "devices",
+        expect.objectContaining({ state: "all" }),
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "使用中" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "devices",
+        expect.objectContaining({ state: "active" }),
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "未使用" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "devices",
+        expect.objectContaining({ state: "free" }),
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "全部" }));
+    await waitFor(() =>
+      expect(
+        call.mock.calls.filter(
+          ([action, input]) =>
+            action === "devices" &&
+            (input as { state?: string }).state === "all",
+        ).length,
+      ).toBeGreaterThan(1),
+    );
+  });
+
   it("集成环境测试读卡器三个入口传递明确 fixture", async () => {
     show();
     await waitFor(() =>

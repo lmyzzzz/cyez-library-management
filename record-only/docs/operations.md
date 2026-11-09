@@ -1,8 +1,8 @@
 # 运行、部署与升级
 
-服务端主分支 CI 在测试与构建通过后，将 API、PostgreSQL、HTTPS 网关镜像分别发布到 `ghcr.io/lmyzzzz/cyez-record-only-api`、`ghcr.io/lmyzzzz/cyez-record-only-postgres17`、`ghcr.io/lmyzzzz/cyez-record-only-https-gateway`，各有 `sha-<完整提交号>` 和 `latest` 标签。正式部署建议固定 SHA：在宿主 `.env` 中按 `.env.example` 设置三个 `*_IMAGE` 和同一个 `RELEASE_TAG=sha-<完整提交号>`，保留原 secrets、配置、`DATA_PREFIX` 和命名卷。执行 `docker compose --env-file .env pull` 后，先在临时数据副本验证迁移，再执行 `docker compose --env-file .env up -d --no-build`。如 GHCR 包未设为公开，拉取机器须先以具有 `read:packages` 权限的账号运行 `docker login ghcr.io`。`latest` 适合临时检查，不用于需可复现的部署；本地默认镜像名和构建流程不变。
+服务端主分支 CI 在测试与构建通过后，将 API、PostgreSQL、HTTPS 网关镜像分别发布到 `ghcr.io/lmyzzzz/cyez-record-only-api`、`ghcr.io/lmyzzzz/cyez-record-only-postgres17`、`ghcr.io/lmyzzzz/cyez-record-only-https-gateway`，各有 `sha-<完整提交号>` 和 `latest` 标签。正式部署建议固定 SHA：在宿主 `.env` 中按 `.env.example` 设置三个 `*_IMAGE` 和同一个 `RELEASE_TAG=sha-<完整提交号>`，保留原 secrets、配置、`DATA_PREFIX` 和命名卷。执行 `docker compose --env-file .env pull` 后，先在临时数据副本验证迁移，再执行 `docker compose --env-file .env up -d --no-build`。如 GHCR 包未设为公开，拉取机器须先以具有 `read:packages` 权限的账号运行 `docker login ghcr.io`。`latest` 适合临时检查，不用于需可复现的部署；本地默认镜像名和构建流程不变。CI 在构建前用临时 dummy env/secrets 执行 `docker compose --env-file <临时文件> config -q`，只校验 Compose 文件，不启动容器、不拉取或构建镜像。
 
-2026-11-07 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.6`），打包手动输入、串口和 ACR1552U 三个读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。
+2026-11-07 发布流程：`corepack yarn package:win` 生成无调试入口的正式安装包（当前 `0.1.7`），打包手动输入、串口和 ACR1552U 三个读卡进程，禁止以 integration/development 配置启动。开发用 `corepack yarn dev`；自动化业务回归先运行 `corepack yarn build:client:integration` 再运行 `corepack yarn test:integration:client`，随后构建正式包并执行 `corepack yarn test:release:client`。两种构建共用 `out/`，发布前必须由 `package:win` 重新生产构建，不能直接把集成产物交给 electron-builder。已有合法 production 配置和用户数据保留。教师端运行时版本以 `app.getVersion()` 为准（由另一并行修正项接入），日志与界面不再写死版本号。
 
 2026-11-05：内置 Concard SQL Server 接入已经实现，部署/升级前准备新的服务端加密密钥并运行 `003-provider-config` 迁移。教师端在“设置 → 校园数据源”一次性提交完整新配置。固定只读取卡号、姓名、班级；表内账号不使用。详细字段、单向边界、密钥与命令见[Concard 接入](campus-sqlserver.md)。下文外置 module 仍是可选兼容路径，不是本次 SQL 接入的前置。
 
@@ -19,7 +19,7 @@ corepack yarn install --immutable
 corepack yarn tsx scripts/prepare-integration.ts
 ```
 
-准备脚本只在 `.env.integration` 不存在时创建本地测试证书、随机口令、数据库连接文件和 `runtime/integration-connection.json`，文件均被 Git 忽略；不会覆盖现有数据库凭证。若端口或卷名前缀已被占用，在首次启动前编辑 `.env.integration` 的 `HTTPS_PORT`、`DATA_PREFIX`，并同步 `runtime/integration-connection.json` 的端口。已有卷使用过固定盐后不得直接改变身份参数。
+准备脚本只在 `.env.integration` 不存在时创建本地测试证书、随机口令、数据库连接文件和 `runtime/integration-connection.json`，文件均被 Git 忽略；不会覆盖现有数据库凭证。`secrets/` 目录为 `0700`，其中的 secret 文件为 `0444`（原因见[生产接入](#生产接入)的文件式 secret 说明）。若端口或卷名前缀已被占用，在首次启动前编辑 `.env.integration` 的 `HTTPS_PORT`、`DATA_PREFIX`，并同步 `runtime/integration-connection.json` 的端口。已有卷使用过固定盐后不得直接改变身份参数。
 
 ```bash
 docker compose --env-file .env.integration build
@@ -55,7 +55,11 @@ corepack yarn test:release:client
 
 ## 生产接入
 
-复制 `.env.example` 为宿主受限 `.env`，填入真实部署输入。提供 `secrets/db-password`、`secrets/migration-database-url`、`secrets/runtime-database-url`、`secrets/provider-credential`、`secrets/server.crt`、`secrets/server.key`，并在 `runtime/adapters/` 放置符合 `CampusProvider` 接口的真实模块。模块按供应方协议把临时原卡号发送到固定、可信 HTTPS 目的地，不得记录原卡号或完整请求/响应；仅在 API 确认学生可登记时返回资料，明确拒绝映射为 `STUDENT_NOT_ALLOWED`。先完成 TBD-01/02/03/04 的实际输入核对和独立验收；`PROFILE_CONTRACT_CONFIRMED=true` 仅在字段契约确认后设置。生产配置不得使用 `PROVIDER_MODE=fake`、集成 seed、测试证书或测试卡按钮。
+复制 `.env.example` 为宿主受限 `.env`，填入真实部署输入。提供 `secrets/db-password`、`secrets/migration-database-url`、`secrets/runtime-database-url`、`secrets/server.crt`、`secrets/server.key`；SQL 模式另需 `secrets/provider-config-key`。Compose 不再挂载未使用的 `provider_credential` secret，服务端也不读取它；只有显式使用外置 `module` 适配器且该适配器确需运维凭证时，才由运维在本地 compose override 中自行加入只读挂载或环境变量，默认部署不代持该凭证。使用外置 `module` 模式时在 `runtime/adapters/` 放置符合 `CampusProvider` 接口的真实模块；SQL 模式为内置实现，不需要外置模块。模块按供应方协议把临时原卡号发送到固定、可信 HTTPS 目的地，不得记录原卡号或完整请求/响应；仅在 API 确认学生可登记时返回资料，明确拒绝映射为 `STUDENT_NOT_ALLOWED`。先完成 TBD-01/02/03/04 的实际输入核对和独立验收；`PROFILE_CONTRACT_CONFIRMED=true` 仅在字段契约确认后设置。生产配置不得使用 `PROVIDER_MODE=fake`、集成 seed、测试证书或测试卡按钮。
+
+文件式 Compose secrets 不是 Swarm secrets，只是把宿主文件绑定挂载到 `/run/secrets/<名称>`，宿主属主和权限原样保留。`secrets/` 目录必须为 `0700`，每个 secret 文件为 `0444`：这样宿主其他用户不能穿透目录，而容器内非 root UID（db 999、gateway/nginx 101、api/log-ingest/migrate 的 node 1000）可以读取。`scripts/prepare-integration.ts` 与 `scripts/prepare-provider-key.ts` 已按此创建新文件。已有 `0600` 文件的部署须由运维修正：`chmod 0700 secrets && find secrets -maxdepth 1 -type f -exec chmod 0444 {} +`；不改宿主文件属主、不把容器改为 root。文件内容本身未加密，仍须宿主访问控制；已废弃的 `secrets/provider-credential` 可直接删除。
+
+`api` 由 Compose 转发以下可调参数，默认值与 `apps/server/src/config.ts` 一致，可在宿主 `.env` 覆盖：`PREVIEW_TTL_MS=120000`、`PREVIEW_LIMIT=10000`、`BATCH_LIMIT=500`、`SESSION_TTL_MS=3600000`、`PROVIDER_TIMEOUT_MS=5000`、`CAPACITY_OLDEST_WARN_MS=3600000`。改值后 `docker compose up -d --force-recreate api` 生效。`migrate`/`log-ingest` 不继承这些可调值，避免把业务/预览配置扩到日志归集进程。
 
 生产环境不运行学生 seed。`seed` CLI 在生产配置下直接拒绝；学生缓存由每次成功的校园 API 查询新增或覆盖。`migrate` 作业包含 `002-student-cache` 和 `002-student-cache-insert`，并首次写入固定盐等身份配置的指纹；API 要求该指纹存在且匹配，防止在不再运行 seed 后意外更改身份参数。升级既有库时保留旧学生资料和历史，只放宽旧预置列并赋予运行账号学生插入权限。真实 API 对“不存在/无资格”和故障的响应映射须在 TBD-02 输入后完成。
 
@@ -65,6 +69,10 @@ corepack yarn test:release:client
 
 ## 升级与故障
 
-升级时保留 `DATA_PREFIX`、所有命名卷、身份参数和 secrets；用同版镜像执行单个 `migrate` 作业，再重建 API/gateway。正常升级不得使用 `down -v`。先在临时数据副本上验证扩展迁移。改共享密码需要编辑 `.env` 后 `docker compose up -d --force-recreate api`，旧内存会话失效，教师重新登录可查原请求结果。固定盐、版本或卡身份变化属于延期的 NEXT-01，不能当普通配置升级。
+升级时保留 `DATA_PREFIX`、所有命名卷、身份参数和 secrets；用同版镜像执行单个 `migrate` 作业，再重建 API（仅在 nginx/证书/网关镜像变更时才重建 gateway）。正常升级不得使用 `down -v`。先在临时数据副本上验证扩展迁移。`init-volumes` 会在 db/api/gateway/log-ingest 启动前幂等执行卷属主初始化；若宿主或卷驱动已预置正确属主，可用 `INIT_VOLUMES_MODE=skip` 跳过。改共享密码需要编辑 `.env` 后 `docker compose up -d --force-recreate api`，旧内存会话失效，教师重新登录可查原请求结果。gateway 不再缓存 api 容器 IP：nginx 每 10 秒重新解析 Docker DNS，重建 api 后无需重建 gateway，最多约 10 秒内可能出现短暂 502。固定盐、版本或卡身份变化属于延期的 NEXT-01，不能当普通配置升级。
+
+角色迁移与运行角色口令：`migrate` 只有在设置 `RUNTIME_DATABASE_URL_FILE` 时才执行 `apps/server/src/roles` 下的角色/授权迁移；Compose 已注入 `/run/secrets/runtime_database_url`。在 Compose 外直接运行 `node apps/server/dist/cli.js migrate` 时必须显式提供该变量，否则 runtime 角色不会创建或更新，随后 api/log-ingest 会因认证失败而不可用。运行角色口令轮换不是自动的：修改 `secrets/runtime-database-url` 不会 `ALTER ROLE`（已记录的迁移不会重跑）。轮换须由迁移账号手工 `ALTER ROLE cyez_runtime PASSWORD ...`（或删除角色后重建并重新授权），按 URL 编码规则把新口令写入 `secrets/runtime-database-url` 并重建 api/log-ingest；如权限被重置，按 `apps/server/src/roles/001-runtime-role.ts` 的授权重新 GRANT，不要删除 `role_migrations` 或业务表来强迫迁移重跑。
+
+日志轮转、游标重置与隔离文件：gateway/DB 源日志先写各自 spool 卷，`log-ingest` 的 `FileCollector` 按文件字节偏移把游标保存在 `ingest_cursors` 卷（`<source>-<hash>.json`，含 offset、generation 和可用时的 inode），只有 PostgreSQL 提交后才推进。同一文件名下 inode 变化或文件被截断时，归集器会从 0 重读并递增 generation，新行使用不同 generation 的稳定 logId，不会与旧行冲突；轮转为新文件名时使用新游标并从 generation 0 开始。通常不需要手工删除游标。手工删除游标会丢失 generation 信息：同一文件已按更高 generation 归集的行可能以 generation 0 的 logId 重新写入（去重只覆盖完全相同的来源+logId），仅在可接受重复计数风险时才这样做；需要重新归集时先停 `log-ingest`。无法解析的游标会被改名为 `<游标>.corrupt-<时间戳>` 并从 0 以新 generation 重启，原文件保留供检查。spool 的提交文件是 `<logId>.json`；新写入器先把内容写进唯一的 `<logId>.json.<uuid>.tmp` 再原子改名，`.tmp` 不被扫描，确认没有写入进程后可清理崩溃遗留的 `.tmp`。归集器扫描 `.json` 提交文件，并额外处理旧版本写入器遗留的 `<logId>.json.pending` 暂存文件：下一轮归集立即校验内容，合法的照常投递，非法的改名为 `<原文件名>.corrupt-<时间戳>`（如 `<logId>.json.pending.corrupt-<时间戳>`）隔离保留，没有静置时长或年龄门槛。损坏的 `<logId>.json` 会改名为 `<logId>.json.corrupt-<时间戳>` 并保留，不会自动删除。新写入器不再产生 `.pending`；滚动升级时旧版 API 仍可能写入 `.pending`，须先停旧 API 再启动新 `log-ingest`（或另行确保没有旧写入器仍在写 `.pending`），否则可能读到写了一半的文件而误隔离，并打断旧写入器的改名。上述隔离文件确认无未交付数据后再按 TBD-05 处理，绝不能为清理删除整个卷。gateway access/error 日志不会自动轮转；需要时在确认已归集后重建 gateway 或让 nginx 重新打开日志（api IP 已由 resolver 处理），DB 源日志按 `log_rotation_age=60` 分钟轮转。
 
 DB 不可用时 gateway readiness 返回 503，恢复后自动返回 200；已提交操作按原 `clientId/requestId` 查询。服务状态受限时只允许可持久化的查询/结束，读卡和新登记暂停。检查 DB、各 spool 和容量水位后扩容并观察归集追赶；未 ACK 日志、持久操作结果和历史记录不能因清理卷而丢失。TBD-05 未确认前没有自动删除策略。

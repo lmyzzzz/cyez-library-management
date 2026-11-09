@@ -19,6 +19,19 @@ import {
 } from "@record/protocol";
 import type { Config } from "./config.js";
 import type { Database } from "./database.js";
+/** `.json` is the committed, drainable name. Appends are staged in a unique
+ * `.tmp` file that is never scanned and atomically renamed into place. Legacy
+ * `.pending` files from the previous writer are delivered (or quarantined) once
+ * after the new writer can no longer produce them. */
+const committed = (name: string) => name.endsWith(".json");
+const pending = (name: string) => name.endsWith(".pending");
+let lastCorruptStamp = 0;
+function corruptStamp() {
+  // Keep `<name>.corrupt-<timestamp>` unique even when several corrupt files
+  // appear within the same millisecond.
+  lastCorruptStamp = Math.max(Date.now(), lastCorruptStamp + 1);
+  return lastCorruptStamp;
+}
 export class Spool {
   constructor(readonly directory: string) {}
   async init() {
@@ -28,20 +41,26 @@ export class Spool {
     const clean = logSchema.parse(log);
     await this.init();
     const destination = join(this.directory, `${clean.logId}.json`);
-    const tmp = destination + ".pending";
-    const f = await open(tmp, "wx");
+    // Unique temp names keep concurrent appends from unlinking each other's file.
+    const tmp = join(this.directory, `${clean.logId}.json.${randomUUID()}.tmp`);
+    let f: Awaited<ReturnType<typeof open>> | undefined;
     try {
+      f = await open(tmp, "wx");
       await f.writeFile(JSON.stringify(clean));
       await f.sync();
-    } finally {
       await f.close();
+      f = undefined;
+      await rename(tmp, destination);
+    } catch (error) {
+      if (f) await f.close().catch(() => {});
+      await unlink(tmp).catch(() => {});
+      throw error;
     }
-    await rename(tmp, destination);
   }
   async metrics() {
     await this.init();
     const files = (await readdir(this.directory)).filter(
-      (n) => n.endsWith(".json") || n.endsWith(".pending"),
+      (n) => committed(n) || pending(n),
     );
     let bytes = 0,
       oldest = Date.now();
@@ -52,21 +71,48 @@ export class Spool {
     }
     return { count: files.length, bytes, oldestAgeMs: Date.now() - oldest };
   }
+  private async quarantine(name: string) {
+    const source = join(this.directory, name);
+    const target = join(this.directory, `${name}.corrupt-${corruptStamp()}`);
+    try {
+      // The corrupt payload is retained for inspection but removed from the
+      // drainable namespace so one bad entry cannot wedge all later logs.
+      await rename(source, target);
+    } catch {
+      /* Best effort: an unrenameable file stays out of the way of other drains. */
+    }
+  }
+  private async deliver(db: Database, origin: string, name: string) {
+    const path = join(this.directory, name);
+    let raw: string;
+    try {
+      raw = await readFile(path, "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return;
+      // Transient I/O failures keep the committed file for a later retry.
+      throw error;
+    }
+    let log: AppLog;
+    try {
+      log = logSchema.parse(JSON.parse(raw));
+    } catch {
+      await this.quarantine(name);
+      return;
+    }
+    // Ingest failures intentionally propagate: the committed file is retained
+    // and replayed later, and (origin, logId) deduplication keeps that safe.
+    await ingestLogs(db, origin, [log]);
+    await unlink(path).catch((error: NodeJS.ErrnoException) => {
+      if (error?.code !== "ENOENT") throw error;
+    });
+  }
   async drain(db: Database, origin: string) {
     await this.init();
-    for (const n of (await readdir(this.directory))
-      .filter((n) => n.endsWith(".json") || n.endsWith(".pending"))
-      .sort()) {
-      const path = join(this.directory, n);
-      let log: AppLog;
-      try {
-        log = logSchema.parse(JSON.parse(await readFile(path, "utf8")));
-      } catch {
-        throw new ApiError("SPOOL_CORRUPT", 503);
-      }
-      await ingestLogs(db, origin, [log]);
-      await unlink(path);
-    }
+    const names = (await readdir(this.directory)).sort();
+    for (const n of names) if (committed(n)) await this.deliver(db, origin, n);
+    // Legacy `.pending` files (old writer naming); new appends never create them
+    // and use an unscanned `.tmp` stage, so this cannot race a current write.
+    for (const n of names) if (pending(n)) await this.deliver(db, origin, n);
   }
 }
 export async function ingestLogs(db: Database, origin: string, logs: AppLog[]) {

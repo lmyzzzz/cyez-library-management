@@ -28,17 +28,19 @@ UI 要求显式选择卡号表示：`decimal` 将规范四字节 UID 转为无�
 
 ## 部署和升级
 
-在 `record-only/` 执行 `corepack yarn tsx scripts/prepare-provider-key.ts`。仅在不存在时创建 `secrets/provider-config-key`，不读取、输出或覆盖已有密钥。该文件为服务器独有的 32 字节随机密钥（64 位十六进制），不分发给教师端，由运维限制文件权限。
+在 `record-only/` 执行 `corepack yarn tsx scripts/prepare-provider-key.ts`。仅在不存在时创建 `secrets/provider-config-key`，不读取、输出或覆盖已有密钥。该文件为服务器独有的 32 字节随机密钥（64 位十六进制），不分发给教师端，由运维限制文件权限。脚本把 `secrets/` 目录设为 `0700`、密钥文件写为 `0444`；已有 `0600` 文件须执行 `chmod 0700 secrets && chmod 0444 secrets/provider-config-key`，否则非 root 的 api 容器无法读取。
 
-`.env` 设置 `PROVIDER_MODE=sqlserver`、`PROVIDER_CONFIG_KEY_HOST_PATH=./secrets/provider-config-key`。Compose 将密钥挂到 API 的 `/run/secrets/provider_config_key`；非 Compose 用 `PROVIDER_CONFIG_KEY_FILE` 指定文件。SQL 模式不需外置模块或 `PROFILE_CONTRACT_CONFIRMED`。旧 `module` 模式仍可显式使用；`provider_credential` 挂载仅为兼容，在 SQL 模式未使用。
+`.env` 设置 `PROVIDER_MODE=sqlserver`、`PROVIDER_CONFIG_KEY_HOST_PATH=./secrets/provider-config-key`。Compose 将密钥挂到 API 的 `/run/secrets/provider_config_key`；非 Compose 用 `PROVIDER_CONFIG_KEY_FILE` 指定文件。SQL 模式不需外置模块或 `PROFILE_CONTRACT_CONFIRMED`。旧 `module` 模式仍可显式使用；Compose 已移除未使用的 `provider_credential` secret，服务端也不读取它，module 适配器如确需运维凭证，必须在本地 override 中自行只读挂载/传入。
 
 保留卷、身份参数和服务器密钥，升级命令：
 
 ```bash
 docker compose --env-file .env build
 docker compose --env-file .env run --rm migrate
-docker compose --env-file .env up -d --force-recreate api gateway log-ingest
+docker compose --env-file .env up -d --force-recreate api log-ingest
 ```
+
+重建 api 后 gateway 会按 Docker DNS 的 10 秒缓存自动解析新容器 IP，不需要为 IP 变化单独重建 gateway；只有 nginx/证书/网关镜像变更时才重建 gateway。角色迁移需要 `RUNTIME_DATABASE_URL_FILE`，Compose 已注入；运行角色口令轮换须手工 `ALTER ROLE`，见[运行说明](operations.md#升级与故障)。
 
 `003-provider-config` ORM 迁移创建 `provider_configs`；同名权限迁移仅授予 runtime 对该表的 SELECT/INSERT/UPDATE。表内保存密文与时间，重启解密恢复。密钥缺失/错误或密文认证失败拒绝启动，不能重新生成已使用密钥。旧集成部署升级也先准备密钥，继续显式 `PROVIDER_MODE=fake`，不会自动连接学校。Docker egress 须能访问 SQL Server 配置的 TCP 端口。
 

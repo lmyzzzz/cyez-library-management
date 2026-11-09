@@ -25,6 +25,42 @@ x-environment: &environment
   CAPACITY_RESERVE_BYTES: ${CAPACITY_RESERVE_BYTES:-268435456}
   CAPACITY_RECOVERY_BYTES: ${CAPACITY_RECOVERY_BYTES:-2147483648}
 services:
+  # Fresh native Linux named volumes are created root-owned. Non-root services
+  # could then fail to write: postgres=999, nginx=101, node=1000. This one-shot,
+  # idempotent job chowns the volume roots before dependants start. Set
+  # INIT_VOLUMES_MODE=skip to opt out when the host/volume driver already
+  # provisions the expected ownership.
+  init-volumes:
+    image: ${DB_IMAGE:-cyez-record-db}:${RELEASE_TAG:-local}
+    user: "0:0"
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN]
+    security_opt: [no-new-privileges:true]
+    restart: "no"
+    network_mode: "none"
+    environment:
+      INIT_VOLUMES_MODE: ${INIT_VOLUMES_MODE:-chown}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        if [ "$${INIT_VOLUMES_MODE}" = "skip" ]; then
+          echo "init-volumes: skipped (INIT_VOLUMES_MODE=skip)"
+          exit 0
+        fi
+        chown 999:999 /volumes/pgdata /volumes/db-spool
+        chown 1000:1000 /volumes/api-spool /volumes/cursors
+        chown 101:101 /volumes/gateway-spool
+        echo "init-volumes: ownership ready"
+    volumes:
+      [
+        pgdata:/volumes/pgdata,
+        api_spool:/volumes/api-spool,
+        gateway_spool:/volumes/gateway-spool,
+        db_spool:/volumes/db-spool,
+        ingest_cursors:/volumes/cursors,
+      ]
   db:
     image: ${DB_IMAGE:-cyez-record-db}:${RELEASE_TAG:-local}
     build: { context: ., dockerfile: deploy/db.Dockerfile }
@@ -38,6 +74,8 @@ services:
     secrets: [db_password]
     volumes: [pgdata:/var/lib/postgresql/data, db_spool:/var/log/cyez]
     networks: [backend]
+    depends_on:
+      init-volumes: { condition: service_completed_successfully }
     restart: unless-stopped
     command:
       [
@@ -91,7 +129,13 @@ services:
     environment:
       <<: *environment
       DATABASE_URL_FILE: /run/secrets/runtime_database_url
-    secrets: [runtime_database_url, provider_credential, provider_config_key]
+      PROVIDER_TIMEOUT_MS: ${PROVIDER_TIMEOUT_MS:-5000}
+      PREVIEW_TTL_MS: ${PREVIEW_TTL_MS:-120000}
+      PREVIEW_LIMIT: ${PREVIEW_LIMIT:-10000}
+      BATCH_LIMIT: ${BATCH_LIMIT:-500}
+      SESSION_TTL_MS: ${SESSION_TTL_MS:-3600000}
+      CAPACITY_OLDEST_WARN_MS: ${CAPACITY_OLDEST_WARN_MS:-3600000}
+    secrets: [runtime_database_url, provider_config_key]
     volumes:
       [
         api_spool:/data/api-spool,
@@ -102,6 +146,7 @@ services:
       ]
     networks: [frontend, backend, egress]
     depends_on:
+      init-volumes: { condition: service_completed_successfully }
       migrate: { condition: service_completed_successfully }
     healthcheck:
       test:
@@ -133,6 +178,7 @@ services:
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
     depends_on:
+      init-volumes: { condition: service_completed_successfully }
       api: { condition: service_healthy }
   log-ingest:
     <<: *api
@@ -152,12 +198,12 @@ services:
       ]
     networks: [backend]
     depends_on:
+      init-volumes: { condition: service_completed_successfully }
       migrate: { condition: service_completed_successfully }
 secrets:
   db_password: { file: ./secrets/db-password }
   migration_database_url: { file: ./secrets/migration-database-url }
   runtime_database_url: { file: ./secrets/runtime-database-url }
-  provider_credential: { file: ./secrets/provider-credential }
   provider_config_key:
     { file: "${PROVIDER_CONFIG_KEY_HOST_PATH:-./secrets/provider-config-key}" }
   tls_cert: { file: ./secrets/server.crt }

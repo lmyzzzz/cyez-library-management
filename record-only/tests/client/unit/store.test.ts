@@ -133,4 +133,12 @@ describe("C-U 本地持久化与证书边界", () => {
       }),
     ).toBe(false);
   });
+
+  it("IPv6 pin 校验忽略 URL 主机名的方括号", () => {
+    const valid = certificate("::1");
+    const connection = { ip: "::1", port: 8443, pin: valid.pin };
+    expect(verifyCertificate(valid.cert, "[::1]", connection)).toBe(true);
+    expect(verifyCertificate(valid.cert, "::1", connection)).toBe(true);
+    expect(verifyCertificate(valid.cert, "[::2]", connection)).toBe(false);
+  });
 });

@@ -111,6 +111,45 @@ describe("C-U 登记、结束与批量确认", () => {
     expect(onBusy).toHaveBeenCalledWith(true);
   });
 
+  it("登记提交失败后解除锁定并重新计时，可再次提交", async () => {
+    let attempts = 0;
+    call.mockImplementation(async (action) => {
+      if (action === "devices")
+        return {
+          devices: {
+            items: [free],
+            total: 1,
+            page: 1,
+            pageSize: 20,
+          },
+        };
+      if (action === "start") {
+        attempts += 1;
+        if (attempts === 1) throw Error("DEVICE_UNAVAILABLE");
+      }
+      return {};
+    });
+    const onDone = vi.fn();
+    render(
+      <Registration
+        preview={preview}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: /^选择 / }));
+    fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
+    await waitFor(() =>
+      expect(screen.getByText(/设备已被占用、禁用或删除/)).toBeTruthy(),
+    );
+    const confirm = screen.getByRole("button", { name: "确认登记" });
+    await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(confirm);
+    await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
+    expect(attempts).toBe(2);
+  });
+
   it("活动设备先结束后必须重新刷卡，不能复用旧时间登记", async () => {
     call.mockImplementation(async (action) =>
       action === "devices"

@@ -174,6 +174,20 @@ export function ConnectionForm({
       setUsername("");
     }
   };
+  const logout = async () => {
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      await window.library.call("logout", {});
+      setMessage("已退出登录");
+      refresh();
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <SettingsContent>
       <SettingsSection
@@ -270,6 +284,13 @@ export function ConnectionForm({
           onClick={() => void run("login")}
         >
           覆盖连接并登录
+        </Button>
+        <Button
+          size="small"
+          disabled={busy || !status?.authenticated}
+          onClick={() => void logout()}
+        >
+          退出登录
         </Button>
         <IconButton
           size="small"
@@ -910,6 +931,7 @@ export function TagManager({
     [error, setError] = useState<unknown>();
   const mutate = async (remove = false) => {
     setBusy(true);
+    setError(undefined);
     onBusy(true);
     try {
       if (remove && deleting)
@@ -1058,6 +1080,12 @@ export function History({
   useEffect(() => {
     void load();
   }, [page, search, tagId, deviceSearch, from, to, authenticated]);
+  useEffect(() => {
+    // Do not leave student names and notes visible after the session is lost.
+    if (authenticated) return;
+    setData({ items: [], total: 0, page: 1, pageSize: 30 });
+    setDetail(null);
+  }, [authenticated]);
   useEffect(() => {
     onModal(!!detail);
     return () => onModal(false);

@@ -467,6 +467,11 @@ export function Registration({
       onDone();
     } catch (e) {
       setError(e);
+      sending.current = false;
+      // A retryable rejection must not lock the confirm button forever; re-arm
+      // the idle deadline so the preview keeps its normal expiry behavior.
+      timer.current?.restart();
+      setRemaining(timer.current?.remaining() ?? 10000);
     } finally {
       setBusy(false);
       onBusy(false);

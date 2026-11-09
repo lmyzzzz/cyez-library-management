@@ -376,6 +376,29 @@ describe("C-U-05 设置和只读历史", () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it("退出登录仅在已认证时可用，调用 logout 后刷新并反馈失败", async () => {
+    const refresh = vi.fn();
+    render(<ConnectionForm status={status} refresh={refresh} />);
+    expect(
+      screen.getByRole("button", { name: "退出登录" }).hasAttribute("disabled"),
+    ).toBe(true);
+    cleanup();
+    render(
+      <ConnectionForm
+        status={{ ...status, authenticated: true }}
+        refresh={refresh}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+    await waitFor(() => expect(call).toHaveBeenCalledWith("logout", {}));
+    expect(refresh).toHaveBeenCalledOnce();
+    expect(screen.getByText("已退出登录")).toBeTruthy();
+    call.mockRejectedValueOnce(Error("AUTH_REQUIRED"));
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+    await waitFor(() => expect(screen.getByText(/登录已失效/)).toBeTruthy());
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
   it("设备创建、编辑、标签选择和失败状态", async () => {
     const onDone = vi.fn(),
       onBusy = vi.fn();
@@ -466,6 +489,44 @@ describe("C-U-05 设置和只读历史", () => {
       }),
     );
     expect(refresh).toHaveBeenCalledTimes(3);
+  });
+
+  it("认证失效时清空历史列表与详情中的学生资料", async () => {
+    call.mockResolvedValue({
+      items: [record],
+      total: 1,
+      page: 1,
+      pageSize: 30,
+    });
+    const view = render(
+      <History authenticated tagOptions={[tag]} onModal={vi.fn()} />,
+    );
+    await waitFor(() => expect(screen.getByText("只读备注")).toBeTruthy());
+    fireEvent.click(screen.getByText("只读备注").closest("tr")!);
+    await waitFor(() => expect(screen.getByText("历史记录详情")).toBeTruthy());
+    view.rerender(
+      <History authenticated={false} tagOptions={[tag]} onModal={vi.fn()} />,
+    );
+    await waitFor(() => expect(screen.queryByText("历史记录详情")).toBeNull());
+    expect(screen.queryByText("只读备注")).toBeNull();
+    expect(screen.queryByText("测试学生")).toBeNull();
+  });
+
+  it("标签操作成功后清除上一次失败的错误提示", async () => {
+    const refresh = vi.fn();
+    render(<TagManager tags={[tag]} refresh={refresh} onBusy={vi.fn()} />);
+    call.mockRejectedValueOnce(Error("TAG_VERSION_CONFLICT"));
+    fireEvent.change(screen.getByLabelText("标签名称"), {
+      target: { value: "冲突区域" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "新增标签" }));
+    await waitFor(() => expect(screen.getByText(/标签已变化/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("标签名称"), {
+      target: { value: "新区域" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "新增标签" }));
+    await waitFor(() => expect(screen.queryByText(/标签已变化/)).toBeNull());
+    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("历史按筛选查询、键盘打开详情，不提供写入命令", async () => {

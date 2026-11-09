@@ -78,6 +78,21 @@ it("S-I-09/17: PG 中断保留日志，恢复补传且游标重放不重复入�
     await collector.drain(db);
     expect(await db.logs.count()).toBe(242);
     expect(await readFile(accessPath, "utf8")).toContain('"status":503');
+
+    // Truncation/rotation must not throw or let old deterministic rows suppress
+    // lines written at reused offsets; continue under a new cursor generation.
+    await writeFile(accessPath, '{"status":200,"rotated":1}\n');
+    await collector.drain(db);
+    expect(await db.logs.count()).toBe(243);
+    const rotatedCursor = JSON.parse(
+      await readFile(join(cursorDir, cursorFile), "utf8"),
+    ) as { offset: number; generation: number };
+    expect(rotatedCursor.generation).toBe(1);
+    expect(rotatedCursor.offset).toBe(
+      Buffer.byteLength('{"status":200,"rotated":1}\n'),
+    );
+    await collector.drain(db);
+    expect(await db.logs.count()).toBe(243);
   } finally {
     await db?.close();
     await admin.sequelize.getQueryInterface().dropDatabase(databaseName);

@@ -34,10 +34,28 @@ import {
   assertAssignable,
 } from "@record/domain";
 import type { Config } from "./config.js";
-import { Database, type StudentRow, type UsageRow } from "./database.js";
+import {
+  Database,
+  type AuditRow,
+  type StudentRow,
+  type UsageRow,
+} from "./database.js";
 import { Previews, type Context, type Intent } from "./previews.js";
 import { refreshProfile, type CampusProvider } from "./provider.js";
 import { Capacity } from "./storage.js";
+/** Business identifiers attached to the generic command audit. Only entity IDs
+ * are recorded; payload contents (notes, names, card data) never are. */
+export interface AuditIds {
+  requestId?: string;
+  scanId?: string;
+  studentId?: string;
+  recordId?: string;
+  deviceId?: string;
+}
+export type AuditIdResolver = (
+  result: unknown,
+  intent?: Intent,
+) => AuditIds | Promise<AuditIds>;
 export class Service {
   readonly previews: Previews;
   private serial = new SerialKeys();
@@ -89,30 +107,22 @@ export class Service {
     action: string,
     fields: string[],
     transaction: Transaction,
-    ids: {
-      requestId?: string;
-      scanId?: string;
-      studentId?: string;
-      recordId?: string;
-      deviceId?: string;
-    } = {},
+    ids: AuditIds = {},
   ) {
-    await this.db.audits.create(
-      {
-        id: randomUUID(),
-        actor: ctx.username,
-        clientId: ctx.clientId,
-        requestId: ids.requestId ?? null,
-        scanId: ids.scanId ?? null,
-        studentId: ids.studentId ?? null,
-        recordId: ids.recordId ?? null,
-        deviceId: ids.deviceId ?? null,
-        action,
-        fields,
-        at: new Date(this.now()),
-      },
-      { transaction, returning: false },
-    );
+    const values: AuditRow = {
+      id: randomUUID(),
+      actor: ctx.username,
+      clientId: ctx.clientId,
+      requestId: ids.requestId ?? null,
+      scanId: ids.scanId ?? null,
+      studentId: ids.studentId ?? null,
+      recordId: ids.recordId ?? null,
+      deviceId: ids.deviceId ?? null,
+      action,
+      fields,
+      at: new Date(this.now()),
+    };
+    await this.db.audits.create(values, { transaction, returning: false });
   }
   async scan(
     ctx: Context,
@@ -171,11 +181,18 @@ export class Service {
               );
               this.providerHealthy = true;
             } catch (e) {
-              this.providerHealthy =
-                e instanceof ApiError && e.code === "STUDENT_NOT_ALLOWED";
+              // A rejection or malformed profile response still proves the
+              // provider is reachable; only transport/timeout failures are an
+              // outage. Client cancellation leaves the previous state alone.
+              if (
+                e instanceof ApiError &&
+                (e.code === "STUDENT_NOT_ALLOWED" ||
+                  e.code === "PROFILE_MISMATCH")
+              )
+                this.providerHealthy = true;
+              else if (!signal?.aborted) this.providerHealthy = false;
               throw e;
             }
-            await this.capacity.require("scan");
             signal?.throwIfAborted();
             const s = await this.db.sequelize.transaction(
               async (transaction) => {
@@ -245,6 +262,7 @@ export class Service {
     payload: { requestId: string; previewId?: string },
     action: Action,
     work: (tx: Transaction, p?: Intent) => Promise<unknown>,
+    auditIds?: AuditIds | AuditIdResolver,
   ) {
     const digest = payloadDigest(route, payload),
       key = `${ctx.clientId}:${payload.requestId}`;
@@ -272,7 +290,12 @@ export class Service {
         try {
           return await this.db.sequelize.transaction(async (transaction) => {
             const result = await work(transaction, p);
+            const resolvedIds =
+              typeof auditIds === "function"
+                ? await auditIds(result, p)
+                : (auditIds ?? {});
             await this.audit(ctx, route, [], transaction, {
+              ...resolvedIds,
               requestId: payload.requestId,
             });
             const logId = randomUUID();
@@ -357,55 +380,66 @@ export class Service {
       throw new ApiError("PROFILE_VERSION_CONFLICT", 409);
   }
   async start(ctx: Context, data: z.infer<typeof startSchema>) {
-    return this.operation(ctx, "usage.start", data, "start", async (tx, p) => {
-      if (p?.mode !== "start" || !p.studentId)
-        throw new ApiError("PREVIEW_MODE_INVALID", 409);
-      await this.lock(tx, [data.deviceId], [p.studentId], []);
-      await this.checkProfile(p, tx);
-      const device = await this.db.devices.findByPk(data.deviceId, {
-        transaction: tx,
-      });
-      if (!device) throw new ApiError("NOT_FOUND", 404);
-      const active = await this.db.records.findOne({
-        where: {
-          endedAt: null,
-          [Op.or]: [{ deviceId: data.deviceId }, { studentId: p.studentId }],
-        },
-        transaction: tx,
-      });
-      assertAssignable(device.get(), !!active);
-      const overlaps = await this.db.records.count({
-        where: {
-          [Op.or]: [{ deviceId: data.deviceId }, { studentId: p.studentId }],
-          endedAt: { [Op.gt]: new Date(p.atMs) },
-        },
-        transaction: tx,
-      });
-      if (overlaps) throw new ApiError("TIME_RANGE_CONFLICT", 409);
-      const r = await this.db.records.create(
-        {
-          id: randomUUID(),
+    return this.operation(
+      ctx,
+      "usage.start",
+      data,
+      "start",
+      async (tx, p) => {
+        if (p?.mode !== "start" || !p.studentId)
+          throw new ApiError("PREVIEW_MODE_INVALID", 409);
+        await this.lock(tx, [data.deviceId], [p.studentId], []);
+        await this.checkProfile(p, tx);
+        const device = await this.db.devices.findByPk(data.deviceId, {
+          transaction: tx,
+        });
+        if (!device) throw new ApiError("NOT_FOUND", 404);
+        const active = await this.db.records.findOne({
+          where: {
+            endedAt: null,
+            [Op.or]: [{ deviceId: data.deviceId }, { studentId: p.studentId }],
+          },
+          transaction: tx,
+        });
+        assertAssignable(device.get(), !!active);
+        const overlaps = await this.db.records.count({
+          where: {
+            [Op.or]: [{ deviceId: data.deviceId }, { studentId: p.studentId }],
+            endedAt: { [Op.gt]: new Date(p.atMs) },
+          },
+          transaction: tx,
+        });
+        if (overlaps) throw new ApiError("TIME_RANGE_CONFLICT", 409);
+        const r = await this.db.records.create(
+          {
+            id: randomUUID(),
+            studentId: p.studentId,
+            deviceId: data.deviceId,
+            startedAt: new Date(p.atMs),
+            endedAt: null,
+            notes: data.notes,
+            endReason: null,
+            version: 1,
+            clientId: ctx.clientId,
+            createdAt: new Date(this.now()),
+            updatedAt: new Date(this.now()),
+          },
+          { transaction: tx },
+        );
+        await this.audit(ctx, "usage.created", ["startedAt", "notes"], tx, {
+          requestId: data.requestId,
           studentId: p.studentId,
           deviceId: data.deviceId,
-          startedAt: new Date(p.atMs),
-          endedAt: null,
-          notes: data.notes,
-          endReason: null,
-          version: 1,
-          clientId: ctx.clientId,
-          createdAt: new Date(this.now()),
-          updatedAt: new Date(this.now()),
-        },
-        { transaction: tx },
-      );
-      await this.audit(ctx, "usage.created", ["startedAt", "notes"], tx, {
-        requestId: data.requestId,
-        studentId: p.studentId,
+          recordId: r.get().id,
+        });
+        return { recordId: r.get().id, version: 1 };
+      },
+      (result, p) => ({
+        recordId: (result as { recordId?: string }).recordId,
+        studentId: p?.studentId,
         deviceId: data.deviceId,
-        recordId: r.get().id,
-      });
-      return { recordId: r.get().id, version: 1 };
-    });
+      }),
+    );
   }
   async endPreview(ctx: Context, id: string) {
     const r = await this.db.records.findByPk(id);
@@ -440,6 +474,14 @@ export class Service {
           throw new ApiError("PREVIEW_MODE_INVALID", 409);
         await this.finish(ctx, p, data.notes, false, tx, data.requestId);
         return { recordId: id, version: data.expectedVersion + 1 };
+      },
+      (_result, p) => {
+        const record = p?.records.find((r) => r.id === id);
+        return {
+          recordId: id,
+          studentId: p?.studentId,
+          deviceId: record?.device.id,
+        };
       },
     );
   }
@@ -497,6 +539,7 @@ export class Service {
     }
   }
   async editNotes(ctx: Context, id: string, data: z.infer<typeof noteSchema>) {
+    const auditIds: AuditIds = { recordId: id };
     return this.operation(
       ctx,
       "usage.notes:" + id,
@@ -505,6 +548,8 @@ export class Service {
       async (tx) => {
         const initial = await this.db.records.findByPk(id, { transaction: tx });
         if (!initial) throw new ApiError("NOT_FOUND", 404);
+        auditIds.deviceId = initial.get().deviceId;
+        auditIds.studentId = initial.get().studentId;
         await this.lock(
           tx,
           [initial.get().deviceId],
@@ -525,6 +570,7 @@ export class Service {
         );
         return { recordId: id, version: data.expectedVersion + 1 };
       },
+      () => auditIds,
     );
   }
   private async recordWhere(
@@ -804,6 +850,9 @@ export class Service {
         );
         return { deviceId: model.get().id, version: model.get().version };
       },
+      (result) => ({
+        deviceId: (result as { deviceId?: string }).deviceId,
+      }),
     );
   }
   async tag(
