@@ -83,6 +83,8 @@
 
 ## 联调与门禁
 
+Electron 测试的 HTTPS 服务器通过 `tests/helpers/electron-server.ts` 在 49152–65535 范围内随机绑定，端口占用时有限次重选。不能依赖 `listen(0)`：自定义 Windows 动态端口范围可能分配 Chromium 禁止的端口（如 6000），造成 `net::ERR_UNSAFE_PORT`，甚至使证书拒绝用例错误通过。正式包与开发版 Electron 套件应依次执行，避免多个桌面窗口争抢焦点；不放宽产品的网络或证书校验策略。
+
 完整联调从**空学生缓存**开始：刷卡从 API 建缓存 → 选设备 → 开始 → 再刷卡覆盖缓存 → 结束 → 设置内查历史；另测 API 明确拒绝、外部故障转手动结束、标签跨区域设备、全系统批量、设备编辑/删除、10 秒空闲、共享改密、pin 错误、应用/DB 重启和日志补传。
 
 CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、Windows Rust fmt/test/release build、真实 Electron 集成，然后构建 Docker/客户端包并联调。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。

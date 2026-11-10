@@ -15,6 +15,7 @@ import { Database } from "../../../apps/server/src/database.js";
 import { createApp } from "../../../apps/server/src/app.js";
 import { testConfig, identity } from "../../helpers/config.js";
 import { certificate } from "../../helpers/certificates.js";
+import { listenForElectron } from "../../helpers/electron-server.js";
 import { LocalStore } from "../../../apps/teacher/src/main/store.js";
 let api: Awaited<ReturnType<typeof createApp>>,
   admin: Database,
@@ -69,8 +70,7 @@ test.beforeAll(async () => {
     });
     incoming.pipe(proxy);
   });
-  await new Promise<void>((r) => tls.listen(0, "127.0.0.1", r));
-  port = (tls.address() as { port: number }).port;
+  port = await listenForElectron(tls);
   userData = await mkdtemp(join(tmpdir(), "cyez-electron-profile-"));
   await launch();
 });
@@ -204,8 +204,7 @@ test("C-I-09: 过期/SAN 错误/证书更换、重定向和 HTTP 降级", async 
       received++;
       res.end("{}");
     });
-    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
-    const target = (server.address() as { port: number }).port;
+    const target = await listenForElectron(server);
     try {
       await call("configure", {
         ip: "127.0.0.1",
@@ -230,11 +229,11 @@ test("C-I-09: 过期/SAN 错误/证书更换、重定向和 HTTP 降级", async 
     res.writeHead(302, { location: "http://127.0.0.1:1/steal" });
     res.end();
   });
-  await new Promise<void>((r) => redirect.listen(0, "127.0.0.1", r));
+  const redirectPort = await listenForElectron(redirect);
   try {
     await call("configure", {
       ip: "127.0.0.1",
-      port: (redirect.address() as { port: number }).port,
+      port: redirectPort,
       pin: cert.pin,
     });
     await expect(call("testConnection")).rejects.toThrow();

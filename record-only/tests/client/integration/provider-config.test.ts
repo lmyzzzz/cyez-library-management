@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { createApp } from "../../../apps/server/src/app.js";
 import { testConfig } from "../../helpers/config.js";
 import { certificate } from "../../helpers/certificates.js";
+import { listenForElectron } from "../../helpers/electron-server.js";
 import { sqlServerProviderSchema } from "@record/protocol";
 import { runtimeDatabase } from "../../helpers/runtime-database.js";
 
@@ -86,8 +87,7 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
     });
     incoming.pipe(proxy);
   });
-  await new Promise<void>((r) => tls.listen(0, "127.0.0.1", r));
-  const port = (tls.address() as { port: number }).port;
+  const port = await listenForElectron(tls);
   const executable = process.env.CYEZ_ELECTRON_EXECUTABLE;
   const desktop = await electron.launch({
     executablePath: executable ? resolve(executable) : undefined,

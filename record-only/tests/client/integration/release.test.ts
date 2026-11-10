@@ -10,6 +10,7 @@ import { Database } from "../../../apps/server/src/database.js";
 import { createApp } from "../../../apps/server/src/app.js";
 import { testConfig, identity } from "../../helpers/config.js";
 import { certificate } from "../../helpers/certificates.js";
+import { listenForElectron } from "../../helpers/electron-server.js";
 
 const executablePath = resolve(
   process.env.CYEZ_ELECTRON_EXECUTABLE ??
@@ -88,8 +89,7 @@ test("正式安装包首次配置、登录、设备管理与手动输入可用�
     });
     incoming.pipe(proxy);
   });
-  await new Promise<void>((r) => tls.listen(0, "127.0.0.1", r));
-  const port = (tls.address() as { port: number }).port;
+  const port = await listenForElectron(tls);
   const userData = join(dir, "teacher");
   const env = {
     ...process.env,

@@ -13,6 +13,10 @@
 
 本机测试未连接学校数据库，未改动现场部署；目标硬件、学校资料与安装部署验收边界继续保留。远端 CI、Docker 和正式 Windows 打包结果以本次合并提交对应的 Actions 为准，不将旧分支失败或此前发布包结果计为本次通过。
 
+合并提交 `7e4f606` 的 [CI 42755603984](https://github.com/lmyzzzz/cyez-library-management/actions/runs/42755603984) 服务端与 Windows 均成功，包含 Docker 构建/GHCR 发布、Electron 和正式包检查。本机同时构建了 `release/merged-7e4f606/cyez-library-0.1.8-x64-setup.exe`（119670254 字节，SHA-256 `1798d80c8bb47aded4fdf1bd736cd29d13b5f07ab0e783a58a56fcc2bbadaa0f`，未签名）。
+
+本机首次正式包测试 1 项通过、1 项失败：操作系统将 `listen(0)` 分配到 6000，真实 exe 诊断确认 `net::ERR_UNSAFE_PORT`；本机动态 TCP 端口从 1024 起。随后只调整测试设施，让所有 Electron HTTPS fixture 在 49152–65535 内直接绑定并有限次处理占用。同一个 exe 的正式包测试 2 项通过。与正式包检查重叠运行的一次集成检查出现登记门控失败（10 通过、1 失败、1 跳过），原因未单独定论；按套件顺序单独重跑后 11 项全部通过、Compose 专用 1 项仍未启用。未启用自动测试重试，未放宽证书校验或改动产品代码；TypeScript、Prettier 复验通过。后续测试设施提交的远端结果应另查其 Actions。
+
 ## 2026-11-09 校园数据源配置保存权限修复
 
 在正式 schema/role 迁移创建的受限 PostgreSQL runtime 账号下，修复前实际复现：SQL Server TLS 登录和固定三列 `TOP (0)` 探测成功，但配置请求经 HTTPS 返回 503；Sequelize 审计 `INSERT … RETURNING` 触发 PostgreSQL `42501`。审计插入增加 `returning: false` 后成功，保持 `audit_events` 仅 INSERT 权限，不增加审计读取权限或业务迁移。保存失败返回 `PROVIDER_CONFIGURATION_SAVE_FAILED`，与探测失败的 `PROVIDER_CONFIGURATION_INVALID` 分开；日志仅记录固定阶段码。
