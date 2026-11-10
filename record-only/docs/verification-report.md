@@ -1,5 +1,18 @@
 # 产品验证报告
 
+## 2026-11-10 全部分支审查与合并
+
+同步远端后，本地分支仅 `main`，远端分支为 `main` 与 `dev/ui`。`dev/ui` 唯一未合入的提交是 `260f6d7`，仅为 domain/client-sdk 构建配置增加协议声明文件映射。审查确认协议包先构建、两个包当前只导入协议主入口、映射不改变运行时导入；没有发现阻塞合并的业务问题。Windows 检出造成的两处 CRLF/Prettier 差异已本地规范化为 LF。保留主分支 `07a6f46` 的新版 UI 集成定位修正，并将此前校园配置权限修复单独提交为 `be2da4f`，随后合并 `dev/ui`。原有根目录文档删除及未跟踪材料不纳入本次提交。
+
+| 检查 | 合并结果的本机实际结果 |
+| ---- | -------------------- |
+| 静态与构建 | Yarn immutable install、TypeScript、Prettier、图源一致性、共享包、服务端、客户端集成构建通过 |
+| 服务端 | 真实 PostgreSQL 与隔离 SQL Server fixture，44 项通过；覆盖率 statements 96.24%、branches 90.59%、functions 97.82%、lines 97.80%，门禁通过 |
+| 客户端 | 64 项通过；覆盖率 statements 88.84%、branches 83.94%、functions 86.20%、lines 89.70%，门禁通过 |
+| 真实 Electron | 11 项通过，Compose 专用 1 项未启用；真实 TLS/SQLite/PG、校园配置使用真实 SQL Server，涵盖 UI 交互、读卡配置、自动登录、滚动/焦点保留及权限故障恢复 |
+
+本机测试未连接学校数据库，未改动现场部署；目标硬件、学校资料与安装部署验收边界继续保留。远端 CI、Docker 和正式 Windows 打包结果以本次合并提交对应的 Actions 为准，不将旧分支失败或此前发布包结果计为本次通过。
+
 ## 2026-11-09 校园数据源配置保存权限修复
 
 在正式 schema/role 迁移创建的受限 PostgreSQL runtime 账号下，修复前实际复现：SQL Server TLS 登录和固定三列 `TOP (0)` 探测成功，但配置请求经 HTTPS 返回 503；Sequelize 审计 `INSERT … RETURNING` 触发 PostgreSQL `42501`。审计插入增加 `returning: false` 后成功，保持 `audit_events` 仅 INSERT 权限，不增加审计读取权限或业务迁移。保存失败返回 `PROVIDER_CONFIGURATION_SAVE_FAILED`，与探测失败的 `PROVIDER_CONFIGURATION_INVALID` 分开；日志仅记录固定阶段码。
