@@ -5,28 +5,19 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { Database } from "../../../apps/server/src/database.js";
 import { createApp } from "../../../apps/server/src/app.js";
-import { testConfig, identity } from "../../helpers/config.js";
+import { testConfig } from "../../helpers/config.js";
 import { certificate } from "../../helpers/certificates.js";
 import { sqlServerProviderSchema } from "@record/protocol";
+import { runtimeDatabase } from "../../helpers/runtime-database.js";
 
 test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有配置正文", async () => {
   const dir = await mkdtemp(join(tmpdir(), "cyez-provider-ui-"));
   const profile = join(dir, "teacher");
-  const databaseName = "cyez_provider_ui_" + randomUUID().replaceAll("-", "");
-  const adminUrl =
-    process.env.TEST_DATABASE_URL ??
-    "postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test";
-  const admin = new Database(adminUrl);
-  await admin.sequelize.getQueryInterface().createDatabase(databaseName);
-  const url = new URL(adminUrl);
-  url.pathname = "/" + databaseName;
+  const fixture = await runtimeDatabase();
   const keyFile = join(dir, "provider-key");
   await writeFile(keyFile, randomBytes(32).toString("hex"));
-  const db = new Database(url.toString());
-  await db.migrator.up();
-  await db.initializeIdentity(identity);
+  const db = fixture.db;
   const live = !!process.env.TEST_SQLSERVER_CONFIG;
   const supplied = live
     ? sqlServerProviderSchema.parse(
@@ -42,7 +33,7 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
       };
   const api = await createApp(
     {
-      ...testConfig(url.toString(), join(dir, "spool")),
+      ...testConfig(fixture.url, join(dir, "spool")),
       providerMode: "sqlserver",
       providerConfigKeyFile: keyFile,
       providerTimeoutMs: 3000,
@@ -122,22 +113,66 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
     );
     await page.getByRole("link", { name: "设置", exact: true }).click();
     await page.getByRole("button", { name: "校园数据源", exact: true }).click();
-    await page.getByLabel("SQL Server 地址").fill(supplied.host);
-    await page.getByLabel("端口", { exact: true }).fill(String(supplied.port));
-    await page.getByLabel("数据库账号").fill(supplied.username);
-    await page.getByLabel("数据库密码").fill(supplied.password);
-    await page.getByLabel("TLS CA 证书（PEM，可留空）").fill(supplied.caPem);
-    await page
-      .getByLabel("数据源证书校验")
-      .selectOption("trustServerCertificate");
-    await expect(page.getByLabel("TLS CA 证书（PEM，可留空）")).toHaveCount(0);
-    await page.getByLabel("卡号表示").selectOption(supplied.uidEncoding);
-    await page.getByRole("button", { name: "覆盖服务端配置" }).click();
-    await expect(page.getByLabel("数据库密码")).toHaveValue("");
-    await expect(page.getByLabel("SQL Server 地址")).toHaveValue("");
-    await expect(page.getByLabel("数据源证书校验")).toHaveValue("verify");
+    const submitConfiguration = async () => {
+      await page.getByLabel("SQL Server 地址").fill(supplied.host);
+      await page
+        .getByLabel("端口", { exact: true })
+        .fill(String(supplied.port));
+      await page.getByLabel("数据库账号").fill(supplied.username);
+      await page.getByLabel("数据库密码").fill(supplied.password);
+      await page.getByLabel("TLS CA 证书（PEM，可留空）").fill(supplied.caPem);
+      await page
+        .getByLabel("数据源证书校验")
+        .selectOption("trustServerCertificate");
+      await expect(page.getByLabel("TLS CA 证书（PEM，可留空）")).toHaveCount(
+        0,
+      );
+      await page.getByLabel("卡号表示").selectOption(supplied.uidEncoding);
+      await page.getByRole("button", { name: "覆盖服务端配置" }).click();
+      await expect(page.getByLabel("数据库密码")).toHaveValue("");
+      await expect(page.getByLabel("SQL Server 地址")).toHaveValue("");
+      await expect(page.getByLabel("数据源证书校验")).toHaveValue("verify");
+    };
+    await fixture.privileges((pgm) =>
+      pgm.revokeOnTables({
+        tables: "audit_events",
+        roles: fixture.role,
+        privileges: "INSERT",
+      }),
+    );
+    try {
+      await submitConfiguration();
+      await expect(
+        page.getByRole("alert").filter({
+          hasText: "校园数据源连接校验已通过，但服务端未能确认配置保存",
+        }),
+      ).toBeVisible();
+      expect(await fixture.owner.providerConfigs.findByPk("campus")).toBeNull();
+      expect(await fixture.owner.audits.count()).toBe(0);
+      // Failure must not refill credentials or queue an automatic replay.
+      await page.reload();
+      await page
+        .getByRole("button", { name: "校园数据源", exact: true })
+        .click();
+      await expect(page.getByLabel("SQL Server 地址")).toHaveValue("");
+      await expect(page.getByLabel("数据库密码")).toHaveValue("");
+      await expect(page.getByLabel("数据库账号")).toHaveValue("");
+      expect(
+        seen.filter((r) => r.url === "/api/v1/provider-config"),
+      ).toHaveLength(1);
+    } finally {
+      await fixture.privileges((pgm) =>
+        pgm.grantOnTables({
+          tables: "audit_events",
+          roles: fixture.role,
+          privileges: "INSERT",
+        }),
+      );
+    }
+    await submitConfiguration();
     await expect(page.getByText("服务端已覆盖校园数据源配置。")).toBeVisible();
     expect(seen.filter((r) => r.url === "/api/v1/provider-config")).toEqual([
+      { method: "POST", url: "/api/v1/provider-config" },
       { method: "POST", url: "/api/v1/provider-config" },
     ]);
     expect(
@@ -166,8 +201,7 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
     await desktop.close();
     await new Promise<void>((r) => tls.close(() => r()));
     await api.app.close();
-    await admin.sequelize.getQueryInterface().dropDatabase(databaseName);
-    await admin.close();
+    await fixture.close();
   }
   async function checkDirectory(path: string): Promise<void> {
     for (const item of await readdir(path, { withFileTypes: true })) {

@@ -25,6 +25,10 @@ const messages: Record<string, string> = {
   PROVIDER_CONFIGURATION_INVALID:
     "校园数据源连接、TLS 或视图字段校验失败，原配置未变。",
   PROVIDER_CONFIGURATION_DISABLED: "服务器尚未启用 SQL Server 校园数据源模式。",
+  PROVIDER_CONFIGURATION_SAVE_FAILED:
+    "校园数据源连接校验已通过，但服务端未能确认配置保存。请联系维护人员检查本系统数据库权限和存储状态。",
+  SERVICE_UNAVAILABLE: "服务端暂时无法完成请求，请联系维护人员检查服务状态。",
+  RATE_LIMITED: "操作过于频繁，请稍后重新输入并提交。",
   PROFILE_MISMATCH: "校园资料不符合字段要求，请稍后重刷。",
   PROFILE_VERSION_CONFLICT: "学生资料已刷新，请重新刷卡。",
   DEVICE_UNAVAILABLE: "设备已被占用、禁用或删除，请刷新后重选。",

@@ -98,6 +98,9 @@ jobs:
     runs-on: windows-2025
     env:
       TEST_DATABASE_URL: postgres://cyez_test:integration-only@127.0.0.1:5432/cyez_test
+      # Only the isolated role-migration fixture uses the runner's bootstrap account.
+      # The application under test connects with the generated restricted runtime role.
+      TEST_RUNTIME_ADMIN_URL: postgres://postgres:root@127.0.0.1:5432/postgres
     defaults:
       run:
         working-directory: record-only

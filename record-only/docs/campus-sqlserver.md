@@ -26,6 +26,22 @@ UI 要求显式选择卡号表示：`decimal` 将规范四字节 UID 转为无�
 
 服务端串行覆盖：验证新连接与三列查询 → AES-256-GCM 加密 → 配置与不含配置值的审计同事务提交 → 后续查询切换。验证/持久化失败保留旧配置。已开始的刷卡完成原查询，后续刷卡使用新配置。不把原始配置放进业务幂等表。未配置时仍可登录和查历史，刷卡拒绝，无 fake 兜底。
 
+2026-11-09 修复：校园配置审计插入显式关闭 Sequelize `RETURNING`。生产 runtime 对 `audit_events` 仍只有 INSERT；不能通过增加 SELECT 权限来绕过旧版本的插入故障。`provider_configs` 仍按已有迁移授予 SELECT/INSERT/UPDATE，无新增权限或业务迁移。
+
+失败阶段可以从响应码和服务端归集日志区分：
+
+| 响应 | 阶段与处理 |
+| ---- | ---------- |
+| `422 INPUT_INVALID` | 完整输入校验失败，尚未探测 SQL Server |
+| `422 PROVIDER_CONFIGURATION_INVALID` | SQL Server 连接、TLS、登录或固定三列 `TOP (0)` 探测失败，未进入 PostgreSQL 保存 |
+| `503 PROVIDER_CONFIGURATION_SAVE_FAILED` | SQL Server 探测已通过，内部 PostgreSQL 配置/审计事务未能确认完成；检查本系统数据库权限和存储状态 |
+| `429 RATE_LIMITED` | 超过配置接口的每分钟请求上限，稍后重新输入提交 |
+| 客户端网络/超时错误 | 没有收到确定响应，不能据此认定服务端未保存；没有自动重发 |
+
+API spool 对探测失败和保存失败分别写入同名固定日志码，只有事件类型、时间和日志标识，不写请求正文、路径、数据库地址、账号、密码或驱动错误详情。Nginx access 仍仅含状态与耗时，不能单凭其中的一条 422/503 推断请求路径。旧服务端的 `SERVICE_UNAVAILABLE` 在 0.1.8 教师端也有明确的服务异常提示。
+
+从 `sha-07a6f464bdf410411e77a6ba137c14c33e713d72` 升级时，保留原卷、`.env`、身份参数和加密密钥，切换到修复版镜像后重建 `api` 与 `log-ingest`（后者同步识别新增日志码）。不需要变更 SQL Server 三列权限，也不需要对审计表授予 SELECT。若使用仓库的预构建镜像配置，先更新 `.env` 的 `RELEASE_TAG`，执行 `docker compose --env-file .env pull api log-ingest`，再执行 `docker compose --env-file .env up -d --no-deps --force-recreate api log-ingest`。教师端重新输入完整配置验证；旧客户端也可使用修复后的保存接口，新客户端提供阶段提示。
+
 ## 部署和升级
 
 在 `record-only/` 执行 `corepack yarn tsx scripts/prepare-provider-key.ts`。仅在不存在时创建 `secrets/provider-config-key`，不读取、输出或覆盖已有密钥。该文件为服务器独有的 32 字节随机密钥（64 位十六进制），不分发给教师端，由运维限制文件权限。
@@ -54,3 +70,5 @@ TEST_SQLSERVER_CONFIG=runtime/sqlserver-test/connection.json yarn test:coverage:
 ```
 
 脚本用锁定 digest 镜像在 `127.0.0.1:51433` 启动 `cyez-sqlserver-test`，生成测试证书、随机账号和合成资料；同名容器已存在则拒绝替换。Windows WSL Docker 先设 `$env:CYEZ_DOCKER_WSL='1'`；PowerShell 测试变量为 `$env:TEST_SQLSERVER_CONFIG='runtime/sqlserver-test/connection.json'`。Electron 集成也读取此变量；未设置时其 SQL 层使用显式替身，服务端真实 SQL 用例显式跳过。Linux CI 必须设置它执行真实 SQL 测试。可在测试结束后删除此专用容器；测试资料位于 Git 忽略的 `runtime/sqlserver-test/`。
+
+`provider-runtime.test.ts` 使用真实 HTTPS、SQL Server 驱动和正式权限迁移生成的受限 PostgreSQL runtime 账号；验证首次/重复覆盖、重启、刷卡、真实撤销配置 UPDATE 与审计 INSERT 后回滚、阶段日志及不泄露配置值。原 `provider-settings.test.ts` 和 Electron 校园配置测试也使用 runtime 账号运行应用，只有建库、迁移、故障注入及结果检查使用测试 owner。测试部署账号须能创建数据库和角色，可用 `TEST_RUNTIME_ADMIN_URL` 单独提供；它仅用于隔离测试，不是应用的运行凭据。

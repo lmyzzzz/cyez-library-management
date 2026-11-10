@@ -1,5 +1,7 @@
 # 服务端与客户端测试设计
 
+2026-11-09 生产权限回归：校园配置测试必须通过正式 schema/role 迁移创建受限 PostgreSQL runtime 账号运行应用；owner 仅用于建库、迁移、故障注入及结果检查。`provider-runtime.test.ts` 在 `environment=production`、真实 HTTPS 和 SQL Server TLS 下覆盖 `probe → upsert → audit → commit → 切换`，验证审计 SELECT/default RETURNING 拒绝、无回读 INSERT 成功、首次/重复覆盖与重启恢复。实际撤销配置 UPDATE/审计 INSERT 时须失败并回滚，旧配置仍可刷卡；422 探测失败和 503 保存失败返回不同固定码，日志无配置值。Electron 校园配置用例也使用受限账号验证失败提示、输入清空、无重发及成功恢复。Linux CI 启用真实 SQL Server；Windows 未提供 SQL fixture 时仅 SQL 层使用显式替身，权限链路仍为真实 PG。测试 owner 的创建角色权限通过独立 `TEST_RUNTIME_ADMIN_URL` 配置。
+
 2026-11-05 发布检查：客户端 CI 先用 `build:client:integration` 运行原业务回归，再用 `package:win` 重建正式安装包，最后执行 `test:release:client`。正式包验收须实际读取 asar/资源清单确认无测试进程、测试入口和应用 source map，启动真实 exe 验证首次配置、TLS 登录、设备管理、校园设置，以及 DevTools/测试 IPC/运行环境变量无法开启调试入口。开发测试用例不得算作正式包通过。
 
 2026-11-05 增补：必须验证 SQL Server 真实三列权限/TLS/中文 varchar、无匹配/多行/空姓名拒绝；PostgreSQL 配置原子覆盖/密文/重启恢复；拒绝配置 GET/PATCH；Electron 表单、IPC 输入发送后清空，磁盘无配置正文。入口及真实 SQL 与显式替身的区别见[Concard 测试入口](campus-sqlserver.md#真实驱动测试入口)。外部固定 SQL 查询与独立 SQL Server fixture 是内部 PG ORM 约束之外的接入测试；不触及学校真实数据库。

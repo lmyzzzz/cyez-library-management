@@ -10,9 +10,9 @@ import { studentId } from "@record/protocol/identity";
 import { ApiError, type SqlServerProviderConfig } from "@record/protocol";
 import type { Config } from "../../../apps/server/src/config.js";
 import { ProviderSettings } from "../../../apps/server/src/provider-settings.js";
+import { runtimeDatabase } from "../../helpers/runtime-database.js";
 
 describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
-  const databaseName = "cyez_provider_" + randomUUID().replaceAll("-", "");
   const clientId = randomUUID();
   const input = (host: string): SqlServerProviderConfig => ({
     host,
@@ -22,7 +22,7 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     caPem: "",
     uidEncoding: "hex8",
   });
-  let admin: Database,
+  let fixture: Awaited<ReturnType<typeof runtimeDatabase>>,
     db: Database,
     server: Awaited<ReturnType<typeof createApp>>,
     config: Config,
@@ -39,24 +39,17 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     },
   });
   beforeAll(async () => {
-    const adminUrl =
-      process.env.TEST_DATABASE_URL ??
-      "postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test";
-    admin = new Database(adminUrl);
-    await admin.sequelize.getQueryInterface().createDatabase(databaseName);
-    const url = new URL(adminUrl);
-    url.pathname = "/" + databaseName;
-    const dir = await mkdtemp(join(tmpdir(), "cyez-provider-settings-"));
+    fixture = await runtimeDatabase();
+    const dir = fixture.directory;
     const keyFile = join(dir, "key");
     await writeFile(keyFile, randomBytes(32).toString("hex"));
     config = {
-      ...testConfig(url.toString(), dir),
+      ...testConfig(fixture.url, dir),
+      environment: "production",
       providerMode: "sqlserver",
       providerConfigKeyFile: keyFile,
     };
-    db = new Database(config.databaseUrl);
-    await db.migrator.up();
-    await db.initializeIdentity(identity);
+    db = fixture.db;
     server = await createApp(config, {
       database: db,
       providerFactory: factory,
@@ -80,10 +73,7 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
   });
   afterAll(async () => {
     await server?.app.close();
-    if (admin) {
-      await admin.sequelize.getQueryInterface().dropDatabase(databaseName);
-      await admin.close();
-    }
+    await fixture?.close();
   });
   const post = async (payload: unknown, authorization = token) =>
     server.app.inject({
@@ -105,7 +95,7 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
         ),
         hashVersion: identity.hashVersion,
         card: { issuer: identity.issuer, uidHex: "00000001" },
-        source: "integration",
+        source: "reader",
       },
     });
   it("未配置时刷卡拒绝、未认证不能覆盖、没有读取接口", async () => {
@@ -122,7 +112,7 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
         })
       ).statusCode,
     ).toBe(404);
-    expect(await db.providerConfigs.findByPk("campus")).toBeNull();
+    expect(await fixture.owner.providerConfigs.findByPk("campus")).toBeNull();
   });
   it("校验失败不覆盖，成功时密文落库且原文不回传", async () => {
     expect(
@@ -131,11 +121,13 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     expect((await post(input("bad.example"))).json()).toEqual({
       code: "PROVIDER_CONFIGURATION_INVALID",
     });
-    expect(await db.providerConfigs.findByPk("campus")).toBeNull();
+    expect(await fixture.owner.providerConfigs.findByPk("campus")).toBeNull();
     const success = await post(input("first.example"));
     expect(success.statusCode).toBe(200);
     expect(success.json()).toEqual({ ok: true });
-    const sealed = (await db.providerConfigs.findByPk("campus"))!.get().sealed;
+    const sealed = (await fixture.owner.providerConfigs.findByPk(
+      "campus",
+    ))!.get().sealed;
     expect(sealed).toMatch(/^v1\./);
     expect(sealed).not.toContain("transient-password-value");
     expect(sealed).not.toContain("first.example");
@@ -143,9 +135,9 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     expect(calls).toEqual(["first.example"]);
     const failed = await post(input("bad.example"));
     expect(failed.statusCode).toBe(422);
-    expect((await db.providerConfigs.findByPk("campus"))!.get().sealed).toBe(
-      sealed,
-    );
+    expect(
+      (await fixture.owner.providerConfigs.findByPk("campus"))!.get().sealed,
+    ).toBe(sealed);
     expect((await scan()).json().student.name).toBe("first.example");
   });
   it("重启后仅服务端恢复配置，完整覆盖使新配置生效", async () => {
@@ -177,7 +169,7 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     expect(calls.at(-1)).toBe("second.example");
     expect(
       (
-        await db.audits.findAll({
+        await fixture.owner.audits.findAll({
           where: { action: "provider_config_replaced" },
         })
       ).length,
@@ -196,18 +188,24 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
         ).statusCode,
       ).toBe(404);
     }
-    const before = (await db.providerConfigs.findByPk("campus"))!.get().sealed;
+    const before = (await fixture.owner.providerConfigs.findByPk(
+      "campus",
+    ))!.get().sealed;
     const failure = vi
       .spyOn(db.audits, "create")
       .mockRejectedValueOnce(new Error("simulated storage failure"));
     try {
-      expect((await post(input("rollback.example"))).statusCode).toBe(503);
+      const failed = await post(input("rollback.example"));
+      expect(failed.statusCode).toBe(503);
+      expect(failed.json()).toEqual({
+        code: "PROVIDER_CONFIGURATION_SAVE_FAILED",
+      });
     } finally {
       failure.mockRestore();
     }
-    expect((await db.providerConfigs.findByPk("campus"))!.get().sealed).toBe(
-      before,
-    );
+    expect(
+      (await fixture.owner.providerConfigs.findByPk("campus"))!.get().sealed,
+    ).toBe(before);
     expect((await scan()).json().student.name).toBe("second.example");
     const badKey = join(await mkdtemp(join(tmpdir(), "cyez-bad-key-")), "key");
     await writeFile(badKey, "invalid");
@@ -218,8 +216,8 @@ describe("真实 PostgreSQL：校园数据源仅覆盖配置", () => {
     await expect(
       ProviderSettings.create(db, badKey, 200, factory),
     ).rejects.toThrow("PROVIDER_CONFIG_DECRYPT_FAILED");
-    expect((await db.providerConfigs.findByPk("campus"))!.get().sealed).toBe(
-      before,
-    );
+    expect(
+      (await fixture.owner.providerConfigs.findByPk("campus"))!.get().sealed,
+    ).toBe(before);
   });
 });

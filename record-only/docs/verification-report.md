@@ -1,5 +1,20 @@
 # 产品验证报告
 
+## 2026-11-09 校园数据源配置保存权限修复
+
+在正式 schema/role 迁移创建的受限 PostgreSQL runtime 账号下，修复前实际复现：SQL Server TLS 登录和固定三列 `TOP (0)` 探测成功，但配置请求经 HTTPS 返回 503；Sequelize 审计 `INSERT … RETURNING` 触发 PostgreSQL `42501`。审计插入增加 `returning: false` 后成功，保持 `audit_events` 仅 INSERT 权限，不增加审计读取权限或业务迁移。保存失败返回 `PROVIDER_CONFIGURATION_SAVE_FAILED`，与探测失败的 `PROVIDER_CONFIGURATION_INVALID` 分开；日志仅记录固定阶段码。
+
+| 检查 | 本次实际结果 |
+| ---- | ------------ |
+| 真实权限回归 | 定向 7 项通过；生产模式 HTTPS → Fastify → 真实 SQL Server TLS → 受限 PostgreSQL，覆盖首次/重复覆盖、刷卡、重启、实际撤销配置 UPDATE/审计 INSERT 后回滚与旧配置继续有效 |
+| 服务端覆盖率 | 44 项 / 9 文件通过；statements 96.24%、branches 90.59%、functions 97.82%、lines 97.80% |
+| 客户端覆盖率 | 64 项 / 9 文件通过；statements 88.84%、branches 83.94%、functions 86.20%、lines 89.70% |
+| 真实 Electron | 11 项通过，Compose 专用 1 项未启用；校园配置使用真实 SQL Server 和受限 PG，验证具体失败提示、输入清空、刷新无回填/重发、权限恢复后成功及客户端文件无配置账号/密码 |
+| 静态与构建 | Yarn immutable install、TypeScript、Prettier、shared/server、客户端集成及生产构建通过；Docker API 镜像 `cyez-record-only:provider-runtime-fix` 构建成功，ID 前缀 `607e3d698f6e` |
+| Windows 发布 | 0.1.8 NSIS 构建与解包正式版测试 2 项通过；`release/0.1.8/cyez-library-0.1.8-x64-setup.exe`，SHA-256 `ab49e5553ba2f1ccd91da0bc49258cfe373452161500ce9c543f41ce29496561`，未签名 |
+
+HTTPS 回归使用 Node HTTPS 代理，不是 Nginx。SQL Server 是隔离合成资料 fixture；未连接或修改学校数据库和现场部署。Nginx access 日志不记录请求路径，不能据此认定现场所有 422/503 均属于本问题。现场仍需升级 `api` 和 `log-ingest` 后重新提交完整配置并刷实卡确认，步骤见 [校园数据源接入](campus-sqlserver.md)。真实学校资料、硬件和目标安装部署的未完成验收继续保留。
+
 ## 2026-11-08 dev/ui 合并验证
 
 将 `dev/ui` 的 5 个 UI 提交（截至 `0156713`）快进合入 `main`。集成测试更新为新版登记标题、带设备编号的选择按钮、设备操作菜单和读卡进程标题；通知按可访问的 alert 定位，仍验证成功刷卡清除旧通知、新通知不改变全屏边界。产品代码沿用分支实现。

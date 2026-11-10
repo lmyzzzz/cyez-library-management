@@ -106,28 +106,34 @@ export class ProviderSettings {
       const candidate = this.factory(parsed);
       await candidate.probe();
       const sealed = this.seal(parsed);
-      await this.db.sequelize.transaction(async (transaction) => {
-        await this.db.providerConfigs.upsert(
-          { key: "campus", sealed, updatedAt: new Date() },
-          { transaction },
-        );
-        await this.db.audits.create(
-          {
-            id: randomUUID(),
-            actor: ctx.username,
-            clientId: ctx.clientId,
-            requestId: null,
-            scanId: null,
-            studentId: null,
-            recordId: null,
-            deviceId: null,
-            action: "provider_config_replaced",
-            fields: ["campus"],
-            at: new Date(),
-          },
-          { transaction },
-        );
-      });
+      try {
+        await this.db.sequelize.transaction(async (transaction) => {
+          await this.db.providerConfigs.upsert(
+            { key: "campus", sealed, updatedAt: new Date() },
+            { transaction },
+          );
+          await this.db.audits.create(
+            {
+              id: randomUUID(),
+              actor: ctx.username,
+              clientId: ctx.clientId,
+              requestId: null,
+              scanId: null,
+              studentId: null,
+              recordId: null,
+              deviceId: null,
+              action: "provider_config_replaced",
+              fields: ["campus"],
+              at: new Date(),
+            },
+            // The runtime role can append audits but must never read them.
+            { transaction, returning: false },
+          );
+        });
+      } catch {
+        // Do not expose ORM errors, SQL, parameters or the sealed configuration.
+        throw new ApiError("PROVIDER_CONFIGURATION_SAVE_FAILED", 503);
+      }
       this.current = candidate;
     });
   }

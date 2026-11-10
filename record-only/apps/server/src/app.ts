@@ -96,15 +96,23 @@ export async function createApp(
         : status === 429
           ? "RATE_LIMITED"
           : "SERVICE_UNAVAILABLE";
-    if (status >= 500)
+    const providerFailure =
+      known &&
+      (code === "PROVIDER_CONFIGURATION_INVALID" ||
+        code === "PROVIDER_CONFIGURATION_SAVE_FAILED");
+    if (status >= 500 || providerFailure)
       try {
         await spool.append({
           logId: randomUUID(),
           source: "api",
-          level: "error",
+          level: status >= 500 ? "error" : "warn",
           atMs: Date.now(),
           appVersion: "0.1.0",
-          code: "API_REQUEST_FAILED",
+          code: providerFailure
+            ? (code as
+                | "PROVIDER_CONFIGURATION_INVALID"
+                | "PROVIDER_CONFIGURATION_SAVE_FAILED")
+            : "API_REQUEST_FAILED",
         });
       } catch {
         /* The response remains a failure; no fake persistence ACK. */
