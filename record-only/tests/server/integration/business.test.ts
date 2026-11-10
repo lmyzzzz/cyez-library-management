@@ -26,10 +26,12 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
   let calls = 0,
     fail = false;
   let profileName = "测试学生";
+  let exhaustDuringLookup = false;
   let probe = { freeBytes: 100000, writable: true, oldestAgeMs: 0 };
   const provider: CampusProvider = {
     async lookup(card) {
       calls++;
+      if (exhaustDuringLookup) probe.freeBytes = 1;
       expect(card.uidHex).toMatch(/^(?:[0-9a-f]{2}){4}$/);
       if (fail) throw Error("provider unreachable");
       if (card.uidHex === "eeeeeeee")
@@ -909,6 +911,23 @@ describe("真实 PostgreSQL：登记、并发、幂等及故障", () => {
       if (r.statusCode === 429) rate++;
     }
     expect(rate).toBeGreaterThan(0);
+  });
+  it("校园查询期间容量跌破保留线时不写缓存或生成预览", async () => {
+    const uidHex = "1234abcd";
+    const id = studentId({ issuer: identity.issuer, uidHex }, identity);
+    const audits = await server.db.audits.count();
+    exhaustDuringLookup = true;
+    try {
+      expect(await scan(uidHex)).toMatchObject({
+        status: 503,
+        body: { code: "STORAGE_WRITE_RESTRICTED" },
+      });
+      expect(await server.db.students.findByPk(id)).toBeNull();
+      expect(await server.db.audits.count()).toBe(audits);
+    } finally {
+      exhaustDuringLookup = false;
+      probe.freeBytes = 100000;
+    }
   });
   it("S-I-08/14: 业务外端点不存在，数据库及持久结果不含原卡号字段", async () => {
     for (const path of ["/admin", "/students", "/export", "/logs", "/config"])

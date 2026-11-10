@@ -17,8 +17,11 @@ export function verifyCertificate(
 ): boolean {
   try {
     const certificate = new X509Certificate(pem);
+    // Electron reports IPv6 URL hostnames with brackets ("[::1]"); the pinned
+    // connection stores the bare address ("::1").
+    const host = hostname.replace(/^\[/, "").replace(/\]$/, "");
     return (
-      hostname === config.ip &&
+      host === config.ip &&
       createHash("sha256").update(certificate.raw).digest("hex") ===
         normalizePin(config.pin) &&
       now >= Date.parse(certificate.validFrom) &&

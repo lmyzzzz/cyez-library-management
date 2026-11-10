@@ -21,6 +21,18 @@ import {
 import { PinnedTransport } from "./transport.js";
 import { LocalStore } from "./store.js";
 import { CardReader, type CardEvent } from "./reader.js";
+/** Failures that mean the server could not be reached or its response was unusable. */
+const TRANSPORT_FAILURE_CODES = new Set([
+  "NETWORK_TIMEOUT",
+  "NETWORK_ABORTED",
+  "NETWORK_FAILED",
+  "TLS_OR_NETWORK_FAILED",
+  "REDIRECT_REFUSED",
+  "RESPONSE_INVALID",
+  "RESPONSE_TOO_LARGE",
+]);
+/** Deterministic pre-commit refusals that must not be replayed. */
+const DEFINITIVE_REJECTION_CODES = new Set(["STORAGE_WRITE_RESTRICTED"]);
 export class Coordinator {
   sdk: ClientSDK | undefined;
   connection: Connection | null = null;
@@ -39,6 +51,7 @@ export class Coordinator {
     readonly environment: "development" | "integration" | "production",
     identity: IdentityConfig | null,
     private emit: (event: TeacherEvent) => void,
+    private version = "unknown",
   ) {
     this.reader = new CardReader(identity, (event) => this.onCard(event));
   }
@@ -67,7 +80,7 @@ export class Coordinator {
       ...entry,
       logId: randomUUID(),
       atMs: Date.now(),
-      appVersion: "0.1.6",
+      appVersion: this.version,
     });
   }
   async configure(connection: Connection) {
@@ -102,7 +115,7 @@ export class Coordinator {
       pendingOtherOrigins: metrics.pendingCommands - current,
       reader: this.readerState,
       environment: this.environment,
-      version: "0.1.6",
+      version: this.version,
       lastSuccessMs: this.lastSuccessMs,
     };
   }
@@ -117,7 +130,9 @@ export class Coordinator {
       this.lastSuccessMs = Date.now();
       return value;
     } catch (e) {
-      if (!(e instanceof ApiError) || e.status === 401 || e.status >= 500) {
+      // Reachable-server business errors (401/4xx/5xx responses) stay online;
+      // only transport-level failures mean the connection is gone.
+      if (!(e instanceof ApiError) || TRANSPORT_FAILURE_CODES.has(e.code)) {
         this.online = false;
         this.emit({ type: "changed" });
       }
@@ -211,10 +226,11 @@ export class Coordinator {
       } catch (e) {
         if (
           e instanceof ApiError &&
-          e.status >= 400 &&
-          e.status < 500 &&
-          e.status !== 401 &&
-          e.status !== 429
+          ((e.status >= 400 &&
+            e.status < 500 &&
+            e.status !== 401 &&
+            e.status !== 429) ||
+            DEFINITIVE_REJECTION_CODES.has(e.code))
         ) {
           await this.store.write(() =>
             this.store.intents.update(
@@ -265,9 +281,10 @@ export class Coordinator {
         } catch (e) {
           if (
             e instanceof ApiError &&
-            e.status >= 400 &&
-            e.status < 500 &&
-            ![401, 429].includes(e.status)
+            (DEFINITIVE_REJECTION_CODES.has(e.code) ||
+              (e.status >= 400 &&
+                e.status < 500 &&
+                ![401, 429].includes(e.status)))
           ) {
             await this.store.write(() =>
               this.store.intents.update(
@@ -366,7 +383,9 @@ export class Coordinator {
   private async finishLogin(saved: boolean) {
     const sdk = this.requireSdk();
     const recovery = await this.recover();
-    await sdk.call("POST", "/api/v1/clients/startup", { version: "0.1.1" });
+    await sdk.call("POST", "/api/v1/clients/startup", {
+      version: this.version,
+    });
     await this.flush();
     return { saved, recovery };
   }
@@ -467,9 +486,13 @@ export class Coordinator {
         await this.saveLoginSettings(null, false);
         return { ok: true };
       case "logout":
-        await this.sdk?.logout();
-        this.online = false;
-        await this.store.set("autoLogin", "false");
+        try {
+          await this.sdk?.logout();
+        } finally {
+          // Local logout state must not depend on the server acknowledging it.
+          this.online = false;
+          await this.store.set("autoLogin", "false");
+        }
         return { ok: true };
       case "testConnection":
         return this.network(() =>

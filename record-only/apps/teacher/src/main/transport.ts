@@ -62,7 +62,8 @@ export class PinnedTransport implements Transport {
         this.pending.delete(request);
         error ? reject(error) : resolve(result);
       };
-      request.setHeader("content-type", "application/json");
+      if (body !== undefined)
+        request.setHeader("content-type", "application/json");
       if (token) request.setHeader("authorization", `Bearer ${token}`);
       request.on("redirect", () => {
         finish(new ApiError("REDIRECT_REFUSED", 503));

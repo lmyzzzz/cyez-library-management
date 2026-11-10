@@ -148,8 +148,9 @@ export class ProcessReader {
         pending.fill(0);
         settle(false);
         stopPromise = new Promise<void>((resolveStop) => {
-          const force = setTimeout(() => child.kill(), 1500);
-          const bound = setTimeout(resolveStop, 2500);
+          // A valid ACR poll interval can be up to 2s; allow it to finish gracefully.
+          const force = setTimeout(() => child.kill(), 2500);
+          const bound = setTimeout(resolveStop, 3500);
           child.once("close", () => {
             clearTimeout(force);
             clearTimeout(bound);
@@ -160,6 +161,7 @@ export class ProcessReader {
         return stopPromise;
       };
       child.stdin.on("error", fail);
+      child.stdout.on("error", fail);
       child.on("error", fail);
       child.once("close", () => {
         if (!stopping) fail();

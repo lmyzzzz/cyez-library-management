@@ -23,6 +23,11 @@ fn supported_reader(name: &str) -> bool {
     upper.contains("ACR1552") && upper.contains("PICC") && !upper.contains("SAM")
 }
 
+// The teacher schema accepts non-empty names of at most 128 bytes without control characters.
+fn valid_reader_name(name: &str) -> bool {
+    !name.is_empty() && name.len() <= 128 && !name.chars().any(char::is_control)
+}
+
 fn parse_args(args: &[String]) -> Result<Options, ()> {
     if args.len() != 4 || args[0] != "--reader" || args[2] != "--poll-ms" {
         return Err(());
@@ -76,7 +81,7 @@ fn reader_names(context: &Context) -> Result<Vec<String>, Error> {
         .list_readers_owned()?
         .iter()
         .filter_map(|name| name.to_str().ok())
-        .filter(|name| supported_reader(name))
+        .filter(|name| valid_reader_name(name) && supported_reader(name))
         .map(str::to_owned)
         .collect();
     names.sort();
@@ -134,9 +139,11 @@ fn run_reader(context: &Context, options: Options, control: Receiver<bool>) -> R
         if !present(event) {
             scanned = false;
         } else if should_scan(event, scanned, previous_count, count) {
-            scanned = true;
             match read_uid(context, &reader) {
                 Ok(Some(mut uid)) => {
+                    // Consume the presence only after a successful UID read, so
+                    // transient errors retry the same presence on the next poll.
+                    scanned = true;
                     let frame = format!(
                         "{{\"type\":\"scan\",\"uidHex\":\"{:02x}{:02x}{:02x}{:02x}\"}}",
                         uid[0], uid[1], uid[2], uid[3]
@@ -180,10 +187,8 @@ fn run() -> Result<(), ()> {
             Err(Error::NoReadersAvailable) => Vec::new(),
             Err(_) => return Err(()),
         };
-        println!(
-            "{}",
-            serde_json::to_string(&Readers { readers }).map_err(|_| ())?
-        );
+        let output = serde_json::to_string(&Readers { readers }).map_err(|_| ())?;
+        send(&output).map_err(|_| ())?;
         return Ok(());
     }
     let options = parse_args(&args)?;

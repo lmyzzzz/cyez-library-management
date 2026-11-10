@@ -14,7 +14,9 @@ test("集成 Electron 连接 Compose gateway：登记、结束、只读历史", 
   const password = process.env.TEST_TEACHER_PASSWORD;
   if (!username || !password) throw Error("TEST_TEACHER_CREDENTIALS_REQUIRED");
   const cert = new X509Certificate(
-    await readFile(resolve("secrets/server.crt")),
+    await readFile(
+      resolve(process.env.COMPOSE_TLS_CERT ?? "secrets/server.crt"),
+    ),
   );
   const userData = await mkdtemp(join(tmpdir(), "cyez-compose-e2e-"));
   const app = await electron.launch({

@@ -21,6 +21,19 @@ export function lookupQuery(limit: 0 | 2) {
   return `SELECT TOP (${limit}) [卡号] AS [card], [姓名] AS [name], [班级] AS [className] FROM ${view} WHERE [卡号] = @uid`;
 }
 
+/** The [卡号] column may be a character or a numeric type; mssql returns a
+ * number for the latter. Normalize to text and compare case-insensitively so a
+ * numeric column does not masquerade as a profile mismatch. */
+export function cardMatches(value: unknown, uid: string) {
+  const card =
+    typeof value === "string"
+      ? value
+      : typeof value === "number" && Number.isFinite(value)
+        ? String(value)
+        : undefined;
+  return card !== undefined && card.toLowerCase() === uid.toLowerCase();
+}
+
 export class SqlServerCampusProvider implements CampusProvider {
   constructor(
     private readonly config: SqlServerProviderConfig,
@@ -86,7 +99,7 @@ export class SqlServerCampusProvider implements CampusProvider {
       if (rows.length === 0) throw new ApiError("STUDENT_NOT_ALLOWED", 403);
       if (rows.length !== 1) throw new ApiError("PROFILE_MISMATCH", 422);
       const row = rows[0];
-      if (typeof row.card !== "string" || row.card.toLowerCase() !== uid)
+      if (!cardMatches(row.card, uid))
         throw new ApiError("PROFILE_MISMATCH", 422);
       const value = profileSchema.safeParse({
         name: row.name,

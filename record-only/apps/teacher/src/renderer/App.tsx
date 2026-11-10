@@ -110,6 +110,9 @@ export function App() {
     [tags, setTags] = useState<TagDTO[]>([]),
     [page, setPage] = useState(1),
     [state, setState] = useState<"active" | "free" | "all">("active"),
+    [settingsState, setSettingsState] = useState<"active" | "free" | "all">(
+      "all",
+    ),
     [search, setSearch] = useState(""),
     [tagId, setTagId] = useState(""),
     [tab, setTab] = useState("connection"),
@@ -124,6 +127,9 @@ export function App() {
     [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const polling = useRef(false),
     delay = useRef(3000);
+  const cancelPreview = (previewId: string) => {
+    void window.library.call("cancelPreview", { previewId }).catch(() => {});
+  };
   const refreshStatus = useCallback(async () => {
     setStatus(await window.library.call<LocalStatus>("status", {}));
   }, []);
@@ -168,7 +174,7 @@ export function App() {
           }>("devices", {
             page,
             pageSize: 30,
-            state: settings ? "all" : state,
+            state: settings ? settingsState : state,
             search,
             tagId: tagId || undefined,
           }),
@@ -189,13 +195,13 @@ export function App() {
       } catch (e) {
         setError(e);
         delay.current = Math.min(30000, delay.current * 2);
-        await refreshStatus();
+        await refreshStatus().catch(() => {});
       } finally {
         polling.current = false;
         if (!background) setLoading(false);
       }
     },
-    [page, state, search, tagId, settings],
+    [page, state, settingsState, search, tagId, settings],
   );
   useEffect(() => {
     let stopped = false;
@@ -203,11 +209,16 @@ export function App() {
     let initial = true;
     const poll = async () => {
       if (stopped) return;
-      if (!document.hidden && !flow && (!settings || tab === "devices"))
-        await load(!initial);
-      else await refreshStatus().catch(() => {});
-      initial = false;
-      if (!stopped) timer = setTimeout(poll, delay.current);
+      try {
+        if (!document.hidden && !flow && (!settings || tab === "devices"))
+          await load(!initial);
+        else await refreshStatus();
+      } catch {
+        // A single failed refresh must never stop the auto-refresh loop.
+      } finally {
+        initial = false;
+        if (!stopped) timer = setTimeout(poll, delay.current);
+      }
     };
     void poll();
     const visible = () => {
@@ -232,7 +243,7 @@ export function App() {
           const message = errorText(event.code);
           setNotice(message);
           toast.error(message);
-        } else void refreshStatus();
+        } else void refreshStatus().catch(() => {});
       }),
     [],
   );
@@ -246,23 +257,29 @@ export function App() {
   useEffect(() => {
     setSelected([]);
     setPage(1);
-  }, [settings, state, search, tagId]);
+  }, [settings, state, settingsState, search, tagId]);
+  useEffect(() => {
+    // Auth loss invalidates every piece of business data on screen. Skip the
+    // initial null status so a first status load does not clear settled data.
+    if (status === null || status.authenticated) return;
+    setDevices({ items: [], total: 0, page: 1, pageSize: 30 });
+    setTags([]);
+    setCounts({ active: null, free: null });
+    setService(null);
+    setFlow(null);
+    setSelected([]);
+  }, [status?.authenticated]);
   useEffect(() => {
     if (settings && flow) {
       const id = flow.id;
       setFlow(null);
-      void window.library
-        .call("cancelPreview", { previewId: id })
-        .catch(() => {});
+      cancelPreview(id);
     }
   }, [settings]);
   const closeFlow = () => {
     const id = flow?.id;
     setFlow(null);
-    if (id)
-      void window.library
-        .call("cancelPreview", { previewId: id })
-        .catch(() => {});
+    if (id) cancelPreview(id);
   };
   const done = () => {
     setFlow(null);
@@ -270,6 +287,14 @@ export function App() {
     setSelected([]);
     toast.success("操作已完成");
     void load();
+  };
+  const closeModal = () => {
+    // User-initiated close must revoke server-side previews; the success path
+    // (`done`) already consumed them and must not cancel.
+    if (modal?.kind === "end") cancelPreview(modal.preview.id);
+    else if (modal?.kind === "batch")
+      for (const unit of modal.preview.units) cancelPreview(unit.id);
+    setModal(null);
   };
   const canWrite =
     !!status?.authenticated &&
@@ -402,6 +427,31 @@ export function App() {
               size="small"
               variant={state === "free" ? "primary" : "ghost"}
               onClick={() => setState("free")}
+            >
+              未使用
+            </Button>
+          </div>
+        )}
+        {settings && (
+          <div className="tabs" role="group" aria-label="设备状态筛选">
+            <Button
+              size="small"
+              variant={settingsState === "all" ? "primary" : "ghost"}
+              onClick={() => setSettingsState("all")}
+            >
+              全部
+            </Button>
+            <Button
+              size="small"
+              variant={settingsState === "active" ? "primary" : "ghost"}
+              onClick={() => setSettingsState("active")}
+            >
+              使用中
+            </Button>
+            <Button
+              size="small"
+              variant={settingsState === "free" ? "primary" : "ghost"}
+              onClick={() => setSettingsState("free")}
             >
               未使用
             </Button>
@@ -1063,7 +1113,7 @@ export function App() {
                 width={modal.kind === "batch" ? "large" : "medium"}
                 onClose={() => {
                   if (!busy) {
-                    setModal(null);
+                    closeModal();
                     void load();
                   }
                 }}
@@ -1074,7 +1124,7 @@ export function App() {
                     automatic={false}
                     onBusy={setBusy}
                     onDone={done}
-                    onCancel={() => setModal(null)}
+                    onCancel={closeModal}
                   />
                 )}
                 {modal.kind === "batch" && (
@@ -1083,7 +1133,7 @@ export function App() {
                     onBusy={setBusy}
                     onDone={done}
                     onCancel={() => {
-                      setModal(null);
+                      closeModal();
                       void load();
                     }}
                   />

@@ -12,6 +12,27 @@ import { Spool, Capacity, ingestLogs, type StorageProbe } from "./storage.js";
 import { loadProvider, type CampusProvider } from "./provider.js";
 import { ProviderSettings, type ProviderFactory } from "./provider-settings.js";
 import type { Context } from "./previews.js";
+/** Maps an error to the only safe wire response. Known ApiErrors keep their
+ * status/code; Fastify-level 413/429 stay explicit; every other unknown client
+ * error is reported as 422 INPUT_INVALID and only 5xx/unknown failures become
+ * 503 SERVICE_UNAVAILABLE. Request/body/ORM details are never serialized. */
+export function errorResponse(error: unknown): {
+  status: number;
+  code: string;
+} {
+  if (error instanceof P.ApiError)
+    return { status: error.status, code: error.code };
+  const statusCode = (error as { statusCode?: unknown } | null)?.statusCode;
+  const status =
+    typeof statusCode === "number" && Number.isInteger(statusCode)
+      ? statusCode
+      : undefined;
+  if (status === 413) return { status: 413, code: "BODY_TOO_LARGE" };
+  if (status === 429) return { status: 429, code: "RATE_LIMITED" };
+  if (status !== undefined && status >= 400 && status < 500)
+    return { status: 422, code: "INPUT_INVALID" };
+  return { status: 503, code: "SERVICE_UNAVAILABLE" };
+}
 export async function createApp(
   config: Config,
   options: {
@@ -58,6 +79,10 @@ export async function createApp(
   if (providerSettings) service.providerHealthy = providerSettings.configured;
   const app = Fastify({
     logger: false,
+    // Only nginx is exposed; it overwrites X-Forwarded-For with the real client
+    // address. Trusting the proxy makes per-route rate limits key on the client
+    // instead of the gateway. Never log forwarding headers (or any request body).
+    trustProxy: true,
     bodyLimit: 65536,
     requestTimeout: 15000,
     connectionTimeout: 10000,
@@ -78,26 +103,11 @@ export async function createApp(
     )
       ctx(request);
   });
-  app.setErrorHandler(async (error, request, reply) => {
-    const known = error instanceof P.ApiError;
-    const statusCode = (error as { statusCode?: number }).statusCode;
-    const status = known
-      ? error.status
-      : statusCode === 413
-        ? 413
-        : statusCode === 429
-          ? 429
-          : 503;
+  app.setErrorHandler(async (error, _request, reply) => {
     // Never serialize upstream, ORM, AJV or request objects (they may include card input).
-    const code = known
-      ? error.code
-      : status === 413
-        ? "BODY_TOO_LARGE"
-        : status === 429
-          ? "RATE_LIMITED"
-          : "SERVICE_UNAVAILABLE";
+    const { status, code } = errorResponse(error);
     const providerFailure =
-      known &&
+      error instanceof P.ApiError &&
       (code === "PROVIDER_CONFIGURATION_INVALID" ||
         code === "PROVIDER_CONFIGURATION_SAVE_FAILED");
     if (status >= 500 || providerFailure)

@@ -92,7 +92,7 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 | `usage_records` | UUID PK、student_id STRING(64) FK → students.id、device_id UUID FK、started_at、ended_at nullable、notes、end_reason、version、clientId 与写入时间 | 学生 FK 与哈希 PK 同型；活动=`ended_at` 为空；学生/设备活动字段各设条件唯一索引；已结束历史只读 |
 | `operations` | `(client_id,request_id)` 唯一、可空唯一 intent_id、路由+payload 摘要、持久结果与时间 | 跨会话重登也能查询本机提交；同键异 payload 拒绝；preview/batchUnit 成功消费一次 |
 | `audit_events` | event_id、共享账号标识/clientId、记录/设备 ID、必要时 student_id STRING(64) FK、requestId/scanId、动作/时间/字段名 | 与业务/资料更新同事务；只服务端受限保存，可关联哈希学生 ID；无原卡号/完整资料，无教师审计查询接口 |
-| `app_logs` | source+logId 唯一、来源/级别/时间/版本/requestId/scanId/recordId/脱敏消息 | 全部来源集中归集；无原 UID/studentId/密码/provider 完整响应；关联学生时内部通过记录或审计查询，无教师全库日志浏览接口 |
+| `app_logs` | source+logId 唯一、来源/级别/时间/版本、固定 code、可选 requestId/scanId/recordId；不存自由文本 | 全部来源集中归集为固定事件；不保存自由文本消息/错误正文；无原 UID/studentId/密码/provider 完整响应；关联学生时内部通过记录或审计查询，无教师全库日志浏览接口 |
 
 卡号与学生分离为临时输入和持久档案两个模型，**本版不建原卡号/卡凭证持久表**；不再需要卡密钥轮换映射表、账号角色表或机房 ACL 表。Sequelize 对学生 PK/FK 统一声明 `DataTypes.STRING(64)`，schema/模型验证小写 hex，数据库 FK 与唯一约束兜底，不为学生生成 UUID。固定盐/hashVersion 属于协议配置，**运行中不得随意改盐**；换盐/版本/卡会改变主键，不能由旧 hash 重算新 hash。NEXT-01 如需实施，须以受控原始输入建立新旧 ID 映射，并事务性迁移历史外键、审计关联及相关持久结果，验证无孤儿和重复活动记录；首版不提供自动迁移，不能只改盐/插入新档案冒充历史迁移。
 
@@ -141,6 +141,6 @@ provider 适配器按 TBD-02 将规范 UID 无损转为供应方要求的卡号�
 
 ## 日志与故障
 
-教师 main/renderer/reader/SDK/安装日志全部在生成时脱敏、本地持久排队，认证恢复后上传，持久 ACK 前不回收。服务端/gateway/DB 日志先 spool 后内部归集；配置 ORM/gateway/SDK 禁止输出绑定参数、刷卡/登录 body、原卡号、studentId、密码、token、完整请求 URL 或 provider 响应。错误/校验失败不能 stringify 整个请求。应用日志用 requestId/scanId/recordId 关联；数据库内部审计可按上表保留必要 student_id FK，这是受限业务关联，不复制到 app_logs 或教师诊断。全部日志集中上传不等于采集秘密正文。教师诊断只显示本机连接/读卡/版本/待传数量等业务必要状态，不提供服务器系统日志、数据库凭证或原始表访问。
+教师 main/renderer/reader/SDK/安装日志全部在生成时脱敏、本地持久排队，认证恢复后上传，持久 ACK 前不回收。服务端/gateway/DB 日志先 spool 后内部归集；配置 ORM/gateway/SDK 禁止输出绑定参数、刷卡/登录 body、原卡号、studentId、密码、token、完整请求 URL 或 provider 响应。错误/校验失败不能 stringify 整个请求。应用日志用 requestId/scanId/recordId 关联；数据库内部审计可按上表保留必要 student_id FK，这是受限业务关联，不复制到 app_logs 或教师诊断。当前 `app_logs` 只落固定 `code`/`level`/来源/时间/版本和可选关联 ID，不落自由文本消息、错误正文或脱敏后的原文；gateway/DB 文件内容按行生成固定事件，不进入数据库。因此 `app_logs` 适合关联与计数，不能用于阅读错误详情。全部日志集中上传不等于采集秘密正文。教师诊断只显示本机连接/读卡/版本/待传数量等业务必要状态，不提供服务器系统日志、数据库凭证或原始表访问。
 
 所有来源稳定 logId 去重，日志接收不递归生成同类日志；无法保存业务审计则拒绝业务写入。本版故障不控制或关闭学生电脑。应用无备份/导出功能；运维确有需要时在产品外手工操作数据库。日志容量水位、存储失败、断线恢复及实施顺序见[实施计划](implementation-plan.md)；完整验收见[两端测试设计](testing.md)。

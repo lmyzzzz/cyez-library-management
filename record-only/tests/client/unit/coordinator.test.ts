@@ -297,6 +297,156 @@ describe("C-U main 协调器", () => {
     );
   });
 
+  it("仅传输层失败才离线，业务 4xx/5xx 响应保持在线", async () => {
+    await login();
+    expect(coordinator.online).toBe(true);
+    const initial = response;
+    response = () => Promise.reject(new ApiError("PROVIDER_UNAVAILABLE", 503));
+    await expect(
+      coordinator.call("history", { page: 1, pageSize: 30 }),
+    ).rejects.toThrow("PROVIDER_UNAVAILABLE");
+    expect(coordinator.online).toBe(true);
+    response = () => Promise.reject(new ApiError("AUTH_REQUIRED", 401));
+    await expect(coordinator.call("testConnection", {})).rejects.toThrow(
+      "AUTH_REQUIRED",
+    );
+    expect(coordinator.online).toBe(true);
+    response = () =>
+      Promise.reject(new ApiError("RECORD_VERSION_CONFLICT", 409));
+    await expect(coordinator.call("tags", {})).rejects.toThrow(
+      "RECORD_VERSION_CONFLICT",
+    );
+    expect(coordinator.online).toBe(true);
+    response = () => Promise.reject(new ApiError("TLS_OR_NETWORK_FAILED", 503));
+    await expect(coordinator.call("testConnection", {})).rejects.toThrow(
+      "TLS_OR_NETWORK_FAILED",
+    );
+    expect(coordinator.online).toBe(false);
+    response = initial;
+  });
+
+  it("确定性预提交 503 立即拒绝，模糊 503 保持待恢复", async () => {
+    await login();
+    const initial = response;
+    response = (method, path, body) =>
+      method === "POST" && path === "/api/v1/devices"
+        ? Promise.reject(new ApiError("STORAGE_WRITE_RESTRICTED", 503))
+        : initial(method, path, body);
+    await expect(
+      coordinator.command("POST", "/api/v1/devices", { code: "RESTRICTED" }),
+    ).rejects.toThrow("STORAGE_WRITE_RESTRICTED");
+    expect(coordinator.online).toBe(true);
+    expect(await store.pending("https://127.0.0.1:8443")).toHaveLength(0);
+    expect(await store.intents.count({ where: { state: "rejected" } })).toBe(1);
+    response = (method, path, body) =>
+      method === "POST" && path === "/api/v1/devices"
+        ? Promise.reject(new ApiError("SERVICE_UNAVAILABLE", 503))
+        : initial(method, path, body);
+    await expect(
+      coordinator.command("POST", "/api/v1/devices", { code: "AMBIGUOUS" }),
+    ).rejects.toThrow("COMMAND_PENDING");
+    expect(await store.pending("https://127.0.0.1:8443")).toHaveLength(1);
+    response = initial;
+  });
+
+  it("REQUEST_FAILED 是可达服务器的响应错误，保持在线", async () => {
+    await login();
+    const initial = response;
+    response = () => Promise.reject(new ApiError("REQUEST_FAILED", 500));
+    await expect(coordinator.call("testConnection", {})).rejects.toThrow(
+      "REQUEST_FAILED",
+    );
+    expect(coordinator.online).toBe(true);
+    response = initial;
+  });
+
+  it("恢复时确定性预提交 503 落 rejected 并清空待恢复意图", async () => {
+    await login();
+    const requestId = randomUUID();
+    await store.saveIntent({
+      requestId,
+      origin: "https://127.0.0.1:8443",
+      method: "POST",
+      path: "/api/v1/devices",
+      body: { requestId, code: "RESTRICTED" },
+      createdAt: Date.now(),
+      state: "pending",
+    });
+    const initial = response;
+    response = (method, path, body) =>
+      path.startsWith("/api/v1/operations/")
+        ? Promise.reject(new ApiError("NOT_FOUND", 404))
+        : method === "POST" && path === "/api/v1/devices"
+          ? Promise.reject(new ApiError("STORAGE_WRITE_RESTRICTED", 503))
+          : initial(method, path, body);
+    expect(await coordinator.recover()).toEqual({
+      outcomes: [
+        { requestId, state: "rejected", code: "STORAGE_WRITE_RESTRICTED" },
+      ],
+    });
+    expect(await store.pending("https://127.0.0.1:8443")).toHaveLength(0);
+    expect(
+      await store.intents.count({ where: { requestId, state: "rejected" } }),
+    ).toBe(1);
+    response = initial;
+  });
+
+  it("服务端登出失败仍清除本地在线、令牌与自动登录", async () => {
+    await coordinator.call("configure", {
+      ip: "127.0.0.1",
+      port: 8443,
+      pin: "ab".repeat(32),
+    });
+    await coordinator.call("login", {
+      username: "teacher",
+      password: "secret",
+      remember: true,
+      autoLogin: true,
+    });
+    expect((await coordinator.status()).authenticated).toBe(true);
+    expect(await store.get("autoLogin")).toBe("true");
+    response = (method, path) =>
+      path === "/api/v1/auth/logout"
+        ? Promise.reject(new ApiError("NETWORK_TIMEOUT", 503))
+        : Promise.resolve({});
+    await expect(coordinator.call("logout", {})).rejects.toThrow(
+      "NETWORK_TIMEOUT",
+    );
+    expect(coordinator.online).toBe(false);
+    expect(coordinator.sdk?.authenticated).toBe(false);
+    expect(await store.get("autoLogin")).toBe("false");
+    expect((await coordinator.status()).authenticated).toBe(false);
+  });
+
+  it("版本由构造参数注入状态、日志与启动上报", async () => {
+    const versioned = new Coordinator(
+      store,
+      coordinator.clientId,
+      "integration",
+      identity,
+      (e) => events.push(e),
+      "9.9.9",
+    );
+    await versioned.call("configure", {
+      ip: "127.0.0.1",
+      port: 8443,
+      pin: "ab".repeat(32),
+    });
+    await versioned.call("login", {
+      username: "teacher",
+      password: "secret",
+      remember: false,
+    });
+    expect((await versioned.status()).version).toBe("9.9.9");
+    expect(
+      traffic.find((t) => t.path === "/api/v1/clients/startup")?.body,
+    ).toEqual({ version: "9.9.9" });
+    await versioned.init();
+    expect(
+      (await store.logBatch()).some((log) => log.appVersion === "9.9.9"),
+    ).toBe(true);
+  });
+
   it("IPC 白名单、只读查询、测试接口和登录来源隔离", async () => {
     await login();
     await expect(coordinator.call("unsupported" as never, {})).rejects.toThrow(
