@@ -1,5 +1,23 @@
 # 产品验证报告
 
+## 2026-11-10 全链路集成测试补充
+
+新增 Docker 全链路集成测试（`tests/full-chain/`、`scripts/full-chain.ts` 与 `full-chain` CI 作业，场景矩阵见[测试设计](testing.md#全链路集成测试docker)）。测试只新增/替换测试文件，未修改产品代码：真实 Nginx gateway/API/PostgreSQL/log-ingest、真实 TLS 与叶证书 pin、真实 Electron 集成构建和测试 campus provider 一起运行；原手工启动 Compose 堆栈的 `tests/client/integration/compose.test.ts` 已由自动化全链路套件取代并删除。每次运行使用独立项目名、命名卷前缀、端口、镜像标签与 secrets，默认结束后删除。另提供不依赖 Docker 的本地预检（真实 PostgreSQL + 真实 nginx + 本地 API/log-ingest，容器网络与端口隔离用例显式跳过），用于没有 Docker Engine 的开发环境。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| 类型与格式 | `corepack yarn typecheck` 通过；新增文件 `prettier --check` 通过。当前工作区为 Windows CRLF 检出，仓库级 `format:check` 对既有文件报行尾差异；对 HEAD 内容复验 Prettier 通过 |
+| harness 单元 | `corepack yarn test:unit:full-chain` 6 项通过：Compose JSON 两种格式、命令/项目名/env-file 参数、失败诊断、Docker/Compose 可用性提示、隔离 env/secrets/端口/镜像标签、连接文件校验与口令脱敏、等待器超时 |
+| 本地全链路（无 Docker）服务端 | 真实 PostgreSQL 15 + 真实 `deploy/nginx.conf` + 真实 API/log-ingest：28 项通过、3 项容器隔离用例跳过（宿主机发布端口、网络成员、只读/cap/无 Docker socket，仅 Docker 模式执行）。覆盖空缓存首次刷卡、拒绝/故障、设备与标签、登记/结束/只读历史、双客户端并发、批量结束、API 重启幂等、共享改密、DB 停机恢复、down/up 持久性、api/gateway/db 日志归集去重、原始卡号不落库 |
+| 本地全链路 Electron | 真实 Electron 44 → TLS gateway → API → PostgreSQL：4 项通过。覆盖空缓存首刷与只读历史、重复刷卡刷新后历史显示最新资料、未授权卡不建缓存、两个教师端共享账号跨端结束、API 重启后重新认证且历史保留 |
+| 组合链路 | `--suite=all` 一次运行：Electron 4 项、服务端 28 项通过、3 项按模式跳过；结束后本地数据库与进程清理完成 |
+| Compose 配置 | 使用独立 Compose v2.29.7 对 `compose.yaml + tests/full-chain/compose.full-chain.yaml` 执行 `config`：5 个服务、3 个独立镜像标签、secrets 绝对路径位于 `runtime/full-chain/<runId>/secrets`、测试 provider 只读挂载 `/full-chain-adapters`，解析通过 |
+| 既有测试回归 | 服务端单元 19 项通过；客户端单元 61 项通过、3 项失败均为 Linux 上缺少 Windows `cyez-reader-mock.exe` 的读卡子进程用例（Windows 作业覆盖，非本次改动）；类型检查通过 |
+| 本地模式复跑 | 合并运行共执行 3 次：2 次全部通过；1 次在 API 重启相关文件之后出现 1 次不可复现的 `editNotes` 503（读取到服务重启窗口）。随后加固本地 API 重启的端口释放/进程存活检查，复跑通过；Docker 模式的 `compose restart`/`--force-recreate` 另有容器生命周期语义，仍需实跑确认 |
+| Docker 实跑 | **本机沙箱没有 Docker Engine，未执行镜像构建与 Compose 启动**。Docker 全链路需在 Windows Docker Desktop（或 WSL Docker Engine，设置 `CYEZ_DOCKER_WSL=1`）执行 `corepack yarn test:full-chain`，结果另行记录 |
+
+已确认不涉及生产代码、生产 Compose、`.env.integration`、`secrets/` 或学校数据；测试 provider、自签证书和测试卡只存在于 `tests/full-chain/` 与一次性的 Compose overlay 中。Docker 模式的容器网络/端口/只读边界和失败诊断仍需目标机器实跑确认；在拿到结果前不把本地预检计为 Docker 验收通过。
+
 ## 2026-11-10 全部分支审查与合并
 
 同步远端后，本地分支仅 `main`，远端分支为 `main` 与 `dev/ui`。`dev/ui` 唯一未合入的提交是 `260f6d7`，仅为 domain/client-sdk 构建配置增加协议声明文件映射。审查确认协议包先构建、两个包当前只导入协议主入口、映射不改变运行时导入；没有发现阻塞合并的业务问题。Windows 检出造成的两处 CRLF/Prettier 差异已本地规范化为 LF。保留主分支 `07a6f46` 的新版 UI 集成定位修正，并将此前校园配置权限修复单独提交为 `be2da4f`，随后合并 `dev/ui`。原有根目录文档删除及未跟踪材料不纳入本次提交。

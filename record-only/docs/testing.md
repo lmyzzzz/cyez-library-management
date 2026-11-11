@@ -21,6 +21,7 @@
 | C-U 客户端单元/组件 | CardReader 立即 hash、页面门控、空闲/自动确认计时、设备/历史/设置组件、pin 输入规范化 | Vitest + Testing Library，fake reader/clock/network |
 | C-I 客户端集成 | **真实 Electron** main/preload/renderer，实际 SQLite、临时 userData、OS 保存、真实 HTTPS/pin | Windows + 固定 Playwright Electron（实验性），FakeCardReader，可控 HTTPS 服务和测试证书 |
 | E2E | 打包教师应用 + Docker gateway/API/PG + FakeProvider，空学生缓存 | 真实请求/持久层；包含首次刷卡建缓存、API 明确拒绝、重复刷卡刷新、只读历史、改密与设备编辑 |
+| F-E2E 全链路集成 | Docker Compose gateway/API/PostgreSQL/log-ingest + 真实 Electron 集成构建 + 测试校园 provider + 真实 TLS | Docker Engine + Compose v2；`corepack yarn test:full-chain`；Windows Docker Desktop、WSL Docker Engine 或 Linux CI |
 | 实机 | USB、驱动、签名、安装升级、多 DPI/键盘/屏幕阅读器、Linux/TLS | TBD-02/03/04/06 闭合后验收，mock 不能代替 |
 
 测试和种子工具也通过 ORM/迁移 API 操作数据库，不用手写 SQL 绕开应用约束。客户端 SQLite 使用 ORM/结构化库 API；服务端集成不能用 SQLite 代替 PG，客户端集成不能只用 jsdom。证书 pin 测试必须使用实际 TLS 握手，单纯 mock fetch 无法证明凭证发送前已校验证书。
@@ -81,13 +82,58 @@
 
 2026-11-06 增补：内置 Rust 串口进程使用 `serialport` 打开所选端口，不由 Node 解析硬件输入。Linux `cargo test -p cyez-reader-serial --locked` 的伪终端测试执行实际进程读写；Windows Rust 单测和发布构建检查参数校验、打包资源。客户端组件/Electron 检查配置整份覆盖、生产手动输入、失败恢复、加密凭证自动登录与表单无回填。
 
+## 全链路集成测试（Docker）
+
+2026-11-10 新增。`record-only/tests/full-chain/` 与 `corepack yarn test:full-chain` 在 Docker Engine 上构建并运行一次性的完整链路：真实 Nginx 网关（`deploy/nginx.conf`、真实 TLS 与叶证书 pin）、真实 Fastify API、真实 PostgreSQL（ORM 迁移与受限运行角色）、真实 log-ingest 和真实 Electron 集成构建。每次运行生成独立的 Compose 项目名、命名卷前缀、宿主端口、镜像标签与 secrets，位于 `runtime/full-chain/<runId>/`，不读取或覆盖 `.env.integration`、`secrets/` 与既有集成卷；默认结束后 `docker compose down -v`。
+
+测试校园 provider 只在 `tests/full-chain/fixtures/provider.mjs`，由 `tests/full-chain/compose.full-chain.yaml` 只读挂载进 API；生产 `compose.yaml` 不引用该 overlay，`.dockerignore` 排除 `tests/`。provider 按 UID 区分成功/明确拒绝/故障，成功时每次查询返回递增计数，用于验证“每次有效刷卡都查询并覆盖缓存”。测试服务端以 `APP_ENV=integration` 与 `PROVIDER_MODE=module` 运行，不能用于生产。
+
+| ID | 场景 | 关键断言 |
+| --- | --- | --- |
+| F-E2E-01 | TLS、证书 pin 与就绪 | 真实 TLS 1.2/1.3；错误 pin/非本次证书在握手阶段拒绝；明文 HTTP 拒绝；`/health/live` 与 `/health/ready` 200 |
+| F-E2E-02 | 网关白名单与限制 | 非白名单路径 404、未认证 401、超 64KB 登录正文 413；访问日志只含 status/elapsed，不含 URL、正文或口令 |
+| F-E2E-03 | Compose 部署隔离 | 仅 gateway 发布宿主端口；db 仅 backend、gateway 仅 frontend、api frontend+backend+egress、log-ingest 仅 backend；只读根文件系统、cap_drop ALL、no-new-privileges、无 Docker socket、无 host 网络 |
+| F-E2E-04 | 空缓存首次刷卡与刷新 | provider 成功查询建立学生缓存；同一 scanId 幂等；新刷卡再次查询并覆盖，版本递增；响应不含原始卡号 |
+| F-E2E-05 | 拒绝与故障语义 | 明确拒绝 403 不建缓存；provider 故障 503 不覆盖旧缓存、不放行预览；活动记录仍可手动结束；恢复后重新查询成功 |
+| F-E2E-06 | 设备、标签与占用 | 版本冲突、重复编号、TAG_NOT_FOUND、占用中删除 409、软删除保留历史快照 |
+| F-E2E-07 | 登记到只读历史 | 扫描→登记→备注版本→结束（manual）→历史只读；结束后改备注或再次结束 409；不存在历史修改/删除端点 |
+| F-E2E-08 | 双客户端并发 | 同一学生或同一设备并发 start 只产生一条活动记录，另一请求 409 |
+| F-E2E-09 | 批量结束 | selected 固定集合、结束原因 batch、追加批量备注、重复确认按 requestId 幂等；混入已结束记录整批回滚 |
+| F-E2E-10 | 幂等与 API 重启 | 重启后旧 token 401；同 clientId/requestId 查询原结果且不重复执行；同 requestId 不同载荷 409 REQUEST_ID_REUSED |
+| F-E2E-11 | 共享口令变更 | 改 env 后重建 api 与 gateway；旧口令/旧 token 失效；新口令登录、历史与原操作结果保留；随后恢复原口令 |
+| F-E2E-12 | DB 停机与恢复 | DB 停止时 `/health/ready` 503、live 200、只读与手动结束可用；恢复后数据/缓存保留、新写入可用、log-ingest 未崩溃 |
+| F-E2E-13 | 日志归集与去重 | api、gateway、db 三类来源进入 `app_logs`；停止 ingest 时 spool 保留；重启或游标重放不重复；客户端日志按 logId 去重；拒绝伪服务端来源；原始卡号不落库、不落 spool 与日志 |
+| F-E2E-14 | 卷持久性 | `down` 不删卷再 `up`：历史、学生缓存、日志保留，命名卷仍存在；旧 token 失效 |
+| F-E2E-15 | Electron 全链路 | 真实 Electron → gateway → API → PG：空缓存首刷、登记/结束/只读历史；重复刷卡刷新后历史显示最新资料；未授权卡不建缓存；两教师端共享账号可跨端结束；API 重启后重新认证且历史保留 |
+| F-E2E-16 | 迁移与身份 | Sequelize 与角色迁移记录齐全；identity 指纹一致；运行角色无 audit SELECT、有 students INSERT 与 app_logs SELECT |
+
+### 运行方式
+
+Windows 使用 Docker Desktop，在 `record-only/` 的 PowerShell 中首次执行：
+
+```powershell
+corepack yarn install --immutable
+corepack yarn build:shared
+corepack yarn build:server
+corepack yarn build:readers
+corepack yarn build:client:integration
+corepack yarn test:full-chain
+```
+
+- 服务端链路可单独运行：`corepack yarn test:full-chain:server`（不需要 Rust 或 Electron）。
+- 仅运行 Electron 全链路：`corepack yarn test:full-chain:client`。
+- 常用开关：`--skip-build` 复用已构建镜像；`--reuse` 复用 `runtime/full-chain/connection.json` 指向的正在运行的堆栈；`--keep` 在测试后保留堆栈便于排查；`--suite=none --keep` 只准备堆栈；`--down` 清理保留的堆栈与命名卷；`--port=<端口>` 指定 gateway 宿主端口。
+- 失败时会把 `docker compose ps`、容器 inspect 与 `docker compose logs` 写入 `test-results/full-chain/<runId>/`；成功或失败默认都清理容器与命名卷，只有 `--keep` 保留。
+- 只有 WSL 内的 Docker Engine 且没有 Docker Desktop CLI 时，设置 `CYEZ_DOCKER_WSL=1`；脚本以 `wsl.exe -u root --exec docker` 执行，并用 `wslpath` 转换 bind mount 路径。
+- 另有不依赖 Docker 的本地预检（需要本机 PostgreSQL 管理员账号与 nginx）：`FULL_CHAIN_ADMIN_URL=... corepack yarn test:full-chain:local --suite=server`；设置 `FULL_CHAIN_PG_CLUSTER=15/main` 才会运行 DB 停机用例，无显示环境运行 Electron 需 `xvfb-run`。本地模式跳过容器网络/端口/只读边界用例，不能替代 Docker 全链路验收。
+
 ## 联调与门禁
 
 Electron 测试的 HTTPS 服务器通过 `tests/helpers/electron-server.ts` 在 49152–65535 范围内随机绑定，端口占用时有限次重选。不能依赖 `listen(0)`：自定义 Windows 动态端口范围可能分配 Chromium 禁止的端口（如 6000），造成 `net::ERR_UNSAFE_PORT`，甚至使证书拒绝用例错误通过。正式包与开发版 Electron 套件应依次执行，避免多个桌面窗口争抢焦点；不放宽产品的网络或证书校验策略。
 
 完整联调从**空学生缓存**开始：刷卡从 API 建缓存 → 选设备 → 开始 → 再刷卡覆盖缓存 → 结束 → 设置内查历史；另测 API 明确拒绝、外部故障转手动结束、标签跨区域设备、全系统批量、设备编辑/删除、10 秒空闲、共享改密、pin 错误、应用/DB 重启和日志补传。
 
-CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、Windows Rust fmt/test/release build、真实 Electron 集成，然后构建 Docker/客户端包并联调。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。
+CI 依次执行文档/图源校验、不可变 Yarn 安装、类型/格式、服务端与客户端独立单元报告，Linux 真实 PG 集成、harness 单元测试、Windows Rust fmt/test/release build、真实 Electron 集成，然后构建 Docker/客户端包；独立的 `full-chain` 作业在 ubuntu-latest 上用 Xvfb 运行 Docker 全链路两套测试并上传 `full-chain-results` 制品。临时项目/数据库/userData 名称唯一，不指向生产；产出 coverage、失败截图/trace、版本和镜像 digest，测试材料不得含真实个人资料。
 
 根 Yarn 调度脚本 `test:unit:server/client` 与 `test:integration:server/client` 已创建并运行；实际结果见[测试报告](verification-report.md)。两端分别 lines/statements/functions ≥85%、branches ≥80%；身份/占用/幂等/pin/计时/资料刷新/备注关键模块 branches ≥90%。阈值为项目门禁；生成代码和第三方库明确排除，不能排除失败路径凑覆盖率。
 

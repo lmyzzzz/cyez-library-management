@@ -1,0 +1,28 @@
+# Full-chain test overlay. Used only by scripts/full-chain.ts through
+#   docker compose -f compose.yaml -f tests/full-chain/compose.full-chain.yaml
+# Never reference this file from a deployment. It:
+#   - keeps test secrets out of ./secrets (absolute host path from the env file),
+#   - mounts the deterministic test campus provider read-only,
+#   - never changes production defaults in compose.yaml.
+services:
+  api:
+    environment:
+      PROVIDER_MODULE: /full-chain-adapters/provider.mjs
+    volumes:
+      - ${FULL_CHAIN_FIXTURES_DIR:?Set FULL_CHAIN_FIXTURES_DIR}:/full-chain-adapters:ro
+
+secrets:
+  db_password:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/db-password
+  migration_database_url:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/migration-database-url
+  runtime_database_url:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/runtime-database-url
+  provider_credential:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/provider-credential
+  provider_config_key:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/provider-config-key
+  tls_cert:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/server.crt
+  tls_key:
+    file: ${FULL_CHAIN_SECRETS_DIR:?Set FULL_CHAIN_SECRETS_DIR}/server.key
