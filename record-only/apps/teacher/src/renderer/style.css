@@ -2124,3 +2124,118 @@ input[type="checkbox"] {
     transition: none !important;
   }
 }
+
+/* 批量添加设备 */
+.bulk-import {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bulk-import-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.bulk-import-hint code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font-size: 11px;
+}
+
+.bulk-import-json {
+  min-height: 190px;
+  padding: 10px 12px;
+  font-family: "Noto Sans Mono CJK SC", ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.bulk-import-sample {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  font-family: "Noto Sans Mono CJK SC", ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.bulk-import-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.bulk-import-progress > div {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-surface-subtle);
+}
+
+.bulk-import-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transition: width 0.12s ease;
+}
+
+.bulk-import-results {
+  max-height: 160px;
+  padding: 9px 11px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-subtle);
+  font-size: 11px;
+}
+
+.bulk-import-results > b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.bulk-import-results ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bulk-import-results li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-muted);
+}
+
+.bulk-import-results li > span {
+  color: var(--color-text);
+  font-family: "Noto Sans Mono CJK SC", ui-monospace, monospace;
+}
+
+.bulk-import-results li[data-failed="true"] em {
+  color: var(--color-danger);
+}
+
+.bulk-import-results em {
+  font-style: normal;
+  text-align: right;
+}

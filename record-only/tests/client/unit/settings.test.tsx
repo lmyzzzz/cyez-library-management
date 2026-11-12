@@ -15,6 +15,7 @@ import {
   ReaderSettings,
   DeviceEditor,
   TagManager,
+  BulkDeviceImport,
   History,
 } from "../../../apps/teacher/src/renderer/settings.js";
 
@@ -566,5 +567,99 @@ describe("C-U-05 设置和只读历史", () => {
     expect(call.mock.calls.every(([action]) => action === "history")).toBe(
       true,
     );
+  });
+
+  it("批量添加设备逐条发送、汇总失败并刷新完成", async () => {
+    const onDone = vi.fn(),
+      onBusy = vi.fn();
+    call.mockImplementation(async (action, input) => {
+      if (
+        action === "createDevice" &&
+        (input as { code: string }).code === "A-002"
+      )
+        throw Error("DEVICE_CODE_TAKEN");
+      return {};
+    });
+    render(
+      <BulkDeviceImport onDone={onDone} onCancel={vi.fn()} onBusy={onBusy} />,
+    );
+    fireEvent.change(screen.getByLabelText("批量设备 JSON"), {
+      target: {
+        value: JSON.stringify([
+          { code: "A-001", displayName: "一号电脑" },
+          { code: "A-002", displayName: "二号电脑", notes: "备用" },
+        ]),
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "开始添加" }));
+    await waitFor(() => expect(call).toHaveBeenCalledTimes(2));
+    expect(call).toHaveBeenNthCalledWith(1, "createDevice", {
+      code: "A-001",
+      displayName: "一号电脑",
+      notes: "",
+      isDisabled: false,
+      tagIds: [],
+    });
+    expect(call).toHaveBeenNthCalledWith(2, "createDevice", {
+      code: "A-002",
+      displayName: "二号电脑",
+      notes: "备用",
+      isDisabled: false,
+      tagIds: [],
+    });
+    await waitFor(() =>
+      expect(screen.getByText("成功 1 条，失败 1 条")).toBeTruthy(),
+    );
+    expect(onBusy).toHaveBeenCalledWith(true);
+    expect(onBusy).toHaveBeenCalledWith(false);
+    fireEvent.click(screen.getByRole("button", { name: "完成" }));
+    expect(onDone).toHaveBeenCalledOnce();
+  });
+
+  it("批量添加遇到持久队列待确认时停止，不误报失败或发送后续项", async () => {
+    call.mockRejectedValueOnce(Error("COMMAND_PENDING"));
+    render(
+      <BulkDeviceImport onDone={vi.fn()} onCancel={vi.fn()} onBusy={vi.fn()} />,
+    );
+    fireEvent.change(screen.getByLabelText("批量设备 JSON"), {
+      target: {
+        value: JSON.stringify([
+          { code: "A-001", displayName: "一号电脑" },
+          { code: "A-002", displayName: "二号电脑" },
+        ]),
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "开始添加" }));
+    await screen.findByText(/待确认 1 条，未发送 1 条/);
+    expect(screen.getByText("成功 0 条，失败 0 条")).toBeTruthy();
+    expect(call).toHaveBeenCalledTimes(1);
+  });
+
+  it("批量添加在发送前拒绝无效标签 UUID", () => {
+    render(
+      <BulkDeviceImport onDone={vi.fn()} onCancel={vi.fn()} onBusy={vi.fn()} />,
+    );
+    fireEvent.change(screen.getByLabelText("批量设备 JSON"), {
+      target: {
+        value: JSON.stringify([
+          { code: "A-001", displayName: "一号电脑", tagIds: ["not-a-uuid"] },
+        ]),
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "开始添加" }));
+    expect(screen.getByText(/tagIds 必须是 UUID/)).toBeTruthy();
+    expect(call).not.toHaveBeenCalled();
+  });
+
+  it("批量添加设备拒绝无效 JSON", () => {
+    render(
+      <BulkDeviceImport onDone={vi.fn()} onCancel={vi.fn()} onBusy={vi.fn()} />,
+    );
+    fireEvent.change(screen.getByLabelText("批量设备 JSON"), {
+      target: { value: "[{" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "开始添加" }));
+    expect(screen.getByText(/JSON 格式不正确/)).toBeTruthy();
+    expect(call).not.toHaveBeenCalled();
   });
 });
