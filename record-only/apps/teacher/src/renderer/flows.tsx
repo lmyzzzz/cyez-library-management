@@ -10,6 +10,7 @@ import {
 import { Badge, Banner, Button, Card, Textarea } from "@record/ui";
 import type {
   DeviceDTO,
+  RecordDTO,
   ScanPreview,
   EndPreview,
   BatchPreview,
@@ -899,6 +900,65 @@ export function BatchForm({
           onClick={() => void confirm()}
         >
           {busy ? "逐批提交中…" : `确认结束 ${preview.total} 条`}
+        </Button>
+      </div>
+    </>
+  );
+}
+export function NotesEditor({
+  record,
+  onDone,
+  onCancel,
+  onBusy,
+}: {
+  record: RecordDTO;
+  onDone: () => void;
+  onCancel: () => void;
+  onBusy: (v: boolean) => void;
+}) {
+  const [notes, setNotes] = useState(record.notes),
+    [error, setError] = useState<unknown>(),
+    [busy, setBusy] = useState(false);
+  return (
+    <>
+      <label className="block-label" htmlFor="record-notes">
+        当前使用备注
+      </label>
+      <Textarea
+        id="record-notes"
+        aria-label="当前使用备注"
+        value={notes}
+        maxLength={8000}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+      <Failure error={error} />
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
+          取消
+        </Button>
+        <Button
+          size="small"
+          variant="primary"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            onBusy(true);
+            try {
+              await window.library.call("editNotes", {
+                recordId: record.id,
+                expectedVersion: record.version,
+                notes,
+              });
+              onDone();
+            } catch (e) {
+              setError(e);
+            } finally {
+              setBusy(false);
+              onBusy(false);
+            }
+          }}
+        >
+          保存备注
         </Button>
       </div>
     </>

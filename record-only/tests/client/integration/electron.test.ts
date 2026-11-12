@@ -1,4 +1,5 @@
 import { deviceChoice, selectDevice } from "../../helpers/select-device.js";
+import { auxWindow } from "../../helpers/aux-window.js";
 import {
   test,
   expect,
@@ -24,6 +25,7 @@ let api: Awaited<ReturnType<typeof createApp>>,
   port: number,
   desktop: ElectronApplication,
   page: Page,
+  scanPage: Page,
   userData: string;
 const dbName = "cyez_electron_" + randomUUID().replaceAll("-", ""),
   cert = certificate();
@@ -89,8 +91,11 @@ async function launch() {
     },
     timeout: 30000,
   });
+  // 管理后台最先创建；刷卡窗口和状态悬浮窗随后默认打开。
   page = await desktop.firstWindow();
   await page.waitForLoadState("domcontentloaded");
+  scanPage = await auxWindow(desktop, "scan");
+  await auxWindow(desktop, "status");
 }
 test.afterAll(async () => {
   await desktop?.close();
@@ -125,7 +130,7 @@ async function login() {
   });
   await page.getByRole("button", { name: "刷新", exact: true }).first().click();
 }
-test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口", async () => {
+test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口与三个窗口", async () => {
   expect(await call<{ reader: string }>("status")).toMatchObject({
     reader: "手动输入已就绪",
   });
@@ -142,17 +147,88 @@ test("C-I-01/07: 真实 Electron 沙箱、cyez-ui、两个一级入口", async (
       bridge: typeof window.library.call,
     })),
   ).toEqual({ node: "undefined", bridge: "function" });
-  const preferences = await desktop.evaluate(({ BrowserWindow }) => {
-    const w = BrowserWindow.getAllWindows()[0];
-    return (
-      w.webContents as unknown as {
-        getLastWebPreferences: () => Record<string, unknown>;
-      }
-    ).getLastWebPreferences();
+  const all = await desktop.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows().map((w) => ({
+      role:
+        new URL(w.webContents.getURL()).searchParams.get("window") ?? "main",
+      onTop: w.isAlwaysOnTop(),
+      maximizable: w.isMaximizable(),
+      visible: w.isVisible(),
+      preferences: (
+        w.webContents as unknown as {
+          getLastWebPreferences: () => Record<string, unknown>;
+        }
+      ).getLastWebPreferences(),
+    })),
+  );
+  expect(all.map((w) => w.role).sort()).toEqual(["main", "scan", "status"]);
+  for (const w of all) {
+    expect(w.visible).toBe(true);
+    expect(w.preferences.sandbox).toBe(true);
+    expect(w.preferences.contextIsolation).toBe(true);
+    expect(w.preferences.nodeIntegration).toBe(false);
+    // 只有状态悬浮窗置顶且不可最大化。
+    expect(w.onTop).toBe(w.role === "status");
+    expect(w.maximizable).toBe(w.role !== "status");
+  }
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible();
+});
+test("C-I-16: 辅助窗口不可关闭，只能在窗口管理中启停；全屏与设置按钮", async () => {
+  // 系统关闭入口（Alt+F4 等）对辅助窗口无效。
+  await desktop.evaluate(({ BrowserWindow }) => {
+    for (const w of BrowserWindow.getAllWindows()) {
+      const role = new URL(w.webContents.getURL()).searchParams.get("window");
+      if (role) w.close();
+    }
   });
-  expect(preferences.sandbox).toBe(true);
-  expect(preferences.contextIsolation).toBe(true);
-  expect(preferences.nodeIntegration).toBe(false);
+  await page.waitForTimeout(300);
+  expect(desktop.windows()).toHaveLength(3);
+  // 辅助窗口无权启停窗口或执行管理动作。
+  await expect(
+    scanPage.evaluate(() =>
+      window.library.call("setAuxWindow", { window: "status", open: false }),
+    ),
+  ).rejects.toThrow("IPC_FORBIDDEN");
+  await expect(
+    scanPage.evaluate(() => window.library.call("logout", {})),
+  ).rejects.toThrow("IPC_FORBIDDEN");
+  await expect(
+    call("gate", { page: "devices", modal: false, submitting: false }),
+  ).rejects.toThrow("IPC_FORBIDDEN");
+  const fullscreen = () =>
+    desktop.evaluate(({ BrowserWindow }) =>
+      BrowserWindow.getAllWindows()
+        .find((w) => w.webContents.getURL().includes("window=scan"))!
+        .isFullScreen(),
+    );
+  await scanPage.getByRole("button", { name: "全屏", exact: true }).click();
+  await expect.poll(fullscreen).toBe(true);
+  await scanPage.getByRole("button", { name: "退出全屏", exact: true }).click();
+  await expect.poll(fullscreen).toBe(false);
+  // 设置按钮把管理后台带到“设置 → 窗口管理”。
+  await scanPage.getByRole("button", { name: "窗口设置", exact: true }).click();
+  await expect(page.getByLabel("刷卡窗口", { exact: true })).toBeChecked();
+  await page.getByLabel("状态悬浮窗", { exact: true }).click();
+  await expect.poll(() => desktop.windows().length).toBe(2);
+  await page.getByLabel("状态悬浮窗", { exact: true }).click();
+  await auxWindow(desktop, "status");
+  await page.getByLabel("刷卡窗口", { exact: true }).click();
+  await expect.poll(() => desktop.windows().length).toBe(2);
+  // 刷卡窗口关闭后的刷卡只在管理后台提示，不查询学生资料。
+  const before = scans;
+  await call("integrationScan", { fixture: "allowed-1" });
+  await expect(
+    page.getByRole("alert").filter({ hasText: "刷卡窗口已关闭" }),
+  ).toBeVisible();
+  expect(scans).toBe(before);
+  await page.getByLabel("刷卡窗口", { exact: true }).click();
+  scanPage = await auxWindow(desktop, "scan");
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "使用登记", exact: true }).click();
 });
 test("C-I-06: 真实 renderer 的 IPC 白名单、输入 schema 与外部导航拒绝", async () => {
   const originalUrl = page.url();
@@ -164,7 +240,7 @@ test("C-I-06: 真实 renderer 的 IPC 白名单、输入 schema 与外部导航�
       return opened === null;
     }),
   ).toBe(true);
-  expect(desktop.windows()).toHaveLength(1);
+  expect(desktop.windows()).toHaveLength(3);
   const navigationBlocked = await desktop.evaluate(({ BrowserWindow }) => {
     const window = BrowserWindow.getAllWindows()[0];
     let blocked = false;
@@ -257,7 +333,7 @@ test("C-I-09: 过期/SAN 错误/证书更换、重定向和 HTTP 降级", async 
   expect(requests).toBe(before);
   await login();
 });
-test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束 → 只读历史", async () => {
+test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 → 结束 → 只读历史", async () => {
   await page.getByRole("link", { name: "设置", exact: true }).click();
   await page.getByRole("button", { name: "设备管理", exact: true }).click();
   await page.getByRole("button", { name: "新增设备", exact: true }).click();
@@ -265,27 +341,28 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   await page.getByLabel("设备名称", { exact: true }).fill("集成测试设备");
   await page.getByRole("button", { name: "保存设备", exact: true }).click();
   await expect(page.getByText("E2E-001", { exact: true })).toBeVisible();
-  const before = scans;
-  await call("integrationScan", { fixture: "allowed-1" });
-  expect(scans).toBe(before);
-  const scanNotice = page.getByRole("alert").filter({
-    hasText: "接收到刷卡消息，请返回主页面以触发登记",
-  });
-  await expect(scanNotice).toBeVisible();
+  const statusPage = await auxWindow(desktop, "status");
+  await expect(statusPage.getByText("E2E-001", { exact: true })).toBeVisible();
+  const scanNotice = scanPage
+    .locator("[data-sonner-toast]")
+    .filter({ hasText: "请先完成或取消当前操作" });
   await page.getByRole("link", { name: "使用登记", exact: true }).click();
   await page.getByRole("button", { name: "未使用", exact: true }).click();
   await page.waitForTimeout(1300);
   await page.getByRole("button", { name: "测试卡 1", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "选择设备", exact: true }),
+    scanPage.getByRole("heading", { name: "选择设备", exact: true }),
   ).toBeVisible();
-  await expect(scanNotice).toHaveCount(0);
+  // 管理后台保持原页面，不再进入登记流程。
+  await expect(
+    page.getByRole("heading", { name: "选择设备", exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
     "data-layout",
-    "focus",
+    "standard",
   );
   const scanBounds = async () =>
-    page.locator(".bflow").evaluate((element) => {
+    scanPage.locator(".bflow").evaluate((element) => {
       const rect = element.getBoundingClientRect();
       return {
         left: rect.left,
@@ -302,38 +379,46 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
     registrationBounds.viewportHeight,
     0,
   );
+  // 流程进行中的其他卡只在刷卡窗口弹出 toast，不查询、不改变布局。
   const scansDuringFlow = scans;
   await call("integrationScan", { fixture: "allowed-2" });
   expect(scans).toBe(scansDuringFlow);
   await expect(scanNotice).toBeVisible();
-  const noticedBounds = await scanBounds();
-  expect(noticedBounds).toEqual(registrationBounds);
-  await scanNotice.getByRole("button", { name: "关闭" }).click();
-  await expect(deviceChoice(page, "E2E-001")).toBeVisible();
-  await page.screenshot({
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(await scanBounds()).toEqual(registrationBounds);
+  await expect(deviceChoice(scanPage, "E2E-001")).toBeVisible();
+  await scanPage.screenshot({
     path: "test-results/electron/scan-registration-fullscreen.png",
     fullPage: true,
   });
-  const originalViewport = page.viewportSize();
-  await page.setViewportSize({ width: 800, height: 650 });
+  const originalViewport = scanPage.viewportSize();
+  await scanPage.setViewportSize({ width: 800, height: 650 });
   const narrowBounds = await scanBounds();
   expect(narrowBounds.left).toBe(0);
   expect(narrowBounds.width).toBe(narrowBounds.viewportWidth);
   expect(narrowBounds.bottom).toBeCloseTo(narrowBounds.viewportHeight, 0);
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth),
+    await scanPage.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(narrowBounds.viewportWidth);
-  await expect(page.getByRole("button", { name: "取消登记" })).toBeVisible();
-  await page.screenshot({
+  await expect(
+    scanPage.getByRole("button", { name: "取消登记" }),
+  ).toBeVisible();
+  await scanPage.screenshot({
     path: "test-results/electron/scan-registration-narrow.png",
     fullPage: true,
   });
-  if (originalViewport) await page.setViewportSize(originalViewport);
-  await selectDevice(page, "E2E-001");
-  await page
+  if (originalViewport) await scanPage.setViewportSize(originalViewport);
+  await selectDevice(scanPage, "E2E-001");
+  await scanPage
     .getByLabel("登记备注", { exact: true })
     .fill("真实 Electron 集成记录");
-  await page.getByRole("button", { name: "确认登记", exact: true }).click();
+  await scanPage.getByRole("button", { name: "确认登记", exact: true }).click();
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible();
+  await expect(
+    statusPage.getByText(/真实 Electron 集成记录/).first(),
+  ).toBeVisible();
   await page.getByRole("button", { name: "使用中", exact: true }).click();
   await expect(
     page.getByText("真实 Electron 集成记录", { exact: true }),
@@ -341,25 +426,20 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   await page.waitForTimeout(1300); // Same-card scans within 1.2 seconds are intentionally ignored.
   await page.getByRole("button", { name: "测试卡 1", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+    scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
   ).toBeVisible();
-  await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
-    "data-layout",
-    "focus",
-  );
   const endBounds = await scanBounds();
   expect(endBounds.left).toBe(0);
   expect(endBounds.width).toBe(endBounds.viewportWidth);
   expect(endBounds.bottom).toBeCloseTo(endBounds.viewportHeight, 0);
-  await page.screenshot({
+  await scanPage.screenshot({
     path: "test-results/electron/scan-end-fullscreen.png",
     fullPage: true,
   });
-  await page.getByRole("button", { name: "取消", exact: true }).click();
-  await expect(page.locator('[data-ui="app-shell"]')).toHaveAttribute(
-    "data-layout",
-    "standard",
-  );
+  await scanPage.getByRole("button", { name: "取消", exact: true }).click();
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "结束…", exact: true }).click();
   await page.getByRole("button", { name: "确认结束", exact: true }).click();
   await page.getByRole("link", { name: "设置", exact: true }).click();
@@ -390,14 +470,16 @@ test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async 
   const before = scans;
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
-    page.getByRole("heading", { name: "选择设备", exact: true }),
+    scanPage.getByRole("heading", { name: "选择设备", exact: true }),
   ).toBeVisible();
-  await selectDevice(page, "E2E-001");
-  await page.getByLabel("登记备注", { exact: true }).fill("二刷确认集成验证");
+  await selectDevice(scanPage, "E2E-001");
+  await scanPage
+    .getByLabel("登记备注", { exact: true })
+    .fill("二刷确认集成验证");
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
-    page.getByRole("heading", { name: "选择设备", exact: true }),
+    scanPage.getByRole("heading", { name: "选择设备", exact: true }),
   ).toHaveCount(0);
   expect(scans).toBe(before + 1);
   await page.getByRole("button", { name: "使用中", exact: true }).click();
@@ -407,14 +489,16 @@ test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async 
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
-    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+    scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
   ).toBeVisible();
   // Editing pauses automatic checkout, so only the second scan can end this record.
-  await page.getByLabel("使用备注", { exact: true }).fill("二刷确认结束验证");
+  await scanPage
+    .getByLabel("使用备注", { exact: true })
+    .fill("二刷确认结束验证");
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
-    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+    scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
   ).toHaveCount(0);
   expect(scans).toBe(before + 2);
   await page.getByRole("link", { name: "设置", exact: true }).click();

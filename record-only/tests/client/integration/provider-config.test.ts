@@ -1,3 +1,4 @@
+import { auxWindow } from "../../helpers/aux-window.js";
 import { test, expect, _electron as electron } from "@playwright/test";
 import { createServer } from "node:https";
 import { request } from "node:http";
@@ -187,15 +188,14 @@ test("C-I: 校园数据源经 TLS 覆盖后立即清空，客户端磁盘没有�
       path: "test-results/electron/provider-settings.png",
     });
     await page.getByRole("link", { name: "使用登记", exact: true }).click();
-    await page.evaluate(async () => {
-      await window.library.call("gate", {
-        page: "devices",
-        modal: false,
-        submitting: false,
-      });
-      await window.library.call("integrationScan", { fixture: "allowed-1" });
-    });
-    await expect(page.getByText("测试学生", { exact: true })).toBeVisible();
+    const scanPage = await auxWindow(desktop, "scan");
+    await expect(
+      scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() =>
+      window.library.call("integrationScan", { fixture: "allowed-1" }),
+    );
+    await expect(scanPage.getByText("测试学生", { exact: true })).toBeVisible();
     expect((await db.students.findOne())!.get().schoolNumber).toBe("");
   } finally {
     await desktop.close();

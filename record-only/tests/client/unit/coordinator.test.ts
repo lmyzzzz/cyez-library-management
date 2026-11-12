@@ -135,6 +135,48 @@ describe("C-U main 协调器", () => {
     ).toHaveLength(count);
   });
 
+  it("刷卡事件标记为 card 来源；刷卡窗口关闭后撤销预览并拒绝刷卡", async () => {
+    const origins: [string, string | undefined][] = [];
+    const routed = new Coordinator(
+      store,
+      randomUUID(),
+      "integration",
+      identity,
+      (e, origin) => origins.push([e.type, origin]),
+    );
+    coordinator = routed;
+    await login();
+    // 配置、登录等状态变化不属于刷卡窗口专有事件。
+    expect(origins.length).toBeGreaterThan(0);
+    expect(origins.every(([, origin]) => origin === undefined)).toBe(true);
+    origins.length = 0;
+    await routed.onCard(cardEvent());
+    expect(origins).toEqual([["notice", "card"]]);
+    await routed.call("gate", devicesGate);
+    await routed.onCard(cardEvent());
+    expect(origins.at(-1)).toEqual(["scan", "card"]);
+    await routed.call("gate", { ...devicesGate, page: "flow" });
+    await routed.onCard(cardEvent());
+    expect(origins.at(-1)).toEqual(["confirm", "card"]);
+    const scans = () =>
+      traffic.filter((t) => t.path === "/api/v1/scan-previews").length;
+    const before = scans();
+    await routed.releaseScan();
+    expect(
+      traffic.some(
+        (t) =>
+          t.method === "DELETE" && t.path.startsWith("/api/v1/scan-previews/"),
+      ),
+    ).toBe(true);
+    await routed.onCard(cardEvent());
+    expect(origins.at(-1)).toEqual(["notice", "card"]);
+    expect(scans()).toBe(before);
+    // 没有活动预览时再次释放不产生请求。
+    const requests = traffic.length;
+    await routed.releaseScan();
+    expect(traffic.length).toBe(requests);
+  });
+
   it("被拒绝的并发刷卡不解除扫描锁，离开页面后的迟到预览不重开流程", async () => {
     await login();
     await coordinator.call("gate", devicesGate);

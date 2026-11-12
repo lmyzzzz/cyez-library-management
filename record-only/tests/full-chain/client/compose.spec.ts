@@ -1,4 +1,5 @@
 import { selectDevice } from "../../helpers/select-device.js";
+import { auxWindow } from "../../helpers/aux-window.js";
 import {
   _electron as electron,
   expect,
@@ -30,6 +31,7 @@ interface CreatedDevice {
 
 let appA: ElectronApplication;
 let pageA: Page;
+let scanA: Page;
 let userDataA: string;
 const state = {
   deviceCode: `E2E-${runTag}-A`.slice(0, 60),
@@ -104,6 +106,7 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
   test.beforeAll(async () => {
     userDataA = await mkdtemp(join(tmpdir(), "cyez-full-chain-a-"));
     ({ app: appA, page: pageA } = await launch(userDataA));
+    scanA = await auxWindow(appA, "scan");
     await connect(pageA);
   });
 
@@ -124,17 +127,17 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
     await showDevices(pageA, state.deviceCode);
     await pageA.getByRole("button", { name: "测试卡 1", exact: true }).click();
     await expect(
-      pageA.getByRole("heading", { name: "选择设备", exact: true }),
+      scanA.getByRole("heading", { name: "选择设备", exact: true }),
     ).toBeVisible();
     // The provider fixture returns counter-based names; the first lookup is fresh.
     await expect(
-      pageA.getByText("集成学生1", { exact: true }).first(),
+      scanA.getByText("集成学生1", { exact: true }).first(),
     ).toBeVisible();
 
-    await pageA.getByLabel("搜索可选设备").fill(state.deviceCode);
-    await selectDevice(pageA, state.deviceCode);
-    await pageA.getByLabel("登记备注").fill(state.notes);
-    await pageA.getByRole("button", { name: "确认登记", exact: true }).click();
+    await scanA.getByLabel("搜索可选设备").fill(state.deviceCode);
+    await selectDevice(scanA, state.deviceCode);
+    await scanA.getByLabel("登记备注").fill(state.notes);
+    await scanA.getByRole("button", { name: "确认登记", exact: true }).click();
     await pageA.getByRole("button", { name: "使用中", exact: true }).click();
     await expect(
       deviceRow(pageA, state.deviceCode).getByText(state.notes, {
@@ -199,12 +202,12 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
     await showDevices(pageA, state.deviceCode);
     await pageA.getByRole("button", { name: "测试卡 1", exact: true }).click();
     await expect(
-      pageA.getByRole("heading", { name: "选择设备", exact: true }),
+      scanA.getByRole("heading", { name: "选择设备", exact: true }),
     ).toBeVisible();
     await expect(
-      pageA.getByText("集成学生2", { exact: true }).first(),
+      scanA.getByText("集成学生2", { exact: true }).first(),
     ).toBeVisible();
-    await pageA.getByRole("button", { name: "取消登记", exact: true }).click();
+    await scanA.getByRole("button", { name: "取消登记", exact: true }).click();
     expect(
       (await stack.snapshot()).students.filter(
         (row) => row.name === "集成学生2",
@@ -228,7 +231,7 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
       .getByRole("button", { name: "未授权测试卡", exact: true })
       .click();
     await expect(
-      pageA
+      scanA
         .getByText(
           "校园资料服务未确认该学生的登记资格。请联系学校数据负责人。",
           {
@@ -238,7 +241,7 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
         .first(),
     ).toBeVisible();
     await expect(
-      pageA.getByRole("heading", { name: "选择设备", exact: true }),
+      scanA.getByRole("heading", { name: "选择设备", exact: true }),
     ).toHaveCount(0);
     await pageA.waitForTimeout(1500);
     const after = (await stack.snapshot()).students.length;
@@ -258,11 +261,11 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
     await showDevices(pageA, state.deviceCodeB);
     await pageA.getByRole("button", { name: "测试卡 2", exact: true }).click();
     await expect(
-      pageA.getByRole("heading", { name: "选择设备", exact: true }),
+      scanA.getByRole("heading", { name: "选择设备", exact: true }),
     ).toBeVisible();
-    await pageA.getByLabel("搜索可选设备").fill(state.deviceCodeB);
-    await selectDevice(pageA, state.deviceCodeB);
-    await pageA.getByRole("button", { name: "确认登记", exact: true }).click();
+    await scanA.getByLabel("搜索可选设备").fill(state.deviceCodeB);
+    await selectDevice(scanA, state.deviceCodeB);
+    await scanA.getByRole("button", { name: "确认登记", exact: true }).click();
     await pageA.getByRole("button", { name: "使用中", exact: true }).click();
     await expect(
       deviceRow(pageA, state.deviceCodeB).getByText("使用中", { exact: true }),
@@ -272,6 +275,7 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
     const { app: appB, page: pageB } = await launch(userDataB);
     try {
       await connect(pageB);
+      const scanB = await auxWindow(appB, "scan");
       await showDevices(pageB, state.deviceCodeB, "使用中");
       await expect(
         deviceRow(pageB, state.deviceCodeB).getByText("使用中", {
@@ -284,9 +288,9 @@ test.describe("全链路：真实 Electron → TLS 网关 → API → PostgreSQL
         .getByRole("button", { name: "测试卡 2", exact: true })
         .click();
       await expect(
-        pageB.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+        scanB.getByRole("heading", { name: "刷卡结束使用", exact: true }),
       ).toBeVisible();
-      await pageB
+      await scanB
         .getByRole("button", { name: "确认结束", exact: true })
         .click();
       await pageB.getByRole("button", { name: "未使用", exact: true }).click();

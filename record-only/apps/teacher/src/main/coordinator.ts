@@ -52,7 +52,8 @@ export class Coordinator {
     readonly clientId: string,
     readonly environment: "development" | "integration" | "production",
     identity: IdentityConfig | null,
-    private emit: (event: TeacherEvent) => void,
+    /** origin="card" 标记由刷卡触发、只应送达刷卡窗口的事件。 */
+    private emit: (event: TeacherEvent, origin?: "card") => void,
     private version = "unknown",
   ) {
     this.reader = new CardReader(identity, (event) => this.onCard(event));
@@ -154,18 +155,24 @@ export class Coordinator {
             this.writing ||
             this.scanning
           ) {
-            this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+            this.emit(
+              { type: "notice", code: "SCAN_RETURN_TO_DEVICES" },
+              "card",
+            );
             return;
           }
           if (!this.online || !this.sdk?.authenticated) {
-            this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" });
+            this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
             return;
           }
           // 同一张卡再次刷卡等同于当前流程的“确认”。
-          this.emit({ type: "confirm", previewId: this.activeCard.previewId });
+          this.emit(
+            { type: "confirm", previewId: this.activeCard.previewId },
+            "card",
+          );
           return;
         }
-        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
         return;
       }
       if (
@@ -175,11 +182,11 @@ export class Coordinator {
         this.writing ||
         this.scanning
       ) {
-        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
         return;
       }
       if (!this.online || !this.sdk?.authenticated) {
-        this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" });
+        this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
         return;
       }
       this.scanning = true;
@@ -198,12 +205,15 @@ export class Coordinator {
         return;
       this.activeCard = { studentId: event.studentId, previewId: preview.id };
       this.gate.page = "flow";
-      this.emit({ type: "scan", preview });
+      this.emit({ type: "scan", preview }, "card");
     } catch (e) {
-      this.emit({
-        type: "notice",
-        code: e instanceof ApiError ? e.code : "SCAN_FAILED",
-      });
+      this.emit(
+        {
+          type: "notice",
+          code: e instanceof ApiError ? e.code : "SCAN_FAILED",
+        },
+        "card",
+      );
       await this.log({
         source: "reader",
         level: "warn",
@@ -215,6 +225,17 @@ export class Coordinator {
       event.card.uidHex = "";
       event.card.issuer = "";
     }
+  }
+  /** 刷卡窗口关闭或重新加载时调用：停止接收刷卡并撤销未完成的预览。 */
+  async releaseScan() {
+    const previewId = this.activeCard?.previewId;
+    this.gate = { page: "settings", modal: false, submitting: false };
+    this.activeCard = null;
+    this.scanRevision++;
+    if (previewId && this.online && this.sdk?.authenticated)
+      await this.sdk
+        .call("DELETE", `/api/v1/scan-previews/${previewId}`)
+        .catch(() => {});
   }
   async command(method: string, path: string, body: Record<string, unknown>) {
     if (!this.online || !this.requireSdk().authenticated)

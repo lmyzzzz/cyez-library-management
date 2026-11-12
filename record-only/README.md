@@ -17,7 +17,7 @@
 | [Docker 部署设计](docs/deployment.md) | 五类服务、网络/卷、.env 共享口令、证书指纹、ORM 迁移、健康与验收 |
 | [实施与问题处理计划](docs/implementation-plan.md) | 审查修正、8 个工作项、故障/容量处理、实施顺序与验收依赖 |
 | [测试设计](docs/testing.md) | 服务端与客户端分别覆盖单元/集成；真实 PostgreSQL、真实 Electron、CI 门禁 |
-| [UI 与 cyez-ui 接入](docs/ui.md) | 登记/设置两个入口、设备编辑、只读历史、10 秒空闲取消、包入口与 Yarn 消费 |
+| [UI 与 cyez-ui 接入](docs/ui.md) | 刷卡窗口/状态悬浮窗/管理后台三窗口、登记/设置两个入口、设备编辑、只读历史、10 秒空闲取消、包入口与 Yarn 消费 |
 | [正式图册](docs/diagrams.md) | 八张详细 SVG 和统一可编辑 draw.io；黄色标出待定项 |
 | [独立读卡进程接口](docs/reader-process.md) | Wiegand-34 UID、继承管道协议、ACR1552U PC/SC 与串口 Rust 进程、窗口 mock 和外部进程替换 |
 | [运行说明](docs/operations.md) | 集成环境启动、缓存迁移、生产配置及升级 |

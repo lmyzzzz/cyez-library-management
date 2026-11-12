@@ -20,6 +20,7 @@ export default defineConfig({
       ],
       exclude: [
         "apps/teacher/src/main/index.ts",
+        "apps/teacher/src/main/windows.ts",
         "apps/teacher/src/preload/index.ts",
         "apps/teacher/src/renderer/index.tsx",
       ],

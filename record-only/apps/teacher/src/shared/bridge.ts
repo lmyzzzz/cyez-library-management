@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { readerProcessSchema } from "./reader-config.js";
 import { identityConfigSchema } from "@record/protocol/identity";
+import type { WindowState } from "./windows.js";
 import {
   normalizePin,
   sqlServerProviderSchema,
@@ -77,6 +78,16 @@ export const actions = {
   batchConfirm: batchConfirmSchema.omit({ requestId: true }),
   cancelPreview: z.object({ previewId: uuid }).strict(),
   uiError: z.object({}).strict(),
+  windowState: z.object({}).strict(),
+  setAuxWindow: z
+    .object({ window: z.enum(["scan", "status"]), open: z.boolean() })
+    .strict(),
+  setScanAutoFocus: z.object({ enabled: z.boolean() }).strict(),
+  auxCommand: z
+    .object({
+      command: z.enum(["minimize", "toggleFullscreen", "openSettings"]),
+    })
+    .strict(),
   ...(__CYEZ_TEST_FEATURES__
     ? {
         integrationScan: z
@@ -110,7 +121,9 @@ export type TeacherEvent =
   | { type: "scan"; preview: ScanPreview }
   | { type: "confirm"; previewId: string }
   | { type: "notice"; code: string }
-  | { type: "changed" };
+  | { type: "changed" }
+  | { type: "windows"; state: WindowState }
+  | { type: "openWindowSettings" };
 export interface TeacherBridge {
   call<T = unknown, K extends ActionName = ActionName>(
     action: K,

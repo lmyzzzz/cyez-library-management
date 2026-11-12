@@ -63,7 +63,7 @@
 | C-U-04 | 结束页 5 秒确认/编辑失焦、按钮竞争 | 自动提交暂停并需显式恢复；仅一次动作；手动/批量 Modal 从不自动确认 |
 | C-U-05 | 设置/设备/历史组件，pin 输入 | 两个一级入口正确；历史无编辑删除导出；pin 规范化长度正确，错误清晰；设备状态不可误选 |
 | C-I-01 | 真实 Electron/cyez-ui/窗口/路由 | 独立 userData、单份 React、沙箱与隔离开启，无旧仓库路径 |
-| C-I-02 | 独立 Rust mock → main → preload → renderer | main 收到 UID 后立即计算 studentId；main 以临时 card 数据请求 HTTPS，renderer 仅收学生 DTO；主页面门控生效，拒绝事件释放卡号；订阅不泄漏 |
+| C-I-02 | 独立 Rust mock → main → preload → renderer | main 收到 UID 后立即计算 studentId；main 以临时 card 数据请求 HTTPS，renderer 仅收学生 DTO；刷卡窗口等待页门控生效（C-I-16 另验三窗口的启停、不可关闭与按窗口划分的 IPC 权限），拒绝事件释放卡号；订阅不泄漏 |
 | C-I-03 | 断网/超时/会话失效/空闲边界 | 不显示虚假成功，原键恢复；后台过期登记不复活，结束页恢复不偷提交 |
 | C-I-04 | 提交后 kill Electron、重启/换服务器 | SQLite 意图恢复，查询原结果；不存 UID/hash；旧服务器意图绝不发给新 origin |
 | C-I-05 | 日志重启/断网/ACK 丢失/磁盘失败 | 全部日志持久补传和去重；未确认不删；记录不了就明确报错 |
