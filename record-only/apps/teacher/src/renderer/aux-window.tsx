@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Minus } from "lucide-react";
+import { Minus, MonitorUp } from "lucide-react";
 import {
+  Button,
   IconButton,
   SettingsContent,
   SettingsRow,
@@ -14,6 +15,8 @@ export const closedWindows: WindowState = {
   statusOpen: false,
   scanFullscreen: false,
   scanAutoFocus: true,
+  displayCount: 1,
+  scanDisplay: 0,
 };
 const command = (name: "minimize" | "toggleFullscreen" | "openSettings") =>
   void window.library.call("auxCommand", { command: name }).catch(() => {});
@@ -68,7 +71,14 @@ export function WindowSettings({
   onChange: (state: WindowState) => void;
   onError: (error: unknown) => void;
 }) {
-  const apply = (action: "setAuxWindow" | "setScanAutoFocus", input: object) =>
+  const apply = (
+    action:
+      | "setAuxWindow"
+      | "setScanAutoFocus"
+      | "setScanFullscreen"
+      | "moveScanDisplay",
+    input: object,
+  ) =>
     void window.library
       .call<WindowState>(action, input as never)
       .then(onChange)
@@ -104,6 +114,39 @@ export function WindowSettings({
               apply("setScanAutoFocus", { enabled: e.target.checked })
             }
           />
+        </SettingsRow>
+        <SettingsRow
+          label="刷卡窗口全屏"
+          description="在刷卡窗口当前所在的显示器上全屏显示。与刷卡窗口标题栏中的全屏按钮相同。"
+        >
+          <Switch
+            label=""
+            aria-label="刷卡窗口全屏"
+            checked={state.scanFullscreen}
+            disabled={!state.scanOpen}
+            onChange={(e) =>
+              apply("setScanFullscreen", { enabled: e.target.checked })
+            }
+          />
+        </SettingsRow>
+        <SettingsRow
+          label="刷卡窗口所在显示器"
+          description={
+            !state.scanOpen
+              ? "刷卡窗口未启动。"
+              : state.displayCount < 2
+                ? "当前只连接了一个显示器。"
+                : `当前在第 ${state.scanDisplay} 个显示器，共 ${state.displayCount} 个（从左到右排列）。切换后保持全屏或窗口化状态。`
+          }
+        >
+          <Button
+            size="small"
+            icon={MonitorUp}
+            disabled={!state.scanOpen || state.displayCount < 2}
+            onClick={() => apply("moveScanDisplay", {})}
+          >
+            切换到下一个显示器
+          </Button>
         </SettingsRow>
         <SettingsRow
           label="状态悬浮窗"

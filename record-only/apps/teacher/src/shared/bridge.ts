@@ -83,6 +83,8 @@ export const actions = {
     .object({ window: z.enum(["scan", "status"]), open: z.boolean() })
     .strict(),
   setScanAutoFocus: z.object({ enabled: z.boolean() }).strict(),
+  setScanFullscreen: z.object({ enabled: z.boolean() }).strict(),
+  moveScanDisplay: z.object({}).strict(),
   auxCommand: z
     .object({
       command: z.enum(["minimize", "toggleFullscreen", "openSettings"]),
@@ -120,6 +122,8 @@ export interface LocalStatus {
 export type TeacherEvent =
   | { type: "scan"; preview: ScanPreview }
   | { type: "confirm"; previewId: string }
+  /** 当前流程被另一张卡顶替且新卡未能进入流程时，通知刷卡窗口退出旧流程。 */
+  | { type: "cancel"; previewId: string }
   | { type: "notice"; code: string }
   | { type: "changed" }
   | { type: "windows"; state: WindowState }

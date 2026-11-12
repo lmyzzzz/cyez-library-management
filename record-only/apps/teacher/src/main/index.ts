@@ -316,6 +316,8 @@ void app.whenReady().then(async () => {
             action === "windowState" ||
             action === "setAuxWindow" ||
             action === "setScanAutoFocus" ||
+            action === "setScanFullscreen" ||
+            action === "moveScanDisplay" ||
             action === "auxCommand"
           ) {
             const parsed = actions[action].safeParse(input);
@@ -331,6 +333,10 @@ void app.whenReady().then(async () => {
               else await appWindows.close(data.window!);
             } else if (action === "setScanAutoFocus")
               await appWindows.setAutoFocus(data.enabled!);
+            else if (action === "setScanFullscreen")
+              appWindows.get("scan")?.setFullScreen(data.enabled!);
+            else if (action === "moveScanDisplay")
+              await appWindows.moveScanToNextDisplay();
             else if (action === "auxCommand") {
               if (data.command === "minimize") appWindows.minimize(role);
               else if (data.command === "openSettings")

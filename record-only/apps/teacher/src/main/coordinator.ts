@@ -146,48 +146,42 @@ export class Coordinator {
   }
   async onCard(event: CardEvent) {
     let ownsScan = false;
+    let replaced: string | undefined;
     try {
-      if (this.gate.page === "flow" && this.activeCard) {
-        if (this.activeCard.studentId === event.studentId) {
-          if (
-            this.gate.modal ||
-            this.gate.submitting ||
-            this.writing ||
-            this.scanning
-          ) {
-            this.emit(
-              { type: "notice", code: "SCAN_RETURN_TO_DEVICES" },
-              "card",
-            );
-            return;
-          }
-          if (!this.online || !this.sdk?.authenticated) {
-            this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
-            return;
-          }
-          // 同一张卡再次刷卡等同于当前流程的“确认”。
-          this.emit(
-            { type: "confirm", previewId: this.activeCard.previewId },
-            "card",
-          );
-          return;
-        }
-        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
-        return;
-      }
-      if (
-        this.gate.page !== "devices" ||
+      const busy =
         this.gate.modal ||
         this.gate.submitting ||
         this.writing ||
-        this.scanning
-      ) {
+        this.scanning;
+      const current = this.gate.page === "flow" ? this.activeCard : null;
+      if (current?.studentId === event.studentId) {
+        if (busy) {
+          this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
+          return;
+        }
+        if (!this.online || !this.sdk?.authenticated) {
+          this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
+          return;
+        }
+        // 同一张卡再次刷卡等同于当前流程的“确认”。
+        this.emit({ type: "confirm", previewId: current.previewId }, "card");
+        return;
+      }
+      if ((!current && this.gate.page !== "devices") || busy) {
         this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
         return;
       }
       if (!this.online || !this.sdk?.authenticated) {
         this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
         return;
+      }
+      if (current) {
+        // 流程中刷了另一张卡：取消当前流程，按新卡重新开始。
+        replaced = current.previewId;
+        this.activeCard = null;
+        void this.sdk
+          .call("DELETE", `/api/v1/scan-previews/${replaced}`)
+          .catch(() => {});
       }
       this.scanning = true;
       ownsScan = true;
@@ -207,6 +201,8 @@ export class Coordinator {
       this.gate.page = "flow";
       this.emit({ type: "scan", preview }, "card");
     } catch (e) {
+      // 新卡没有进入流程时，被顶替的旧流程也已取消，刷卡窗口回到等待页。
+      if (replaced) this.emit({ type: "cancel", previewId: replaced }, "card");
       this.emit(
         {
           type: "notice",
@@ -621,12 +617,14 @@ export class Coordinator {
     const { recordId, deviceId, tagId, ...body } = data;
     switch (action) {
       case "start":
-        return this.command("POST", "/api/v1/usage-records/start", data);
+        return this.finishFlow(
+          data.previewId,
+          this.command("POST", "/api/v1/usage-records/start", data),
+        );
       case "end":
-        return this.command(
-          "POST",
-          `/api/v1/usage-records/${recordId}/end`,
-          body,
+        return this.finishFlow(
+          data.previewId,
+          this.command("POST", `/api/v1/usage-records/${recordId}/end`, body),
         );
       case "editNotes":
         return this.command(
@@ -655,6 +653,15 @@ export class Coordinator {
       default:
         throw new ApiError("IPC_ACTION_INVALID", 422);
     }
+  }
+  /** 刷卡流程提交成功后立即结束同卡关联，结果页期间的刷卡按新刷卡处理。 */
+  private async finishFlow(previewId: unknown, work: Promise<unknown>) {
+    const result = await work;
+    if (previewId === this.activeCard?.previewId) {
+      this.activeCard = null;
+      this.gate.page = "devices";
+    }
+    return result;
   }
   async close() {
     await this.sdk?.close();

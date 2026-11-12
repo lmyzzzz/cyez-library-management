@@ -343,9 +343,6 @@ test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 �
   await expect(page.getByText("E2E-001", { exact: true })).toBeVisible();
   const statusPage = await auxWindow(desktop, "status");
   await expect(statusPage.getByText("E2E-001", { exact: true })).toBeVisible();
-  const scanNotice = scanPage
-    .locator("[data-sonner-toast]")
-    .filter({ hasText: "请先完成或取消当前操作" });
   await page.getByRole("link", { name: "使用登记", exact: true }).click();
   await page.getByRole("button", { name: "未使用", exact: true }).click();
   await page.waitForTimeout(1300);
@@ -379,11 +376,16 @@ test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 �
     registrationBounds.viewportHeight,
     0,
   );
-  // 流程进行中的其他卡只在刷卡窗口弹出 toast，不查询、不改变布局。
+  await expect(scanPage.getByText("请再次刷卡确认登记")).toBeVisible();
+  // 流程中刷另一张卡：取消当前流程并按新卡重新查询；再刷回原卡同理。
   const scansDuringFlow = scans;
   await call("integrationScan", { fixture: "allowed-2" });
-  expect(scans).toBe(scansDuringFlow);
-  await expect(scanNotice).toBeVisible();
+  await expect.poll(() => scans).toBe(scansDuringFlow + 1);
+  await call("integrationScan", { fixture: "allowed-1" });
+  await expect.poll(() => scans).toBe(scansDuringFlow + 2);
+  await expect(
+    scanPage.getByRole("heading", { name: "选择设备", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect(await scanBounds()).toEqual(registrationBounds);
   await expect(deviceChoice(scanPage, "E2E-001")).toBeVisible();
@@ -413,12 +415,18 @@ test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 �
     .getByLabel("登记备注", { exact: true })
     .fill("真实 Electron 集成记录");
   await scanPage.getByRole("button", { name: "确认登记", exact: true }).click();
-  await expect(
-    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
-  ).toBeVisible();
+  // 登记成功页显示分配的电脑编号，5 秒后自动回到等待页。
+  await expect(scanPage.locator(".scan-result-device b")).toHaveText("E2E-001");
+  await scanPage.screenshot({
+    path: "test-results/electron/scan-registered.png",
+    fullPage: true,
+  });
   await expect(
     statusPage.getByText(/真实 Electron 集成记录/).first(),
   ).toBeVisible();
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible({ timeout: 10_000 });
   await page.getByRole("button", { name: "使用中", exact: true }).click();
   await expect(
     page.getByText("真实 Electron 集成记录", { exact: true }),
@@ -491,15 +499,15 @@ test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async 
   await expect(
     scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
   ).toBeVisible();
-  // Editing pauses automatic checkout, so only the second scan can end this record.
+  // 结束流程从不自动提交，只有第二次刷卡（或点击确认）才结束这条记录。
   await scanPage
     .getByLabel("使用备注", { exact: true })
     .fill("二刷确认结束验证");
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
-    scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
-  ).toHaveCount(0);
+    scanPage.getByRole("heading", { name: "感谢使用", exact: true }),
+  ).toBeVisible();
   expect(scans).toBe(before + 2);
   await page.getByRole("link", { name: "设置", exact: true }).click();
   await page.getByRole("button", { name: "历史记录", exact: true }).click();

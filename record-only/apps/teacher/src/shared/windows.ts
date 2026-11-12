@@ -7,6 +7,10 @@ export interface WindowState {
   scanFullscreen: boolean;
   /** 收到刷卡时是否自动把刷卡窗口切换到前台。 */
   scanAutoFocus: boolean;
+  /** 已连接的显示器数量。 */
+  displayCount: number;
+  /** 刷卡窗口所在显示器的序号（从 1 开始，按从左到右、从上到下排列）；窗口关闭时为 0。 */
+  scanDisplay: number;
 }
 /** 刷卡窗口面向学生，只开放刷卡流程需要的动作。 */
 const scanActions = new Set([

@@ -135,6 +135,89 @@ describe("C-U main 协调器", () => {
     ).toHaveLength(count);
   });
 
+  it("流程中刷另一张卡：取消当前预览并按新卡开始；新卡失败时通知取消", async () => {
+    await login();
+    await coordinator.call("gate", devicesGate);
+    await coordinator.onCard(cardEvent());
+    const first = (
+      events.find((e: any) => e.type === "scan") as { preview: { id: string } }
+    ).preview.id;
+    await coordinator.call("gate", { ...devicesGate, page: "flow" });
+    const other = () => ({
+      ...cardEvent(),
+      studentId: "b".repeat(64),
+      card: { issuer: "test", uidHex: "00000002" },
+    });
+    await coordinator.onCard(other());
+    expect(
+      traffic.filter(
+        (t) =>
+          t.method === "DELETE" && t.path === `/api/v1/scan-previews/${first}`,
+      ),
+    ).toHaveLength(1);
+    const scans = events.filter((e: any) => e.type === "scan") as {
+      preview: { id: string };
+    }[];
+    expect(scans).toHaveLength(2);
+    expect(events.filter((e: any) => e.type === "cancel")).toHaveLength(0);
+    // 新卡成为当前流程：再刷新卡是确认，再刷旧卡又是换卡。
+    await coordinator.onCard(other());
+    expect(events.filter((e: any) => e.type === "confirm")).toEqual([
+      { type: "confirm", previewId: scans[1].preview.id },
+    ]);
+    // 第三张卡被服务端拒绝：旧流程已取消，刷卡窗口收到 cancel 和提示。
+    const initial = response;
+    response = (method, path, body) => {
+      if (method === "POST" && path === "/api/v1/scan-previews")
+        throw new ApiError("STUDENT_NOT_ALLOWED", 403);
+      return initial(method, path, body);
+    };
+    await coordinator.onCard({
+      ...cardEvent(),
+      studentId: "c".repeat(64),
+      card: { issuer: "test", uidHex: "00000003" },
+    });
+    expect(events.slice(-2)).toEqual([
+      { type: "cancel", previewId: scans[1].preview.id },
+      { type: "notice", code: "STUDENT_NOT_ALLOWED" },
+    ]);
+    // 提交中不允许换卡。
+    response = initial;
+    await coordinator.call("gate", devicesGate);
+    await coordinator.onCard(cardEvent());
+    await coordinator.call("gate", {
+      page: "flow",
+      modal: false,
+      submitting: true,
+    });
+    const before = traffic.length;
+    await coordinator.onCard(other());
+    expect(traffic).toHaveLength(before);
+    expect(events.at(-1)).toEqual({
+      type: "notice",
+      code: "SCAN_RETURN_TO_DEVICES",
+    });
+  });
+
+  it("流程提交成功后同卡再刷是新刷卡而不是确认", async () => {
+    await login();
+    await coordinator.call("gate", devicesGate);
+    await coordinator.onCard(cardEvent());
+    const previewId = (
+      events.find((e: any) => e.type === "scan") as { preview: { id: string } }
+    ).preview.id;
+    await coordinator.call("gate", { ...devicesGate, page: "flow" });
+    await coordinator.call("start", {
+      previewId,
+      deviceId: randomUUID(),
+      notes: "",
+    });
+    // 结果页期间渲染进程尚未重新上报门控，刷卡也立即按新刷卡处理。
+    await coordinator.onCard(cardEvent());
+    expect(events.filter((e: any) => e.type === "confirm")).toHaveLength(0);
+    expect(events.filter((e: any) => e.type === "scan")).toHaveLength(2);
+  });
+
   it("刷卡事件标记为 card 来源；刷卡窗口关闭后撤销预览并拒绝刷卡", async () => {
     const origins: [string, string | undefined][] = [];
     const routed = new Coordinator(

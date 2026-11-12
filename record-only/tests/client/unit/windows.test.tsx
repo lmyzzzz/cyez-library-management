@@ -101,6 +101,8 @@ const windows = {
   statusOpen: true,
   scanFullscreen: false,
   scanAutoFocus: true,
+  displayCount: 1,
+  scanDisplay: 1,
 };
 const call = vi.fn<(action: string, input: unknown) => Promise<unknown>>();
 let listener: ((event: TeacherEvent) => void) | undefined;
@@ -178,6 +180,11 @@ describe("窗口角色与位置", () => {
     expect(roleAllows("main", "auxCommand")).toBe(false);
     expect(roleAllows("main", "setAuxWindow")).toBe(true);
     expect(roleAllows("main", "integrationScan")).toBe(true);
+    for (const action of ["moveScanDisplay", "setScanFullscreen"]) {
+      expect(roleAllows("main", action)).toBe(true);
+      expect(roleAllows("scan", action)).toBe(false);
+      expect(roleAllows("status", action)).toBe(false);
+    }
   });
 
   it("只恢复仍落在某个显示器上的窗口位置，支持副屏和负坐标", () => {
@@ -281,11 +288,91 @@ describe("刷卡窗口", () => {
       }),
     );
     expect(calls("start")).toHaveLength(1);
+    // 登记成功页：大字显示学生信息和分配的电脑编号。
+    const result = await screen.findByRole("status");
+    expect(result.textContent).toContain("登记成功");
+    expect(result.textContent).toContain("测试学生");
+    expect(result.textContent).toContain("一班");
+    expect(result.querySelector(".scan-result-device b")?.textContent).toBe(
+      "PC-02",
+    );
+    await waitFor(() =>
+      expect(calls("gate").at(-1)).toMatchObject({ page: "devices" }),
+    );
+  });
+
+  it("结果页固定 5 秒后关闭，期间的新刷卡立即取代结果页", async () => {
+    const end = { ...preview, mode: "end" as const, record: active };
+    render(<ScanWindow />);
+    await screen.findByRole("heading", { name: "请刷卡" });
+    act(() => listener?.({ type: "scan", preview: end }));
+    await screen.findByRole("heading", { name: "刷卡结束使用" });
+    act(() => listener?.({ type: "confirm", previewId: end.id }));
+    await screen.findByRole("heading", { name: "感谢使用" });
+    expect(screen.getByRole("status").textContent).toContain("PC-01");
+    // 结果页期间收到刷卡：立即进入新流程。
+    const next = { ...preview, id: "preview-2" };
+    act(() => listener?.({ type: "scan", preview: next }));
+    await screen.findByRole("heading", { name: "选择设备" });
+    expect(screen.queryByRole("heading", { name: "感谢使用" })).toBeNull();
+    await screen.findByRole("button", { name: "取消选择 PC-02" });
+    act(() => listener?.({ type: "confirm", previewId: next.id }));
+    await screen.findByText("登记成功");
+    vi.useFakeTimers();
+    try {
+      // 重新挂载计时：结果页不等待操作，5 秒后回到等待页。
+      act(() => listener?.({ type: "scan", preview: end }));
+      act(() => listener?.({ type: "confirm", previewId: end.id }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100);
+      });
+      expect(screen.getByRole("heading", { name: "感谢使用" })).toBeTruthy();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(4800);
+      });
+      expect(screen.getByRole("heading", { name: "感谢使用" })).toBeTruthy();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+      expect(screen.getByRole("heading", { name: "请刷卡" })).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("流程中换卡直接显示新卡的界面；新卡失败时退出旧流程", async () => {
+    render(<ScanWindow />);
+    await screen.findByRole("heading", { name: "请刷卡" });
+    act(() => listener?.({ type: "scan", preview }));
+    await screen.findByRole("heading", { name: "选择设备" });
+    const other = {
+      ...preview,
+      id: "preview-other",
+      mode: "end" as const,
+      student: { ...student, name: "另一位学生" },
+      record: { ...active, student: { ...student, name: "另一位学生" } },
+    };
+    act(() => listener?.({ type: "scan", preview: other }));
+    await screen.findByRole("heading", { name: "刷卡结束使用" });
+    expect(screen.getAllByText("另一位学生").length).toBeGreaterThan(0);
+    // 旧预览的确认不再有效。
+    act(() => listener?.({ type: "confirm", previewId: preview.id }));
+    expect(calls("start")).toHaveLength(0);
+    expect(calls("end")).toHaveLength(0);
+    // 另一张无效卡顶替：旧流程取消，回到等待页并提示。
+    act(() => {
+      listener?.({ type: "cancel", previewId: "unrelated" });
+    });
+    expect(screen.getByRole("heading", { name: "刷卡结束使用" })).toBeTruthy();
+    act(() => {
+      listener?.({ type: "cancel", previewId: other.id });
+      listener?.({ type: "notice", code: "STUDENT_NOT_ALLOWED" });
+    });
     await screen.findByRole("heading", { name: "请刷卡" });
     await waitFor(() =>
       expect(
         document.querySelector("[data-sonner-toast]")?.textContent,
-      ).toContain("登记成功"),
+      ).toContain("校园资料服务未确认"),
     );
   });
 

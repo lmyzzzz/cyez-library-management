@@ -62,6 +62,8 @@ export class AppWindows {
         // 损坏的窗口位置只回退到默认布局。
       }
     }
+    for (const name of ["display-added", "display-removed"] as const)
+      screen.on(name as "display-added", () => this.changed());
   }
   url(role: WindowRole) {
     return role === "main"
@@ -84,7 +86,56 @@ export class AppWindows {
       statusOpen: !!this.get("status"),
       scanFullscreen: !!scan?.isFullScreen(),
       scanAutoFocus: this.autoFocus,
+      displayCount: this.displays().length,
+      scanDisplay: scan ? this.displayIndex(scan) + 1 : 0,
     };
+  }
+  /** 按从左到右、从上到下的固定顺序排列，轮换顺序不随系统枚举顺序变化。 */
+  private displays() {
+    return screen
+      .getAllDisplays()
+      .sort((a, b) => a.bounds.x - b.bounds.x || a.bounds.y - b.bounds.y);
+  }
+  private displayIndex(window: BrowserWindow) {
+    const id = screen.getDisplayMatching(window.getBounds()).id;
+    return Math.max(
+      0,
+      this.displays().findIndex((display) => display.id === id),
+    );
+  }
+  /** 把刷卡窗口轮换到下一个显示器，保持全屏/窗口化状态。 */
+  async moveScanToNextDisplay() {
+    const window = this.get("scan");
+    const displays = this.displays();
+    if (!window || displays.length < 2) return;
+    const target = displays[(this.displayIndex(window) + 1) % displays.length];
+    const fullscreen = window.isFullScreen();
+    if (fullscreen) {
+      // 原生全屏绑定在当前显示器上，必须先退出再移动。
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, 1500);
+        window.once("leave-full-screen", () => {
+          clearTimeout(timer);
+          resolve();
+        });
+        window.setFullScreen(false);
+      });
+      if (window.isDestroyed()) return;
+    }
+    if (window.isMaximized()) window.unmaximize();
+    const area = target.workArea;
+    const size = window.getBounds();
+    const width = Math.min(size.width, area.width);
+    const height = Math.min(size.height, area.height);
+    window.setBounds({
+      x: area.x + Math.round((area.width - width) / 2),
+      y: area.y + Math.round((area.height - height) / 2),
+      width,
+      height,
+    });
+    if (fullscreen) window.setFullScreen(true);
+    await this.persist("scan");
+    this.changed();
   }
   send(role: WindowRole, event: TeacherEvent) {
     const window = this.get(role);
@@ -144,6 +195,8 @@ export class AppWindows {
         nodeIntegration: false,
         webSecurity: true,
         spellcheck: false,
+        // 刷卡窗口在失焦、被遮挡或位于另一块显示器时，倒计时也必须准时。
+        backgroundThrottling: role !== "scan",
       },
     });
     this.windows.set(role, window);
@@ -173,6 +226,7 @@ export class AppWindows {
     };
     window.on("resize", remember);
     window.on("move", remember);
+    if (role === "scan") window.on("moved", () => this.changed());
     if (role === "scan") {
       const fullscreen = () => {
         remember();

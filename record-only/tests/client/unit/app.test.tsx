@@ -453,9 +453,22 @@ describe("C-U-01/05 主页面门控和状态", () => {
       statusOpen: true,
       scanFullscreen: false,
       scanAutoFocus: true,
+      displayCount: 2,
+      scanDisplay: 1,
     };
     call.mockImplementation(async (action, input) => {
       if (action === "windowState") return windows;
+      if (action === "moveScanDisplay") {
+        windows = { ...windows, scanDisplay: (windows.scanDisplay % 2) + 1 };
+        return windows;
+      }
+      if (action === "setScanFullscreen") {
+        windows = {
+          ...windows,
+          scanFullscreen: (input as { enabled: boolean }).enabled,
+        };
+        return windows;
+      }
       if (action === "setAuxWindow") {
         const { window: name, open } = input as {
           window: "scan" | "status";
@@ -480,6 +493,21 @@ describe("C-U-01/05 主页面门控和状态", () => {
     });
     const scan = await screen.findByLabelText<HTMLInputElement>("刷卡窗口");
     await waitFor(() => expect(scan.checked).toBe(true));
+    // 全屏与显示器轮换作用于刷卡窗口。
+    const next = screen.getByRole("button", { name: "切换到下一个显示器" });
+    expect(screen.getByText(/当前在第 1 个显示器，共 2 个/)).toBeTruthy();
+    fireEvent.click(next);
+    await screen.findByText(/当前在第 2 个显示器，共 2 个/);
+    expect(call).toHaveBeenCalledWith("moveScanDisplay", {});
+    const fullscreen = screen.getByLabelText<HTMLInputElement>("刷卡窗口全屏");
+    fireEvent.click(fullscreen);
+    await waitFor(() => expect(fullscreen.checked).toBe(true));
+    expect(call).toHaveBeenCalledWith("setScanFullscreen", { enabled: true });
+    await act(async () => {
+      listener!({ type: "windows", state: { ...windows, displayCount: 1 } });
+    });
+    expect(next.hasAttribute("disabled")).toBe(true);
+    expect(screen.getByText("当前只连接了一个显示器。")).toBeTruthy();
     fireEvent.click(scan);
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("setAuxWindow", {
@@ -488,6 +516,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
       }),
     );
     await waitFor(() => expect(scan.checked).toBe(false));
+    expect(fullscreen.hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByLabelText("状态悬浮窗"));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("setAuxWindow", {
