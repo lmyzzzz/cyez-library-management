@@ -523,6 +523,13 @@ export function ReaderSettings({
     >("hex8"),
     [acrReader, setAcrReader] = useState(""),
     [acrPollMs, setAcrPollMs] = useState(250),
+    [acrByteOrder, setAcrByteOrder] = useState<"forward" | "reverse">(
+      "forward",
+    ),
+    [acrProtocol, setAcrProtocol] = useState<"auto" | "t0" | "t1">("auto"),
+    [acrAccessMode, setAcrAccessMode] = useState<"shared" | "exclusive">(
+      "shared",
+    ),
     [acrReaders, setAcrReaders] = useState<string[]>([]),
     [executable, setExecutable] = useState(""),
     [ports, setPorts] = useState<string[]>([]),
@@ -580,7 +587,14 @@ export function ReaderSettings({
               format,
             }
           : kind === "acr1552"
-            ? { kind, reader: acrReader, pollMs: acrPollMs }
+            ? {
+                kind,
+                reader: acrReader,
+                pollMs: acrPollMs,
+                uidByteOrder: acrByteOrder,
+                protocol: acrProtocol,
+                accessMode: acrAccessMode,
+              }
             : kind === "external"
               ? { kind, executable }
               : { kind };
@@ -588,6 +602,9 @@ export function ReaderSettings({
       setMessage("读卡进程已启动，新配置已覆盖");
       setPort("");
       setAcrReader("");
+      setAcrByteOrder("forward");
+      setAcrProtocol("auto");
+      setAcrAccessMode("shared");
       setExecutable("");
       refresh();
     } catch (e) {
@@ -710,6 +727,13 @@ export function ReaderSettings({
       )}
       {kind === "acr1552" && (
         <SettingsSection title="ACR1552U-M1 PC/SC">
+          <Banner tone="info">
+            读卡器返回四字节
+            UID。校园数据库存十进制卡号时，请在“校园数据源”的新配置中将“卡号表示”选择为“无符号十进制”并完整覆盖配置。
+            此处的字节顺序决定 UID
+            数值；仅在实卡对照确认后更改，所有教师端应保持一致，更改后同一卡片的学生
+            ID 也会改变。
+          </Banner>
           <SettingsRow label="PC/SC 读卡器">
             <Select
               aria-label="PC/SC 读卡器"
@@ -735,6 +759,52 @@ export function ReaderSettings({
               value={acrPollMs}
               onChange={(e) => setAcrPollMs(Number(e.target.value))}
             />
+          </SettingsRow>
+          <SettingsRow
+            label="UID 字节顺序"
+            description={`转换示例（非实际卡号）：响应 01 02 03 04 → UID ${acrByteOrder === "forward" ? "01020304" : "04030201"} → 十进制 ${acrByteOrder === "forward" ? "16909060" : "67305985"}。不截断 7/10 字节 UID，不拆分卡号，也不自动尝试其他格式。`}
+          >
+            <Select
+              aria-label="UID 字节顺序"
+              value={acrByteOrder}
+              onChange={(e) =>
+                setAcrByteOrder(e.target.value as "forward" | "reverse")
+              }
+            >
+              <option value="forward">保持响应顺序（高位字节在前）</option>
+              <option value="reverse">反转四字节（低位字节在前）</option>
+            </Select>
+          </SettingsRow>
+          <SettingsRow
+            label="PC/SC 通信协议"
+            description="用于驱动兼容，不改变卡号进制。通常保持自动协商。"
+          >
+            <Select
+              aria-label="PC/SC 通信协议"
+              value={acrProtocol}
+              onChange={(e) =>
+                setAcrProtocol(e.target.value as "auto" | "t0" | "t1")
+              }
+            >
+              <option value="auto">自动协商（默认）</option>
+              <option value="t0">T=0</option>
+              <option value="t1">T=1</option>
+            </Select>
+          </SettingsRow>
+          <SettingsRow
+            label="PC/SC 访问模式"
+            description="通常使用共享；独占模式需要其他读卡软件释放设备。"
+          >
+            <Select
+              aria-label="PC/SC 访问模式"
+              value={acrAccessMode}
+              onChange={(e) =>
+                setAcrAccessMode(e.target.value as "shared" | "exclusive")
+              }
+            >
+              <option value="shared">共享（默认）</option>
+              <option value="exclusive">独占</option>
+            </Select>
           </SettingsRow>
         </SettingsSection>
       )}

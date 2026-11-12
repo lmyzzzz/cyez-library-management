@@ -20,6 +20,9 @@ export const readerProcessSchema = z.discriminatedUnion("kind", [
             !/[\x00-\x1f\x7f]/.test(name),
         ),
       pollMs: z.number().int().min(100).max(2000),
+      uidByteOrder: z.enum(["forward", "reverse"]).default("forward"),
+      protocol: z.enum(["auto", "t0", "t1"]).default("auto"),
+      accessMode: z.enum(["shared", "exclusive"]).default("shared"),
     })
     .strict(),
   z

@@ -125,6 +125,16 @@ test("正式安装包首次配置、登录、设备管理与手动输入可用�
       ),
     ).rejects.toThrow("IPC_FORBIDDEN");
     await page.getByRole("button", { name: "读卡器", exact: true }).click();
+    await page.getByLabel("读卡进程").selectOption("acr1552");
+    await expect(page.getByLabel("UID 字节顺序")).toHaveValue("forward");
+    await expect(page.getByLabel("PC/SC 通信协议")).toHaveValue("auto");
+    await expect(page.getByLabel("PC/SC 访问模式")).toHaveValue("shared");
+    await page.getByLabel("UID 字节顺序").selectOption("reverse");
+    await expect(page.getByText(/十进制 67305985/)).toBeVisible();
+    await page.getByLabel("PC/SC 通信协议").selectOption("t1");
+    await page.getByLabel("PC/SC 访问模式").selectOption("exclusive");
+    await page.getByLabel("PC/SC 访问模式").scrollIntoViewIfNeeded();
+    await page.screenshot({ path: "test-results/release/acr1552-options.png" });
     await expect(page.getByRole("option", { name: "手动输入" })).toHaveCount(1);
     await page.getByLabel("读卡进程").selectOption("mock");
     await page.getByRole("button", { name: "覆盖并启动" }).click();

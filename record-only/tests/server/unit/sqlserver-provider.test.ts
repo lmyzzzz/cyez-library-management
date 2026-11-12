@@ -26,6 +26,9 @@ describe("SQL Server 固定视图查询", () => {
     expect(uidForSqlServer("00000001", "hex8")).toBe("00000001");
     expect(uidForSqlServer("00000001", "decimal")).toBe("1");
     expect(uidForSqlServer("ffffffff", "decimal")).toBe("4294967295");
+    // Match the ACR1552U settings examples after hardware byte-order normalization.
+    expect(uidForSqlServer("01020304", "decimal")).toBe("16909060");
+    expect(uidForSqlServer("04030201", "decimal")).toBe("67305985");
     expect(() => uidForSqlServer("1", "decimal")).toThrow();
   });
   it("不接受任何字段映射或其他未知设置", () => {

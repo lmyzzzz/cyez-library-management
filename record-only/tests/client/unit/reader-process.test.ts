@@ -120,6 +120,12 @@ describe("Wiegand-34 独立读卡进程", () => {
       "ACS ACR1552U PICC 0",
       "--poll-ms",
       "250",
+      "--uid-byte-order",
+      "forward",
+      "--protocol",
+      "auto",
+      "--access-mode",
+      "shared",
     ]);
     expect(
       resolveReaderExecutable(
@@ -147,6 +153,35 @@ describe("Wiegand-34 独立读卡进程", () => {
       readerProcessSchema.safeParse({ ...choice, uidFormat: "reverse" })
         .success,
     ).toBe(false);
+    expect(
+      readerArguments(
+        readerProcessSchema.parse({
+          ...choice,
+          uidByteOrder: "reverse",
+          protocol: "t1",
+          accessMode: "exclusive",
+        }),
+      ),
+    ).toEqual([
+      "--reader",
+      "ACS ACR1552U PICC 0",
+      "--poll-ms",
+      "250",
+      "--uid-byte-order",
+      "reverse",
+      "--protocol",
+      "t1",
+      "--access-mode",
+      "exclusive",
+    ]);
+    for (const extra of [
+      { uidByteOrder: "decimal" },
+      { protocol: "raw" },
+      { accessMode: "direct" },
+    ])
+      expect(
+        readerProcessSchema.safeParse({ ...choice, ...extra }).success,
+      ).toBe(false);
   });
 
   it("实际 Rust 子进程输出握手与无损 4 字节 UID", async () => {

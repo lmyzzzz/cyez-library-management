@@ -270,7 +270,14 @@ void app.whenReady().then(async () => {
     const listAcr1552Readers = async () => {
       try {
         const executable = resolveReaderExecutable(
-          { kind: "acr1552", reader: "ACR1552", pollMs: 250 },
+          {
+            kind: "acr1552",
+            reader: "ACR1552",
+            pollMs: 250,
+            uidByteOrder: "forward",
+            protocol: "auto",
+            accessMode: "shared",
+          },
           environment,
           app.getAppPath(),
           process.resourcesPath,
