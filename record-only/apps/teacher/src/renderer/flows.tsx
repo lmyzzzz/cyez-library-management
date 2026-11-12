@@ -77,6 +77,7 @@ export function EndForm({
   onDone,
   onCancel,
   onBusy,
+  confirmSignal = 0,
 }: {
   preview: EndFlow;
   automatic: boolean;
@@ -84,6 +85,7 @@ export function EndForm({
   onDone: () => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
+  confirmSignal?: number;
 }) {
   const record = preview.record!;
   const [notes, setNotes] = useState(record.notes),
@@ -93,11 +95,13 @@ export function EndForm({
       automatic ? 5000 : null,
     );
   const sent = useRef(false);
+  const connected = useRef(online);
+  connected.current = online;
   const latest = useRef(notes);
   latest.current = notes;
   const timer = useRef<EndTimer | null>(null);
   const submit = async () => {
-    if (sent.current) return;
+    if (sent.current || !connected.current) return;
     sent.current = true;
     setBusy(true);
     onBusy(true);
@@ -119,6 +123,10 @@ export function EndForm({
       onBusy(false);
     }
   };
+  useEffect(() => {
+    if (!confirmSignal) return;
+    void submit();
+  }, [confirmSignal]);
   useEffect(() => {
     if (!automatic) return;
     timer.current = new EndTimer(
@@ -180,7 +188,7 @@ export function EndForm({
           <Button
             size="small"
             variant="primary"
-            disabled={busy}
+            disabled={busy || !online}
             onClick={() => void submit()}
           >
             {busy ? "确认中…" : "确认结束"}
@@ -359,7 +367,7 @@ export function EndForm({
             <button
               type="button"
               className="bflow-btn primary"
-              disabled={busy}
+              disabled={busy || !online}
               onClick={() => void submit()}
             >
               {busy ? "确认中…" : "确认结束"}
@@ -377,12 +385,14 @@ export function Registration({
   onDone,
   onCancel,
   onBusy,
+  confirmSignal = 0,
 }: {
   preview: ScanPreview;
   online?: boolean;
   onDone: () => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
+  confirmSignal?: number;
 }) {
   const [notes, setNotes] = useState(""),
     [selected, setSelected] = useState<DeviceDTO | null>(null),
@@ -464,6 +474,7 @@ export function Registration({
     };
   }, [ready]);
   const submit = async () => {
+    if (!online || release || releaseBusy) return;
     if (sending.current || !selected || !timer.current?.submit()) return;
     sending.current = true;
     setBusy(true);
@@ -487,6 +498,10 @@ export function Registration({
       onBusy(false);
     }
   };
+  useEffect(() => {
+    if (!confirmSignal) return;
+    void submit();
+  }, [confirmSignal]);
   const startRelease = async (device: DeviceDTO) => {
     if (!device.active || releaseBusy) return;
     setReleaseBusy(true);

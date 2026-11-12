@@ -195,6 +195,33 @@ async function openBatchMenu() {
 }
 
 describe("C-U-01/05 主页面门控和状态", () => {
+  it("已取消预览的确认事件不能提交新流程，同预览确认才提交一次", async () => {
+    show();
+    await screen.findByText(device.displayName);
+    act(() => listener?.({ type: "scan", preview }));
+    await screen.findByRole("button", { name: "取消选择 PC-02" });
+    fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
+    act(() => listener?.({ type: "confirm", previewId: preview.id }));
+    const next = { ...preview, id: "preview-2" };
+    act(() => listener?.({ type: "scan", preview: next }));
+    await screen.findByRole("button", { name: "取消选择 PC-02" });
+    act(() => listener?.({ type: "confirm", previewId: preview.id }));
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(0);
+    act(() => listener?.({ type: "confirm", previewId: next.id }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("start", {
+        previewId: next.id,
+        deviceId: free.id,
+        notes: "",
+      }),
+    );
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(1);
+  });
+
   it("自动更新只修改数据，保留勾选、滚动和弹窗草稿及焦点", async () => {
     vi.useFakeTimers();
     try {

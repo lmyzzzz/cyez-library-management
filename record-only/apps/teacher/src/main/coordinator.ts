@@ -39,6 +39,8 @@ export class Coordinator {
   online = false;
   lastSuccessMs: number | null = null;
   private gate = { page: "settings", modal: false, submitting: false };
+  private activeCard: { studentId: string; previewId: string } | null = null;
+  private scanRevision = 0;
   private scanning = false;
   private writing = false;
   private recovering = false;
@@ -84,6 +86,8 @@ export class Coordinator {
     });
   }
   async configure(connection: Connection) {
+    this.activeCard = null;
+    this.scanRevision++;
     await this.sdk?.close();
     this.sdk = undefined;
     this.online = false;
@@ -140,7 +144,30 @@ export class Coordinator {
     }
   }
   async onCard(event: CardEvent) {
+    let ownsScan = false;
     try {
+      if (this.gate.page === "flow" && this.activeCard) {
+        if (this.activeCard.studentId === event.studentId) {
+          if (
+            this.gate.modal ||
+            this.gate.submitting ||
+            this.writing ||
+            this.scanning
+          ) {
+            this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+            return;
+          }
+          if (!this.online || !this.sdk?.authenticated) {
+            this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" });
+            return;
+          }
+          // 同一张卡再次刷卡等同于当前流程的“确认”。
+          this.emit({ type: "confirm", previewId: this.activeCard.previewId });
+          return;
+        }
+        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+        return;
+      }
       if (
         this.gate.page !== "devices" ||
         this.gate.modal ||
@@ -156,9 +183,20 @@ export class Coordinator {
         return;
       }
       this.scanning = true;
+      ownsScan = true;
+      const revision = this.scanRevision;
+      const sdk = this.sdk;
       const preview = await this.network(() =>
-        this.sdk!.call<ScanPreview>("POST", "/api/v1/scan-previews", event),
+        sdk.call<ScanPreview>("POST", "/api/v1/scan-previews", event),
       );
+      // A late lookup must not reopen a flow after navigation or a session change.
+      if (
+        revision !== this.scanRevision ||
+        sdk !== this.sdk ||
+        !sdk.authenticated
+      )
+        return;
+      this.activeCard = { studentId: event.studentId, previewId: preview.id };
       this.gate.page = "flow";
       this.emit({ type: "scan", preview });
     } catch (e) {
@@ -173,7 +211,7 @@ export class Coordinator {
         scanId: event.scanId,
       });
     } finally {
-      this.scanning = false;
+      if (ownsScan) this.scanning = false;
       event.card.uidHex = "";
       event.card.issuer = "";
     }
@@ -465,7 +503,14 @@ export class Coordinator {
       case "status":
         return this.status();
       case "gate":
+        if (
+          data.page !== this.gate.page ||
+          data.modal !== this.gate.modal ||
+          data.submitting !== this.gate.submitting
+        )
+          this.scanRevision++;
         this.gate = data as typeof this.gate;
+        if (this.gate.page !== "flow") this.activeCard = null;
         return { ok: true };
       case "login":
         let saved: boolean;
@@ -486,6 +531,8 @@ export class Coordinator {
         await this.saveLoginSettings(null, false);
         return { ok: true };
       case "logout":
+        this.activeCard = null;
+        this.scanRevision++;
         try {
           await this.sdk?.logout();
         } finally {
@@ -508,6 +555,11 @@ export class Coordinator {
         });
         return { ok: true };
     }
+    if (
+      action === "cancelPreview" &&
+      data.previewId === this.activeCard?.previewId
+    )
+      this.activeCard = null;
     const sdk = this.requireSdk();
     const query = (value: Record<string, unknown>) =>
       new URLSearchParams(

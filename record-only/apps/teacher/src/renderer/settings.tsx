@@ -762,7 +762,7 @@ export function ReaderSettings({
           </SettingsRow>
           <SettingsRow
             label="UID 字节顺序"
-            description={`转换示例（非实际卡号）：响应 01 02 03 04 → UID ${acrByteOrder === "forward" ? "01020304" : "04030201"} → 十进制 ${acrByteOrder === "forward" ? "16909060" : "67305985"}。不截断 7/10 字节 UID，不拆分卡号，也不自动尝试其他格式。`}
+            description={`转换示例（非实际卡号）：响应 01 02 03 04，UID ${acrByteOrder === "forward" ? "01020304" : "04030201"}，十进制 ${acrByteOrder === "forward" ? "16909060" : "67305985"}。不截断 7/10 字节 UID，不拆分卡号，也不自动尝试其他格式。`}
           >
             <Select
               aria-label="UID 字节顺序"

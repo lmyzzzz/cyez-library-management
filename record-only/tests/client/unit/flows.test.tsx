@@ -62,6 +62,117 @@ const free: DeviceDTO = {
 };
 
 describe("C-U 登记、结束与批量确认", () => {
+  it("释放弹窗与过期登记不能被二次刷卡绕过", async () => {
+    let now = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
+    const onCancel = vi.fn();
+    call.mockImplementation(async (action) => {
+      if (action === "devices")
+        return {
+          devices: {
+            items: [free, { ...free, id: "occupied", code: "PC-02", active }],
+            total: 2,
+            page: 1,
+            pageSize: 20,
+          },
+        };
+      if (action === "endPreview")
+        return {
+          ...preview,
+          id: "release-preview",
+          mode: "end",
+          record: active,
+        };
+      return {};
+    });
+    const form = (confirmSignal: number) => (
+      <Registration
+        preview={preview}
+        confirmSignal={confirmSignal}
+        onDone={vi.fn()}
+        onCancel={onCancel}
+        onBusy={vi.fn()}
+      />
+    );
+    try {
+      const view = render(form(0));
+      await screen.findByRole("button", { name: "取消选择 PC-01" });
+      fireEvent.click(screen.getByRole("button", { name: /^释放 / }));
+      await screen.findByText("释放这台设备？");
+      view.rerender(form(1));
+      expect(
+        call.mock.calls.filter(
+          ([action]) => action === "start" || action === "end",
+        ),
+      ).toHaveLength(0);
+      fireEvent.click(screen.getByRole("button", { name: "取消" }));
+      now = 10001;
+      view.rerender(form(2));
+      expect(onCancel).toHaveBeenCalledOnce();
+      expect(
+        call.mock.calls.filter(([action]) => action === "start"),
+      ).toHaveLength(0);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it.each(["start", "end"])(
+    "%s 二次刷卡离线不提交，重连不重放，连续确认只提交一次",
+    async (mode) => {
+      let finish!: () => void;
+      call.mockImplementation(async (action) => {
+        if (action === "devices")
+          return {
+            devices: { items: [free], total: 1, page: 1, pageSize: 20 },
+          };
+        return new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      });
+      const onDone = vi.fn();
+      const form = (online: boolean, confirmSignal: number) =>
+        mode === "start" ? (
+          <Registration
+            preview={preview}
+            online={online}
+            confirmSignal={confirmSignal}
+            onDone={onDone}
+            onCancel={vi.fn()}
+            onBusy={vi.fn()}
+          />
+        ) : (
+          <EndForm
+            preview={{ ...preview, mode: "end", record: active }}
+            automatic
+            online={online}
+            confirmSignal={confirmSignal}
+            onDone={onDone}
+            onCancel={vi.fn()}
+            onBusy={vi.fn()}
+          />
+        );
+      const view = render(form(true, 0));
+      if (mode === "start")
+        await screen.findByRole("button", { name: "取消选择 PC-01" });
+      view.rerender(form(false, 1));
+      expect(
+        call.mock.calls.filter(([action]) => action === mode),
+      ).toHaveLength(0);
+      view.rerender(form(true, 1));
+      expect(
+        call.mock.calls.filter(([action]) => action === mode),
+      ).toHaveLength(0);
+      view.rerender(form(true, 2));
+      view.rerender(form(true, 3));
+      expect(
+        call.mock.calls.filter(([action]) => action === mode),
+      ).toHaveLength(1);
+      finish();
+      await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
+    },
+  );
+
   it("登记选择可用设备并提交，禁用和占用设备不能直接分配", async () => {
     call.mockImplementation(async (action) =>
       action === "devices"
@@ -300,5 +411,77 @@ describe("C-U 登记、结束与批量确认", () => {
     });
     expect(onDone).not.toHaveBeenCalled();
     expect(screen.getByText(/失败后保留已完成批次/)).toBeTruthy();
+  });
+
+  it("再次刷同一张卡等同点击确认登记", async () => {
+    call.mockImplementation(async (action) =>
+      action === "devices"
+        ? {
+            devices: { items: [free], total: 1, page: 1, pageSize: 20 },
+          }
+        : {},
+    );
+    const onDone = vi.fn();
+    const view = render(
+      <Registration
+        preview={preview}
+        confirmSignal={0}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await screen.findByRole("button", { name: "取消选择 PC-01" });
+    view.rerender(
+      <Registration
+        preview={preview}
+        confirmSignal={1}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("start", {
+        previewId: preview.id,
+        deviceId: free.id,
+        notes: "",
+      }),
+    );
+    expect(onDone).toHaveBeenCalledOnce();
+  });
+
+  it("再次刷同一张卡立即确认结束", async () => {
+    const end = { ...preview, mode: "end" as const, record: active };
+    const onDone = vi.fn();
+    const view = render(
+      <EndForm
+        preview={end}
+        automatic
+        confirmSignal={0}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    view.rerender(
+      <EndForm
+        preview={end}
+        automatic
+        confirmSignal={1}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("end", {
+        recordId: active.id,
+        expectedVersion: active.version,
+        previewId: preview.id,
+        notes: active.notes,
+      }),
+    );
+    expect(onDone).toHaveBeenCalledOnce();
   });
 });

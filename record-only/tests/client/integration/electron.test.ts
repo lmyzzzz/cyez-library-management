@@ -383,6 +383,48 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
     fullPage: true,
   });
 });
+test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async () => {
+  await page.getByRole("link", { name: "使用登记", exact: true }).click();
+  await page.getByRole("button", { name: "未使用", exact: true }).click();
+  await page.waitForTimeout(1300);
+  const before = scans;
+  await call("integrationScan", { fixture: "allowed-2" });
+  await expect(
+    page.getByRole("heading", { name: "选择设备", exact: true }),
+  ).toBeVisible();
+  await selectDevice(page, "E2E-001");
+  await page.getByLabel("登记备注", { exact: true }).fill("二刷确认集成验证");
+  await page.waitForTimeout(1300);
+  await call("integrationScan", { fixture: "allowed-2" });
+  await expect(
+    page.getByRole("heading", { name: "选择设备", exact: true }),
+  ).toHaveCount(0);
+  expect(scans).toBe(before + 1);
+  await page.getByRole("button", { name: "使用中", exact: true }).click();
+  await expect(
+    page.getByText("二刷确认集成验证", { exact: true }),
+  ).toBeVisible();
+  await page.waitForTimeout(1300);
+  await call("integrationScan", { fixture: "allowed-2" });
+  await expect(
+    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+  ).toBeVisible();
+  // Editing pauses automatic checkout, so only the second scan can end this record.
+  await page.getByLabel("使用备注", { exact: true }).fill("二刷确认结束验证");
+  await page.waitForTimeout(1300);
+  await call("integrationScan", { fixture: "allowed-2" });
+  await expect(
+    page.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+  ).toHaveCount(0);
+  expect(scans).toBe(before + 2);
+  await page.getByRole("link", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "历史记录", exact: true }).click();
+  await expect(
+    page.getByText("二刷确认结束验证", { exact: true }),
+  ).toBeVisible();
+  expect(scans).toBe(before + 2);
+});
+
 test("C-I-10/04/05: OS 加密保存与真实 SQLite 跨重启，origin 隔离", async () => {
   await login();
   await desktop.close();

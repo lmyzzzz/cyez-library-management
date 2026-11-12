@@ -79,7 +79,88 @@ async function login() {
   });
 }
 
+const cardEvent = () => ({
+  scanId: randomUUID(),
+  studentId: "a".repeat(64),
+  hashVersion: "v1",
+  card: { issuer: "test", uidHex: "00000001" },
+  source: "integration" as const,
+});
+const devicesGate = { page: "devices", modal: false, submitting: false };
+
 describe("C-U main 协调器", () => {
+  it.each([
+    "offline",
+    "expired-auth",
+    "modal",
+    "submitting",
+    "cancel",
+    "configure",
+    "logout",
+  ])("当前预览在 %s 状态不允许同卡确认", async (state) => {
+    await login();
+    await coordinator.call("gate", devicesGate);
+    await coordinator.onCard(cardEvent());
+    const scan = events.find((e: any) => e.type === "scan") as {
+      preview: { id: string };
+    };
+    const count = traffic.filter(
+      (t) => t.path === "/api/v1/scan-previews",
+    ).length;
+    if (state === "offline" || state === "cancel") coordinator.online = false;
+    if (state === "expired-auth") {
+      response = () => Promise.reject(new ApiError("AUTH_REQUIRED", 401));
+      await expect(coordinator.call("tags", {})).rejects.toThrow();
+    }
+    if (state === "modal" || state === "submitting")
+      await coordinator.call("gate", {
+        page: "flow",
+        modal: state === "modal",
+        submitting: state === "submitting",
+      });
+    if (state === "cancel") {
+      await expect(
+        coordinator.call("cancelPreview", { previewId: scan.preview.id }),
+      ).rejects.toThrow("OFFLINE_NO_WRITE");
+      coordinator.online = true;
+    }
+    if (state === "configure") await login();
+    if (state === "logout") await coordinator.call("logout", {});
+    const event = cardEvent();
+    await coordinator.onCard(event);
+    expect(event.card).toEqual({ issuer: "", uidHex: "" });
+    expect(events.filter((e: any) => e.type === "confirm")).toHaveLength(0);
+    expect(
+      traffic.filter((t) => t.path === "/api/v1/scan-previews"),
+    ).toHaveLength(count);
+  });
+
+  it("被拒绝的并发刷卡不解除扫描锁，离开页面后的迟到预览不重开流程", async () => {
+    await login();
+    await coordinator.call("gate", devicesGate);
+    let resolve!: (value: unknown) => void;
+    response = () =>
+      new Promise((done) => {
+        resolve = done;
+      });
+    const first = cardEvent();
+    const pending = coordinator.onCard(first);
+    await coordinator.onCard(cardEvent());
+    await coordinator.onCard(cardEvent());
+    expect(
+      traffic.filter((t) => t.path === "/api/v1/scan-previews"),
+    ).toHaveLength(1);
+    await coordinator.call("gate", { ...devicesGate, page: "settings" });
+    await coordinator.call("gate", devicesGate);
+    resolve({ id: randomUUID(), mode: "start" });
+    await pending;
+    expect(first.card).toEqual({ issuer: "", uidHex: "" });
+    expect(events.filter((e: any) => e.type === "scan")).toHaveLength(0);
+    response = () => ({ id: randomUUID(), mode: "start" });
+    await coordinator.onCard(cardEvent());
+    expect(events.filter((e: any) => e.type === "scan")).toHaveLength(1);
+  });
+
   it("校园配置发送后立即清除，失败也不写本地队列、设置或日志", async () => {
     await login();
     const beforeSettings = JSON.stringify(await store.settings.findAll());
@@ -193,6 +274,25 @@ describe("C-U main 协调器", () => {
     expect(events.some((e) => (e as { type: string }).type === "scan")).toBe(
       true,
     );
+    const scanCount = traffic.filter(
+      (t) => t.path === "/api/v1/scan-previews",
+    ).length;
+    await coordinator.onCard({ ...input, card: { ...input.card } });
+    expect(
+      traffic.filter((t) => t.path === "/api/v1/scan-previews"),
+    ).toHaveLength(scanCount);
+    expect(
+      events.filter((e) => (e as { type: string }).type === "confirm"),
+    ).toHaveLength(1);
+    await coordinator.onCard({
+      ...input,
+      scanId: randomUUID(),
+      studentId: "b".repeat(64),
+      card: { issuer: "test", uidHex: "00000002" },
+    });
+    expect(
+      events.filter((e) => (e as { type: string }).type === "confirm"),
+    ).toHaveLength(1);
     await coordinator.call("gate", {
       page: "devices",
       modal: true,
