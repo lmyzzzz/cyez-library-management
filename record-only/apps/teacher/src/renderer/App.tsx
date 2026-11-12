@@ -121,6 +121,7 @@ export function App() {
     [tab, setTab] = useState("connection"),
     [selected, setSelected] = useState<string[]>([]),
     [flow, setFlow] = useState<ScanPreview | null>(null),
+    [confirmSignal, setConfirmSignal] = useState(0),
     [modal, setModal] = useState<ModalState>(null),
     [childModal, setChildModal] = useState(false),
     [busy, setBusy] = useState(false),
@@ -130,10 +131,14 @@ export function App() {
     [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const polling = useRef(false),
     delay = useRef(3000),
-    tagsRevision = useRef(0);
+    tagsRevision = useRef(0),
+    activeFlowId = useRef<string | null>(null);
   const cancelPreview = (previewId: string) => {
     void window.library.call("cancelPreview", { previewId }).catch(() => {});
   };
+  useEffect(() => {
+    activeFlowId.current = flow?.id ?? null;
+  }, [flow?.id]);
   const refreshStatus = useCallback(async () => {
     setStatus(await window.library.call<LocalStatus>("status", {}));
   }, []);
@@ -252,8 +257,12 @@ export function App() {
       window.library.subscribe((event) => {
         if (event.type === "scan") {
           setNotice(undefined);
+          setConfirmSignal(0);
           setFlow(event.preview);
           navigate("/");
+        } else if (event.type === "confirm") {
+          if (activeFlowId.current === event.previewId)
+            setConfirmSignal((value) => value + 1);
         } else if (event.type === "notice") {
           const message = errorText(event.code);
           setNotice(message);
@@ -765,6 +774,7 @@ export function App() {
               onDone={done}
               onCancel={closeFlow}
               onBusy={setBusy}
+              confirmSignal={confirmSignal}
             />
           ) : (
             <EndForm
@@ -775,6 +785,7 @@ export function App() {
               onDone={done}
               onCancel={closeFlow}
               onBusy={setBusy}
+              confirmSignal={confirmSignal}
             />
           )}
         </div>

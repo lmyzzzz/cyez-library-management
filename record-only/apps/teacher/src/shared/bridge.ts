@@ -108,6 +108,7 @@ export interface LocalStatus {
 }
 export type TeacherEvent =
   | { type: "scan"; preview: ScanPreview }
+  | { type: "confirm"; previewId: string }
   | { type: "notice"; code: string }
   | { type: "changed" };
 export interface TeacherBridge {

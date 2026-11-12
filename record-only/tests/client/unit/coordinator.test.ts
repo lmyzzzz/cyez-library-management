@@ -193,6 +193,24 @@ describe("C-U main 协调器", () => {
     expect(events.some((e) => (e as { type: string }).type === "scan")).toBe(
       true,
     );
+    const scanCount = traffic.filter(
+      (t) => t.path === "/api/v1/scan-previews",
+    ).length;
+    await coordinator.onCard({ ...input, card: { ...input.card } });
+    expect(
+      traffic.filter((t) => t.path === "/api/v1/scan-previews"),
+    ).toHaveLength(scanCount);
+    expect(
+      events.filter((e) => (e as { type: string }).type === "confirm"),
+    ).toHaveLength(1);
+    await coordinator.onCard({
+      ...input,
+      scanId: randomUUID(),
+      card: { issuer: "test", uidHex: "00000002" },
+    });
+    expect(
+      events.filter((e) => (e as { type: string }).type === "confirm"),
+    ).toHaveLength(1);
     await coordinator.call("gate", {
       page: "devices",
       modal: true,

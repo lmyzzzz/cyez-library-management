@@ -39,6 +39,7 @@ export class Coordinator {
   online = false;
   lastSuccessMs: number | null = null;
   private gate = { page: "settings", modal: false, submitting: false };
+  private activeCard: { uidHex: string; previewId: string } | null = null;
   private scanning = false;
   private writing = false;
   private recovering = false;
@@ -141,6 +142,24 @@ export class Coordinator {
   }
   async onCard(event: CardEvent) {
     try {
+      if (this.gate.page === "flow" && this.activeCard) {
+        if (this.activeCard.uidHex === event.card.uidHex) {
+          if (
+            this.gate.modal ||
+            this.gate.submitting ||
+            this.writing ||
+            this.scanning
+          ) {
+            this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+            return;
+          }
+          // 同一张卡再次刷卡等同于当前流程的“确认”。
+          this.emit({ type: "confirm", previewId: this.activeCard.previewId });
+          return;
+        }
+        this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+        return;
+      }
       if (
         this.gate.page !== "devices" ||
         this.gate.modal ||
@@ -159,6 +178,7 @@ export class Coordinator {
       const preview = await this.network(() =>
         this.sdk!.call<ScanPreview>("POST", "/api/v1/scan-previews", event),
       );
+      this.activeCard = { uidHex: event.card.uidHex, previewId: preview.id };
       this.gate.page = "flow";
       this.emit({ type: "scan", preview });
     } catch (e) {
@@ -466,6 +486,7 @@ export class Coordinator {
         return this.status();
       case "gate":
         this.gate = data as typeof this.gate;
+        if (this.gate.page !== "flow") this.activeCard = null;
         return { ok: true };
       case "login":
         let saved: boolean;

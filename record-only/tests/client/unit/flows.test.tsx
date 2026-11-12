@@ -301,4 +301,76 @@ describe("C-U 登记、结束与批量确认", () => {
     expect(onDone).not.toHaveBeenCalled();
     expect(screen.getByText(/失败后保留已完成批次/)).toBeTruthy();
   });
+
+  it("再次刷同一张卡等同点击确认登记", async () => {
+    call.mockImplementation(async (action) =>
+      action === "devices"
+        ? {
+            devices: { items: [free], total: 1, page: 1, pageSize: 20 },
+          }
+        : {},
+    );
+    const onDone = vi.fn();
+    const view = render(
+      <Registration
+        preview={preview}
+        confirmSignal={0}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await screen.findByRole("button", { name: "取消选择 PC-01" });
+    view.rerender(
+      <Registration
+        preview={preview}
+        confirmSignal={1}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("start", {
+        previewId: preview.id,
+        deviceId: free.id,
+        notes: "",
+      }),
+    );
+    expect(onDone).toHaveBeenCalledOnce();
+  });
+
+  it("再次刷同一张卡立即确认结束", async () => {
+    const end = { ...preview, mode: "end" as const, record: active };
+    const onDone = vi.fn();
+    const view = render(
+      <EndForm
+        preview={end}
+        automatic
+        confirmSignal={0}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    view.rerender(
+      <EndForm
+        preview={end}
+        automatic
+        confirmSignal={1}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("end", {
+        recordId: active.id,
+        expectedVersion: active.version,
+        previewId: preview.id,
+        notes: active.notes,
+      }),
+    );
+    expect(onDone).toHaveBeenCalledOnce();
+  });
 });
