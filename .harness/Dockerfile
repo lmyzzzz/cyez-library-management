@@ -58,7 +58,7 @@ FROM node:24-bookworm-slim
 # only checks @deepseek-ai/dsh* peerDependencies -- no `compatibility` field).
 # Overridable at build time; docker-build.bat passes no build args, so this is
 # the default unless the bat is edited (a same-tag rebuild is then a cache hit).
-ARG DSH_VERSION=0.2.1-rc.1
+ARG DSH_VERSION=0.2.2-rc.1
 
 # GIT_OPTIONAL_LOCKS=0: .git is bind-mounted read-only, so git must not attempt
 # its optional index refresh/write. Without this, status/diff still work, but
