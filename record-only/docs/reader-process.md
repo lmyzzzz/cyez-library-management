@@ -6,7 +6,7 @@
 
 ## UID 与职责
 
-本接口只接收 4 字节 UID，统一以 8 位小写十六进制输出（数据位最高位在前）；不能删前导零、反转字节或拆分 facility/card number。`00000001`、`abcdef01`、`ffffffff` 均为有效 UID，不是十进制卡号输入。不同传输适配器负责各自的硬件层：**Wiegand 接口**读卡器处理设备/驱动传输、34 位帧及奇偶校验——第 1 位与前 16 个数据位组成偶校验，第 34 位与后 16 个数据位组成奇校验，只取中间 32 个数据位；**串口进程**按设置页选择的进制解析每行卡号，不处理 Wiegand 帧或奇偶校验；**ACR1552U PC/SC 进程**直接读取 `FF CA 00 00 00` 返回的恰好 4 字节 UID/PUPI/SN，也不套用 Wiegand 帧规则。后两种来源不得据 Wiegand 规则推断字节序或截断/补齐长度。
+本接口只接收 4 字节规范 UID，统一以 8 位小写十六进制输出（数据位最高位在前）；不能删前导零、自动猜测字节序或拆分 facility/card number。`00000001`、`abcdef01`、`ffffffff` 均为有效 UID，不是十进制卡号输入。不同传输适配器负责各自的硬件层：**Wiegand 接口**读卡器处理设备/驱动传输、34 位帧及奇偶校验——第 1 位与前 16 个数据位组成偶校验，第 34 位与后 16 个数据位组成奇校验，只取中间 32 个数据位；**串口进程**按设置页选择的进制解析每行卡号，不处理 Wiegand 帧或奇偶校验；**ACR1552U PC/SC 进程**直接读取 `FF CA 00 00 00` 返回的恰好 4 字节 UID/PUPI/SN，可按显式配置保持或反转四字节响应以对应发行方卡号，也不套用 Wiegand 帧规则。后两种来源不得据 Wiegand 规则推断字节序或截断/补齐长度。规范 UID 进入 IPC 后不再反转；十进制数据库由服务端 provider 负责数值表示转换。
 
 读卡进程不接收固定盐或校园 API 凭证。Electron main 收到 UID 后立即调用已有 `CardReader` 计算固定盐 SHA-256 学生 ID；去重、页面门控、HTTPS 查询和本地缓存更新沿用业务规格。原 UID 只短时经过读卡进程、继承管道和本次查询内存，不进入 renderer、日志、SQLite 或重放队列。可写 buffer 在交付/错误/关闭时覆写；不承诺操作系统、GUI 控件或运行时副本的物理擦除。
 
@@ -28,14 +28,24 @@ main 用 `spawn(executable, args, {shell:false, stdio:["pipe","pipe","pipe"]})` 
 
 ## ACR1552U-M1 PC/SC 进程
 
-ACR1552U-M1 为 USB-A 版本，Windows 下使用厂商 CCID 驱动暴露的 PC/SC 读卡器，不作为串口/Wiegand D0/D1 设备打开。官方 ACR1552U Series Reference Manual v1.09 第 34–35 页定义 `FF CA 00 00 00` 取卡 UID/PUPI/SN，成功响应末尾为 `90 00`。`cyez-reader-acr1552.exe` 使用 WinSCard 的读卡器枚举、状态变化和卡片传输。仅接受成功且恰好 4 字节的结果，按响应顺序输出 8 位小写十六进制；7/10 字节、失败状态及异常长度不得截断、倒序或猜测 Wiegand 编码。每次检测到卡片进入只发送一次，移卡后才重新接收；设备消失/PCSC I/O 错误发送固定 `READER_IO`，不合格响应发送固定 `INVALID_FRAME`，然后退出。父进程 shutdown/EOF 在有界状态等待内退出。
+ACR1552U-M1 为 USB-A 版本，Windows 下使用厂商 CCID 驱动暴露的 PC/SC 读卡器，不作为串口/Wiegand D0/D1 设备打开。官方 ACR1552U Series Reference Manual v1.09 第 34–35 页定义 `FF CA 00 00 00` 取卡 UID/PUPI/SN，成功响应末尾为 `90 00`。`cyez-reader-acr1552.exe` 使用 WinSCard 的读卡器枚举、状态变化和卡片传输。仅接受成功且恰好 4 字节的结果，默认按响应顺序输出 8 位小写十六进制；显式选择反序时仅反转四个 UID 字节，不处理末尾状态字。7/10 字节、失败状态及异常长度仍直接拒绝。每次检测到卡片进入只发送一次，移卡后才重新接收；设备消失/PCSC I/O 错误发送固定 `READER_IO`，不合格响应发送固定 `INVALID_FRAME`，然后退出。父进程 shutdown/EOF 在有界状态等待内退出。
 
-设置页选择“ACR1552U-M1 (PC/SC)”，点击“刷新 PC/SC 读卡器”，从枚举到的 ACR1552 系列 PICC 接口中选择精确设备名；SAM/接触式接口不进入列表，同型号多台设备不会自动切换。状态检查间隔可设为 100–2000 ms，默认 250 ms，它决定正常停止的最长等待时间，不改变 UID 规则。进程只支持 `--reader <name> --poll-ms <100..2000>`；`--list-readers` 一次性返回 `{"readers":[...]}`。选定设备不在枚举中或 WinSCard 服务不可用时启动失败，教师端恢复原进程并显示故障。无需在 UI 设置串口参数、APDU 字节序、扇区或厂商键盘仿真模式；键盘仿真是设备固件配置，不属于 PC/SC 读卡进程。
+设置页选择“ACR1552U-M1 (PC/SC)”，点击“刷新 PC/SC 读卡器”，从枚举到的 ACR1552 系列 PICC 接口中选择精确设备名；SAM/接触式接口不进入列表，同型号多台设备不会自动切换。状态检查间隔可设为 100–2000 ms，默认 250 ms，它决定正常停止的最长等待时间，不改变 UID 规则。2026-11-12 新增以下完整覆盖选项，旧配置省略字段时仍用原默认值：
+
+| UI 设置 / 字段 | CLI 参数与值 | 默认 / 作用 |
+| --- | --- | --- |
+| UID 字节顺序 / `uidByteOrder` | `--uid-byte-order forward\|reverse` | `forward` 保持响应顺序；`reverse` 反转四字节 |
+| PC/SC 通信协议 / `protocol` | `--protocol auto\|t0\|t1` | `auto` 协商 T=0/T=1；不支持所选协议时失败，不自动换协议 |
+| PC/SC 访问模式 / `accessMode` | `--access-mode shared\|exclusive` | `shared` 共享；独占要求其他程序释放卡片连接 |
+
+必填启动参数仍为 `--reader <name> --poll-ms <100..2000>`；新增参数可省略，重复/未知参数和无效枚举值拒绝。`--list-readers` 一次性返回 `{"readers":[...]}`。选定设备不在枚举中或 WinSCard 服务不可用时启动失败，教师端恢复原进程并显示故障；卡片连接的协议/共享冲突在刷卡时报告。固定取 UID 的 APDU 不提供编辑，不增加扇区、密钥或固件设置。
+
+数据库为十进制时，在“设置 → 校园数据源 → 卡号表示”选择“无符号十进制”，完整填写并覆盖服务端配置；教师端不读取旧数据源配置。响应样例 `01 02 03 04`：保持顺序得到 `01020304`，查询十进制 `16909060`；反转得到 `04030201`，查询 `67305985`。先用两张已知卡核对实际卡库数值，再统一所有客户端的字节序；更改规范 UID 会改变学生 ID，现有历史不自动迁移。UI 只显示上述固定示例，不接收或展示真实刷卡 UID。
 
 配置示例：
 
 ```json
-{"readerProcess":{"kind":"acr1552","reader":"ACS ACR1552U PICC 0","pollMs":250}}
+{"readerProcess":{"kind":"acr1552","reader":"ACS ACR1552U PICC 0","pollMs":250,"uidByteOrder":"forward","protocol":"auto","accessMode":"shared"}}
 ```
 
 官方产品页：https://www.acs.com.hk/en/products/575/acr1552u-usb-nfc-reader-iv/；参考手册：https://www.acs.com.hk/download-manual/13473/REF-ACR1552U-Series-1.09.pdf。实际 PC/SC 名称须以目标机器枚举结果为准。**尚缺实卡对照**：PC/SC 返回的 4 字节 UID 是否等于既有 Wiegand-34 中间 32 数据位及校园 API 接受的原卡号，必须用真实发卡样本核对；不能以编译、模拟响应或手动 mock 代替。仅 7/10 字节的卡不符合当前 4 字节协议，需业务方确认卡片/编码后才能支持，不能自行转换。

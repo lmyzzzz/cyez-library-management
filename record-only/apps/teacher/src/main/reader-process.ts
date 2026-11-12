@@ -55,7 +55,18 @@ export function resolveReaderExecutable(
 
 export function readerArguments(config: ReaderProcessConfig): string[] {
   if (config.kind === "acr1552")
-    return ["--reader", config.reader, "--poll-ms", String(config.pollMs)];
+    return [
+      "--reader",
+      config.reader,
+      "--poll-ms",
+      String(config.pollMs),
+      "--uid-byte-order",
+      config.uidByteOrder,
+      "--protocol",
+      config.protocol,
+      "--access-mode",
+      config.accessMode,
+    ];
   return config.kind === "serial"
     ? [
         "--port",

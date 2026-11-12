@@ -564,6 +564,14 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
     "",
   );
   await expect(page.getByLabel("状态检查间隔（毫秒）")).toHaveValue("250");
+  await expect(page.getByLabel("UID 字节顺序")).toHaveValue("forward");
+  await expect(page.getByLabel("PC/SC 通信协议")).toHaveValue("auto");
+  await expect(page.getByLabel("PC/SC 访问模式")).toHaveValue("shared");
+  await expect(page.getByText(/十进制 16909060/)).toBeVisible();
+  await page.getByLabel("UID 字节顺序").selectOption("reverse");
+  await page.getByLabel("PC/SC 通信协议").selectOption("t1");
+  await page.getByLabel("PC/SC 访问模式").selectOption("exclusive");
+  await expect(page.getByText(/十进制 67305985/)).toBeVisible();
   await expect(page.getByRole("button", { name: "覆盖并启动" })).toBeDisabled();
   await page.screenshot({
     path: "test-results/electron/acr1552-settings.png",

@@ -304,15 +304,46 @@ describe("C-U-05 设置和只读历史", () => {
     fireEvent.change(screen.getByLabelText("状态检查间隔（毫秒）"), {
       target: { value: "500" },
     });
+    expect(
+      (screen.getByLabelText("UID 字节顺序") as HTMLSelectElement).value,
+    ).toBe("forward");
+    expect(
+      (screen.getByLabelText("PC/SC 通信协议") as HTMLSelectElement).value,
+    ).toBe("auto");
+    expect(
+      (screen.getByLabelText("PC/SC 访问模式") as HTMLSelectElement).value,
+    ).toBe("shared");
+    expect(screen.getByText(/十进制 16909060/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("UID 字节顺序"), {
+      target: { value: "reverse" },
+    });
+    fireEvent.change(screen.getByLabelText("PC/SC 通信协议"), {
+      target: { value: "t1" },
+    });
+    fireEvent.change(screen.getByLabelText("PC/SC 访问模式"), {
+      target: { value: "exclusive" },
+    });
+    expect(screen.getByText(/十进制 67305985/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "覆盖并启动" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("configureReader", {
         kind: "acr1552",
         reader: "ACS ACR1552U PICC 0",
         pollMs: 500,
+        uidByteOrder: "reverse",
+        protocol: "t1",
+        accessMode: "exclusive",
       }),
     );
     expect(refresh).toHaveBeenCalled();
+    expect(
+      (screen.getByLabelText("UID 字节顺序") as HTMLSelectElement).value,
+    ).toBe("forward");
+    expect(
+      call.mock.calls.every(([action]) =>
+        ["listAcr1552Readers", "configureReader"].includes(action),
+      ),
+    ).toBe(true);
     expect(
       (screen.getByLabelText("PC/SC 读卡器") as HTMLSelectElement).value,
     ).toBe("");
