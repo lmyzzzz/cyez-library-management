@@ -10,6 +10,7 @@ import {
 import { Badge, Banner, Button, Card, Textarea } from "@record/ui";
 import type {
   DeviceDTO,
+  RecordDTO,
   ScanPreview,
   EndPreview,
   BatchPreview,
@@ -23,7 +24,7 @@ import {
   timestamp,
   duration,
 } from "./common.js";
-import { IdleTimer, EndTimer } from "./timers.js";
+import { IdleTimer } from "./timers.js";
 type EndFlow = EndPreview | ScanPreview;
 const clock = (ms: number) =>
   new Date(ms).toLocaleTimeString("zh-CN", { hour12: false });
@@ -31,6 +32,81 @@ const classText = (value: string) => value || "—";
 const minutes = (start: number, end: number) =>
   Math.max(1, Math.round((end - start) / 60000));
 const RING = 100.5;
+const IDLE_MS = 10000;
+/**
+ * 刷卡流程的空闲取消：10 秒无操作即取消，登记与结束相同。计时不依赖窗口
+ * 焦点；只有窗口持有焦点时的真实输入才算操作，无焦点一律视为无操作。
+ */
+function useIdleCancel(active: boolean, onCancel: () => void) {
+  const [remaining, setRemaining] = useState(IDLE_MS);
+  const timer = useRef<IdleTimer | null>(null);
+  useEffect(() => {
+    if (!active || timer.current) return;
+    const clockTimer = new IdleTimer(() => performance.now(), onCancel);
+    timer.current = clockTimer;
+    const activity = (e: Event) => {
+      if (document.hasFocus()) clockTimer.activity(e.isTrusted);
+    };
+    const check = () => {
+      clockTimer.check();
+      setRemaining(clockTimer.remaining());
+    };
+    const events = [
+      "keydown",
+      "input",
+      "click",
+      "touchstart",
+      "wheel",
+      "pointermove",
+    ];
+    for (const name of events)
+      document.addEventListener(name, activity, {
+        capture: true,
+        passive: true,
+      });
+    const interval = setInterval(check, 100);
+    document.addEventListener("visibilitychange", check, true);
+    return () => {
+      clockTimer.stop();
+      clearInterval(interval);
+      for (const name of events)
+        document.removeEventListener(name, activity, true);
+      document.removeEventListener("visibilitychange", check, true);
+    };
+  }, [active]);
+  return {
+    remaining,
+    timer,
+    /** 提交失败后重新计时，流程保持正常的过期行为。 */
+    restart() {
+      timer.current?.restart();
+      setRemaining(timer.current?.remaining() ?? IDLE_MS);
+    },
+  };
+}
+function IdleNotice({ remaining }: { remaining: number }) {
+  return (
+    <div className="bflow-idle">
+      <Ring remaining={remaining} total={IDLE_MS} />
+      <div>
+        <b>{Math.ceil(remaining / 1000)} 秒无操作将自动取消</b>
+        <span>在本窗口点击或输入会重新计时</span>
+      </div>
+    </div>
+  );
+}
+/** 等待第二次刷卡时的醒目提示。 */
+function RescanPrompt({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="bflow-rescan" role="status">
+      <CreditCard size={34} aria-hidden="true" />
+      <div>
+        <b>{title}</b>
+        <span>{detail}</span>
+      </div>
+    </div>
+  );
+}
 function Ring({
   remaining,
   total,
@@ -90,22 +166,20 @@ export function EndForm({
   const record = preview.record!;
   const [notes, setNotes] = useState(record.notes),
     [error, setError] = useState<unknown>(),
-    [busy, setBusy] = useState(false),
-    [remaining, setRemaining] = useState<number | null>(
-      automatic ? 5000 : null,
-    );
+    [busy, setBusy] = useState(false);
+  const idle = useIdleCancel(automatic, onCancel);
   const sent = useRef(false);
   const connected = useRef(online);
   connected.current = online;
   const latest = useRef(notes);
   latest.current = notes;
-  const timer = useRef<EndTimer | null>(null);
   const submit = async () => {
     if (sent.current || !connected.current) return;
+    // 已过期的刷卡结束只取消，不提交；提交中不再执行空闲取消。
+    if (automatic && !idle.timer.current?.submit()) return;
     sent.current = true;
     setBusy(true);
     onBusy(true);
-    timer.current?.stop();
     try {
       await window.library.call("end", {
         recordId: record.id,
@@ -117,7 +191,7 @@ export function EndForm({
     } catch (e) {
       setError(e);
       sent.current = false;
-      setRemaining(null);
+      idle.restart();
     } finally {
       setBusy(false);
       onBusy(false);
@@ -127,29 +201,6 @@ export function EndForm({
     if (!confirmSignal) return;
     void submit();
   }, [confirmSignal]);
-  useEffect(() => {
-    if (!automatic) return;
-    timer.current = new EndTimer(
-      () => performance.now(),
-      () => void submit(),
-    );
-    const tick = setInterval(() => {
-      timer.current?.tick();
-      setRemaining(timer.current?.remaining() ?? null);
-    }, 100);
-    const pause = () => {
-      timer.current?.pause();
-      setRemaining(null);
-    };
-    window.addEventListener("blur", pause);
-    document.addEventListener("visibilitychange", pause);
-    return () => {
-      clearInterval(tick);
-      timer.current?.stop();
-      window.removeEventListener("blur", pause);
-      document.removeEventListener("visibilitychange", pause);
-    };
-  }, []);
   if (!automatic)
     return (
       <>
@@ -269,7 +320,9 @@ export function EndForm({
           <div>
             <p className="bflow-eyebrow">结束使用 · CHECK OUT</p>
             <h1>刷卡结束使用</h1>
-            <p className="bflow-sub">请确认本次使用信息，确认后记录将结束。</p>
+            <p className="bflow-sub">
+              请确认本次使用信息，再次刷卡确认后记录将结束。
+            </p>
           </div>
           <span className="bflow-terminal">
             <i />
@@ -314,11 +367,7 @@ export function EndForm({
             value={notes}
             maxLength={8000}
             disabled={busy}
-            onChange={(e) => {
-              setNotes(e.target.value);
-              timer.current?.pause();
-              setRemaining(null);
-            }}
+            onChange={(e) => setNotes(e.target.value)}
           />
           <p className="bflow-hint">
             确认后本条记录结束并写入历史，历史记录只读。
@@ -331,18 +380,12 @@ export function EndForm({
           </div>
           <Failure error={error} />
         </div>
+        <RescanPrompt
+          title="请再次刷卡确认结束使用"
+          detail={`再刷一次同一张卡即可结束 ${record.device.code}，也可以点击“确认结束”。`}
+        />
         <footer className="bflow-foot">
-          <div className="bflow-idle">
-            <Ring remaining={remaining} total={5000} />
-            <div>
-              <b>
-                {remaining === null
-                  ? "自动确认已暂停。请显式确认或继续倒计时。"
-                  : `${Math.ceil(remaining / 1000)} 秒后自动结束本条记录`}
-              </b>
-              <span>编辑备注或切到后台会暂停自动确认</span>
-            </div>
-          </div>
+          <IdleNotice remaining={idle.remaining} />
           <div className="bflow-actions">
             <button
               type="button"
@@ -352,18 +395,6 @@ export function EndForm({
             >
               取消
             </button>
-            {remaining === null && !error && (
-              <button
-                type="button"
-                className="bflow-btn"
-                onClick={() => {
-                  timer.current?.resume();
-                  setRemaining(5000);
-                }}
-              >
-                继续倒计时
-              </button>
-            )}
             <button
               type="button"
               className="bflow-btn primary"
@@ -389,7 +420,7 @@ export function Registration({
 }: {
   preview: ScanPreview;
   online?: boolean;
-  onDone: () => void;
+  onDone: (device: DeviceDTO) => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
   confirmSignal?: number;
@@ -407,13 +438,56 @@ export function Registration({
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
     [ready, setReady] = useState(false),
-    [remaining, setRemaining] = useState(10000),
+    [located, setLocated] = useState(false),
     [release, setRelease] = useState<EndPreview | null>(null),
     [releaseBusy, setReleaseBusy] = useState(false),
     [releaseError, setReleaseError] = useState<unknown>();
-  const timer = useRef<IdleTimer | null>(null),
-    sending = useRef(false),
-    autoSelected = useRef(false);
+  const sending = useRef(false),
+    reveal = useRef(false),
+    list = useRef<HTMLDivElement>(null);
+  const idle = useIdleCancel(ready, onCancel);
+  const timer = idle.timer;
+  /**
+   * 默认选中第一台可用设备，并定位到它所在的分页。列表按设备编号排序，
+   * 第一台可用设备可能排在若干页使用中或禁用的设备之后。
+   */
+  const locate = async () => {
+    try {
+      const size = 100;
+      for (let index = 1; index <= 20; index++) {
+        const r = await window.library.call<{ devices: Page<DeviceDTO> }>(
+          "devices",
+          { page: index, pageSize: size, state: "all" },
+        );
+        const position = r.devices.items.findIndex(
+          (d) => !d.isDisabled && !d.active,
+        );
+        if (position >= 0) {
+          reveal.current = true;
+          setSelected(r.devices.items[position]);
+          setPage(
+            Math.floor(((index - 1) * size + position) / devices.pageSize) + 1,
+          );
+          break;
+        }
+        if (index * size >= r.devices.total) break;
+      }
+    } catch {
+      // 定位失败时退回第一页，下面的列表读取会显示错误。
+    }
+    setLocated(true);
+  };
+  useEffect(() => {
+    void locate();
+  }, []);
+  useEffect(() => {
+    // 列表渲染后把默认选中的设备滚动到可见区域，只在进入页面时执行一次。
+    if (!reveal.current || !selected) return;
+    const row = list.current?.querySelector<HTMLElement>(".is-selected");
+    if (!row) return;
+    reveal.current = false;
+    row.scrollIntoView?.({ block: "center" });
+  }, [devices, selected]);
   const load = async () => {
     try {
       const r = await window.library.call<{ devices: Page<DeviceDTO> }>(
@@ -421,15 +495,6 @@ export function Registration({
         { page, pageSize: 20, search, state: "all" },
       );
       setDevices(r.devices);
-      if (!autoSelected.current) {
-        const firstFree = r.devices.items.find(
-          (d) => !d.isDisabled && !d.active,
-        );
-        if (firstFree) {
-          autoSelected.current = true;
-          setSelected(firstFree);
-        }
-      }
       setReady(true);
       setError(undefined);
     } catch (e) {
@@ -437,42 +502,8 @@ export function Registration({
     }
   };
   useEffect(() => {
-    void load();
-  }, [page, search]);
-  useEffect(() => {
-    if (!ready || timer.current) return;
-    const clockTimer = new IdleTimer(() => performance.now(), onCancel);
-    timer.current = clockTimer;
-    const activity = (e: Event) => clockTimer.activity(e.isTrusted);
-    const check = () => {
-      clockTimer.check();
-      setRemaining(clockTimer.remaining());
-    };
-    const events = [
-      "keydown",
-      "input",
-      "click",
-      "touchstart",
-      "wheel",
-      "pointermove",
-    ];
-    for (const name of events)
-      document.addEventListener(name, activity, {
-        capture: true,
-        passive: true,
-      });
-    const interval = setInterval(check, 100);
-    window.addEventListener("focus", check, true);
-    document.addEventListener("visibilitychange", check, true);
-    return () => {
-      clockTimer.stop();
-      clearInterval(interval);
-      for (const name of events)
-        document.removeEventListener(name, activity, true);
-      window.removeEventListener("focus", check, true);
-      document.removeEventListener("visibilitychange", check, true);
-    };
-  }, [ready]);
+    if (located) void load();
+  }, [located, page, search]);
   const submit = async () => {
     if (!online || release || releaseBusy) return;
     if (sending.current || !selected || !timer.current?.submit()) return;
@@ -485,14 +516,13 @@ export function Registration({
         deviceId: selected.id,
         notes,
       });
-      onDone();
+      onDone(selected);
     } catch (e) {
       setError(e);
       sending.current = false;
       // A retryable rejection must not lock the confirm button forever; re-arm
       // the idle deadline so the preview keeps its normal expiry behavior.
-      timer.current?.restart();
-      setRemaining(timer.current?.remaining() ?? 10000);
+      idle.restart();
     } finally {
       setBusy(false);
       onBusy(false);
@@ -627,7 +657,7 @@ export function Registration({
             <p className="bflow-eyebrow">使用登记 · REGISTRATION</p>
             <h1>选择设备</h1>
             <p className="bflow-sub">
-              空闲设备可直接选择；使用中的设备可先释放。
+              已默认选择第一台空闲设备；需要更换时在列表中选择。
             </p>
           </div>
           <span className="bflow-terminal">
@@ -655,7 +685,7 @@ export function Registration({
             刷新设备
           </button>
         </div>
-        <div className="bflow-list">
+        <div className="bflow-list" ref={list}>
           {devices.items.map((d) => {
             const status = statusOf(d);
             return (
@@ -740,14 +770,21 @@ export function Registration({
           onChange={(e) => setNotes(e.target.value)}
         />
         <Failure error={error} />
+        {selected ? (
+          <RescanPrompt
+            title="请再次刷卡确认登记"
+            detail={`将登记使用 ${selected.code} ${selected.displayName}。再刷一次同一张卡即可确认，也可以点击“确认登记”。`}
+          />
+        ) : (
+          ready && (
+            <RescanPrompt
+              title="当前没有可用设备"
+              detail="请联系值班教师，或在上方列表中释放一台设备。"
+            />
+          )
+        )}
         <footer className="bflow-foot">
-          <div className="bflow-idle">
-            <Ring remaining={remaining} total={10000} />
-            <div>
-              <b>{Math.ceil(remaining / 1000)} 秒无操作将自动取消</b>
-              <span>点击、输入或选择设备会重新计时</span>
-            </div>
-          </div>
+          <IdleNotice remaining={idle.remaining} />
           <div className="bflow-actions">
             <button
               type="button"
@@ -899,6 +936,65 @@ export function BatchForm({
           onClick={() => void confirm()}
         >
           {busy ? "逐批提交中…" : `确认结束 ${preview.total} 条`}
+        </Button>
+      </div>
+    </>
+  );
+}
+export function NotesEditor({
+  record,
+  onDone,
+  onCancel,
+  onBusy,
+}: {
+  record: RecordDTO;
+  onDone: () => void;
+  onCancel: () => void;
+  onBusy: (v: boolean) => void;
+}) {
+  const [notes, setNotes] = useState(record.notes),
+    [error, setError] = useState<unknown>(),
+    [busy, setBusy] = useState(false);
+  return (
+    <>
+      <label className="block-label" htmlFor="record-notes">
+        当前使用备注
+      </label>
+      <Textarea
+        id="record-notes"
+        aria-label="当前使用备注"
+        value={notes}
+        maxLength={8000}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+      <Failure error={error} />
+      <div className="form-actions">
+        <Button size="small" disabled={busy} onClick={onCancel}>
+          取消
+        </Button>
+        <Button
+          size="small"
+          variant="primary"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            onBusy(true);
+            try {
+              await window.library.call("editNotes", {
+                recordId: record.id,
+                expectedVersion: record.version,
+                notes,
+              });
+              onDone();
+            } catch (e) {
+              setError(e);
+            } finally {
+              setBusy(false);
+              onBusy(false);
+            }
+          }}
+        >
+          保存备注
         </Button>
       </div>
     </>

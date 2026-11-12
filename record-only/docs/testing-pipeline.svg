@@ -34,8 +34,8 @@
 <text x="1340.0" y="534.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">C-U · 规则与 React 组件</text>
 <text x="1340.0" y="563.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">立即算 studentId；卡输入与学生 DTO 分离</text>
 <text x="1340.0" y="592.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">原卡号仅内存/HTTPS，无 IPC/日志/持久队列</text>
-<text x="1340.0" y="621.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">10 秒无操作取消，真实输入重置 / 后台检查</text>
-<text x="1340.0" y="650.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">结束 5 秒确认独立规则 / 一次提交门闩</text>
+<text x="1340.0" y="621.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">登记与结束均 10 秒无操作取消</text>
+<text x="1340.0" y="650.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">同卡确认、异卡重预览；一次提交门闩</text>
 <text x="1340.0" y="679.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">页面门控 / 设备编辑 / 历史只读 / pin 格式</text>
 <rect x="90" y="820" width="740" height="315" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="460.0" y="897.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">S-I · Fastify → Sequelize → 真实 PostgreSQL</text>

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -12,6 +13,7 @@ import {
   Registration,
   BatchForm,
 } from "../../../apps/teacher/src/renderer/flows.js";
+import { IdleTimer } from "../../../apps/teacher/src/renderer/timers.js";
 
 const call = vi.fn<(action: string, input: unknown) => Promise<unknown>>();
 beforeEach(() => {
@@ -342,25 +344,216 @@ describe("C-U 登记、结束与批量确认", () => {
     });
   });
 
-  it("自动结束编辑或失焦暂停，必须显式继续或确认", async () => {
+  it.each(["start", "end"])(
+    "%s 流程 10 秒无操作取消：失焦不暂停，无焦点的输入不算操作",
+    async (mode) => {
+      let now = 0;
+      const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
+      const focus = vi.spyOn(document, "hasFocus").mockReturnValue(true);
+      // jsdom 无法产生 isTrusted 事件；这里把到达计时器的输入都视为真实输入，
+      // 以单独验证“无焦点不算操作”的门控。
+      const activity = IdleTimer.prototype.activity;
+      const trusted = vi
+        .spyOn(IdleTimer.prototype, "activity")
+        .mockImplementation(function (this: IdleTimer) {
+          activity.call(this, true);
+        });
+      const onCancel = vi.fn();
+      call.mockImplementation(async (action) =>
+        action === "devices"
+          ? { devices: { items: [free], total: 1, page: 1, pageSize: 20 } }
+          : {},
+      );
+      vi.useFakeTimers();
+      try {
+        render(
+          mode === "start" ? (
+            <Registration
+              preview={preview}
+              onDone={vi.fn()}
+              onCancel={onCancel}
+              onBusy={vi.fn()}
+            />
+          ) : (
+            <EndForm
+              preview={{ ...preview, mode: "end", record: active }}
+              automatic
+              onDone={vi.fn()}
+              onCancel={onCancel}
+              onBusy={vi.fn()}
+            />
+          ),
+        );
+        const advance = async (ms: number) => {
+          now += ms;
+          await act(async () => {
+            await vi.advanceTimersByTimeAsync(ms);
+          });
+        };
+        await advance(0);
+        const click = () =>
+          act(() => {
+            document.body.dispatchEvent(
+              new MouseEvent("click", { bubbles: true }),
+            );
+          });
+        expect(screen.getByText(/请再次刷卡确认/)).toBeTruthy();
+        // 有焦点时的真实操作重新计时。
+        await advance(6000);
+        click();
+        await advance(6000);
+        expect(onCancel).not.toHaveBeenCalled();
+        // 失焦不暂停计时，无焦点时的输入也不算操作。
+        fireEvent(window, new Event("blur"));
+        focus.mockReturnValue(false);
+        await advance(3000);
+        click();
+        await advance(900);
+        expect(onCancel).not.toHaveBeenCalled();
+        await advance(200);
+        expect(onCancel).toHaveBeenCalledOnce();
+        // 到期只取消，从不自动提交。
+        expect(
+          call.mock.calls.filter(
+            ([action]) => action === "start" || action === "end",
+          ),
+        ).toHaveLength(0);
+      } finally {
+        vi.useRealTimers();
+        cleanup();
+        clock.mockRestore();
+        focus.mockRestore();
+        trusted.mockRestore();
+      }
+    },
+  );
+
+  it("刷卡结束过期后二次刷卡不提交；编辑备注不暂停计时", async () => {
+    let now = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
     const end = { ...preview, mode: "end" as const, record: active };
-    render(
+    const onCancel = vi.fn();
+    const form = (confirmSignal: number) => (
       <EndForm
         preview={end}
         automatic
+        confirmSignal={confirmSignal}
+        onDone={vi.fn()}
+        onCancel={onCancel}
+        onBusy={vi.fn()}
+      />
+    );
+    try {
+      const view = render(form(0));
+      fireEvent.change(screen.getByLabelText("使用备注"), {
+        target: { value: "修改" },
+      });
+      expect(screen.queryByRole("button", { name: "继续倒计时" })).toBeNull();
+      expect(screen.getByText(/秒无操作将自动取消/)).toBeTruthy();
+      now = 10001;
+      view.rerender(form(1));
+      expect(onCancel).toHaveBeenCalledOnce();
+      expect(call).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("默认选中第一台可用设备并跳转到它所在的分页和位置", async () => {
+    const all: DeviceDTO[] = Array.from({ length: 45 }, (_, i) => ({
+      ...free,
+      id: `device-${i}`,
+      code: `PC-${String(i + 1).padStart(2, "0")}`,
+      // 前 30 台使用中，随后 2 台禁用，第 33 台才是第一台可用设备。
+      active: i < 30 ? active : null,
+      isDisabled: i >= 30 && i < 32,
+    }));
+    call.mockImplementation(async (action, input) => {
+      if (action !== "devices") return {};
+      const { page, pageSize } = input as { page: number; pageSize: number };
+      return {
+        devices: {
+          items: all.slice((page - 1) * pageSize, page * pageSize),
+          total: all.length,
+          page,
+          pageSize,
+        },
+      };
+    });
+    const scroll = vi.fn();
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scroll;
+    try {
+      const onDone = vi.fn();
+      render(
+        <Registration
+          preview={preview}
+          onDone={onDone}
+          onCancel={vi.fn()}
+          onBusy={vi.fn()}
+        />,
+      );
+      const chosen = await screen.findByRole("button", {
+        name: "取消选择 PC-33",
+      });
+      // 每页 20 台：第 33 台在第 2 页，列表直接显示这一页。
+      expect(call).toHaveBeenCalledWith(
+        "devices",
+        expect.objectContaining({ page: 2, pageSize: 20 }),
+      );
+      expect(
+        call.mock.calls.filter(
+          ([action, input]) =>
+            action === "devices" &&
+            (input as { pageSize: number }).pageSize === 20 &&
+            (input as { page: number }).page === 1,
+        ),
+      ).toHaveLength(0);
+      expect(screen.getByText("2 / 3")).toBeTruthy();
+      await waitFor(() => expect(scroll).toHaveBeenCalledOnce());
+      expect(scroll.mock.contexts[0]).toBe(chosen.closest(".bflow-row"));
+      expect(screen.getByText("请再次刷卡确认登记")).toBeTruthy();
+      expect(screen.getByText(/将登记使用 PC-33/)).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
+      await waitFor(() =>
+        expect(onDone).toHaveBeenCalledWith(
+          expect.objectContaining({ code: "PC-33" }),
+        ),
+      );
+      expect(call).toHaveBeenCalledWith(
+        "start",
+        expect.objectContaining({ deviceId: "device-32" }),
+      );
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  it("没有可用设备时提示联系教师，不能确认", async () => {
+    call.mockImplementation(async (action) =>
+      action === "devices"
+        ? {
+            devices: {
+              items: [{ ...free, active }],
+              total: 1,
+              page: 1,
+              pageSize: 20,
+            },
+          }
+        : {},
+    );
+    render(
+      <Registration
+        preview={preview}
         onDone={vi.fn()}
         onCancel={vi.fn()}
         onBusy={vi.fn()}
       />,
     );
-    fireEvent.change(screen.getByLabelText("使用备注"), {
-      target: { value: "修改" },
-    });
-    expect(screen.getByText(/自动确认已暂停/)).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "继续倒计时" }));
-    fireEvent(window, new Event("blur"));
-    expect(screen.getByText(/自动确认已暂停/)).toBeTruthy();
-    expect(call).not.toHaveBeenCalled();
+    await screen.findByText("当前没有可用设备");
+    expect(
+      screen.getByRole("button", { name: "确认登记" }).hasAttribute("disabled"),
+    ).toBe(true);
   });
 
   it("批量逐批提交、第二批失败保留第一批状态且不重复", async () => {

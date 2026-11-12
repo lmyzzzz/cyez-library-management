@@ -1,5 +1,24 @@
 # 产品验证报告
 
+## 2026-11-13 三窗口教师端审查合并与发布验证（本轮）
+
+审查并准备合入 `origin/feature/three-window-split`（`1ff57ee5e42348c08c6462149da6f595371d46ae`）。分支新增管理后台、专用刷卡窗口和状态悬浮窗；逐项检查刷卡门控、异卡重预览/同卡确认、窗口关闭撤销、IPC 角色权限、多显示器状态、原卡号生命周期、配置覆盖、并发幂等、断线恢复和回归测试。合并无代码冲突。审查修复两处确定问题：刷卡窗口重新打开后清除主窗口遗留的“刷卡窗口已关闭”提示；三窗口 Electron 集成首测补齐登录前置。正式文档、决策表、测试矩阵和四张图同步删除结束页旧的 5 秒自动确认规则，统一记录 10 秒无操作取消、同卡确认、异卡重预览。
+
+| 检查 | 本轮实际结果 |
+| --- | --- |
+| Git/分支 | 已 `fetch --prune`；除远端 `feature/three-window-split` 外无新的未合入提交；根目录既有删除、`aaaaaa.txt` 和 `no-planned/` 未跟踪内容保留，未纳入本轮提交；其他 worktree 未改动 |
+| 静态与构建 | `build:shared`、TypeScript、Prettier、Rust fmt 通过；格式化后 `format:check` 全部通过；三窗口客户端 integration build 通过 |
+| 服务端单元 | 26/26 通过 |
+| 客户端单元 | 119/119，10 个文件通过 |
+| 覆盖率门禁 | 服务端 48/52（4 个真实 SQL Server/provider 条件用例跳过）: statements 92.07%、branches 88.54%、functions 92.68%、lines 93.86%；客户端 119/119: statements 92.15%、branches 86.28%、functions 87.18%、lines 93.27% |
+| 独立服务端集成 | 22/26 通过，4 个需外部 SQL Server/provider 条件的用例按配置跳过；真实 PostgreSQL、迁移、并发、日志和配置覆盖已执行 |
+| Rust 读卡进程 | workspace 12/12 通过（手动输入、串口、ACR1552U） |
+| 真实 Electron | 13/13 通过，含三窗口启停/不可关闭、IPC 白名单、TLS pin、SQLite 跨重启、自动登录、配置覆盖、读卡进程切换、局部更新和正式流程 |
+| Docker 全链路 | 首次运行暴露空闲行测试定位器的严格模式错误，已改为 `data-status=free` 状态断言并完整重跑；客户端 5/5、服务端 31/31 通过，真实 PostgreSQL、网关、日志归集、并发、重启、故障恢复、卷持久化均执行 |
+| Windows 发布包 | `record-only/release/three-window-merge/cyez-library-0.1.8-x64-setup.exe`，119693962 字节，SHA-256 `ebe39c6dd3fa5af3172a45fd0f590eebf67e43b311b36543f9e139e41db060dc`；发布包测试 2/2 通过，包含三个 Rust 读卡进程且开发入口关闭 |
+
+本轮未使用学校真实 Concard、实物 ACR1552U 或现场学生卡；TBD-02/03/04/05/06 的真实资料、硬件、证书和签名验收仍需外部输入。训练对话通知已成功发送，未等待训练结束；本次一次性自动任务完成后应删除，不再重复运行。
+
 ## 2026-11-12 同卡确认与 ACR1552U 配置分支审查合并
 
 本轮基于 main `13deff2`，审查并合入本地已提交分支 `codex/acr1552-uid-options`（83320bb）及远端 `feat/rescan-confirm`（9bc5ee5）。ACR 分支合并为 `cb27e76`；文档冲突保留 UID 字节顺序/PC/SC 配置和主线批量导入待确认立即停止规则。已有根目录删除和未跟踪材料不纳入提交，其他 worktree 保持原样。

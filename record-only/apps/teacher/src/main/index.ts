@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron";
+import { app, ipcMain, dialog, Menu } from "electron";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
@@ -12,6 +12,8 @@ import { actions, type ActionName } from "../shared/bridge.js";
 import type { ReaderProcessConfig } from "../shared/reader-config.js";
 import { LocalStore } from "./store.js";
 import { Coordinator } from "./coordinator.js";
+import { AppWindows } from "./windows.js";
+import { roleAllows } from "../shared/windows.js";
 import {
   ProcessReader,
   readerProcessSchema,
@@ -40,18 +42,12 @@ if (process.env.CYEZ_USER_DATA)
 app.disableHardwareAcceleration();
 const primaryInstance = app.requestSingleInstanceLock();
 if (!primaryInstance) app.quit();
-else
-  app.on("second-instance", () => {
-    const window = BrowserWindow.getAllWindows()[0];
-    if (!window || window.isDestroyed()) return;
-    if (window.isMinimized()) window.restore();
-    window.show();
-    window.focus();
-  });
+else app.on("second-instance", () => windows?.raise("main"));
 let coordinator: Coordinator | undefined;
 let adapter: ProcessReader | undefined;
 let interval: NodeJS.Timeout | undefined;
 let stopping = false;
+let windows: AppWindows | undefined;
 void app.whenReady().then(async () => {
   if (!primaryInstance) return;
   try {
@@ -76,26 +72,6 @@ void app.whenReady().then(async () => {
     );
     await store.init();
     const location = dirname(fileURLToPath(import.meta.url));
-    const window = new BrowserWindow({
-      width: 1280,
-      height: 840,
-      minWidth: 760,
-      minHeight: 600,
-      show: false,
-      frame: false,
-      backgroundColor: "#fffaf3",
-      webPreferences: {
-        devTools: __CYEZ_TEST_FEATURES__,
-        preload: join(location, "../preload/index.cjs"),
-        sandbox: true,
-        contextIsolation: true,
-        nodeIntegration: false,
-        webSecurity: true,
-        spellcheck: false,
-      },
-    });
-    const controls = createWindowControlHost();
-    controls.bind(window);
     let renderer = pathToFileURL(join(location, "../renderer/index.html")).href;
     if (
       __CYEZ_TEST_FEATURES__ &&
@@ -117,10 +93,19 @@ void app.whenReady().then(async () => {
         throw new Error("INVALID_DEV_RENDERER_URL");
       renderer = devUrl.href;
     }
-    window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-    window.webContents.on("will-navigate", (event, url) => {
-      if (url.split("#")[0] !== renderer) event.preventDefault();
+    const appWindows = new AppWindows({
+      preload: join(location, "../preload/index.cjs"),
+      renderer,
+      devTools: __CYEZ_TEST_FEATURES__,
+      settings: store,
+      quitting: () => stopping,
+      onScanClosed: () => void coordinator?.releaseScan().catch(() => {}),
     });
+    windows = appWindows;
+    await appWindows.init();
+    const window = appWindows.create("main");
+    const controls = createWindowControlHost();
+    controls.bind(window);
     window.webContents.session.setPermissionRequestHandler((_wc, _p, cb) =>
       cb(false),
     );
@@ -129,9 +114,22 @@ void app.whenReady().then(async () => {
       await store.clientId(),
       environment,
       config?.identity ?? null,
-      (event) => {
-        if (!window.isDestroyed())
-          window.webContents.send("library:event", event);
+      (event, origin) => {
+        if (origin !== "card") {
+          // 状态变化通知全部窗口；登录、存储等提示只属于管理后台。
+          if (event.type === "changed") appWindows.broadcast(event);
+          else appWindows.send("main", event);
+          return;
+        }
+        // 刷卡只由刷卡窗口处理；窗口被关闭时在管理后台提示。
+        if (appWindows.get("scan")) {
+          appWindows.cardReceived();
+          appWindows.send("scan", event);
+        } else
+          appWindows.send("main", {
+            type: "notice",
+            code: "SCAN_WINDOW_CLOSED",
+          });
       },
       app.getVersion(),
     );
@@ -186,8 +184,7 @@ void app.whenReady().then(async () => {
             void coordinator!
               .log({ source: "reader", level: "error", code: "READER_FAILED" })
               .catch(() => {});
-            if (!window.isDestroyed())
-              window.webContents.send("library:event", { type: "changed" });
+            appWindows.broadcast({ type: "changed" });
           },
           (mock) => {
             if (adapter !== candidate) return;
@@ -198,8 +195,7 @@ void app.whenReady().then(async () => {
                 : choice.kind === "acr1552"
                   ? "ACR1552U-M1 读卡进程已连接"
                   : "读卡进程已连接";
-            if (!window.isDestroyed())
-              window.webContents.send("library:event", { type: "changed" });
+            appWindows.broadcast({ type: "changed" });
           },
         );
         return candidate;
@@ -305,15 +301,50 @@ void app.whenReady().then(async () => {
     ipcMain.handle(
       "library:action",
       async (event, action: unknown, input: unknown) => {
+        const role = appWindows.roleOf(event.sender);
         if (
-          event.sender !== window.webContents ||
-          event.senderFrame !== window.webContents.mainFrame ||
-          event.senderFrame.url.split("#")[0] !== renderer ||
+          !role ||
+          event.senderFrame !== event.sender.mainFrame ||
+          event.senderFrame.url.split("#")[0] !== appWindows.url(role) ||
           typeof action !== "string" ||
-          !Object.hasOwn(actions, action)
+          !Object.hasOwn(actions, action) ||
+          !roleAllows(role, action)
         )
           return { ok: false, code: "IPC_FORBIDDEN", status: 403 };
         try {
+          if (
+            action === "windowState" ||
+            action === "setAuxWindow" ||
+            action === "setScanAutoFocus" ||
+            action === "setScanFullscreen" ||
+            action === "moveScanDisplay" ||
+            action === "auxCommand"
+          ) {
+            const parsed = actions[action].safeParse(input);
+            if (!parsed.success) throw new ApiError("INPUT_INVALID", 422);
+            const data = parsed.data as {
+              window?: "scan" | "status";
+              open?: boolean;
+              enabled?: boolean;
+              command?: "minimize" | "toggleFullscreen" | "openSettings";
+            };
+            if (action === "setAuxWindow") {
+              if (data.open) await appWindows.open(data.window!);
+              else await appWindows.close(data.window!);
+            } else if (action === "setScanAutoFocus")
+              await appWindows.setAutoFocus(data.enabled!);
+            else if (action === "setScanFullscreen")
+              appWindows.get("scan")?.setFullScreen(data.enabled!);
+            else if (action === "moveScanDisplay")
+              await appWindows.moveScanToNextDisplay();
+            else if (action === "auxCommand") {
+              if (data.command === "minimize") appWindows.minimize(role);
+              else if (data.command === "openSettings")
+                appWindows.openSettings();
+              else if (role === "scan") appWindows.toggleFullscreen();
+            }
+            return { ok: true, value: appWindows.state() };
+          }
           if (action === "initializeClient") {
             if (config) throw new ApiError("IDENTITY_ALREADY_CONFIGURED", 409);
             const parsed = configSchema.safeParse({
@@ -337,8 +368,7 @@ void app.whenReady().then(async () => {
             config = parsed.data;
             coordinator!.reader.configure(parsed.data.identity);
             coordinator!.readerState = "未配置读卡进程";
-            if (!window.isDestroyed())
-              window.webContents.send("library:event", { type: "changed" });
+            appWindows.broadcast({ type: "changed" });
             return { ok: true, value: { ok: true } };
           }
           if (
@@ -400,10 +430,13 @@ void app.whenReady().then(async () => {
     interval = setInterval(() => {
       void coordinator!.flush().catch(() => {});
     }, 3000);
+    window.on("closed", () => app.quit());
     await window.loadURL(renderer);
     window.show();
     if (config) void coordinator.autoLoginOnStartup().catch(() => {});
-    window.on("closed", () => app.quit());
+    // 无论上次是否关闭，每次启动都重新打开刷卡窗口和状态悬浮窗。
+    await appWindows.open("scan");
+    await appWindows.open("status");
   } catch {
     dialog.showErrorBox(
       "启动失败",
@@ -418,6 +451,7 @@ app.on("before-quit", (event) => {
   stopping = true;
   clearInterval(interval);
   void (async () => {
+    await windows?.flush();
     await adapter?.stop();
     await coordinator?.close();
     app.quit();

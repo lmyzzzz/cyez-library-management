@@ -428,13 +428,13 @@
         <mxCell id="register-form" value="无活动记录 → 登记页&#10;只读学生摘要、刷卡时间、备注和 DevicePicker&#10;连续 10 秒无任何用户操作自动取消&#10;键盘/指针/选择/编辑重置；后台返回先检查过期&#10;取消不占设备、不撤销资料刷新；无补填学生入口" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#fff4dc;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="865" width="780" height="185" as="geometry" />
         </mxCell>
-        <mxCell id="end-form" value="有活动记录 → 刷卡结束页&#10;固定 recordId + expectedVersion&#10;当前资料、设备、原开始与本次刷卡时间&#10;备注预填已有值；默认 5 秒自动确认&#10;可立即确认或取消，不结束后来新开的记录" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="end-form" value="有活动记录 → 刷卡结束页&#10;固定 recordId + expectedVersion&#10;当前资料、设备、原开始与本次刷卡时间&#10;连续 10 秒无操作自动取消&#10;同卡再刷确认；异卡取消并按新卡重预览" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="960" y="865" width="780" height="185" as="geometry" />
         </mxCell>
         <mxCell id="picker" value="选择设备 · 只能选可分配设备&#10;占用设备：先单独确认结束，服务端成功后刷新再选&#10;若释放晚于本次刷卡，须重刷以避免使用时间重叠&#10;禁用不可选；无设备/资料缺失不可提交；冲突重新确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="60" y="1140" width="780" height="155" as="geometry" />
         </mxCell>
-        <mxCell id="end-check" value="刷卡结束专用 5 秒确认规则&#10;编辑 / 失焦 / 后台 / 网络故障 → 暂停自动提交&#10;回到前台需显式继续或确认&#10;手动单结束 / 批量 Modal 没有自动确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="end-check" value="刷卡结束与登记相同：10 秒无操作自动取消&#10;编辑 / 有焦点真实输入重置期限&#10;失焦、后台或无焦点输入不算操作&#10;同卡再刷确认；手动单结束 / 批量无自动确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e8effa;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="960" y="1140" width="780" height="155" as="geometry" />
         </mxCell>
         <mxCell id="start-command" value="POST /usage-records/start&#10;previewId + deviceId + notes + requestId&#10;仅创建使用记录，endedAtMs = null；学生必须已存在" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#e4f2eb;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -937,7 +937,7 @@
         <mxCell id="end-panel-title" value="使用登记 / 结束与批量" style="rounded=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=23;fontStyle=1;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1235" y="1910" width="500" height="45" as="geometry" />
         </mxCell>
-        <mxCell id="end-card" value="刷卡结束仍为 5 秒自动确认&#10;现有备注、原开始、本次刷卡时间&#10;编辑 / 失焦 / 后台暂停自动提交&#10;返回显式继续；按钮/到期仅提交一次&#10;手动单结束 Modal：无自动确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="end-card" value="刷卡结束与登记相同：10 秒无操作自动取消&#10;现有备注、原开始、本次刷卡时间&#10;同卡再刷只确认当前预览，异卡重预览&#10;到期只取消，从不自动提交&#10;手动单结束 Modal：无自动确认" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="1245" y="1985" width="480" height="170" as="geometry" />
         </mxCell>
         <mxCell id="batch-card" value="批量 Modal：固定列表 + 数量 + 范围&#10;公共备注初始为空，提交只追加一次&#10;结束全部 = 全系统活动记录&#10;单批冲突整体回滚；分批结果透明&#10;已结束历史不可修改或删除&#10;Modal 内刷卡仍只 Toast" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=19;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
@@ -1190,7 +1190,7 @@
         <mxCell id="su" value="S-U · 单元 / 确定性 fake&#10;由原卡号重算 studentId，错配/版本错误拒绝&#10;共享向量 / 前导零 / 长度编码 / 白名单&#10;毫秒整数、结束 ≥ 开始、活动/禁用/软删除&#10;共享账号、批量备注、请求摘要和错误映射&#10;Vitest；fake clock / provider，不用真实资料" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="90" y="485" width="740" height="230" as="geometry" />
         </mxCell>
-        <mxCell id="cu" value="C-U · 规则与 React 组件&#10;立即算 studentId；卡输入与学生 DTO 分离&#10;原卡号仅内存/HTTPS，无 IPC/日志/持久队列&#10;10 秒无操作取消，真实输入重置 / 后台检查&#10;结束 5 秒确认独立规则 / 一次提交门闩&#10;页面门控 / 设备编辑 / 历史只读 / pin 格式" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+        <mxCell id="cu" value="C-U · 规则与 React 组件&#10;立即算 studentId；卡输入与学生 DTO 分离&#10;原卡号仅内存/HTTPS，无 IPC/日志/持久队列&#10;登记与结束均 10 秒无操作取消&#10;同卡确认、异卡重预览；一次提交门闩&#10;页面门控 / 设备编辑 / 历史只读 / pin 格式" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
           <mxGeometry x="970" y="485" width="740" height="230" as="geometry" />
         </mxCell>
         <mxCell id="si" value="S-I · Fastify → Sequelize → 真实 PostgreSQL&#10;哈希 PK/FK、条件索引、并发占用、行锁与迁移&#10;provider 收到原卡号；错配拒绝；卡号不落库&#10;首次建缓存、每次覆盖；历史只读 DB&#10;响应丢失 / 重启 / intentId / 固定批量集合&#10;.env 改密失效；网关 body 无临时文件&#10;日志 ACK / 容量恢复 / 网络隔离" style="rounded=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#cbd5e1;strokeWidth=1.5;fontColor=#172b4d;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">

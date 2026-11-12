@@ -66,18 +66,18 @@
 <text x="1350.0" y="906.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">有活动记录 → 刷卡结束页</text>
 <text x="1350.0" y="935.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">固定 recordId + expectedVersion</text>
 <text x="1350.0" y="964.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">当前资料、设备、原开始与本次刷卡时间</text>
-<text x="1350.0" y="993.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">备注预填已有值；默认 5 秒自动确认</text>
-<text x="1350.0" y="1022.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">可立即确认或取消，不结束后来新开的记录</text>
+<text x="1350.0" y="993.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">连续 10 秒无操作自动取消</text>
+<text x="1350.0" y="1022.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">同卡再刷确认；异卡取消并按新卡重预览</text>
 <rect x="60" y="1140" width="780" height="155" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="450.0" y="1181.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">选择设备 · 只能选可分配设备</text>
 <text x="450.0" y="1210.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">占用设备：先单独确认结束，服务端成功后刷新再选</text>
 <text x="450.0" y="1239.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">若释放晚于本次刷卡，须重刷以避免使用时间重叠</text>
 <text x="450.0" y="1268.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">禁用不可选；无设备/资料缺失不可提交；冲突重新确认</text>
 <rect x="960" y="1140" width="780" height="155" rx="10" fill="#e8effa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1350.0" y="1181.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">刷卡结束专用 5 秒确认规则</text>
-<text x="1350.0" y="1210.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">编辑 / 失焦 / 后台 / 网络故障 → 暂停自动提交</text>
-<text x="1350.0" y="1239.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">回到前台需显式继续或确认</text>
-<text x="1350.0" y="1268.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">手动单结束 / 批量 Modal 没有自动确认</text>
+<text x="1350.0" y="1181.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">刷卡结束与登记相同：10 秒无操作自动取消</text>
+<text x="1350.0" y="1210.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">编辑 / 有焦点真实输入重置期限</text>
+<text x="1350.0" y="1239.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">失焦、后台或无焦点输入不算操作</text>
+<text x="1350.0" y="1268.0" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">同卡再刷确认；手动单结束 / 批量无自动确认</text>
 <rect x="60" y="1385" width="780" height="125" rx="10" fill="#e4f2eb" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="450.0" y="1425.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">POST /usage-records/start</text>
 <text x="450.0" y="1454.5" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400" fill="#172b4d">previewId + deviceId + notes + requestId</text>

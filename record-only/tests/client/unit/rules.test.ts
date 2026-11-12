@@ -1,9 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
-import {
-  IdleTimer,
-  EndTimer,
-} from "../../../apps/teacher/src/renderer/timers.js";
+import { IdleTimer } from "../../../apps/teacher/src/renderer/timers.js";
 import { CardReader } from "../../../apps/teacher/src/main/reader.js";
 import { ClientSDK } from "@record/client-sdk";
 import { ApiError } from "@record/protocol";
@@ -58,38 +55,6 @@ describe("C-U 计时和读卡边界", () => {
     );
     stopped.stop();
     expect(stopped.check()).toBe(true);
-  });
-  it("结束 5 秒确认、编辑/失焦暂停、显式恢复与单次门闩", () => {
-    let now = 0,
-      sent = 0;
-    const timer = new EndTimer(
-      () => now,
-      () => sent++,
-    );
-    now = 4999;
-    timer.tick();
-    expect(sent).toBe(0);
-    expect(timer.remaining()).toBe(1);
-    timer.pause();
-    now = 10000;
-    timer.tick();
-    expect(timer.remaining()).toBeNull();
-    expect(sent).toBe(0);
-    timer.resume();
-    now = 15000;
-    timer.tick();
-    timer.submit();
-    timer.resume();
-    timer.tick();
-    expect(sent).toBe(1);
-    const stopped = new EndTimer(
-      () => now,
-      () => sent++,
-    );
-    stopped.stop();
-    now += 6000;
-    stopped.tick();
-    expect(sent).toBe(1);
   });
   it("reader 立即 hash，覆盖可写 buffer，重复帧合并，完成释放卡输入", async () => {
     let now = 0;

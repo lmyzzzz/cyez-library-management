@@ -195,33 +195,6 @@ async function openBatchMenu() {
 }
 
 describe("C-U-01/05 主页面门控和状态", () => {
-  it("已取消预览的确认事件不能提交新流程，同预览确认才提交一次", async () => {
-    show();
-    await screen.findByText(device.displayName);
-    act(() => listener?.({ type: "scan", preview }));
-    await screen.findByRole("button", { name: "取消选择 PC-02" });
-    fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
-    act(() => listener?.({ type: "confirm", previewId: preview.id }));
-    const next = { ...preview, id: "preview-2" };
-    act(() => listener?.({ type: "scan", preview: next }));
-    await screen.findByRole("button", { name: "取消选择 PC-02" });
-    act(() => listener?.({ type: "confirm", previewId: preview.id }));
-    expect(
-      call.mock.calls.filter(([action]) => action === "start"),
-    ).toHaveLength(0);
-    act(() => listener?.({ type: "confirm", previewId: next.id }));
-    await waitFor(() =>
-      expect(call).toHaveBeenCalledWith("start", {
-        previewId: next.id,
-        deviceId: free.id,
-        notes: "",
-      }),
-    );
-    expect(
-      call.mock.calls.filter(([action]) => action === "start"),
-    ).toHaveLength(1);
-  });
-
   it("自动更新只修改数据，保留勾选、滚动和弹窗草稿及焦点", async () => {
     vi.useFakeTimers();
     try {
@@ -335,11 +308,8 @@ describe("C-U-01/05 主页面门控和状态", () => {
   it("活动列表、筛选、备注、结束预览和批量确认入口", async () => {
     show();
     await waitFor(() => expect(screen.getByText("活动备注")).toBeTruthy());
-    expect(call).toHaveBeenCalledWith("gate", {
-      page: "devices",
-      modal: false,
-      submitting: false,
-    });
+    // 刷卡门控只由刷卡窗口上报，管理后台不再参与。
+    expect(call.mock.calls.filter(([action]) => action === "gate")).toEqual([]);
     fireEvent.change(screen.getByLabelText("搜索设备"), {
       target: { value: "PC-01" },
     });
@@ -451,13 +421,13 @@ describe("C-U-01/05 主页面门控和状态", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("刷卡事件只在主页面打开登记，取消释放 preview", async () => {
+  it("管理后台不响应刷卡事件，提示以横幅和 toast 显示", async () => {
     show();
     await waitFor(() => expect(listener).toBeTypeOf("function"));
     await act(async () => {
-      listener!({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
+      listener!({ type: "notice", code: "SCAN_WINDOW_CLOSED" });
     });
-    expect(screen.getByRole("alert").textContent).toContain("请返回主页面");
+    expect(screen.getByRole("alert").textContent).toContain("刷卡窗口已关闭");
     await waitFor(() => {
       const toast = document.querySelector("[data-sonner-toast]");
       expect(toast).not.toBeNull();
@@ -467,17 +437,107 @@ describe("C-U-01/05 主页面门控和状态", () => {
     });
     await act(async () => {
       listener!({ type: "scan", preview });
+      listener!({ type: "confirm", previewId: preview.id });
     });
+    expect(screen.queryByRole("heading", { name: "选择设备" })).toBeNull();
+    expect(screen.getByRole("link", { name: "设置" })).toBeTruthy();
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(0);
+  });
+
+  it("窗口管理页签启动/关闭辅助窗口，辅助窗口的设置按钮跳转到此页", async () => {
+    const original = call.getMockImplementation()!;
+    let windows = {
+      scanOpen: true,
+      statusOpen: true,
+      scanFullscreen: false,
+      scanAutoFocus: true,
+      displayCount: 2,
+      scanDisplay: 1,
+    };
+    call.mockImplementation(async (action, input) => {
+      if (action === "windowState") return windows;
+      if (action === "moveScanDisplay") {
+        windows = { ...windows, scanDisplay: (windows.scanDisplay % 2) + 1 };
+        return windows;
+      }
+      if (action === "setScanFullscreen") {
+        windows = {
+          ...windows,
+          scanFullscreen: (input as { enabled: boolean }).enabled,
+        };
+        return windows;
+      }
+      if (action === "setAuxWindow") {
+        const { window: name, open } = input as {
+          window: "scan" | "status";
+          open: boolean;
+        };
+        windows = { ...windows, [`${name}Open`]: open };
+        return windows;
+      }
+      if (action === "setScanAutoFocus") {
+        windows = {
+          ...windows,
+          scanAutoFocus: (input as { enabled: boolean }).enabled,
+        };
+        return windows;
+      }
+      return original(action, input);
+    });
+    show();
+    await waitFor(() => expect(listener).toBeTypeOf("function"));
+    await act(async () => {
+      listener!({ type: "openWindowSettings" });
+    });
+    const scan = await screen.findByLabelText<HTMLInputElement>("刷卡窗口");
+    await waitFor(() => expect(scan.checked).toBe(true));
+    // 全屏与显示器轮换作用于刷卡窗口。
+    const next = screen.getByRole("button", { name: "切换到下一个显示器" });
+    expect(screen.getByText(/当前在第 1 个显示器，共 2 个/)).toBeTruthy();
+    fireEvent.click(next);
+    await screen.findByText(/当前在第 2 个显示器，共 2 个/);
+    expect(call).toHaveBeenCalledWith("moveScanDisplay", {});
+    const fullscreen = screen.getByLabelText<HTMLInputElement>("刷卡窗口全屏");
+    fireEvent.click(fullscreen);
+    await waitFor(() => expect(fullscreen.checked).toBe(true));
+    expect(call).toHaveBeenCalledWith("setScanFullscreen", { enabled: true });
+    await act(async () => {
+      listener!({ type: "windows", state: { ...windows, displayCount: 1 } });
+    });
+    expect(next.hasAttribute("disabled")).toBe(true);
+    expect(screen.getByText("当前只连接了一个显示器。")).toBeTruthy();
+    fireEvent.click(scan);
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: "选择设备" })).toBeTruthy(),
-    );
-    expect(screen.queryByRole("alert")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
-    await waitFor(() =>
-      expect(call).toHaveBeenCalledWith("cancelPreview", {
-        previewId: preview.id,
+      expect(call).toHaveBeenCalledWith("setAuxWindow", {
+        window: "scan",
+        open: false,
       }),
     );
+    await waitFor(() => expect(scan.checked).toBe(false));
+    expect(fullscreen.hasAttribute("disabled")).toBe(true);
+    fireEvent.click(screen.getByLabelText("状态悬浮窗"));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("setAuxWindow", {
+        window: "status",
+        open: false,
+      }),
+    );
+    fireEvent.click(screen.getByLabelText("刷卡时自动切到前台"));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("setScanAutoFocus", {
+        enabled: false,
+      }),
+    );
+    // 主进程广播的窗口状态（例如重新启动后恢复打开）直接反映到开关。
+    await act(async () => {
+      listener!({
+        type: "windows",
+        state: { ...windows, scanOpen: true, statusOpen: true },
+      });
+    });
+    expect(scan.checked).toBe(true);
   });
 
   it("选中/取消选中、状态切换与两种批量范围使用当前筛选", async () => {
@@ -624,7 +684,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
     );
   });
 
-  it("使用中设备禁止删除；刷卡结束全屏隐藏导航，取消后恢复", async () => {
+  it("使用中设备禁止删除", async () => {
     show("/settings");
     fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
     await waitFor(() =>
@@ -638,24 +698,6 @@ describe("C-U-01/05 主页面门控和状态", () => {
       screen.getByRole("button", { name: "确认删除" }).hasAttribute("disabled"),
     ).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
-    fireEvent.click(screen.getByRole("link", { name: "使用登记" }));
-    await waitFor(() => expect(listener).toBeTypeOf("function"));
-    listener!({
-      type: "scan",
-      preview: { ...preview, mode: "end", record: active },
-    });
-    await waitFor(() => expect(screen.getByText("刷卡结束使用")).toBeTruthy());
-    expect(screen.queryByRole("link", { name: "设置" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "取消" }));
-    await waitFor(() =>
-      expect(screen.getByRole("link", { name: "设置" })).toBeTruthy(),
-    );
-    fireEvent.click(screen.getByRole("link", { name: "设置" }));
-    await waitFor(() =>
-      expect(call).toHaveBeenCalledWith("cancelPreview", {
-        previewId: preview.id,
-      }),
-    );
   });
 
   it("自动刷新失败不会停掉轮询，恢复后继续更新数据", async () => {
@@ -688,23 +730,14 @@ describe("C-U-01/05 主页面门控和状态", () => {
     }
   });
 
-  it("认证失效后清除旧设备、标签与进行中的刷卡流程", async () => {
+  it("认证失效后清除旧设备与标签", async () => {
     show();
     await waitFor(() => expect(screen.getByText("活动备注")).toBeTruthy());
-    await act(async () => {
-      listener!({ type: "scan", preview });
-    });
-    await waitFor(() =>
-      expect(screen.getByRole("heading", { name: "选择设备" })).toBeTruthy(),
-    );
     local = { ...local, authenticated: false, online: false };
     await act(async () => {
       listener!({ type: "changed" });
     });
-    await waitFor(() =>
-      expect(screen.queryByRole("heading", { name: "选择设备" })).toBeNull(),
-    );
-    expect(screen.queryByText("活动备注")).toBeNull();
+    await waitFor(() => expect(screen.queryByText("活动备注")).toBeNull());
     expect(screen.getByText(/请先在设置中配置连接并登录/)).toBeTruthy();
   });
 

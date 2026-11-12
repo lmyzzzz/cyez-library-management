@@ -133,10 +133,10 @@
 <text x="900.0" y="2380.525" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">不排队返回后自动重放刷卡</text>
 <text x="1485.0" y="1940.55" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600" fill="#172b4d">使用登记 / 结束与批量</text>
 <rect x="1245" y="1985" width="480" height="170" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="1485.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡结束仍为 5 秒自动确认</text>
+<text x="1485.0" y="2021.5500000000002" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">刷卡结束与登记相同：10 秒无操作自动取消</text>
 <text x="1485.0" y="2049.1000000000004" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">现有备注、原开始、本次刷卡时间</text>
-<text x="1485.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">编辑 / 失焦 / 后台暂停自动提交</text>
-<text x="1485.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">返回显式继续；按钮/到期仅提交一次</text>
+<text x="1485.0" y="2076.65" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">同卡再刷只确认当前预览，异卡重预览</text>
+<text x="1485.0" y="2104.2000000000003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">到期只取消，从不自动提交</text>
 <text x="1485.0" y="2131.75" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">手动单结束 Modal：无自动确认</text>
 <rect x="1245" y="2200" width="480" height="210" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="1485.0" y="2242.775" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400" fill="#172b4d">批量 Modal：固定列表 + 数量 + 范围</text>

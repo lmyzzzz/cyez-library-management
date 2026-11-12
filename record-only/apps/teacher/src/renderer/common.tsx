@@ -39,7 +39,9 @@ const messages: Record<string, string> = {
   PREVIEW_EXPIRED: "预览已过期，请重新刷卡或重新预览。",
   PREVIEW_ALREADY_USED: "此预览已提交，请刷新查看结果。",
   HISTORY_READ_ONLY: "已结束的历史记录不可修改。",
-  SCAN_RETURN_TO_DEVICES: "接收到刷卡消息，请返回主页面以触发登记",
+  SCAN_RETURN_TO_DEVICES: "已收到刷卡，请先完成或取消当前操作后再刷卡。",
+  SCAN_WINDOW_CLOSED:
+    "已收到刷卡，但刷卡窗口已关闭。请在“设置 - 窗口管理”中启动刷卡窗口。",
   OFFLINE_NO_WRITE: "连接已中断，禁止新业务写入。请恢复连接。",
   COMMAND_PENDING: "提交结果待确认。恢复连接后按原请求查询，请勿重复提交。",
   COMMAND_BUSY: "正在提交，请稍候。",
