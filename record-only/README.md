@@ -33,6 +33,6 @@ Electron main 收到独立读卡进程的 4 字节 UID 后立即计算固定盐 
 
 待定项在图中标黄：学生字段、校园 API、真实读卡器接入、部署和发布输入。TBD-02 保留校园 API 的协议、认证、原卡号格式、学生拒绝语义和字段等接入输入，不要求 API 接受哈希。原 TBD-07 预置要求已撤回；跨卡身份迁移 NEXT-01 仍延期，新卡按新哈希 ID 建立独立缓存，不自动合并旧历史。
 
-工作区入口在本目录运行：首次执行 `corepack yarn install --immutable`，日常开发直接执行 `corepack yarn dev`（自动准备 Rust mock、共享包并启动带热更新的 Electron/Vite 开发环境）；`corepack yarn typecheck`，`corepack yarn test:coverage:server`（需要真实 PostgreSQL），`corepack yarn test:coverage:client`，`corepack yarn build`。Windows 需 Rust 1.94.0 + MSVC Build Tools；客户端用 `corepack yarn package:win` 生成 `release/` 内安装包；该目录为本地构建产物，不入源码仓库。GitHub Actions 检查入口为仓库根目录 `.github/workflows/record-only.yml`。
+工作区入口在本目录运行：首次执行 `corepack yarn install --immutable`，日常开发直接执行 `corepack yarn dev`（自动准备 Rust mock、共享包并启动带热更新的 Electron/Vite 开发环境）；`corepack yarn typecheck`，`corepack yarn test:coverage:server`（需要真实 PostgreSQL），`corepack yarn test:coverage:client`，`corepack yarn build`。全链路 Docker 集成测试（真实 gateway/API/PostgreSQL/log-ingest + 真实 Electron + 测试校园 provider）执行 `corepack yarn test:full-chain`；Windows 需先启动 Docker Desktop，细节见[测试设计](docs/testing.md#全链路集成测试docker)。Windows 需 Rust 1.94.0 + MSVC Build Tools；客户端用 `corepack yarn package:win` 生成 `release/` 内安装包；该目录为本地构建产物，不入源码仓库。GitHub Actions 检查入口为仓库根目录 `.github/workflows/record-only.yml`。
 
 空白机器安装后可直接打开教师端，在首次配置页输入与服务端一致的身份参数，再在设置页手动填写服务器连接并选择读卡器；不必先在文件系统中创建 `client-config.json`。生产身份参数仍须由部署方提供，详见[运行说明](docs/operations.md)。

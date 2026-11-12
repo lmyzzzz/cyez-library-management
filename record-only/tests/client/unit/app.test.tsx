@@ -538,7 +538,9 @@ describe("C-U-01/05 主页面门控和状态", () => {
     await act(async () => {
       finish({ items: oldTags });
     });
-    expect(screen.getByRole("option", { name: "新区域", hidden: true })).toBeTruthy();
+    expect(
+      screen.getByRole("option", { name: "新区域", hidden: true }),
+    ).toBeTruthy();
   });
 
   it("新增标签后立即刷新列表并提示", async () => {

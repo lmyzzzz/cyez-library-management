@@ -47,11 +47,17 @@ corepack yarn build:server
 corepack yarn build:client:integration
 corepack yarn workspace @record/teacher exec install-electron
 corepack yarn test:integration:client
+corepack yarn test:unit:full-chain
+corepack yarn build:readers
+corepack yarn build:client:integration
+corepack yarn test:full-chain
 corepack yarn package:win
 corepack yarn test:release:client
 ```
 
-服务端集成测试需要独立真实 PostgreSQL，默认 `postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test`；可用 `TEST_DATABASE_URL` 覆盖。测试会新建随机数据库并迁移，所用账号须有 `CREATEDB`。Compose 端到端联调先完成上述 Compose、`build:readers` 和 `build:client:integration`，无需 seed，不设置 `CYEZ_ELECTRON_EXECUTABLE`；再设置 `COMPOSE_E2E=1`、`TEST_TEACHER_USERNAME`、`TEST_TEACHER_PASSWORD` 与 `COMPOSE_HTTPS_PORT`，运行 `corepack yarn test:integration:client --grep '集成 Electron 连接 Compose'`。正式 exe 由 `test:release:client` 单独验收。测试入口只用于隔离测试部署，绝不指向生产。
+服务端集成测试需要独立真实 PostgreSQL，默认 `postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test`；可用 `TEST_DATABASE_URL` 覆盖。测试会新建随机数据库并迁移，所用账号须有 `CREATEDB`。
+
+全链路集成测试由 `corepack yarn test:full-chain` 自动完成，不再手工维护 Compose 堆栈：脚本创建一次性 Compose 项目（唯一项目名、命名卷前缀、端口、镜像标签与 `runtime/full-chain/<runId>/` secrets，使用测试 campus provider），构建并启动 gateway/API/PostgreSQL/log-ingest，依次运行真实 Electron 与服务端全链路用例，默认结束后 `down -v`。首次运行前需 `build:shared`、`build:server`、`build:readers`、`build:client:integration`。可单独执行 `test:full-chain:server` 或 `test:full-chain:client`；`--keep` 保留堆栈排查，之后用 `test:full-chain:down` 清理；`--reuse` 复用正在运行的堆栈。Windows 需 Docker Desktop；只有 WSL Docker Engine 时设置 `CYEZ_DOCKER_WSL=1`。详见[测试设计](testing.md#全链路集成测试docker)。正式 exe 由 `test:release:client` 单独验收。自动化测试只用于隔离测试部署，绝不指向生产。
 
 ## 生产接入
 

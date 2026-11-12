@@ -1,5 +1,28 @@
 # 产品验证报告
 
+## 2026-11-12 再次审查合并与真实 Docker 全链路验证
+
+本轮同步并审查 `feat/bulk-device-import`（822d844）和 `test`（bea1dd3），保留 main 上次的审计权限、日志游标、容量复检、卷初始化和 nginx 动态 DNS 修复。批量导入先合并为 2685a69；新增标签的旧轮询覆盖、待确认提交误报失败并继续发送、无效标签 UUID 未提前校验均已修复并加入行为回归。导入遇到待确认会停止后续发送，明确区分成功、失败、待确认与未发送。
+
+测试分支的审查修正包括：新运行拒绝覆盖旧目录/数据库；限定项目、命名卷和路径，隔离宿主 Compose 环境变量；不自动探测/重启宿主 PostgreSQL；诊断移除子进程环境口令；使用当前 init-volumes 和 secrets 权限；数据库结果改用 Sequelize 读取；显式确定服务端文件顺序；API 重建时保持 gateway 不动；结束操作幂等用例实际重启 API 后验证。原 Compose 专用用例由自动建栈的套件替代，上次的安全端口选择保留。修正测试矩阵中 DB 停机仍可结束等错误描述。
+
+| 检查 | 本机实际结果 |
+| --- | --- |
+| 静态/依赖 | TypeScript、全仓 Prettier、图源一致性、Rust fmt 通过；依赖版本与锁文件未变 |
+| 客户端单元/组件 | 86 项通过；statements 89.90%、branches 84.02%、functions 87.73%、lines 91.01%，门禁通过 |
+| 服务端单元/集成 | 52 项通过，真实 PostgreSQL 与独立合成资料 SQL Server TLS fixture；statements 95.57%、branches 90.48%、functions 95.60%、lines 97.18%，门禁通过 |
+| Rust | Windows 三个读卡进程共 10 项通过；Linux PTY 用例由 Linux CI 执行，未计入本机结果 |
+| 编排单元 | 8 项通过，包含路径/项目/卷隔离、拒绝覆盖已有 run、宿主环境变量隔离与诊断口令清除 |
+| 原有 Electron | 11 项通过，真实 TLS/SQLite/PG/SQL Server，覆盖局部刷新保留滚动和编辑草稿、自动登录、读卡配置和校园配置单向覆盖 |
+| Docker 完整链路 | `CYEZ_DOCKER_WSL=1 corepack yarn test:full-chain --suite=all`；全新项目 `cyez-fc-mwd46qd7-8ce948`，三个镜像构建并通过 init-volumes/migrate，真实 Electron 5 项与服务端 31 项全部通过、无跳过 |
+| Docker 场景 | 首刷建缓存、再刷刷新、provider 拒绝/故障、设备/标签/并发/批量结束、历史只读、实际 TLS/pin、网络/端口/权限隔离、API 重启和改密、DB 停机恢复、三类日志归集、down/up 卷持久性；新增 JSON 批量导入通过真实 UI 验证成功与重复编号失败 |
+| Windows 发布 | NSIS 构建与正式 exe 2 项通过；`release/merge-20261112/cyez-library-0.1.8-x64-setup.exe`，119686688 字节，SHA-256 `bf247119709256cf9b0ee10831358a475a9d65e6503a5115a62b354c27962d2e`，未签名；旧包保留 |
+
+首次联调揭示自动选中设备后按钮名称变化导致旧定位超时，已改为读取选中状态；随后服务端测试的一条旧断言把无效 JSON 认作 503，按当前契约修正为 422/INPUT_INVALID。最终以新空库完整复跑通过，没有自动重试或放宽产品约束。测试栈的容器、网络与卷用后单独清理，原有集成部署及 SQL/PG fixture 保留；根目录已有删除及未跟踪材料不纳入提交。
+
+本轮未运行 Docker-free 的本机 PostgreSQL/nginx 预检分支，不将历史记录视为本轮验证。学校真实数据源、实物卡和目标安装升级/签名验收仍需外部条件；未连接学校数据库。远端 CI 结果以本次合并提交的 Actions 为准。
+
+
 ## 2026-11-10 审查修复分支合并验证
 
 审查 `fix/record-only-audit-remediation` 的 `7f69f2d`（39 个文件），合入现有主分支前保留校园数据源保存错误码、阶段日志、审计 INSERT-only 修复及 Electron 安全测试端口。修复错误处理冲突和重复文案。审查发现并修正以下问题：
@@ -20,6 +43,23 @@
 | 正式包 | NSIS 构建与解包正式版 2 项通过；`release/audit-merge/cyez-library-0.1.8-x64-setup.exe`，119669060 字节，SHA-256 `fc0413abac65310b8543765ccf747752c23f919f5131027e04f00cf896cee704`，未签名，未覆盖旧包 |
 
 测试未使用学校数据库或实物读卡器；目标安装升级、实卡和学校数据源验收继续保留。Docker 使用唯一测试项目和卷，未改动现有集成部署；测试资源用后单独清理。原有根目录文档删除及未跟踪材料继续保留。远端构建、Linux 伪终端和发布结果以本次合并提交对应的 Actions 为准。
+## 2026-11-10 全链路集成测试补充
+
+新增 Docker 全链路集成测试（`tests/full-chain/`、`scripts/full-chain.ts` 与 `full-chain` CI 作业，场景矩阵见[测试设计](testing.md#全链路集成测试docker)）。测试只新增/替换测试文件，未修改产品代码：真实 Nginx gateway/API/PostgreSQL/log-ingest、真实 TLS 与叶证书 pin、真实 Electron 集成构建和测试 campus provider 一起运行；原手工启动 Compose 堆栈的 `tests/client/integration/compose.test.ts` 已由自动化全链路套件取代并删除。每次运行使用独立项目名、命名卷前缀、端口、镜像标签与 secrets，默认结束后删除。另提供不依赖 Docker 的本地预检（真实 PostgreSQL + 真实 nginx + 本地 API/log-ingest，容器网络与端口隔离用例显式跳过），用于没有 Docker Engine 的开发环境。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| 类型与格式 | `corepack yarn typecheck` 通过；新增文件 `prettier --check` 通过。当前工作区为 Windows CRLF 检出，仓库级 `format:check` 对既有文件报行尾差异；对 HEAD 内容复验 Prettier 通过 |
+| harness 单元 | `corepack yarn test:unit:full-chain` 6 项通过：Compose JSON 两种格式、命令/项目名/env-file 参数、失败诊断、Docker/Compose 可用性提示、隔离 env/secrets/端口/镜像标签、连接文件校验与口令脱敏、等待器超时 |
+| 本地全链路（无 Docker）服务端 | 真实 PostgreSQL 15 + 真实 `deploy/nginx.conf` + 真实 API/log-ingest：28 项通过、3 项容器隔离用例跳过（宿主机发布端口、网络成员、只读/cap/无 Docker socket，仅 Docker 模式执行）。覆盖空缓存首次刷卡、拒绝/故障、设备与标签、登记/结束/只读历史、双客户端并发、批量结束、API 重启幂等、共享改密、DB 停机恢复、down/up 持久性、api/gateway/db 日志归集去重、原始卡号不落库 |
+| 本地全链路 Electron | 真实 Electron 44 → TLS gateway → API → PostgreSQL：4 项通过。覆盖空缓存首刷与只读历史、重复刷卡刷新后历史显示最新资料、未授权卡不建缓存、两个教师端共享账号跨端结束、API 重启后重新认证且历史保留 |
+| 组合链路 | `--suite=all` 一次运行：Electron 4 项、服务端 28 项通过、3 项按模式跳过；结束后本地数据库与进程清理完成 |
+| Compose 配置 | 使用独立 Compose v2.29.7 对 `compose.yaml + tests/full-chain/compose.full-chain.yaml` 执行 `config`：5 个服务、3 个独立镜像标签、secrets 绝对路径位于 `runtime/full-chain/<runId>/secrets`、测试 provider 只读挂载 `/full-chain-adapters`，解析通过 |
+| 既有测试回归 | 服务端单元 19 项通过；客户端单元 61 项通过、3 项失败均为 Linux 上缺少 Windows `cyez-reader-mock.exe` 的读卡子进程用例（Windows 作业覆盖，非本次改动）；类型检查通过 |
+| 本地模式复跑 | 合并运行共执行 3 次：2 次全部通过；1 次在 API 重启相关文件之后出现 1 次不可复现的 `editNotes` 503（读取到服务重启窗口）。随后加固本地 API 重启的端口释放/进程存活检查，复跑通过；Docker 模式的 `compose restart`/`--force-recreate` 另有容器生命周期语义，仍需实跑确认 |
+| Docker 实跑 | **本机沙箱没有 Docker Engine，未执行镜像构建与 Compose 启动**。Docker 全链路需在 Windows Docker Desktop（或 WSL Docker Engine，设置 `CYEZ_DOCKER_WSL=1`）执行 `corepack yarn test:full-chain`，结果另行记录 |
+
+已确认不涉及生产代码、生产 Compose、`.env.integration`、`secrets/` 或学校数据；测试 provider、自签证书和测试卡只存在于 `tests/full-chain/` 与一次性的 Compose overlay 中。Docker 模式的容器网络/端口/只读边界和失败诊断仍需目标机器实跑确认；在拿到结果前不把本地预检计为 Docker 验收通过。
 
 ## 2026-11-10 全部分支审查与合并
 

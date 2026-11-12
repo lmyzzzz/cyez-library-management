@@ -126,6 +126,44 @@ jobs:
             record-only/test-results/image-ids.txt
             record-only/test-results/toolchain.txt
 
+  full-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: record-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --global corepack@0.34.1
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn build:shared
+      - run: yarn build:server
+      - run: yarn test:unit:full-chain
+      - run: yarn build:client:integration
+      - run: yarn workspace @record/teacher exec install-electron
+      - name: Install headless Electron dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          sudo env "PATH=$PATH" node node_modules/@playwright/test/cli.js install-deps chromium
+      - name: Run Docker full-chain integration suites
+        run: yarn test:full-chain --suite=all
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-chain-results
+          path: |
+            record-only/test-results/full-chain
+            record-only/test-results/full-chain-harness.xml
+            record-only/test-results/full-chain-server.xml
+            record-only/test-results/full-chain-client.xml
+            record-only/test-results/full-chain-electron
+            record-only/playwright-report
+
   windows-client:
     runs-on: windows-2025
     env:

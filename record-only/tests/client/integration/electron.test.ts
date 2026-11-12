@@ -1,3 +1,4 @@
+import { deviceChoice, selectDevice } from "../../helpers/select-device.js";
 import {
   test,
   expect,
@@ -308,9 +309,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
   const noticedBounds = await scanBounds();
   expect(noticedBounds).toEqual(registrationBounds);
   await scanNotice.getByRole("button", { name: "关闭" }).click();
-  await expect(
-    page.getByRole("button", { name: "选择 E2E-001", exact: true }),
-  ).toBeVisible();
+  await expect(deviceChoice(page, "E2E-001")).toBeVisible();
   await page.screenshot({
     path: "test-results/electron/scan-registration-fullscreen.png",
     fullPage: true,
@@ -330,7 +329,7 @@ test("C-I-02/08: 设置刷卡不查询；真实 CRUD → 刷卡登记 → 结束
     fullPage: true,
   });
   if (originalViewport) await page.setViewportSize(originalViewport);
-  await page.getByRole("button", { name: "选择 E2E-001", exact: true }).click();
+  await selectDevice(page, "E2E-001");
   await page
     .getByLabel("登记备注", { exact: true })
     .fill("真实 Electron 集成记录");
