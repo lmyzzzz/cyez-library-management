@@ -402,7 +402,8 @@ export function Registration({
     [releaseBusy, setReleaseBusy] = useState(false),
     [releaseError, setReleaseError] = useState<unknown>();
   const timer = useRef<IdleTimer | null>(null),
-    sending = useRef(false);
+    sending = useRef(false),
+    autoSelected = useRef(false);
   const load = async () => {
     try {
       const r = await window.library.call<{ devices: Page<DeviceDTO> }>(
@@ -410,6 +411,15 @@ export function Registration({
         { page, pageSize: 20, search, state: "all" },
       );
       setDevices(r.devices);
+      if (!autoSelected.current) {
+        const firstFree = r.devices.items.find(
+          (d) => !d.isDisabled && !d.active,
+        );
+        if (firstFree) {
+          autoSelected.current = true;
+          setSelected(firstFree);
+        }
+      }
       setReady(true);
       setError(undefined);
     } catch (e) {

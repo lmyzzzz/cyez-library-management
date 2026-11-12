@@ -89,16 +89,17 @@ describe("C-U 登记、结束与批量确认", () => {
         onBusy={onBusy}
       />,
     );
-    await waitFor(() =>
-      expect(screen.getAllByRole("button", { name: /^选择 / })).toHaveLength(1),
-    );
+    // 刷卡进入登记后自动选中第一台可用设备。
+    expect(
+      await screen.findByRole("button", { name: "取消选择 PC-01" }),
+    ).toBeTruthy();
+    expect(screen.queryAllByRole("button", { name: /^选择 / })).toHaveLength(0);
     expect(
       screen.getByRole("button", { name: "确认登记" }).hasAttribute("disabled"),
-    ).toBe(true);
+    ).toBe(false);
     fireEvent.change(screen.getByLabelText("登记备注"), {
       target: { value: "需要设备" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /^选择 / }));
     fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("start", {
@@ -138,14 +139,20 @@ describe("C-U 登记、结束与批量确认", () => {
         onBusy={vi.fn()}
       />,
     );
-    fireEvent.click(await screen.findByRole("button", { name: /^选择 / }));
-    fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
+    const confirm = await screen.findByRole("button", { name: "确认登记" });
+    await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(confirm);
     await waitFor(() =>
       expect(screen.getByText(/设备已被占用、禁用或删除/)).toBeTruthy(),
     );
-    const confirm = screen.getByRole("button", { name: "确认登记" });
-    await waitFor(() => expect(confirm.hasAttribute("disabled")).toBe(false));
-    fireEvent.click(confirm);
+    await waitFor(() =>
+      expect(
+        screen
+          .getByRole("button", { name: "确认登记" })
+          .hasAttribute("disabled"),
+      ).toBe(false),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
     await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
     expect(attempts).toBe(2);
   });

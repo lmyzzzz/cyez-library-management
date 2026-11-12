@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, Clock3, Inbox, Monitor } from "lucide-react";
+import { createPortal } from "react-dom";
+import { CircleCheck, Clock3, FileUp, Inbox, Monitor } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ActionMenu,
@@ -58,6 +59,7 @@ import {
   ReaderSettings,
   DeviceEditor,
   TagManager,
+  BulkDeviceImport,
   History,
   ProviderSettingsForm,
 } from "./settings.js";
@@ -87,6 +89,7 @@ type ModalState =
   | { kind: "end"; preview: EndPreview }
   | { kind: "batch"; preview: BatchPreview }
   | { kind: "device"; device: DeviceDTO | null }
+  | { kind: "bulkDevices" }
   | { kind: "delete"; device: DeviceDTO }
   | { kind: "notes"; record: RecordDTO }
   | { kind: "tags" }
@@ -126,12 +129,23 @@ export function App() {
     [notice, setNotice] = useState<string>(),
     [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const polling = useRef(false),
-    delay = useRef(3000);
+    delay = useRef(3000),
+    tagsRevision = useRef(0);
   const cancelPreview = (previewId: string) => {
     void window.library.call("cancelPreview", { previewId }).catch(() => {});
   };
   const refreshStatus = useCallback(async () => {
     setStatus(await window.library.call<LocalStatus>("status", {}));
+  }, []);
+  const refreshTags = useCallback(async () => {
+    const revision = ++tagsRevision.current;
+    try {
+      const t = await window.library.call<{ items: TagDTO[] }>("tags", {});
+      if (revision === tagsRevision.current) setTags(t.items);
+    } catch {
+      // The surrounding load reports the error; this keeps tag edits visible
+      // even when a background poll owns the load guard.
+    }
   }, []);
   const load = useCallback(
     async (background = false) => {
@@ -143,6 +157,7 @@ export function App() {
         setStatus(local);
         if (!local.authenticated) return;
         // 概览需要同时展示使用中/未使用总数；只在非后台、无筛选时补两次轻量计数。
+        const tagsRevisionAtStart = tagsRevision.current;
         const countsTask =
           !settings && !background && !search && !tagId
             ? Promise.all([
@@ -509,6 +524,16 @@ export function App() {
               >
                 新增设备
               </Button>
+              <Button
+                size="small"
+                icon={FileUp}
+                disabled={
+                  !canWrite || !service?.allowedActions.includes("modify")
+                }
+                onClick={() => setModal({ kind: "bulkDevices" })}
+              >
+                批量添加
+              </Button>
             </>
           ) : (
             <ActionMenu label="批量结束">
@@ -699,7 +724,7 @@ export function App() {
             void refreshStatus();
           }}
         />
-        <AppToaster />
+        {createPortal(<AppToaster />, document.body)}
       </AppShell>
     );
   return (
@@ -1104,11 +1129,13 @@ export function App() {
                         ? modal.device
                           ? "编辑设备"
                           : "新增设备"
-                        : modal.kind === "delete"
-                          ? "删除设备确认"
-                          : modal.kind === "notes"
-                            ? "编辑活动备注"
-                            : "管理标签"
+                        : modal.kind === "bulkDevices"
+                          ? "批量添加设备"
+                          : modal.kind === "delete"
+                            ? "删除设备确认"
+                            : modal.kind === "notes"
+                              ? "编辑活动备注"
+                              : "管理标签"
                 }
                 width={modal.kind === "batch" ? "large" : "medium"}
                 onClose={() => {
@@ -1147,10 +1174,23 @@ export function App() {
                     onCancel={() => setModal(null)}
                   />
                 )}
+                {modal.kind === "bulkDevices" && (
+                  <BulkDeviceImport
+                    onBusy={setBusy}
+                    onDone={() => {
+                      setModal(null);
+                      void load();
+                    }}
+                    onCancel={() => setModal(null)}
+                  />
+                )}
                 {modal.kind === "tags" && (
                   <TagManager
                     tags={tags}
-                    refresh={() => void load()}
+                    refresh={() => {
+                      void refreshTags();
+                      void load();
+                    }}
                     onBusy={setBusy}
                   />
                 )}
@@ -1175,7 +1215,7 @@ export function App() {
           </div>
         </Page>
       )}
-      <AppToaster />
+      {createPortal(<AppToaster />, document.body)}
     </AppShell>
   );
 }

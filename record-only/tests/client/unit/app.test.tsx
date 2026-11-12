@@ -95,11 +95,13 @@ const call = vi.fn<(action: string, input: unknown) => Promise<unknown>>();
 let listener: ((event: TeacherEvent) => void) | undefined;
 let local = { ...status };
 let devices = [device, free];
+let tags = [{ id: "tag-1", name: "阅览区", version: 1 }];
 beforeEach(() => {
   call.mockReset();
   listener = undefined;
   local = { ...status };
   devices = [device, free];
+  tags = [{ id: "tag-1", name: "阅览区", version: 1 }];
   call.mockImplementation(async (action, input) => {
     if (action === "status") return local;
     if (action === "devices")
@@ -115,8 +117,12 @@ beforeEach(() => {
           allowedActions: ["read", "scan", "start", "end", "modify"],
         },
       };
-    if (action === "tags")
-      return { items: [{ id: "tag-1", name: "阅览区", version: 1 }] };
+    if (action === "tags") return { items: tags };
+    if (action === "createTag") {
+      const name = (input as { name: string }).name;
+      tags = [...tags, { id: `tag-${tags.length + 1}`, name, version: 1 }];
+      return { tagId: `tag-${tags.length}`, version: 1 };
+    }
     if (action === "endPreview")
       return {
         id: "end-preview",
@@ -425,6 +431,13 @@ describe("C-U-01/05 主页面门控和状态", () => {
       listener!({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" });
     });
     expect(screen.getByRole("alert").textContent).toContain("请返回主页面");
+    await waitFor(() => {
+      const toast = document.querySelector("[data-sonner-toast]");
+      expect(toast).not.toBeNull();
+      // The toaster must live outside the scrollable AppShell content area,
+      // otherwise the route-enter clip-path hides it.
+      expect(toast?.closest('[data-part="content"]')).toBeNull();
+    });
     await act(async () => {
       listener!({ type: "scan", preview });
     });
@@ -495,6 +508,27 @@ describe("C-U-01/05 主页面门控和状态", () => {
     fireEvent.click(screen.getByRole("button", { name: "刷新" }));
   });
 
+  it("新增标签后立即刷新列表并提示", async () => {
+    show("/settings");
+    fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "管理标签" })).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "管理标签" }));
+    fireEvent.change(screen.getByLabelText("标签名称"), {
+      target: { value: "新区域" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "新增标签" }));
+    await waitFor(() =>
+      expect(screen.getAllByText("新区域").length).toBeGreaterThan(0),
+    );
+    await waitFor(() =>
+      expect(
+        document.querySelector("[data-sonner-toast]")?.textContent,
+      ).toContain("标签已新增"),
+    );
+  });
+
   it("设置中新增、管理标签、删除空闲设备和诊断刷新", async () => {
     show("/settings");
     fireEvent.click(screen.getByRole("button", { name: "设备管理" }));
@@ -503,6 +537,9 @@ describe("C-U-01/05 主页面门控和状态", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "新增设备" }));
     expect(screen.getByRole("heading", { name: "新增设备" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    fireEvent.click(screen.getByRole("button", { name: "批量添加" }));
+    expect(screen.getByRole("heading", { name: "批量添加设备" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
     fireEvent.click(screen.getByRole("button", { name: "管理标签" }));
     expect(screen.getByRole("heading", { name: "管理标签" })).toBeTruthy();

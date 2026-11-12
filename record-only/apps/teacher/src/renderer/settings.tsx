@@ -19,6 +19,7 @@ import {
   TableContainer,
   Textarea,
   Toolbar,
+  toast,
 } from "@record/ui";
 import type {
   DeviceDTO,
@@ -950,6 +951,9 @@ export function TagManager({
       setEditing(null);
       setDeleting(null);
       refresh();
+      toast.success(
+        remove ? "标签已删除" : editing ? "标签已保存" : "标签已新增",
+      );
     } catch (e) {
       setError(e);
     } finally {
@@ -1031,6 +1035,217 @@ export function TagManager({
     </>
   );
 }
+type BulkDeviceRow = {
+  code: string;
+  displayName: string;
+  notes: string;
+  isDisabled: boolean;
+  tagIds: string[];
+};
+
+const bulkDeviceLimit = 200;
+
+function parseBulkDeviceJson(raw: string): BulkDeviceRow[] {
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new Error("JSON 格式不正确，请检查括号、引号和逗号。");
+  }
+  const list = Array.isArray(value)
+    ? value
+    : value &&
+        typeof value === "object" &&
+        Array.isArray((value as { devices?: unknown }).devices)
+      ? (value as { devices: unknown[] }).devices
+      : null;
+  if (!list) throw new Error("请粘贴设备数组，或包含 devices 数组的对象。");
+  if (!list.length) throw new Error("JSON 中没有设备。");
+  if (list.length > bulkDeviceLimit)
+    throw new Error(`一次最多添加 ${bulkDeviceLimit} 台设备。`);
+  const seen = new Set<string>();
+  return list.map((item, index) => {
+    const at = index + 1;
+    if (!item || typeof item !== "object" || Array.isArray(item))
+      throw new Error(`第 ${at} 项不是对象。`);
+    const row = item as Record<string, unknown>;
+    const unknown = Object.keys(row).filter(
+      (key) =>
+        !["code", "displayName", "notes", "isDisabled", "tagIds"].includes(key),
+    );
+    if (unknown.length)
+      throw new Error(`第 ${at} 项包含不支持的字段：${unknown.join("、")}。`);
+    const code = typeof row.code === "string" ? row.code.trim() : "";
+    if (!code) throw new Error(`第 ${at} 项缺少 code。`);
+    if (code.length > 60)
+      throw new Error(`第 ${at} 项的 code 超过 60 个字符。`);
+    const displayName =
+      typeof row.displayName === "string" ? row.displayName.trim() : "";
+    if (!displayName) throw new Error(`第 ${at} 项缺少 displayName。`);
+    if (displayName.length > 120)
+      throw new Error(`第 ${at} 项的 displayName 超过 120 个字符。`);
+    const normalized = code.toLocaleLowerCase("en-US");
+    if (seen.has(normalized))
+      throw new Error(`第 ${at} 项的 code 与前面的设备重复：${code}。`);
+    seen.add(normalized);
+    const notes = row.notes == null ? "" : row.notes;
+    if (typeof notes !== "string" || notes.length > 8000)
+      throw new Error(`第 ${at} 项的 notes 必须是 8000 字以内的字符串。`);
+    const isDisabled = row.isDisabled == null ? false : row.isDisabled;
+    if (typeof isDisabled !== "boolean")
+      throw new Error(`第 ${at} 项的 isDisabled 必须是布尔值。`);
+    const tagIds = row.tagIds == null ? [] : row.tagIds;
+    if (
+      !Array.isArray(tagIds) ||
+      tagIds.length > 50 ||
+      tagIds.some((tagId) => typeof tagId !== "string")
+    )
+      throw new Error(`第 ${at} 项的 tagIds 必须是 UUID 字符串数组。`);
+    return {
+      code,
+      displayName,
+      notes,
+      isDisabled,
+      tagIds: tagIds as string[],
+    };
+  });
+}
+
+type BulkDeviceResult = {
+  code: string;
+  failed?: string;
+};
+
+export function BulkDeviceImport({
+  onDone,
+  onCancel,
+  onBusy,
+}: {
+  onDone: () => void;
+  onCancel: () => void;
+  onBusy: (v: boolean) => void;
+}) {
+  const [raw, setRaw] = useState(""),
+    [error, setError] = useState<string>(),
+    [running, setRunning] = useState(false),
+    [progress, setProgress] = useState({ done: 0, total: 0 }),
+    [results, setResults] = useState<BulkDeviceResult[]>([]);
+  const finished = results.length > 0 && !running;
+  const succeeded = results.filter((result) => !result.failed).length;
+  const failed = results.length - succeeded;
+  const close = () => {
+    if (running) return;
+    if (finished) onDone();
+    else onCancel();
+  };
+  const start = async () => {
+    setError(undefined);
+    let rows: BulkDeviceRow[];
+    try {
+      rows = parseBulkDeviceJson(raw);
+    } catch (e) {
+      setError((e as Error).message);
+      return;
+    }
+    setResults([]);
+    setProgress({ done: 0, total: rows.length });
+    setRunning(true);
+    onBusy(true);
+    const next: BulkDeviceResult[] = [];
+    try {
+      for (let index = 0; index < rows.length; index += 1) {
+        const row = rows[index];
+        try {
+          await window.library.call("createDevice", row);
+          next.push({ code: row.code });
+        } catch (e) {
+          next.push({ code: row.code, failed: errorText(e) });
+        }
+        setResults([...next]);
+        setProgress({ done: index + 1, total: rows.length });
+        if (index < rows.length - 1)
+          await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      const ok = next.filter((result) => !result.failed).length;
+      const bad = next.length - ok;
+      if (!bad) toast.success(`已添加 ${ok} 台设备`);
+      else if (!ok) toast.error(`添加失败 ${bad} 条，请查看列表`);
+      else toast.info(`成功 ${ok} 条，失败 ${bad} 条`);
+    } finally {
+      setRunning(false);
+      onBusy(false);
+    }
+  };
+  return (
+    <div className="bulk-import">
+      <p className="bulk-import-hint">
+        粘贴设备 JSON 数组（也支持 <code>{'{"devices":[...]}'}</code>），每 10ms
+        发送一条请求，最多 {bulkDeviceLimit} 台。<code>code</code>、
+        <code>displayName</code> 必填；notes、isDisabled、tagIds（现有标签 UUID
+        数组）可选。
+      </p>
+      <Textarea
+        aria-label="批量设备 JSON"
+        className="bulk-import-json"
+        rows={8}
+        value={raw}
+        disabled={running || finished}
+        onChange={(e) => setRaw(e.target.value)}
+        placeholder='[{"code":"A-003","displayName":"三号电脑"}]'
+      />
+      <pre className="bulk-import-sample">{`[
+  { "code": "A-101", "displayName": "新设备一", "notes": "阅览区" },
+  { "code": "A-102", "displayName": "新设备二", "isDisabled": true }
+]`}</pre>
+      {error && <Banner tone="error">{error}</Banner>}
+      {running && (
+        <div className="bulk-import-progress" aria-live="polite">
+          <span>
+            正在添加 {progress.done} / {progress.total}
+          </span>
+          <div>
+            <i
+              style={{
+                width: `${progress.total ? (progress.done / progress.total) * 100 : 0}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+      {results.length > 0 && (
+        <div className="bulk-import-results" aria-live="polite">
+          <b>
+            成功 {succeeded} 条，失败 {failed} 条
+          </b>
+          <ul>
+            {results.map((result, index) => (
+              <li key={`${result.code}-${index}`} data-failed={!!result.failed}>
+                <span>{result.code}</span>
+                <em>{result.failed ?? "已添加"}</em>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="form-actions">
+        <Button size="small" disabled={running} onClick={close}>
+          {finished ? "完成" : "取消"}
+        </Button>
+        {!finished && (
+          <Button
+            size="small"
+            variant="primary"
+            disabled={running || !raw.trim()}
+            onClick={() => void start()}
+          >
+            {running ? "正在添加…" : "开始添加"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function History({
   authenticated,
   tagOptions,
