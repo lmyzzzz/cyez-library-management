@@ -1,5 +1,7 @@
 # 学校图书馆刷卡使用登记系统
 
+2026-11-16：CI 在 `main` 的服务端、Docker 全链路和 Windows 客户端检查全部成功后，按教师端版本号自动发布安装包至 [GitHub Releases](https://github.com/lmyzzzz/cyez-library-management/releases)。下载 Windows x64 的 `*-setup.exe`，可用同页 `SHA256SUMS.txt` 校验；当前安装包未签名。版本发布与重试规则见[运行说明](docs/operations.md#安装包下载与自动发布)。
+
 2026-11-06：教师端 `0.1.4` 正式包加入可选“手动输入”读卡进程；仍移除测试卡、注入刷卡入口、开发提示和诊断面板，禁用 DevTools，仅接受生产客户端配置。日常 `yarn dev` 和显式 `yarn build:client:integration` 保留开发测试能力，不能作为发布包分发。发布包检查入口为 `yarn test:release:client`。
 
 2026-11-05：已实现 [Concard SQL Server 接入与单向配置](docs/campus-sqlserver.md)。固定只读卡号、姓名、班级，不读账号/证件等列；学生标识保持固定盐哈希。教师端只提交完整配置覆盖服务端，随后清空，本机不保存或回填。此修订覆盖下文待定字段/接口与不提供服务端配置入口的旧表述；学校网络、认证/TLS 和实卡对照仍须验收。

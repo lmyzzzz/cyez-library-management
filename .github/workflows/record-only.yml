@@ -5,10 +5,12 @@ on:
     paths:
       - "record-only/**"
       - ".github/workflows/record-only.yml"
+      - ".github/scripts/**"
   pull_request:
     paths:
       - "record-only/**"
       - ".github/workflows/record-only.yml"
+      - ".github/scripts/**"
   workflow_dispatch:
 
 jobs:
@@ -41,6 +43,8 @@ jobs:
           node-version: "22"
       - run: npm install --global corepack@0.34.1
       - run: corepack enable
+      - name: Test installer release automation
+        run: node --test ../.github/scripts/release.test.cjs
       - name: Validate Docker Compose configuration
         run: |
           set -euo pipefail
@@ -219,6 +223,14 @@ jobs:
       - run: yarn test:release:client
         env:
           CYEZ_ELECTRON_EXECUTABLE: release/win-unpacked/图书馆使用登记.exe
+      - name: Prepare verified installer for publication
+        run: node ../.github/scripts/release.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: record-only/release/publication/
+          if-no-files-found: error
+          overwrite: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -229,3 +241,28 @@ jobs:
             record-only/test-results/release
             record-only/test-results/client-release.xml
             record-only/release/*-setup.exe
+
+  release:
+    needs: [server, full-chain, windows-client]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: record-only-installer-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: release-artifact
+      - name: Publish new installer version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { publishRelease } = require('./.github/scripts/release.cjs');
+            await publishRelease({ github, context, core });

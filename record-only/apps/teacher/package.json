@@ -11,7 +11,7 @@
     "build:integration": "electron-vite build --mode integration",
     "start": "electron .",
     "dev": "electron-vite dev --watch",
-    "package:win": "electron-builder --win nsis --x64"
+    "package:win": "electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": {
     "sequelize": "6.37.8",

@@ -59,6 +59,20 @@ corepack yarn test:release:client
 
 全链路集成测试由 `corepack yarn test:full-chain` 自动完成，不再手工维护 Compose 堆栈：脚本创建一次性 Compose 项目（唯一项目名、命名卷前缀、端口、镜像标签与 `runtime/full-chain/<runId>/` secrets，使用测试 campus provider），构建并启动 gateway/API/PostgreSQL/log-ingest，依次运行真实 Electron 与服务端全链路用例，默认结束后 `down -v`。首次运行前需 `build:shared`、`build:server`、`build:readers`、`build:client:integration`。可单独执行 `test:full-chain:server` 或 `test:full-chain:client`；`--keep` 保留堆栈排查，之后用 `test:full-chain:down` 清理；`--reuse` 复用正在运行的堆栈。Windows 需 Docker Desktop；只有 WSL Docker Engine 时设置 `CYEZ_DOCKER_WSL=1`。详见[测试设计](testing.md#全链路集成测试docker)。正式 exe 由 `test:release:client` 单独验收。自动化测试只用于隔离测试部署，绝不指向生产。
 
+## 安装包下载与自动发布
+
+正式 Windows x64 安装包下载入口：[GitHub Releases](https://github.com/lmyzzzz/cyez-library-management/releases)。每版提供 `cyez-library-<版本>-x64-setup.exe`、`SHA256SUMS.txt` 和 `release-manifest.json`（版本、完整提交号、文件名、大小、SHA-256）。在 PowerShell 运行 `Get-FileHash .\cyez-library-<版本>-x64-setup.exe -Algorithm SHA256`，与校验文件中的值比对。当前安装包未签名；首次配置和生产接入仍按下节执行。
+
+发布步骤：
+
+1. 在 `record-only/apps/teacher/package.json` 提升 `version`，使用稳定的 `X.Y.Z` 格式，随产品修改一起提交。CI 不自动修改源码版本号；预发布版本和带构建元数据的版本暂不发布。
+2. 将提交合入或推送到 `main`。`record-only` 流水线完成服务端、Docker 全链路及 Windows 测试、正式打包与发布版 Electron 测试后，才将本次运行的安装包交给 `release` 作业。拉取请求、其他分支、失败或取消的检查均不发布。
+3. 发布作业校验安装包版本、提交号、大小和 SHA-256，创建指向受测提交的 `v<版本>` 标签，先建立草稿并上传三个文件，全部成功后公开 Release。只在该作业授予 `GITHUB_TOKEN` 的 `contents: write` 权限，不需要额外 PAT；`electron-builder` 自身禁止发布，统一由门禁后的作业处理。
+4. 若版本已公开，后续同版本提交只执行 CI，保留原标签和原安装包。要向用户分发后续修改，必须提升版本号。首次启用此流程时，如果当前版本还未发布，会自动发布当前版本。
+5. 上传故障会留下未公开草稿，可在同一 Actions 运行中使用 **Re-run failed jobs** 重试；已有完整附件复用，草稿中的不完整附件重新上传。同名标签或草稿如果属于其他提交则拒绝发布，不移动标签、不覆盖成品。也可在 `main` 手动触发 `workflow_dispatch`，但仍须重新通过全部检查。已经公开的错误版本通过提升版本号修正。
+
+Actions 的 `windows-client-results` 继续保留测试报告；`windows-installer` 是通过发布版测试后产生的独立制品。长期下载使用 Releases，不依赖 Actions 制品的保留期限。新增发布脚本的本地回归入口为仓库根目录的 `node --test .github/scripts/release.test.cjs`。
+
 ## 生产接入
 
 复制 `.env.example` 为宿主受限 `.env`，填入真实部署输入。提供 `secrets/db-password`、`secrets/migration-database-url`、`secrets/runtime-database-url`、`secrets/server.crt`、`secrets/server.key`；SQL 模式另需 `secrets/provider-config-key`。Compose 不再挂载未使用的 `provider_credential` secret，服务端也不读取它；只有显式使用外置 `module` 适配器且该适配器确需运维凭证时，才由运维在本地 compose override 中自行加入只读挂载或环境变量，默认部署不代持该凭证。使用外置 `module` 模式时在 `runtime/adapters/` 放置符合 `CampusProvider` 接口的真实模块；SQL 模式为内置实现，不需要外置模块。模块按供应方协议把临时原卡号发送到固定、可信 HTTPS 目的地，不得记录原卡号或完整请求/响应；仅在 API 确认学生可登记时返回资料，明确拒绝映射为 `STUDENT_NOT_ALLOWED`。先完成 TBD-01/02/03/04 的实际输入核对和独立验收；`PROFILE_CONTRACT_CONFIRMED=true` 仅在字段契约确认后设置。生产配置不得使用 `PROVIDER_MODE=fake`、集成 seed、测试证书或测试卡按钮。

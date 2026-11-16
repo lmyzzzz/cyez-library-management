@@ -385,3 +385,9 @@ Docker 全链路本轮构建了真实 Nginx/TLS/API/PostgreSQL/log-ingest 镜像
 审查中还发现定时任务的固定内部 clientId 可能被共享账号登录请求声明，从而抢占可预测的定时幂等键。现将内部 clientId 设为登录保留值；真实 PostgreSQL/Fastify 集成验证使用此 ID 登录返回 401，定时触发与重启幂等场景继续通过。
 
 未完成的外部验收仍是学校正式 SQL Server、现场卡/读卡器 UID 对照、目标 Windows 安装升级和代码签名；测试替身和集成 provider 不计作这些验收。班级映射见独立 Issue #2。
+
+## 2026-11-16 Issue #3：CI 自动发布 Windows 安装包
+
+新增门禁后的 Release 作业，复用本次 Windows 正式包验收后的独立制品，校验版本、提交和 SHA-256，再以草稿上传并公开 `v<版本>`。已发布同版本跳过；未公开草稿可在同一提交重试；不同提交的标签/草稿冲突拒绝覆盖。正式发布只接受 `main` 的 push 或手动 CI 运行，依赖服务端、全链路和 Windows 三个作业成功。构建工具本身使用 `--publish never`，避免绕过最终门禁。
+
+本地实际验证：发布脚本 10 项回归通过（使用临时文件与 GitHub API 替身，覆盖上传和公开失败重试、重复版本、损坏制品、标签冲突、权限错误与来源限制）；真实的 119696780 字节 `0.1.8` 安装包完成制品准备，SHA-256 与原包一致；Node 语法、TypeScript、Prettier、`git diff --check` 和 actionlint 1.7.12 均通过。API 替身不代表 GitHub 已发布成功；对应提交的四个 CI 作业和真实 Release 附件是线上验收依据，可从仓库 Actions/Releases 查询。此改动不涉及业务代码，学校数据源、实卡、目标机器和签名的外部验收边界不变。
