@@ -160,11 +160,9 @@ describe("C-U main 协调器", () => {
     }[];
     expect(scans).toHaveLength(2);
     expect(events.filter((e: any) => e.type === "cancel")).toHaveLength(0);
-    // 新卡成为当前流程：再刷新卡是确认，再刷旧卡又是换卡。
+    // 当前卡重复事件不确认，也不重复查询校园资料。
     await coordinator.onCard(other());
-    expect(events.filter((e: any) => e.type === "confirm")).toEqual([
-      { type: "confirm", previewId: scans[1].preview.id },
-    ]);
+    expect(events.filter((e: any) => e.type === "confirm")).toHaveLength(0);
     // 第三张卡被服务端拒绝：旧流程已取消，刷卡窗口收到 cancel 和提示。
     const initial = response;
     response = (method, path, body) => {
@@ -240,7 +238,7 @@ describe("C-U main 协调器", () => {
     expect(origins.at(-1)).toEqual(["scan", "card"]);
     await routed.call("gate", { ...devicesGate, page: "flow" });
     await routed.onCard(cardEvent());
-    expect(origins.at(-1)).toEqual(["confirm", "card"]);
+    expect(origins.at(-1)).toEqual(["scan", "card"]);
     const scans = () =>
       traffic.filter((t) => t.path === "/api/v1/scan-previews").length;
     const before = scans();
@@ -408,7 +406,7 @@ describe("C-U main 协调器", () => {
     ).toHaveLength(scanCount);
     expect(
       events.filter((e) => (e as { type: string }).type === "confirm"),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
     await coordinator.onCard({
       ...input,
       scanId: randomUUID(),
@@ -417,7 +415,7 @@ describe("C-U main 协调器", () => {
     });
     expect(
       events.filter((e) => (e as { type: string }).type === "confirm"),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
     await coordinator.call("gate", {
       page: "devices",
       modal: true,

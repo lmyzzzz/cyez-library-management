@@ -64,6 +64,8 @@ import {
   ProviderSettingsForm,
 } from "./settings.js";
 import { EndForm, BatchForm, NotesEditor } from "./flows.js";
+import { DeviceToggle, ScanModeControl } from "./device-controls.js";
+import { AddonSettings } from "./addons.js";
 const routes: AppRouteRegistration[] = [
   {
     id: "register",
@@ -412,6 +414,13 @@ export function App() {
     <Card className="bento-device-card">
       <div className="bento-card-head">
         <h2>{settings ? "设备管理" : "设备使用"}</h2>
+        {!settings && (
+          <ScanModeControl
+            status={status}
+            refresh={() => void refreshStatus()}
+            disabled={busy || !!modal}
+          />
+        )}
         <span className="bento-count">{devices.total} 条</span>
         {!settings && (
           <div className="tabs" role="group" aria-label="设备状态">
@@ -630,6 +639,14 @@ export function App() {
                       )}
                     </td>
                     <td>
+                      <DeviceToggle
+                        device={d}
+                        disabled={
+                          !canWrite ||
+                          !service?.allowedActions.includes("modify")
+                        }
+                        refresh={() => void load(true)}
+                      />
                       {settings ? (
                         <div className="row-actions">
                           <ActionMenu label="设备操作">
@@ -806,6 +823,7 @@ export function App() {
                   ["provider", "校园数据源"],
                   ["devices", "设备管理"],
                   ["history", "历史记录"],
+                  ["addons", "加载项"],
                   ...(__CYEZ_TEST_FEATURES__ ? [["diagnostics", "诊断"]] : []),
                 ].map(([id, name]) => (
                   <Button
@@ -843,6 +861,12 @@ export function App() {
               )}
               {tab === "provider" && (
                 <ProviderSettingsForm authenticated={!!status?.authenticated} />
+              )}
+              {tab === "addons" && (
+                <AddonSettings
+                  authenticated={!!status?.authenticated}
+                  canWrite={canWrite}
+                />
               )}
               {tab === "devices" && table}
               {tab === "history" && (

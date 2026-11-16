@@ -24,6 +24,7 @@ import {
   timestamp,
   duration,
 } from "./common.js";
+import { useAutoSubmit } from "./auto-submit.js";
 import { IdleTimer } from "./timers.js";
 type EndFlow = EndPreview | ScanPreview;
 const clock = (ms: number) =>
@@ -95,7 +96,7 @@ function IdleNotice({ remaining }: { remaining: number }) {
     </div>
   );
 }
-/** 等待第二次刷卡时的醒目提示。 */
+/** 刷卡流程中的确认或自动提交状态。 */
 function RescanPrompt({ title, detail }: { title: string; detail: string }) {
   return (
     <div className="bflow-rescan" role="status">
@@ -153,7 +154,7 @@ export function EndForm({
   onDone,
   onCancel,
   onBusy,
-  confirmSignal = 0,
+  autoSubmit = false,
 }: {
   preview: EndFlow;
   automatic: boolean;
@@ -161,7 +162,7 @@ export function EndForm({
   onDone: () => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
-  confirmSignal?: number;
+  autoSubmit?: boolean;
 }) {
   const record = preview.record!;
   const [notes, setNotes] = useState(record.notes),
@@ -197,10 +198,12 @@ export function EndForm({
       onBusy(false);
     }
   };
-  useEffect(() => {
-    if (!confirmSignal) return;
-    void submit();
-  }, [confirmSignal]);
+  const { remaining: autoRemaining, stop: stopAutoSubmit } = useAutoSubmit(
+    autoSubmit,
+    automatic,
+    online,
+    submit,
+  );
   if (!automatic)
     return (
       <>
@@ -228,7 +231,10 @@ export function EndForm({
             value={notes}
             maxLength={8000}
             disabled={busy}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(e) => {
+              stopAutoSubmit();
+              setNotes(e.target.value);
+            }}
           />
         </label>
         <Failure error={error} />
@@ -321,7 +327,7 @@ export function EndForm({
             <p className="bflow-eyebrow">结束使用 · CHECK OUT</p>
             <h1>刷卡结束使用</h1>
             <p className="bflow-sub">
-              请确认本次使用信息，再次刷卡确认后记录将结束。
+              请确认本次使用信息，登记模式决定提交方式。
             </p>
           </div>
           <span className="bflow-terminal">
@@ -367,7 +373,10 @@ export function EndForm({
             value={notes}
             maxLength={8000}
             disabled={busy}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(e) => {
+              stopAutoSubmit();
+              setNotes(e.target.value);
+            }}
           />
           <p className="bflow-hint">
             确认后本条记录结束并写入历史，历史记录只读。
@@ -381,8 +390,18 @@ export function EndForm({
           <Failure error={error} />
         </div>
         <RescanPrompt
-          title="请再次刷卡确认结束使用"
-          detail={`再刷一次同一张卡即可结束 ${record.device.code}，也可以点击“确认结束”。`}
+          title={
+            !autoSubmit
+              ? "请教师确认结束使用"
+              : autoRemaining === null
+                ? "请教师确认结束使用"
+                : `${Math.ceil(autoRemaining / 1000)} 秒后自动结束使用`
+          }
+          detail={
+            !autoSubmit
+              ? `将结束 ${record.device.code}，请点击“确认结束”。`
+              : `将结束 ${record.device.code}。可点击取消；编辑备注会停止自动提交。`
+          }
         />
         <footer className="bflow-foot">
           <IdleNotice remaining={idle.remaining} />
@@ -416,14 +435,14 @@ export function Registration({
   onDone,
   onCancel,
   onBusy,
-  confirmSignal = 0,
+  autoSubmit = false,
 }: {
   preview: ScanPreview;
   online?: boolean;
   onDone: (device: DeviceDTO) => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
-  confirmSignal?: number;
+  autoSubmit?: boolean;
 }) {
   const [notes, setNotes] = useState(""),
     [selected, setSelected] = useState<DeviceDTO | null>(null),
@@ -528,10 +547,12 @@ export function Registration({
       onBusy(false);
     }
   };
-  useEffect(() => {
-    if (!confirmSignal) return;
-    void submit();
-  }, [confirmSignal]);
+  const { remaining: autoRemaining, stop: stopAutoSubmit } = useAutoSubmit(
+    autoSubmit,
+    ready && !!selected && !release && !error,
+    online,
+    submit,
+  );
   const startRelease = async (device: DeviceDTO) => {
     if (!device.active || releaseBusy) return;
     setReleaseBusy(true);
@@ -672,6 +693,7 @@ export function Registration({
             placeholder="搜索设备编号或名称"
             value={search}
             onChange={(e) => {
+              stopAutoSubmit();
               setSearch(e.target.value);
               setPage(1);
             }}
@@ -680,7 +702,10 @@ export function Registration({
             type="button"
             className="bflow-btn small"
             disabled={busy}
-            onClick={() => void load()}
+            onClick={() => {
+              stopAutoSubmit();
+              void load();
+            }}
           >
             刷新设备
           </button>
@@ -715,7 +740,10 @@ export function Registration({
                     aria-label={`释放 ${d.code}`}
                     title="释放设备"
                     disabled={busy || releaseBusy}
-                    onClick={() => void startRelease(d)}
+                    onClick={() => {
+                      stopAutoSubmit();
+                      void startRelease(d);
+                    }}
                   >
                     <LockOpen size={15} aria-hidden="true" />
                   </button>
@@ -732,9 +760,10 @@ export function Registration({
                       selected?.id === d.id ? "取消选择" : "选择"
                     } ${d.code}`}
                     disabled={busy}
-                    onClick={() =>
-                      setSelected(selected?.id === d.id ? null : d)
-                    }
+                    onClick={() => {
+                      stopAutoSubmit();
+                      setSelected(selected?.id === d.id ? null : d);
+                    }}
                   >
                     {selected?.id === d.id ? (
                       <Check size={13} aria-hidden="true" />
@@ -767,13 +796,26 @@ export function Registration({
           value={notes}
           maxLength={8000}
           disabled={busy}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e) => {
+            stopAutoSubmit();
+            setNotes(e.target.value);
+          }}
         />
         <Failure error={error} />
         {selected ? (
           <RescanPrompt
-            title="请再次刷卡确认登记"
-            detail={`将登记使用 ${selected.code} ${selected.displayName}。再刷一次同一张卡即可确认，也可以点击“确认登记”。`}
+            title={
+              !autoSubmit
+                ? "请教师确认登记"
+                : autoRemaining === null
+                  ? "请教师确认登记"
+                  : `${Math.ceil(autoRemaining / 1000)} 秒后自动登记`
+            }
+            detail={
+              !autoSubmit
+                ? `将登记使用 ${selected.code} ${selected.displayName}，请点击“确认登记”。`
+                : `将登记使用 ${selected.code} ${selected.displayName}。更换设备或编辑备注后，请点击“确认登记”。`
+            }
           />
         ) : (
           ready && (
@@ -797,7 +839,9 @@ export function Registration({
             <button
               type="button"
               className="bflow-btn primary"
-              disabled={!selected || busy || sending.current || !ready}
+              disabled={
+                !selected || busy || sending.current || !ready || !online
+              }
               onClick={() => void submit()}
             >
               {busy ? "正在登记…" : "确认登记"}

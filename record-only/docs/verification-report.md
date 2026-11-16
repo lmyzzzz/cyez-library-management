@@ -364,3 +364,24 @@ Linux CI 新增独立 SQL Server fixture，服务端覆盖率显式启用真实 
 | Windows 安装包 | `release/0.1.7/cyez-library-0.1.7-x64-setup.exe`，119650838 字节，SHA-256 `6a276ab6f9c660f4effbae7585098ae0eecf87333ce2ed85ee5aa0ce56302b91`，Authenticode `NotSigned` |
 
 本次没有修改服务端或读卡进程，未重跑服务端/Docker 套件或学校正式校园数据源与实卡验收；其余外部验收边界仍按前述报告执行。
+
+## 2026-11-16 Issue #1：设备快捷禁用、手动/自动模式与内置加载项
+
+本轮按 Issue #1 及其补充细则完成实现。教师主窗口和状态悬浮窗均显示登记模式与设备快捷停用/恢复；服务端以 `expectedVersion` 和活动记录锁最终校验，使用中的设备拒绝禁用。刷卡登记和刷卡结束始终进入全屏流程。手动模式只由教师确认按钮提交，重复硬件帧静默去重；自动模式对每个有效预览等待 3 秒并最多尝试一次，编辑备注、换设备、刷新、断线、隐藏窗口或取消会停止该次自动提交。班级映射按用户要求另立 Issue #2，没有混入本轮。
+
+定时清空实现为服务端独立的内置加载项目录、模型、触发器和执行器，不向教师端加入客户端特判。当前仅有两个固定任务：北京时间每天 12:40 结束高一/高二，13:30 结束高三；支持启用/禁用、教师手动执行、持久 requestId 幂等、当天有界补执行、容量失败事务回滚与恢复、重启/并发竞争。班级匹配使用独立年级 token，兼容 ASCII/全角罗马数字及中文高一/高二/高三，不把 III 误判为 I。
+
+| 本轮检查 | 实际结果 |
+| --- | --- |
+| TypeScript / 格式 / diff 检查 | `corepack yarn typecheck`、Prettier、`git diff --check` 通过 |
+| 客户端单元/组件与覆盖率 | 11 个文件、122 项通过；statements 90.18%、branches 84.87%、functions 85.86%、lines 91.53%，门禁通过；覆盖手动按钮确认、自动一次提交、重复帧静默、自动提交取消、加载项设置和设备快捷操作 |
+| 服务端单元与覆盖率 | 单元 4 个文件、43 项通过；服务端覆盖率套件 72 项通过、4 项明确跳过，statements 92.37%、branches 88.23%、functions 92.74%、lines 94.35%，门禁通过 |
+| 真实 PostgreSQL 集成 | 7 个加载项/设备用例通过；与既有套件合计 29 项通过、4 项明确跳过（需真实 SQL Server） |
+| 真实 Electron | 14 项通过，含真实 TLS、SQLite、三窗口、手动模式和自动模式一刷登记/结束；此前复现的重复 toast 覆盖确认按钮问题已修复 |
+| 构建 | `build:shared`、`build:server`、`build:client:integration`、Rust 三读卡进程测试和 `package:win` 通过；安装包 [cyez-library-0.1.8-x64-setup.exe](../release/cyez-library-0.1.8-x64-setup.exe)，119696780 字节，SHA-256 `D7C2B80DB8426EA96550DF074C6D3BD34F704A229E707EEFC56DBD302545493C`，Authenticode `NotSigned`；正式包资源含 mock/serial/ACR1552U 三个读卡进程，发布套件 2/2 通过 |
+
+Docker 全链路本轮构建了真实 Nginx/TLS/API/PostgreSQL/log-ingest 镜像并运行隔离 Compose 项目：真实 Electron 客户端 5/5、服务端 31/31 通过，覆盖网关白名单、并发、日志去重、API/数据库重启和卷持久化；测试后已清理本轮容器和卷。
+
+审查中还发现定时任务的固定内部 clientId 可能被共享账号登录请求声明，从而抢占可预测的定时幂等键。现将内部 clientId 设为登录保留值；真实 PostgreSQL/Fastify 集成验证使用此 ID 登录返回 401，定时触发与重启幂等场景继续通过。
+
+未完成的外部验收仍是学校正式 SQL Server、现场卡/读卡器 UID 对照、目标 Windows 安装升级和代码签名；测试替身和集成 provider 不计作这些验收。班级映射见独立 Issue #2。

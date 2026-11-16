@@ -2480,7 +2480,7 @@ input[type="checkbox"] {
   flex: none;
 }
 
-/* 等待二次刷卡确认的提示 */
+/* 等待教师确认或自动提交倒计时的提示 */
 
 .bflow-rescan {
   display: flex;
@@ -2600,4 +2600,20 @@ input[type="checkbox"] {
 
 .scan-result.is-end h1 {
   letter-spacing: 0.08em;
+}
+
+.scan-mode-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.addon-row {
+  padding: 20px 0;
+  border-bottom: 1px solid #eadcc9;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }

@@ -12,6 +12,8 @@ import { Spool, Capacity, ingestLogs, type StorageProbe } from "./storage.js";
 import { loadProvider, type CampusProvider } from "./provider.js";
 import { ProviderSettings, type ProviderFactory } from "./provider-settings.js";
 import type { Context } from "./previews.js";
+import { AddonRuntime } from "./addons/runtime.js";
+import { registerAddons } from "./addons/register.js";
 /** Maps an error to the only safe wire response. Known ApiErrors keep their
  * status/code; Fastify-level 413/429 stay explicit; every other unknown client
  * error is reported as 422 INPUT_INVALID and only 5xx/unknown failures become
@@ -244,6 +246,13 @@ export async function createApp(
       P.parse(P.editDeviceSchema, req.body),
     ),
   );
+  app.patch("/api/v1/devices/:id/disabled", async (req) =>
+    service.disableDevice(
+      ctx(req),
+      id(req.params),
+      P.parse(P.disableDeviceSchema, req.body),
+    ),
+  );
   app.delete("/api/v1/devices/:id", async (req) =>
     service.device(
       ctx(req),
@@ -313,8 +322,20 @@ export async function createApp(
       throw new P.ApiError("LOG_SOURCE_INVALID", 422);
     return ingestLogs(db, ctx(req).clientId, logs);
   });
+  const addons = new AddonRuntime(service, options.now, async () => {
+    await spool.append({
+      logId: randomUUID(),
+      source: "api",
+      level: "error",
+      atMs: Date.now(),
+      appVersion: "0.1.0",
+      code: "ADDON_RUN_FAILED",
+    });
+  });
+  registerAddons(app, addons, auth);
   app.addHook("onClose", async () => {
+    await addons.close();
     await db.close();
   });
-  return { app, db, auth, service, capacity, spool, providerSettings };
+  return { app, db, auth, service, capacity, spool, providerSettings, addons };
 }

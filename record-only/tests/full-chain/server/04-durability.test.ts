@@ -227,6 +227,7 @@ describe("全链路：日志归集、持久化与故障恢复", () => {
       "001-runtime-role",
       "002-student-cache-insert",
       "003-provider-config",
+      "004-builtin-addons",
     ]);
     expect(snapshot.privileges).toEqual({
       audit_select: false,

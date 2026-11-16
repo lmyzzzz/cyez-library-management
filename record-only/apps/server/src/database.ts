@@ -10,6 +10,8 @@ import { Umzug, SequelizeStorage } from "umzug";
 import { ApiError, type Profile, type AppLog } from "@record/protocol";
 import type { IdentityConfig } from "@record/protocol/identity";
 import { payloadDigest } from "@record/domain";
+import { defineAddons, addonAttributes } from "./addons/model.js";
+import { builtins } from "./addons/catalog.js";
 export interface StudentRow extends Profile {
   id: string;
   hashVersion: string;
@@ -202,6 +204,7 @@ export class Database {
   readonly logs: Table<LogRow>;
   readonly settings: Table<SettingRow>;
   readonly providerConfigs: Table<ProviderConfigRow>;
+  readonly addons: ReturnType<typeof defineAddons>;
   readonly migrator: Umzug<QueryInterface>;
   constructor(url: string) {
     this.sequelize = new Sequelize(url, {
@@ -224,6 +227,7 @@ export class Database {
     this.logs = define("app_logs");
     this.settings = define("settings");
     this.providerConfigs = define("provider_configs");
+    this.addons = defineAddons(this.sequelize);
     this.migrator = new Umzug({
       context: this.sequelize.getQueryInterface(),
       storage: new SequelizeStorage({ sequelize: this.sequelize }),
@@ -321,6 +325,29 @@ export class Database {
             });
           },
         },
+        {
+          name: "004-builtin-addons",
+          up: async () => {
+            await this.sequelize.transaction(async (transaction) => {
+              await this.sequelize
+                .getQueryInterface()
+                .createTable("builtin_addons", addonAttributes, {
+                  transaction,
+                });
+              await this.addons.bulkCreate(
+                builtins.map((addon) => ({
+                  id: addon.id,
+                  enabled: false,
+                  version: 1,
+                  enabledAt: null,
+                  lastSlot: null,
+                  lastRun: null,
+                })),
+                { transaction },
+              );
+            });
+          },
+        },
       ],
     });
   }
@@ -343,7 +370,7 @@ export class Database {
         { tableName: "SequelizeMeta", timestamps: false },
       );
     const completed = await metadata.findAll();
-    if (!completed.some((row) => row.get("name") === "003-provider-config"))
+    if (!completed.some((row) => row.get("name") === "004-builtin-addons"))
       throw new Error("SCHEMA_NOT_READY");
   }
   async close() {

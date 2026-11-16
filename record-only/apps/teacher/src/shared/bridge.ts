@@ -11,6 +11,9 @@ import {
   noteSchema,
   createDeviceSchema,
   editDeviceSchema,
+  disableDeviceSchema,
+  configureAddonSchema,
+  addonIdSchema,
   deleteSchema,
   createTagSchema,
   editTagSchema,
@@ -55,6 +58,15 @@ export const actions = {
   testConnection: z.object({}).strict(),
   logout: z.object({}).strict(),
   status: z.object({}).strict(),
+  setScanMode: z.object({ mode: z.enum(["manual", "automatic"]) }).strict(),
+  addons: z.object({}).strict(),
+  configureAddon: configureAddonSchema
+    .omit({ requestId: true })
+    .extend({ addonId: addonIdSchema }),
+  runAddon: z.object({ addonId: addonIdSchema }).strict(),
+  disableDevice: disableDeviceSchema
+    .omit({ requestId: true })
+    .extend({ deviceId: uuid }),
   recover: z.object({}).strict(),
   gate: gateSchema,
   devices: listSchema,
@@ -103,6 +115,7 @@ export type ActionInput<K extends ActionName> = z.input<
   NonNullable<(typeof actions)[K]>
 >;
 export interface LocalStatus {
+  scanMode?: "manual" | "automatic";
   identityConfigured: boolean;
   connectionConfigured: boolean;
   authenticated: boolean;
@@ -120,8 +133,7 @@ export interface LocalStatus {
   lastSuccessMs: number | null;
 }
 export type TeacherEvent =
-  | { type: "scan"; preview: ScanPreview }
-  | { type: "confirm"; previewId: string }
+  | { type: "scan"; preview: ScanPreview; scanMode?: "manual" | "automatic" }
   /** 当前流程被另一张卡顶替且新卡未能进入流程时，通知刷卡窗口退出旧流程。 */
   | { type: "cancel"; previewId: string }
   | { type: "notice"; code: string }

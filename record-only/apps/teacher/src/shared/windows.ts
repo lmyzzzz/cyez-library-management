@@ -28,6 +28,8 @@ const scanActions = new Set([
 ]);
 /** 状态悬浮窗只复制主窗口的查看、备注和手动结束。 */
 const statusActions = new Set([
+  "setScanMode",
+  "disableDevice",
   "status",
   "devices",
   "editNotes",

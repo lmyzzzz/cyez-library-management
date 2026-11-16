@@ -377,7 +377,7 @@ test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 �
     registrationBounds.viewportHeight,
     0,
   );
-  await expect(scanPage.getByText("请再次刷卡确认登记")).toBeVisible();
+  await expect(scanPage.getByText("请教师确认登记")).toBeVisible();
   // 流程中刷另一张卡：取消当前流程并按新卡重新查询；再刷回原卡同理。
   const scansDuringFlow = scans;
   await call("integrationScan", { fixture: "allowed-2" });
@@ -472,7 +472,7 @@ test("C-I-02/08: 流程中刷卡不查询；真实 CRUD → 刷卡窗口登记 �
     fullPage: true,
   });
 });
-test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async () => {
+test("C-I-15: 手动模式同卡二刷不提交，教师明确确认且不重复查询资料", async () => {
   await page.getByRole("link", { name: "使用登记", exact: true }).click();
   await page.getByRole("button", { name: "未使用", exact: true }).click();
   await page.waitForTimeout(1300);
@@ -484,28 +484,34 @@ test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async 
   await selectDevice(scanPage, "E2E-001");
   await scanPage
     .getByLabel("登记备注", { exact: true })
-    .fill("二刷确认集成验证");
+    .fill("手动确认集成验证");
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
     scanPage.getByRole("heading", { name: "选择设备", exact: true }),
-  ).toHaveCount(0);
+  ).toBeVisible();
   expect(scans).toBe(before + 1);
+  await scanPage.getByRole("button", { name: "确认登记", exact: true }).click();
+  await expect(scanPage.getByText("登记成功", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "使用中", exact: true }).click();
   await expect(
-    page.getByText("二刷确认集成验证", { exact: true }),
+    page.getByText("手动确认集成验证", { exact: true }),
   ).toBeVisible();
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
   await expect(
     scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
   ).toBeVisible();
-  // 结束流程从不自动提交，只有第二次刷卡（或点击确认）才结束这条记录。
+  // 手动结束必须由教师按确认，重复读卡帧不触发结束。
   await scanPage
     .getByLabel("使用备注", { exact: true })
-    .fill("二刷确认结束验证");
+    .fill("手动确认结束验证");
   await page.waitForTimeout(1300);
   await call("integrationScan", { fixture: "allowed-2" });
+  await expect(
+    scanPage.getByRole("heading", { name: "刷卡结束使用", exact: true }),
+  ).toBeVisible();
+  await scanPage.getByRole("button", { name: "确认结束", exact: true }).click();
   await expect(
     scanPage.getByRole("heading", { name: "感谢使用", exact: true }),
   ).toBeVisible();
@@ -513,9 +519,33 @@ test("C-I-15: 同卡二刷确认登记与结束，不重复查询资料", async 
   await page.getByRole("link", { name: "设置", exact: true }).click();
   await page.getByRole("button", { name: "历史记录", exact: true }).click();
   await expect(
-    page.getByText("二刷确认结束验证", { exact: true }),
+    page.getByText("手动确认结束验证", { exact: true }),
   ).toBeVisible();
   expect(scans).toBe(before + 2);
+});
+
+test("C-I-15: 自动模式单次刷卡登记和结束，短时间重复帧不反向操作", async () => {
+  await page.getByRole("link", { name: "使用登记", exact: true }).click();
+  await page.getByLabel("登记模式").selectOption("automatic");
+  await expect
+    .poll(async () => (await call<{ scanMode: string }>("status")).scanMode)
+    .toBe("automatic");
+  const before = scans;
+  await call("integrationScan", { fixture: "allowed-1" });
+  await expect(scanPage.getByText("登记成功", { exact: true })).toBeVisible();
+  expect(scans).toBe(before + 1);
+  await call("integrationScan", { fixture: "allowed-1" });
+  expect(scans).toBe(before + 1);
+  await expect(
+    scanPage.getByRole("heading", { name: "请刷卡", exact: true }),
+  ).toBeVisible();
+  await page.waitForTimeout(5200);
+  await call("integrationScan", { fixture: "allowed-1" });
+  await expect(
+    scanPage.getByRole("heading", { name: "感谢使用", exact: true }),
+  ).toBeVisible();
+  expect(scans).toBe(before + 2);
+  await page.getByLabel("登记模式").selectOption("manual");
 });
 
 test("C-I-10/04/05: OS 加密保存与真实 SQLite 跨重启，origin 隔离", async () => {

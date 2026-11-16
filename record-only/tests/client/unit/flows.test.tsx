@@ -64,7 +64,7 @@ const free: DeviceDTO = {
 };
 
 describe("C-U 登记、结束与批量确认", () => {
-  it("释放弹窗与过期登记不能被二次刷卡绕过", async () => {
+  it("释放弹窗与过期登记不能被确认按钮绕过", async () => {
     let now = 0;
     const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
     const onCancel = vi.fn();
@@ -87,21 +87,20 @@ describe("C-U 登记、结束与批量确认", () => {
         };
       return {};
     });
-    const form = (confirmSignal: number) => (
+    const form = () => (
       <Registration
         preview={preview}
-        confirmSignal={confirmSignal}
         onDone={vi.fn()}
         onCancel={onCancel}
         onBusy={vi.fn()}
       />
     );
     try {
-      const view = render(form(0));
+      render(form());
       await screen.findByRole("button", { name: "取消选择 PC-01" });
       fireEvent.click(screen.getByRole("button", { name: /^释放 / }));
       await screen.findByText("释放这台设备？");
-      view.rerender(form(1));
+      expect(screen.queryByRole("button", { name: "确认登记" })).toBeNull();
       expect(
         call.mock.calls.filter(
           ([action]) => action === "start" || action === "end",
@@ -109,7 +108,7 @@ describe("C-U 登记、结束与批量确认", () => {
       ).toHaveLength(0);
       fireEvent.click(screen.getByRole("button", { name: "取消" }));
       now = 10001;
-      view.rerender(form(2));
+      fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
       expect(onCancel).toHaveBeenCalledOnce();
       expect(
         call.mock.calls.filter(([action]) => action === "start"),
@@ -120,7 +119,7 @@ describe("C-U 登记、结束与批量确认", () => {
   });
 
   it.each(["start", "end"])(
-    "%s 二次刷卡离线不提交，重连不重放，连续确认只提交一次",
+    "%s 离线不提交，重连后由教师明确确认且只提交一次",
     async (mode) => {
       let finish!: () => void;
       call.mockImplementation(async (action) => {
@@ -133,12 +132,11 @@ describe("C-U 登记、结束与批量确认", () => {
         });
       });
       const onDone = vi.fn();
-      const form = (online: boolean, confirmSignal: number) =>
+      const form = (online: boolean) =>
         mode === "start" ? (
           <Registration
             preview={preview}
             online={online}
-            confirmSignal={confirmSignal}
             onDone={onDone}
             onCancel={vi.fn()}
             onBusy={vi.fn()}
@@ -148,25 +146,32 @@ describe("C-U 登记、结束与批量确认", () => {
             preview={{ ...preview, mode: "end", record: active }}
             automatic
             online={online}
-            confirmSignal={confirmSignal}
             onDone={onDone}
             onCancel={vi.fn()}
             onBusy={vi.fn()}
           />
         );
-      const view = render(form(true, 0));
+      const view = render(form(true));
       if (mode === "start")
         await screen.findByRole("button", { name: "取消选择 PC-01" });
-      view.rerender(form(false, 1));
+      view.rerender(form(false));
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: mode === "start" ? "确认登记" : "确认结束",
+        }),
+      );
       expect(
         call.mock.calls.filter(([action]) => action === mode),
       ).toHaveLength(0);
-      view.rerender(form(true, 1));
+      view.rerender(form(true));
       expect(
         call.mock.calls.filter(([action]) => action === mode),
       ).toHaveLength(0);
-      view.rerender(form(true, 2));
-      view.rerender(form(true, 3));
+      const confirm = screen.getByRole("button", {
+        name: mode === "start" ? "确认登记" : "确认结束",
+      });
+      fireEvent.click(confirm);
+      fireEvent.click(confirm);
       expect(
         call.mock.calls.filter(([action]) => action === mode),
       ).toHaveLength(1);
@@ -397,7 +402,7 @@ describe("C-U 登记、结束与批量确认", () => {
               new MouseEvent("click", { bubbles: true }),
             );
           });
-        expect(screen.getByText(/请再次刷卡确认/)).toBeTruthy();
+        expect(screen.getByText(/请教师确认/)).toBeTruthy();
         // 有焦点时的真实操作重新计时。
         await advance(6000);
         click();
@@ -428,30 +433,29 @@ describe("C-U 登记、结束与批量确认", () => {
     },
   );
 
-  it("刷卡结束过期后二次刷卡不提交；编辑备注不暂停计时", async () => {
+  it("刷卡结束过期后确认不提交；编辑备注不暂停计时", async () => {
     let now = 0;
     const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
     const end = { ...preview, mode: "end" as const, record: active };
     const onCancel = vi.fn();
-    const form = (confirmSignal: number) => (
+    const form = () => (
       <EndForm
         preview={end}
         automatic
-        confirmSignal={confirmSignal}
         onDone={vi.fn()}
         onCancel={onCancel}
         onBusy={vi.fn()}
       />
     );
     try {
-      const view = render(form(0));
+      render(form());
       fireEvent.change(screen.getByLabelText("使用备注"), {
         target: { value: "修改" },
       });
       expect(screen.queryByRole("button", { name: "继续倒计时" })).toBeNull();
       expect(screen.getByText(/秒无操作将自动取消/)).toBeTruthy();
       now = 10001;
-      view.rerender(form(1));
+      fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
       expect(onCancel).toHaveBeenCalledOnce();
       expect(call).not.toHaveBeenCalled();
     } finally {
@@ -512,7 +516,7 @@ describe("C-U 登记、结束与批量确认", () => {
       expect(screen.getByText("2 / 3")).toBeTruthy();
       await waitFor(() => expect(scroll).toHaveBeenCalledOnce());
       expect(scroll.mock.contexts[0]).toBe(chosen.closest(".bflow-row"));
-      expect(screen.getByText("请再次刷卡确认登记")).toBeTruthy();
+      expect(screen.getByText("请教师确认登记")).toBeTruthy();
       expect(screen.getByText(/将登记使用 PC-33/)).toBeTruthy();
       fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
       await waitFor(() =>
@@ -606,7 +610,7 @@ describe("C-U 登记、结束与批量确认", () => {
     expect(screen.getByText(/失败后保留已完成批次/)).toBeTruthy();
   });
 
-  it("再次刷同一张卡等同点击确认登记", async () => {
+  it("自动模式一次刷卡进入流程后倒计时提交登记", async () => {
     call.mockImplementation(async (action) =>
       action === "devices"
         ? {
@@ -615,66 +619,72 @@ describe("C-U 登记、结束与批量确认", () => {
         : {},
     );
     const onDone = vi.fn();
-    const view = render(
-      <Registration
-        preview={preview}
-        confirmSignal={0}
-        onDone={onDone}
-        onCancel={vi.fn()}
-        onBusy={vi.fn()}
-      />,
-    );
-    await screen.findByRole("button", { name: "取消选择 PC-01" });
-    view.rerender(
-      <Registration
-        preview={preview}
-        confirmSignal={1}
-        onDone={onDone}
-        onCancel={vi.fn()}
-        onBusy={vi.fn()}
-      />,
-    );
-    await waitFor(() =>
+    vi.useFakeTimers();
+    try {
+      const onCancel = vi.fn();
+      render(
+        <Registration
+          preview={preview}
+          autoSubmit
+          onDone={onDone}
+          onCancel={onCancel}
+          onBusy={vi.fn()}
+        />,
+      );
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100);
+      });
+      expect(screen.getByText(/秒后自动登记/)).toBeTruthy();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3200);
+      });
       expect(call).toHaveBeenCalledWith("start", {
         previewId: preview.id,
         deviceId: free.id,
         notes: "",
-      }),
-    );
-    expect(onDone).toHaveBeenCalledOnce();
+      });
+      expect(onDone).toHaveBeenCalledOnce();
+      expect(onCancel).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("再次刷同一张卡立即确认结束", async () => {
+  it("自动模式编辑备注后停止倒计时，结束仍需教师确认", async () => {
     const end = { ...preview, mode: "end" as const, record: active };
     const onDone = vi.fn();
-    const view = render(
-      <EndForm
-        preview={end}
-        automatic
-        confirmSignal={0}
-        onDone={onDone}
-        onCancel={vi.fn()}
-        onBusy={vi.fn()}
-      />,
-    );
-    view.rerender(
-      <EndForm
-        preview={end}
-        automatic
-        confirmSignal={1}
-        onDone={onDone}
-        onCancel={vi.fn()}
-        onBusy={vi.fn()}
-      />,
-    );
-    await waitFor(() =>
+    vi.useFakeTimers();
+    try {
+      render(
+        <EndForm
+          preview={end}
+          automatic
+          autoSubmit
+          onDone={onDone}
+          onCancel={vi.fn()}
+          onBusy={vi.fn()}
+        />,
+      );
+      fireEvent.change(screen.getByLabelText("使用备注"), {
+        target: { value: "教师修改" },
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3500);
+      });
+      expect(call).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
       expect(call).toHaveBeenCalledWith("end", {
         recordId: active.id,
         expectedVersion: active.version,
         previewId: preview.id,
-        notes: active.notes,
-      }),
-    );
-    expect(onDone).toHaveBeenCalledOnce();
+        notes: "教师修改",
+      });
+      expect(onDone).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

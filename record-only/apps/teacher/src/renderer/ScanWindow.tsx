@@ -63,7 +63,7 @@ export function ScanWindow() {
     [windows, setWindows] = useState<WindowState>(closedWindows),
     [flow, setFlow] = useState<ScanPreview | null>(null),
     [result, setResult] = useState<Result | null>(null),
-    [confirmSignal, setConfirmSignal] = useState(0),
+    [scanMode, setScanMode] = useState<"manual" | "automatic">("manual"),
     [busy, setBusy] = useState(false);
   const activeFlowId = useRef<string | null>(null);
   const refreshStatus = useCallback(async () => {
@@ -82,7 +82,7 @@ export function ScanWindow() {
         // 新刷卡立即取代结果页或被另一张卡顶替的流程。
         setResult(null);
         setBusy(false);
-        setConfirmSignal(0);
+        setScanMode(event.scanMode ?? "manual");
         activeFlowId.current = event.preview.id;
         setFlow(event.preview);
       } else if (event.type === "cancel") {
@@ -90,9 +90,6 @@ export function ScanWindow() {
           activeFlowId.current = null;
           setFlow(null);
         }
-      } else if (event.type === "confirm") {
-        if (activeFlowId.current === event.previewId)
-          setConfirmSignal((value) => value + 1);
       } else if (event.type === "notice") toast.error(errorText(event.code));
       else if (event.type === "windows") setWindows(event.state);
       else if (event.type === "changed") poll();
@@ -201,7 +198,7 @@ export function ScanWindow() {
               onDone={done}
               onCancel={closeFlow}
               onBusy={setBusy}
-              confirmSignal={confirmSignal}
+              autoSubmit={scanMode === "automatic"}
             />
           ) : (
             <EndForm
@@ -212,7 +209,7 @@ export function ScanWindow() {
               onDone={() => done()}
               onCancel={closeFlow}
               onBusy={setBusy}
-              confirmSignal={confirmSignal}
+              autoSubmit={scanMode === "automatic"}
             />
           )
         ) : result ? (
@@ -226,7 +223,9 @@ export function ScanWindow() {
             <p>
               {blocked
                 ? `${blocked}，请联系值班教师。`
-                : "将校园卡贴近读卡器，按提示再刷一次确认：未登记时开始使用，已登记时结束使用。"}
+                : status?.scanMode === "automatic"
+                  ? "自动模式：刷卡一次，3 秒后自动登记或结束；倒计时内可取消。"
+                  : "手动模式：刷卡后由教师点击确认，重复刷卡不会提交。"}
             </p>
             <Clock />
             <footer>

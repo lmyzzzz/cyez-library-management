@@ -19,6 +19,7 @@ import {
 } from "./common.js";
 import { AuxTitleBar } from "./aux-window.js";
 import { EndForm, NotesEditor } from "./flows.js";
+import { DeviceToggle, ScanModeControl } from "./device-controls.js";
 type Filter = "all" | "active" | "free";
 type ModalState =
   | { kind: "notes"; record: RecordDTO }
@@ -132,6 +133,11 @@ export function StatusWindow() {
     <div className="aux-window status-window">
       <AuxTitleBar title="使用状态" subtitle={summary} />
       <div className="aux-body status-body">
+        <ScanModeControl
+          status={status}
+          refresh={() => void load()}
+          disabled={busy || !!modal}
+        />
         <div className="status-tools">
           <div className="tabs" role="group" aria-label="设备状态">
             {filters.map(([id, name]) => (
@@ -212,6 +218,11 @@ export function StatusWindow() {
                     <small>{d.isDisabled ? "禁用" : "空闲"}</small>
                   </span>
                 )}
+                <DeviceToggle
+                  device={d}
+                  disabled={!canWrite}
+                  refresh={() => void load()}
+                />
               </li>
             );
           })}

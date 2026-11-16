@@ -2001,6 +2001,7 @@ __metadata:
     "@record/protocol": "workspace:^"
     "@types/mssql": "npm:12.3.0"
     bcryptjs: "npm:3.0.2"
+    cron-parser: "npm:5.4.0"
     fastify: "npm:5.12.7"
     mssql: "npm:12.7.14"
     node-pg-migrate: "npm:9.0.0"
@@ -3762,6 +3763,15 @@ __metadata:
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
   checksum: 10c0/90a0e40abbddfd7618f8ccd63a74d88deea94e77d0e8dbbea059fa7ebebb8fbb4e2909667fe26f3a467073de1a542ebe6ae4c73a73745ac5833786759cd906c9
+  languageName: node
+  linkType: hard
+
+"cron-parser@npm:5.4.0":
+  version: 5.4.0
+  resolution: "cron-parser@npm:5.4.0"
+  dependencies:
+    luxon: "npm:^3.7.1"
+  checksum: 10c0/665a78e62468e0fccf5e33723bff501b672d42c891c08ae084130bf459212451e6942d3d02a78c3b32ab89c87de3fcbd37c18ae7c291d378d946ce38a937bcbd
   languageName: node
   linkType: hard
 
@@ -5816,6 +5826,13 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/fe02e02a8c6a58fad4e27f0be0791fd4a6015ac02eec026bb51299e9e6221ed28b9e735229acb711e3fdfc27055ea89f326077249d63ff00fd5968d3e93f703f
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.7.1":
+  version: 3.7.2
+  resolution: "luxon@npm:3.7.2"
+  checksum: 10c0/ed8f0f637826c08c343a29dd478b00628be93bba6f068417b1d8896b61cb61c6deacbe1df1e057dbd9298334044afa150f9aaabbeb3181418ac8520acfdc2ae2
   languageName: node
   linkType: hard
 

@@ -42,6 +42,9 @@ export class Coordinator {
   private activeCard: { studentId: string; previewId: string } | null = null;
   private scanRevision = 0;
   private scanning = false;
+  private scanMode: "manual" | "automatic" = "manual";
+  private modeChanging = false;
+  private completedCard: { id: string; at: number } | null = null;
   private writing = false;
   private recovering = false;
   private flushing = false;
@@ -59,6 +62,10 @@ export class Coordinator {
     this.reader = new CardReader(identity, (event) => this.onCard(event));
   }
   async init() {
+    this.scanMode =
+      (await this.store.get("scanMode")) === "automatic"
+        ? "automatic"
+        : "manual";
     const saved = await this.store.get("connection");
     if (saved) {
       try {
@@ -109,6 +116,7 @@ export class Coordinator {
         ).length
       : 0;
     return {
+      scanMode: this.scanMode,
       identityConfigured: this.reader.configured,
       connectionConfigured: !!this.connection,
       authenticated: !!this.sdk?.authenticated,
@@ -148,23 +156,23 @@ export class Coordinator {
     let ownsScan = false;
     let replaced: string | undefined;
     try {
+      // Automatic one-scan completion must not immediately reverse itself when
+      // a reader repeats a held card. Require five seconds of quiet for that ID.
+      if (this.completedCard?.id === event.studentId) {
+        const previous = this.completedCard.at;
+        this.completedCard.at = performance.now();
+        if (this.completedCard.at - previous < 5000) return;
+      }
       const busy =
+        this.modeChanging ||
         this.gate.modal ||
         this.gate.submitting ||
         this.writing ||
         this.scanning;
       const current = this.gate.page === "flow" ? this.activeCard : null;
       if (current?.studentId === event.studentId) {
-        if (busy) {
-          this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
-          return;
-        }
-        if (!this.online || !this.sdk?.authenticated) {
-          this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
-          return;
-        }
-        // 同一张卡再次刷卡等同于当前流程的“确认”。
-        this.emit({ type: "confirm", previewId: current.previewId }, "card");
+        // A held card can emit repeated frames throughout the flow. They have
+        // no action to take and must not cover the confirmation button with toasts.
         return;
       }
       if ((!current && this.gate.page !== "devices") || busy) {
@@ -199,7 +207,7 @@ export class Coordinator {
         return;
       this.activeCard = { studentId: event.studentId, previewId: preview.id };
       this.gate.page = "flow";
-      this.emit({ type: "scan", preview }, "card");
+      this.emit({ type: "scan", preview, scanMode: this.scanMode }, "card");
     } catch (e) {
       // 新卡没有进入流程时，被顶替的旧流程也已取消，刷卡窗口回到等待页。
       if (replaced) this.emit({ type: "cancel", previewId: replaced }, "card");
@@ -519,6 +527,24 @@ export class Coordinator {
         return this.configure(data as Connection);
       case "status":
         return this.status();
+      case "setScanMode":
+        if (
+          this.activeCard ||
+          this.scanning ||
+          this.writing ||
+          this.recovering ||
+          this.modeChanging
+        )
+          throw new ApiError("SCAN_MODE_BUSY", 409);
+        this.modeChanging = true;
+        try {
+          await this.store.set("scanMode", data.mode as string);
+          this.scanMode = data.mode as "manual" | "automatic";
+          this.emit({ type: "changed" });
+          return { mode: this.scanMode };
+        } finally {
+          this.modeChanging = false;
+        }
       case "gate":
         if (
           data.page !== this.gate.page ||
@@ -578,6 +604,8 @@ export class Coordinator {
     )
       this.activeCard = null;
     const sdk = this.requireSdk();
+    if (action === "addons")
+      return this.network(() => sdk.call("GET", "/api/v1/addons"));
     const query = (value: Record<string, unknown>) =>
       new URLSearchParams(
         Object.entries(value)
@@ -614,8 +642,22 @@ export class Coordinator {
         "/api/v1/usage-records/end-batches/preview",
         data,
       );
-    const { recordId, deviceId, tagId, ...body } = data;
+    const { recordId, deviceId, tagId, addonId, ...body } = data;
     switch (action) {
+      case "configureAddon":
+        return this.command(
+          "POST",
+          `/api/v1/addons/${addonId}/configure`,
+          body,
+        );
+      case "runAddon":
+        return this.command("POST", `/api/v1/addons/${addonId}/run`, body);
+      case "disableDevice":
+        return this.command(
+          "PATCH",
+          `/api/v1/devices/${deviceId}/disabled`,
+          body,
+        );
       case "start":
         return this.finishFlow(
           data.previewId,
@@ -658,6 +700,11 @@ export class Coordinator {
   private async finishFlow(previewId: unknown, work: Promise<unknown>) {
     const result = await work;
     if (previewId === this.activeCard?.previewId) {
+      if (this.scanMode === "automatic")
+        this.completedCard = {
+          id: this.activeCard!.studentId,
+          at: performance.now(),
+        };
       this.activeCard = null;
       this.gate.page = "devices";
     }

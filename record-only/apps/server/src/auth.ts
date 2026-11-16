@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { hash, compare } from "bcryptjs";
 import { ApiError } from "@record/protocol";
 import type { Context } from "./previews.js";
+import { SCHEDULER_CLIENT_ID } from "./addons/catalog.js";
 export class Auth {
   private sessions = new Map<string, Context & { expires: number }>();
   private constructor(
@@ -19,6 +20,8 @@ export class Auth {
     return new Auth(username, await hash(password, 12), ttl, now);
   }
   async login(username: string, password: string, clientId: string) {
+    if (clientId === SCHEDULER_CLIENT_ID)
+      throw new ApiError("LOGIN_FAILED", 401);
     const valid = await compare(password, this.passwordHash);
     if (!valid || username !== this.username)
       throw new ApiError("LOGIN_FAILED", 401);

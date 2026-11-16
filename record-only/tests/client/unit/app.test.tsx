@@ -437,7 +437,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
     });
     await act(async () => {
       listener!({ type: "scan", preview });
-      listener!({ type: "confirm", previewId: preview.id });
+      listener!({ type: "notice", code: "SCAN_ALREADY_PROCESSING" });
     });
     expect(screen.queryByRole("heading", { name: "选择设备" })).toBeNull();
     expect(screen.getByRole("link", { name: "设置" })).toBeTruthy();

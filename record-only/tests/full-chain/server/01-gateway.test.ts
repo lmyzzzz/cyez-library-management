@@ -233,12 +233,14 @@ describe("全链路：网关 TLS、路由白名单与部署隔离", () => {
             "001-initial",
             "002-student-cache",
             "003-provider-config",
+            "004-builtin-addons",
           ]),
         );
         expect(snapshot.roles).toEqual([
           "001-runtime-role",
           "002-student-cache-insert",
           "003-provider-config",
+          "004-builtin-addons",
         ]);
       });
     },

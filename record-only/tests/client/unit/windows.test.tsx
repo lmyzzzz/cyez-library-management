@@ -267,19 +267,17 @@ describe("刷卡窗口", () => {
     );
   });
 
-  it("已取消预览的确认事件不能提交新流程，同预览确认才提交一次", async () => {
+  it("手动模式由教师按钮只提交当前流程一次", async () => {
     render(<ScanWindow />);
     await screen.findByRole("heading", { name: "请刷卡" });
     act(() => listener?.({ type: "scan", preview }));
     await screen.findByRole("button", { name: "取消选择 PC-02" });
     fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
-    act(() => listener?.({ type: "confirm", previewId: preview.id }));
     const next = { ...preview, id: "preview-2" };
     act(() => listener?.({ type: "scan", preview: next }));
     await screen.findByRole("button", { name: "取消选择 PC-02" });
-    act(() => listener?.({ type: "confirm", previewId: preview.id }));
     expect(calls("start")).toHaveLength(0);
-    act(() => listener?.({ type: "confirm", previewId: next.id }));
+    fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
     await waitFor(() =>
       expect(call).toHaveBeenCalledWith("start", {
         previewId: next.id,
@@ -307,7 +305,7 @@ describe("刷卡窗口", () => {
     await screen.findByRole("heading", { name: "请刷卡" });
     act(() => listener?.({ type: "scan", preview: end }));
     await screen.findByRole("heading", { name: "刷卡结束使用" });
-    act(() => listener?.({ type: "confirm", previewId: end.id }));
+    fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
     await screen.findByRole("heading", { name: "感谢使用" });
     expect(screen.getByRole("status").textContent).toContain("PC-01");
     // 结果页期间收到刷卡：立即进入新流程。
@@ -316,13 +314,13 @@ describe("刷卡窗口", () => {
     await screen.findByRole("heading", { name: "选择设备" });
     expect(screen.queryByRole("heading", { name: "感谢使用" })).toBeNull();
     await screen.findByRole("button", { name: "取消选择 PC-02" });
-    act(() => listener?.({ type: "confirm", previewId: next.id }));
+    fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
     await screen.findByText("登记成功");
     vi.useFakeTimers();
     try {
       // 重新挂载计时：结果页不等待操作，5 秒后回到等待页。
       act(() => listener?.({ type: "scan", preview: end }));
-      act(() => listener?.({ type: "confirm", previewId: end.id }));
+      fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
       await act(async () => {
         await vi.advanceTimersByTimeAsync(100);
       });
@@ -355,8 +353,7 @@ describe("刷卡窗口", () => {
     act(() => listener?.({ type: "scan", preview: other }));
     await screen.findByRole("heading", { name: "刷卡结束使用" });
     expect(screen.getAllByText("另一位学生").length).toBeGreaterThan(0);
-    // 旧预览的确认不再有效。
-    act(() => listener?.({ type: "confirm", previewId: preview.id }));
+    // 异卡已取代旧预览，未按确认按钮时不会提交。
     expect(calls("start")).toHaveLength(0);
     expect(calls("end")).toHaveLength(0);
     // 另一张无效卡顶替：旧流程取消，回到等待页并提示。
@@ -444,7 +441,7 @@ describe("状态悬浮窗", () => {
     await screen.findByText("PC-01");
     expect(screen.getByText("测试学生 · 一班")).toBeTruthy();
     expect(screen.getByText("空闲")).toBeTruthy();
-    expect(screen.getByText("禁用")).toBeTruthy();
+    expect(screen.getAllByText("禁用").length).toBeGreaterThan(0);
     expect(screen.getByText("使用中 1 / 3")).toBeTruthy();
     expect(calls("devices").at(-1)).toMatchObject({ state: "all" });
     fireEvent.click(screen.getByRole("button", { name: "使用中" }));

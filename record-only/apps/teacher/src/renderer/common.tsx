@@ -39,6 +39,11 @@ const messages: Record<string, string> = {
   PREVIEW_EXPIRED: "预览已过期，请重新刷卡或重新预览。",
   PREVIEW_ALREADY_USED: "此预览已提交，请刷新查看结果。",
   HISTORY_READ_ONLY: "已结束的历史记录不可修改。",
+  ADDON_NOT_READY: "加载项尚未就绪，请检查服务端迁移。",
+  ADDON_DISABLED: "该加载项已禁用，不能执行。",
+  ADDON_VERSION_CONFLICT: "加载项状态已变化，请刷新后重试。",
+  SCAN_MODE_BUSY: "正在处理刷卡或提交，请完成或取消后再切换模式。",
+  SCAN_ALREADY_PROCESSING: "正在处理该卡，请等待或由教师确认。",
   SCAN_RETURN_TO_DEVICES: "已收到刷卡，请先完成或取消当前操作后再刷卡。",
   SCAN_WINDOW_CLOSED:
     "已收到刷卡，但刷卡窗口已关闭。请在“设置 - 窗口管理”中启动刷卡窗口。",

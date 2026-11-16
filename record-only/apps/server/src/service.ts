@@ -14,6 +14,7 @@ import {
   noteSchema,
   createDeviceSchema,
   editDeviceSchema,
+  disableDeviceSchema,
   deleteSchema,
   createTagSchema,
   editTagSchema,
@@ -768,6 +769,46 @@ export class Service {
     );
     return { items, total: count, page: query.page, pageSize: query.pageSize };
   }
+  async disableDevice(
+    ctx: Context,
+    id: string,
+    data: z.infer<typeof disableDeviceSchema>,
+  ) {
+    return this.operation(
+      ctx,
+      `device.disable:${id}`,
+      data,
+      "modify",
+      async (tx) => {
+        const device = await this.db.devices.findByPk(id, {
+          transaction: tx,
+          lock: tx.LOCK.UPDATE,
+        });
+        if (!device || device.get().deletedAt)
+          throw new ApiError("NOT_FOUND", 404);
+        if (device.get().version !== data.expectedVersion)
+          throw new ApiError("DEVICE_VERSION_CONFLICT", 409);
+        if (
+          data.isDisabled &&
+          (await this.db.records.count({
+            where: { deviceId: id, endedAt: null },
+            transaction: tx,
+          }))
+        )
+          throw new ApiError("DEVICE_IN_USE", 409);
+        await device.update(
+          { isDisabled: data.isDisabled, version: device.get().version + 1 },
+          { transaction: tx },
+        );
+        return {
+          deviceId: id,
+          version: device.get().version,
+          isDisabled: device.get().isDisabled,
+        };
+      },
+      { deviceId: id },
+    );
+  }
   async device(
     ctx: Context,
     id: string | null,
@@ -816,6 +857,15 @@ export class Service {
           return { deviceId: id, deleted: true };
         }
         if (!("code" in data)) throw new ApiError("INPUT_INVALID");
+        if (
+          id &&
+          data.isDisabled &&
+          (await this.db.records.count({
+            where: { deviceId: id, endedAt: null },
+            transaction: tx,
+          }))
+        )
+          throw new ApiError("DEVICE_IN_USE", 409);
         const tagIds = [...new Set(data.tagIds)].sort();
         const tags = await this.db.tags.findAll({
           where: { id: { [Op.in]: tagIds } },

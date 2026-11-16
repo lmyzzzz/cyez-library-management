@@ -938,12 +938,13 @@ export function DeviceEditor({
           </SettingsRow>
           <SettingsRow
             label="禁用新登记"
-            description="不会结束现有使用；活动设备需先结束记录才能删除。"
+            description="使用中的设备必须先结束记录，才能禁用或删除。"
           >
             <Switch
               label=""
               aria-label="禁用新登记（不会结束现有使用）"
               checked={disabled}
+              disabled={!!device?.active && !device.isDisabled}
               onChange={(e) => setDisabled(e.target.checked)}
             />
           </SettingsRow>

@@ -153,6 +153,32 @@ export const createDeviceSchema = z
 export const editDeviceSchema = createDeviceSchema.extend({
   expectedVersion: version,
 });
+export const disableDeviceSchema = z
+  .object({
+    requestId: uuid,
+    expectedVersion: version,
+    isDisabled: z.boolean(),
+  })
+  .strict();
+export const addonIdSchema = z.enum(["end-grade-1-2", "end-grade-3"]);
+export type AddonId = z.infer<typeof addonIdSchema>;
+export const configureAddonSchema = z
+  .object({
+    requestId: uuid,
+    expectedVersion: version,
+    enabled: z.boolean(),
+  })
+  .strict();
+export const runAddonSchema = z.object({ requestId: uuid }).strict();
+export interface AddonDTO {
+  id: AddonId;
+  name: string;
+  cron: string;
+  timezone: string;
+  enabled: boolean;
+  version: number;
+  lastRun: { atMs: number; trigger: "cron" | "manual"; count: number } | null;
+}
 export const deleteSchema = z
   .object({ requestId: uuid, expectedVersion: version })
   .strict();
@@ -215,6 +241,7 @@ export const logCodes = [
   "STORAGE_RECOVERED",
   "UI_ERROR",
   "API_REQUEST_FAILED",
+  "ADDON_RUN_FAILED",
   "PROVIDER_CONFIGURATION_INVALID",
   "PROVIDER_CONFIGURATION_SAVE_FAILED",
   "GATEWAY_ACCESS",
