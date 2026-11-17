@@ -114,8 +114,10 @@ export type ActionName = keyof typeof actions;
 export type ActionInput<K extends ActionName> = z.input<
   NonNullable<(typeof actions)[K]>
 >;
+/** 登记模式：手动由教师确认，自动在预览就绪后立即提交一次。 */
+export type ScanMode = "manual" | "automatic";
 export interface LocalStatus {
-  scanMode?: "manual" | "automatic";
+  scanMode: ScanMode;
   identityConfigured: boolean;
   connectionConfigured: boolean;
   authenticated: boolean;
@@ -133,7 +135,9 @@ export interface LocalStatus {
   lastSuccessMs: number | null;
 }
 export type TeacherEvent =
-  | { type: "scan"; preview: ScanPreview; scanMode?: "manual" | "automatic" }
+  | { type: "scan"; preview: ScanPreview; scanMode: ScanMode }
+  /** 手动模式下同一张卡再次刷卡或点击确认按钮时，确认当前预览。 */
+  | { type: "confirm"; previewId: string }
   /** 当前流程被另一张卡顶替且新卡未能进入流程时，通知刷卡窗口退出旧流程。 */
   | { type: "cancel"; previewId: string }
   | { type: "notice"; code: string }

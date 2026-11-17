@@ -144,7 +144,7 @@ describe("C-U 登记、结束与批量确认", () => {
         ) : (
           <EndForm
             preview={{ ...preview, mode: "end", record: active }}
-            automatic
+            fullscreen
             online={online}
             onDone={onDone}
             onCancel={vi.fn()}
@@ -328,7 +328,6 @@ describe("C-U 登记、结束与批量确认", () => {
     render(
       <EndForm
         preview={end}
-        automatic={false}
         onDone={onDone}
         onCancel={vi.fn()}
         onBusy={vi.fn()}
@@ -382,7 +381,7 @@ describe("C-U 登记、结束与批量确认", () => {
           ) : (
             <EndForm
               preview={{ ...preview, mode: "end", record: active }}
-              automatic
+              fullscreen
               onDone={vi.fn()}
               onCancel={onCancel}
               onBusy={vi.fn()}
@@ -402,7 +401,7 @@ describe("C-U 登记、结束与批量确认", () => {
               new MouseEvent("click", { bubbles: true }),
             );
           });
-        expect(screen.getByText(/请教师确认/)).toBeTruthy();
+        expect(screen.getByText(/请再次刷卡确认/)).toBeTruthy();
         // 有焦点时的真实操作重新计时。
         await advance(6000);
         click();
@@ -441,7 +440,7 @@ describe("C-U 登记、结束与批量确认", () => {
     const form = () => (
       <EndForm
         preview={end}
-        automatic
+        fullscreen
         onDone={vi.fn()}
         onCancel={onCancel}
         onBusy={vi.fn()}
@@ -516,7 +515,7 @@ describe("C-U 登记、结束与批量确认", () => {
       expect(screen.getByText("2 / 3")).toBeTruthy();
       await waitFor(() => expect(scroll).toHaveBeenCalledOnce());
       expect(scroll.mock.contexts[0]).toBe(chosen.closest(".bflow-row"));
-      expect(screen.getByText("请教师确认登记")).toBeTruthy();
+      expect(screen.getByText("请再次刷卡确认登记")).toBeTruthy();
       expect(screen.getByText(/将登记使用 PC-33/)).toBeTruthy();
       fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
       await waitFor(() =>
@@ -610,81 +609,180 @@ describe("C-U 登记、结束与批量确认", () => {
     expect(screen.getByText(/失败后保留已完成批次/)).toBeTruthy();
   });
 
-  it("自动模式一次刷卡进入流程后倒计时提交登记", async () => {
+  it("手动模式同卡再次刷卡确认登记，只提交一次", async () => {
     call.mockImplementation(async (action) =>
       action === "devices"
-        ? {
-            devices: { items: [free], total: 1, page: 1, pageSize: 20 },
-          }
+        ? { devices: { items: [free], total: 1, page: 1, pageSize: 20 } }
         : {},
     );
     const onDone = vi.fn();
-    vi.useFakeTimers();
-    try {
-      const onCancel = vi.fn();
-      render(
-        <Registration
-          preview={preview}
-          autoSubmit
-          onDone={onDone}
-          onCancel={onCancel}
-          onBusy={vi.fn()}
-        />,
-      );
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(100);
-      });
-      expect(screen.getByText(/秒后自动登记/)).toBeTruthy();
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3200);
-      });
+    const form = (confirmSignal: number) => (
+      <Registration
+        preview={preview}
+        confirmSignal={confirmSignal}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />
+    );
+    const view = render(form(0));
+    await screen.findByRole("button", { name: "取消选择 PC-01" });
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(0);
+    view.rerender(form(1));
+    await waitFor(() =>
       expect(call).toHaveBeenCalledWith("start", {
         previewId: preview.id,
         deviceId: free.id,
         notes: "",
-      });
-      expect(onDone).toHaveBeenCalledOnce();
-      expect(onCancel).not.toHaveBeenCalled();
-    } finally {
-      vi.useRealTimers();
-    }
+      }),
+    );
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(1);
+    expect(onDone).toHaveBeenCalledOnce();
   });
 
-  it("自动模式编辑备注后停止倒计时，结束仍需教师确认", async () => {
+  it("手动模式同卡再次刷卡确认结束，使用当前备注且只提交一次", async () => {
     const end = { ...preview, mode: "end" as const, record: active };
+    call.mockResolvedValue({});
     const onDone = vi.fn();
-    vi.useFakeTimers();
-    try {
-      render(
-        <EndForm
-          preview={end}
-          automatic
-          autoSubmit
-          onDone={onDone}
-          onCancel={vi.fn()}
-          onBusy={vi.fn()}
-        />,
-      );
-      fireEvent.change(screen.getByLabelText("使用备注"), {
-        target: { value: "教师修改" },
-      });
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3500);
-      });
-      expect(call).not.toHaveBeenCalled();
-      fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
-      });
+    const form = (confirmSignal: number) => (
+      <EndForm
+        preview={end}
+        fullscreen
+        confirmSignal={confirmSignal}
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />
+    );
+    const view = render(form(0));
+    fireEvent.change(screen.getByLabelText("使用备注"), {
+      target: { value: "结束备注" },
+    });
+    expect(call.mock.calls.filter(([action]) => action === "end")).toHaveLength(
+      0,
+    );
+    view.rerender(form(1));
+    await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
+    expect(call).toHaveBeenLastCalledWith("end", {
+      recordId: active.id,
+      expectedVersion: active.version,
+      previewId: preview.id,
+      notes: "结束备注",
+    });
+    expect(call.mock.calls.filter(([action]) => action === "end")).toHaveLength(
+      1,
+    );
+  });
+
+  it("自动模式预览就绪后立即提交登记，不等待倒计时", async () => {
+    call.mockImplementation(async (action) =>
+      action === "devices"
+        ? { devices: { items: [free], total: 1, page: 1, pageSize: 20 } }
+        : {},
+    );
+    const onDone = vi.fn();
+    const onCancel = vi.fn();
+    render(
+      <Registration
+        preview={preview}
+        autoSubmit
+        onDone={onDone}
+        onCancel={onCancel}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("start", {
+        previewId: preview.id,
+        deviceId: free.id,
+        notes: "",
+      }),
+    );
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(onCancel).not.toHaveBeenCalled();
+    expect(screen.queryByText(/秒后自动登记/)).toBeNull();
+  });
+
+  it("自动模式立即提交一次结束，提交中不因备注编辑重复提交", async () => {
+    const end = { ...preview, mode: "end" as const, record: active };
+    let finish!: () => void;
+    call.mockImplementation(async (action) =>
+      action === "end"
+        ? new Promise<void>((resolve) => {
+            finish = resolve;
+          })
+        : {},
+    );
+    const onDone = vi.fn();
+    render(
+      <EndForm
+        preview={end}
+        fullscreen
+        autoSubmit
+        onDone={onDone}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
       expect(call).toHaveBeenCalledWith("end", {
         recordId: active.id,
         expectedVersion: active.version,
         previewId: preview.id,
-        notes: "教师修改",
-      });
-      expect(onDone).toHaveBeenCalledOnce();
-    } finally {
-      vi.useRealTimers();
-    }
+        notes: active.notes,
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("使用备注"), {
+      target: { value: "教师修改" },
+    });
+    expect(call.mock.calls.filter(([action]) => action === "end")).toHaveLength(
+      1,
+    );
+    finish();
+    await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
+  });
+
+  it("自动模式提交失败只显示错误，不自动重试", async () => {
+    call.mockImplementation(async (action) => {
+      if (action === "devices")
+        return {
+          devices: { items: [free], total: 1, page: 1, pageSize: 20 },
+        };
+      if (action === "start") throw Error("DEVICE_UNAVAILABLE");
+      return {};
+    });
+    render(
+      <Registration
+        preview={preview}
+        autoSubmit
+        onDone={vi.fn()}
+        onCancel={vi.fn()}
+        onBusy={vi.fn()}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByText(/设备已被占用、禁用或删除/)).toBeTruthy(),
+    );
+    await waitFor(() =>
+      expect(
+        call.mock.calls.filter(([action]) => action === "start"),
+      ).toHaveLength(1),
+    );
+    const devicesBefore = call.mock.calls.filter(
+      ([action]) => action === "devices",
+    ).length;
+    fireEvent.click(screen.getByRole("button", { name: "刷新设备" }));
+    await waitFor(() =>
+      expect(
+        call.mock.calls.filter(([action]) => action === "devices").length,
+      ).toBeGreaterThan(devicesBefore),
+    );
+    expect(
+      call.mock.calls.filter(([action]) => action === "start"),
+    ).toHaveLength(1);
   });
 });

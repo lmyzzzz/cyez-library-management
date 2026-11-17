@@ -1,8 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { Banner, Button, Card } from "@record/ui";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Play } from "lucide-react";
+import { Badge, Banner, Button, Card, Switch } from "@record/ui";
 import type { AddonDTO } from "@record/protocol";
 import { Dialog, Failure, timestamp } from "./common.js";
 
+/** 从五段 cron 的分钟/小时字段派生展示时间，无法解析时保留原始表达式。 */
+function cronClock(cron: string) {
+  const [minute, hour] = cron.trim().split(/\s+/);
+  const h = Number(hour),
+    m = Number(minute);
+  if (!Number.isInteger(h) || !Number.isInteger(m)) return cron;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/**
+ * 内置加载项：状态只从服务器读取，启用/禁用与立即执行都需显式操作。
+ * 计划时间与年级筛选属于服务端固定目录，不由教师端硬编码。
+ */
 export function AddonSettings({
   authenticated,
   canWrite,
@@ -17,63 +31,74 @@ export function AddonSettings({
     [confirm, setConfirm] = useState<AddonDTO | null>(null),
     [message, setMessage] = useState("");
   const revision = useRef(0);
-  const load = async () => {
+  const load = useCallback(async () => {
     const current = ++revision.current;
     try {
       const response = await window.library.call<{ items: AddonDTO[] }>(
         "addons",
         {},
       );
-      if (current === revision.current) {
-        setItems(response.items);
-        setLoaded(true);
-      }
+      if (current !== revision.current) return;
+      setItems(response.items);
+      setLoaded(true);
     } catch (error) {
       if (current === revision.current) setError(error);
     }
-  };
+  }, []);
   useEffect(() => {
     if (!authenticated) {
+      revision.current++;
       setItems([]);
+      setLoaded(false);
       setConfirm(null);
       return;
     }
     void load();
-    const timer = setInterval(() => void load(), 10000);
+    const timer = setInterval(() => {
+      if (!document.hidden) void load();
+    }, 10000);
     return () => {
       clearInterval(timer);
       revision.current++;
     };
-  }, [authenticated]);
-  const run = async (addon: AddonDTO, manual: boolean) => {
+  }, [authenticated, load]);
+  const toggle = async (addon: AddonDTO) => {
     setBusy(true);
     setError(undefined);
     setMessage("");
     try {
-      if (manual) {
-        const result = await window.library.call<{ count: number }>(
-          "runAddon",
-          { addonId: addon.id },
-        );
-        setMessage(`已结束 ${result.count} 条使用记录。`);
-      } else {
-        await window.library.call("configureAddon", {
-          addonId: addon.id,
-          expectedVersion: addon.version,
-          enabled: !addon.enabled,
-        });
-        setMessage(
-          addon.enabled
-            ? "加载项已禁用。"
-            : "加载项已启用，将从下一个计划时间执行。",
-        );
-      }
+      await window.library.call("configureAddon", {
+        addonId: addon.id,
+        expectedVersion: addon.version,
+        enabled: !addon.enabled,
+      });
+      setMessage(
+        addon.enabled
+          ? "加载项已禁用。"
+          : "加载项已启用，将从下一个计划时间执行。",
+      );
+    } catch (error) {
+      setError(error);
+    } finally {
+      await load();
+      setBusy(false);
+    }
+  };
+  const runNow = async (addon: AddonDTO) => {
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      const result = await window.library.call<{ count: number }>("runAddon", {
+        addonId: addon.id,
+      });
+      setMessage(`已结束 ${result.count} 条使用记录。`);
       setConfirm(null);
     } catch (error) {
       setError(error);
     } finally {
-      setBusy(false);
       await load();
+      setBusy(false);
     }
   };
   return (
@@ -82,13 +107,15 @@ export function AddonSettings({
       <p className="muted">
         由服务器独立执行，教师端关闭后仍有效。按北京时间运行，默认禁用。仅结束符合年级的活动记录，保留历史和备注。
       </p>
-      <Failure
-        error={error}
-        retry={() => {
-          setError(undefined);
-          void load();
-        }}
-      />
+      {!confirm && (
+        <Failure
+          error={error}
+          retry={() => {
+            setError(undefined);
+            void load();
+          }}
+        />
+      )}
       {message && <Banner tone="success">{message}</Banner>}
       {!authenticated ? (
         <p>请先登录服务器。</p>
@@ -98,13 +125,14 @@ export function AddonSettings({
         items.map((addon) => (
           <section className="addon-row" key={addon.id}>
             <div>
-              <h3>{addon.name}</h3>
+              <h3>
+                {addon.name}{" "}
+                <Badge tone={addon.enabled ? "success" : "neutral"}>
+                  {addon.enabled ? "已启用" : "已禁用"}
+                </Badge>
+              </h3>
               <p>
-                每天{" "}
-                {addon.id === "end-grade-1-2"
-                  ? "12:40 · 高一、高二"
-                  : "13:30 · 高三"}
-                （{addon.timezone}） · {addon.enabled ? "已启用" : "已禁用"}
+                每天 {cronClock(addon.cron)}（{addon.timezone}）
               </p>
               <small>
                 {addon.lastRun
@@ -113,19 +141,23 @@ export function AddonSettings({
               </small>
             </div>
             <div className="row-actions">
-              <Button
-                size="small"
+              <Switch
+                label="启用"
+                aria-label={`${addon.enabled ? "禁用" : "启用"} ${addon.name}`}
+                checked={addon.enabled}
                 disabled={!canWrite || busy}
-                onClick={() => void run(addon, false)}
-              >
-                {addon.enabled ? "禁用" : "启用"} {addon.name}
-              </Button>
+                onChange={() => void toggle(addon)}
+              />
               <Button
                 size="small"
+                icon={Play}
                 disabled={!canWrite || busy || !addon.enabled}
-                onClick={() => setConfirm(addon)}
+                onClick={() => {
+                  setError(undefined);
+                  setConfirm(addon);
+                }}
               >
-                立即执行 {addon.name}
+                立即执行
               </Button>
             </div>
           </section>
@@ -153,7 +185,7 @@ export function AddonSettings({
             <Button
               variant="primary"
               disabled={busy || !canWrite}
-              onClick={() => void run(confirm, true)}
+              onClick={() => void runNow(confirm)}
             >
               确认执行
             </Button>

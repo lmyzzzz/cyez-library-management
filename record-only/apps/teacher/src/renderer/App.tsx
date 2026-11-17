@@ -64,7 +64,8 @@ import {
   ProviderSettingsForm,
 } from "./settings.js";
 import { EndForm, BatchForm, NotesEditor } from "./flows.js";
-import { DeviceToggle, ScanModeControl } from "./device-controls.js";
+import { ScanModeSwitch } from "./scan-mode.js";
+import { DeviceToggle } from "./device-toggle.js";
 import { AddonSettings } from "./addons.js";
 const routes: AppRouteRegistration[] = [
   {
@@ -415,7 +416,7 @@ export function App() {
       <div className="bento-card-head">
         <h2>{settings ? "设备管理" : "设备使用"}</h2>
         {!settings && (
-          <ScanModeControl
+          <ScanModeSwitch
             status={status}
             refresh={() => void refreshStatus()}
             disabled={busy || !!modal}
@@ -1068,7 +1069,7 @@ export function App() {
                       <h2>使用提示</h2>
                     </div>
                     <p>
-                      学生在刷卡窗口刷卡后选择空闲设备；离开时再次刷卡结束使用。刷卡窗口和状态悬浮窗在“设置
+                      学生在刷卡窗口刷卡后确认设备；离开时再次刷卡结束使用。刷卡窗口和状态悬浮窗在“设置
                       - 窗口管理”中启动或关闭。
                     </p>
                     <div className="bento-steps">
@@ -1117,7 +1118,6 @@ export function App() {
               {modal.kind === "end" && (
                 <EndForm
                   preview={modal.preview}
-                  automatic={false}
                   onBusy={setBusy}
                   onDone={done}
                   onCancel={closeModal}

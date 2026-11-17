@@ -72,6 +72,7 @@ const disabled: DeviceDTO = {
   isDisabled: true,
 };
 const status: LocalStatus = {
+  scanMode: "manual",
   identityConfigured: true,
   connectionConfigured: true,
   authenticated: true,
@@ -251,7 +252,7 @@ describe("刷卡窗口", () => {
         submitting: false,
       }),
     );
-    act(() => listener?.({ type: "scan", preview }));
+    act(() => listener?.({ type: "scan", preview, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "选择设备" });
     expect(screen.queryByRole("heading", { name: "请刷卡" })).toBeNull();
     await waitFor(() =>
@@ -270,11 +271,11 @@ describe("刷卡窗口", () => {
   it("手动模式由教师按钮只提交当前流程一次", async () => {
     render(<ScanWindow />);
     await screen.findByRole("heading", { name: "请刷卡" });
-    act(() => listener?.({ type: "scan", preview }));
+    act(() => listener?.({ type: "scan", preview, scanMode: "manual" }));
     await screen.findByRole("button", { name: "取消选择 PC-02" });
     fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
     const next = { ...preview, id: "preview-2" };
-    act(() => listener?.({ type: "scan", preview: next }));
+    act(() => listener?.({ type: "scan", preview: next, scanMode: "manual" }));
     await screen.findByRole("button", { name: "取消选择 PC-02" });
     expect(calls("start")).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "确认登记" }));
@@ -299,18 +300,47 @@ describe("刷卡窗口", () => {
     );
   });
 
+  it("手动模式同卡再刷的确认事件提交当前流程一次，其他预览的确认无效", async () => {
+    render(<ScanWindow />);
+    await screen.findByRole("heading", { name: "请刷卡" });
+    act(() => listener?.({ type: "scan", preview, scanMode: "manual" }));
+    await screen.findByRole("button", { name: "取消选择 PC-02" });
+    // 非当前预览的确认信号不提交。
+    act(() => listener?.({ type: "confirm", previewId: "preview-other" }));
+    expect(calls("start")).toHaveLength(0);
+    act(() => listener?.({ type: "confirm", previewId: preview.id }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("start", {
+        previewId: preview.id,
+        deviceId: free.id,
+        notes: "",
+      }),
+    );
+    expect(calls("start")).toHaveLength(1);
+    expect(await screen.findByText("登记成功")).toBeTruthy();
+  });
+
+  it("自动模式刷卡后无需确认直接登记", async () => {
+    render(<ScanWindow />);
+    await screen.findByRole("heading", { name: "请刷卡" });
+    act(() => listener?.({ type: "scan", preview, scanMode: "automatic" }));
+    await waitFor(() => expect(calls("start")).toHaveLength(1));
+    expect(await screen.findByText("登记成功")).toBeTruthy();
+    expect(screen.queryByText(/秒后自动/)).toBeNull();
+  });
+
   it("结果页固定 5 秒后关闭，期间的新刷卡立即取代结果页", async () => {
     const end = { ...preview, mode: "end" as const, record: active };
     render(<ScanWindow />);
     await screen.findByRole("heading", { name: "请刷卡" });
-    act(() => listener?.({ type: "scan", preview: end }));
+    act(() => listener?.({ type: "scan", preview: end, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "刷卡结束使用" });
     fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
     await screen.findByRole("heading", { name: "感谢使用" });
     expect(screen.getByRole("status").textContent).toContain("PC-01");
     // 结果页期间收到刷卡：立即进入新流程。
     const next = { ...preview, id: "preview-2" };
-    act(() => listener?.({ type: "scan", preview: next }));
+    act(() => listener?.({ type: "scan", preview: next, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "选择设备" });
     expect(screen.queryByRole("heading", { name: "感谢使用" })).toBeNull();
     await screen.findByRole("button", { name: "取消选择 PC-02" });
@@ -319,7 +349,7 @@ describe("刷卡窗口", () => {
     vi.useFakeTimers();
     try {
       // 重新挂载计时：结果页不等待操作，5 秒后回到等待页。
-      act(() => listener?.({ type: "scan", preview: end }));
+      act(() => listener?.({ type: "scan", preview: end, scanMode: "manual" }));
       fireEvent.click(screen.getByRole("button", { name: "确认结束" }));
       await act(async () => {
         await vi.advanceTimersByTimeAsync(100);
@@ -341,7 +371,7 @@ describe("刷卡窗口", () => {
   it("流程中换卡直接显示新卡的界面；新卡失败时退出旧流程", async () => {
     render(<ScanWindow />);
     await screen.findByRole("heading", { name: "请刷卡" });
-    act(() => listener?.({ type: "scan", preview }));
+    act(() => listener?.({ type: "scan", preview, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "选择设备" });
     const other = {
       ...preview,
@@ -350,7 +380,7 @@ describe("刷卡窗口", () => {
       student: { ...student, name: "另一位学生" },
       record: { ...active, student: { ...student, name: "另一位学生" } },
     };
-    act(() => listener?.({ type: "scan", preview: other }));
+    act(() => listener?.({ type: "scan", preview: other, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "刷卡结束使用" });
     expect(screen.getAllByText("另一位学生").length).toBeGreaterThan(0);
     // 异卡已取代旧预览，未按确认按钮时不会提交。
@@ -379,6 +409,7 @@ describe("刷卡窗口", () => {
     act(() =>
       listener?.({
         type: "scan",
+        scanMode: "manual",
         preview: { ...preview, mode: "end", record: active },
       }),
     );
@@ -425,7 +456,7 @@ describe("刷卡窗口", () => {
   it("未登录时提示无法刷卡，登录失效会退出进行中的流程", async () => {
     render(<ScanWindow />);
     await screen.findByRole("heading", { name: "请刷卡" });
-    act(() => listener?.({ type: "scan", preview }));
+    act(() => listener?.({ type: "scan", preview, scanMode: "manual" }));
     await screen.findByRole("heading", { name: "选择设备" });
     local = { ...status, authenticated: false, online: false };
     act(() => listener?.({ type: "changed" }));
@@ -507,6 +538,54 @@ describe("状态悬浮窗", () => {
     const end = await screen.findByRole("button", { name: "结束 PC-01" });
     expect(end.hasAttribute("disabled")).toBe(true);
     expect(screen.getByText("连接中断")).toBeTruthy();
+  });
+
+  it("设备快捷停用/恢复是行内图标按钮，占用设备不可停用", async () => {
+    render(<StatusWindow />);
+    await screen.findByText("PC-01");
+    // 使用中的设备只能结束，不能停用；空闲设备可停用，已禁用设备显示恢复。
+    const occupied = screen.getByRole("button", { name: "停用 PC-01" });
+    expect(occupied.hasAttribute("disabled")).toBe(true);
+    expect(occupied.textContent).toBe("");
+    const freeToggle = screen.getByRole("button", { name: "停用 PC-02" });
+    expect(freeToggle.hasAttribute("disabled")).toBe(false);
+    expect(freeToggle.textContent).toBe("");
+    const restore = screen.getByRole("button", { name: "恢复 PC-03" });
+    expect(restore.hasAttribute("disabled")).toBe(false);
+    expect(restore.textContent).toBe("");
+    fireEvent.click(freeToggle);
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("disableDevice", {
+        deviceId: free.id,
+        expectedVersion: free.version,
+        isDisabled: true,
+      }),
+    );
+  });
+
+  it("每 3 秒轮询设备状态，窗口隐藏时暂停", async () => {
+    vi.useFakeTimers();
+    try {
+      render(<StatusWindow />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      const before = calls("devices").length;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3000);
+      });
+      expect(calls("devices").length).toBeGreaterThan(before);
+      const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+      const paused = calls("devices").length;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6000);
+      });
+      expect(calls("devices").length).toBe(paused);
+      hidden.mockRestore();
+    } finally {
+      vi.useRealTimers();
+      cleanup();
+    }
   });
 
   it("标题栏只有最小化和设置，没有关闭或最大化", async () => {

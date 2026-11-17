@@ -2480,7 +2480,7 @@ input[type="checkbox"] {
   flex: none;
 }
 
-/* 等待教师确认或自动提交倒计时的提示 */
+/* 流程中的确认/自动提交状态提示 */
 
 .bflow-rescan {
   display: flex;
@@ -2602,18 +2602,63 @@ input[type="checkbox"] {
   letter-spacing: 0.08em;
 }
 
-.scan-mode-control {
-  display: flex;
+/* 登记模式开关：自动提交/教师确认的说明文字随开关模式切换。 */
+.scan-mode {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
+  min-width: 0;
 }
+
+.scan-mode [data-ui="switch"] {
+  white-space: nowrap;
+}
+
+.scan-mode-hint {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* 内置加载项：服务端固定的计划任务，按行展示状态与操作。 */
 .addon-row {
-  padding: 20px 0;
-  border-bottom: 1px solid #eadcc9;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.addon-row:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.addon-row > div:first-child {
+  min-width: 0;
+}
+
+.addon-row h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-strong);
+  font-size: 14px;
+}
+
+.addon-row p {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+.addon-row small {
+  color: var(--color-text-muted);
+  font-size: 11px;
 }

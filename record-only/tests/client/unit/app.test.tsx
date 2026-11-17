@@ -67,6 +67,7 @@ const free: DeviceDTO = {
   active: null,
 };
 const status: LocalStatus = {
+  scanMode: "manual",
   identityConfigured: true,
   connectionConfigured: true,
   authenticated: true,
@@ -436,7 +437,7 @@ describe("C-U-01/05 主页面门控和状态", () => {
       expect(toast?.closest('[data-part="content"]')).toBeNull();
     });
     await act(async () => {
-      listener!({ type: "scan", preview });
+      listener!({ type: "scan", preview, scanMode: "manual" });
       listener!({ type: "notice", code: "SCAN_ALREADY_PROCESSING" });
     });
     expect(screen.queryByRole("heading", { name: "选择设备" })).toBeNull();

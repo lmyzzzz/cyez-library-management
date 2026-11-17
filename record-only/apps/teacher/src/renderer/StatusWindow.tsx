@@ -19,7 +19,8 @@ import {
 } from "./common.js";
 import { AuxTitleBar } from "./aux-window.js";
 import { EndForm, NotesEditor } from "./flows.js";
-import { DeviceToggle, ScanModeControl } from "./device-controls.js";
+import { ScanModeSwitch } from "./scan-mode.js";
+import { DeviceToggle } from "./device-toggle.js";
 type Filter = "all" | "active" | "free";
 type ModalState =
   | { kind: "notes"; record: RecordDTO }
@@ -133,7 +134,7 @@ export function StatusWindow() {
     <div className="aux-window status-window">
       <AuxTitleBar title="使用状态" subtitle={summary} />
       <div className="aux-body status-body">
-        <ScanModeControl
+        <ScanModeSwitch
           status={status}
           refresh={() => void load()}
           disabled={busy || !!modal}
@@ -179,20 +180,26 @@ export function StatusWindow() {
                   <small>{d.displayName}</small>
                 </span>
                 {d.active ? (
-                  <>
-                    <span className="status-user">
-                      <b>
-                        {d.active.student.name}
-                        {d.active.student.className
-                          ? ` · ${d.active.student.className}`
-                          : ""}
-                      </b>
-                      <small>
-                        <LiveDuration startedAtMs={d.active.startedAtMs} />
-                        {d.active.notes ? ` · ${d.active.notes}` : ""}
-                      </small>
-                    </span>
-                    <span className="row-actions">
+                  <span className="status-user">
+                    <b>
+                      {d.active.student.name}
+                      {d.active.student.className
+                        ? ` · ${d.active.student.className}`
+                        : ""}
+                    </b>
+                    <small>
+                      <LiveDuration startedAtMs={d.active.startedAtMs} />
+                      {d.active.notes ? ` · ${d.active.notes}` : ""}
+                    </small>
+                  </span>
+                ) : (
+                  <span className="status-user">
+                    <small>{d.isDisabled ? "禁用" : "空闲"}</small>
+                  </span>
+                )}
+                <span className="row-actions">
+                  {d.active && (
+                    <>
                       <IconButton
                         size="small"
                         variant="ghost"
@@ -211,18 +218,14 @@ export function StatusWindow() {
                         disabled={!canWrite}
                         onClick={() => void end(d.active!.id)}
                       />
-                    </span>
-                  </>
-                ) : (
-                  <span className="status-user">
-                    <small>{d.isDisabled ? "禁用" : "空闲"}</small>
-                  </span>
-                )}
-                <DeviceToggle
-                  device={d}
-                  disabled={!canWrite}
-                  refresh={() => void load()}
-                />
+                    </>
+                  )}
+                  <DeviceToggle
+                    device={d}
+                    disabled={!canWrite}
+                    refresh={() => void load()}
+                  />
+                </span>
               </li>
             );
           })}
@@ -248,7 +251,6 @@ export function StatusWindow() {
           {modal.kind === "end" ? (
             <EndForm
               preview={modal.preview}
-              automatic={false}
               online={!!status?.online}
               onBusy={setBusy}
               onDone={done}

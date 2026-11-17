@@ -1,5 +1,22 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  BookOpen as LibraryIcon,
+  Check as CheckIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  FileText as NoteIcon,
+  LogIn as LoginIcon,
+  Pencil as EditIcon,
+  Plus as PlusIcon,
+  Power as PowerIcon,
+  RefreshCw as RefreshIcon,
+  RotateCcw as ResetIcon,
+  Settings as SettingsIcon,
+  Square as StopIcon,
+  Tag as TagIcon,
+  Trash2 as TrashIcon,
+} from "lucide-react";
+import {
   Badge,
   Banner,
   Button,
@@ -113,23 +130,6 @@ export function errorText(error: unknown) {
   const code = error instanceof Error ? error.message : String(error);
   return messages[code] ?? "操作未完成，请重试；如仍失败，请联系维护人员。";
 }
-import {
-  BookOpen as LibraryIcon,
-  Check as CheckIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  FileText as NoteIcon,
-  LogIn as LoginIcon,
-  Pencil as EditIcon,
-  Plus as PlusIcon,
-  Power as PowerIcon,
-  RefreshCw as RefreshIcon,
-  RotateCcw as ResetIcon,
-  Settings as SettingsIcon,
-  Square as StopIcon,
-  Tag as TagIcon,
-  Trash2 as TrashIcon,
-} from "lucide-react";
 export {
   LibraryIcon,
   CheckIcon,

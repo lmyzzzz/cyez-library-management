@@ -31,6 +31,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const status = {
+  scanMode: "manual",
   identityConfigured: true,
   connectionConfigured: true,
   authenticated: false,

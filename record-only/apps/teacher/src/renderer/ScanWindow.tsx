@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { CircleCheck, CreditCard, Maximize, Minimize } from "lucide-react";
 import { AppToaster, IconButton, toast } from "@record/ui";
 import type { DeviceDTO, ScanPreview } from "@record/protocol";
-import type { LocalStatus } from "../shared/bridge.js";
+import type { LocalStatus, ScanMode } from "../shared/bridge.js";
 import type { WindowState } from "../shared/windows.js";
 import { errorText, useClock } from "./common.js";
 import { AuxTitleBar, auxCommand, closedWindows } from "./aux-window.js";
@@ -63,7 +63,8 @@ export function ScanWindow() {
     [windows, setWindows] = useState<WindowState>(closedWindows),
     [flow, setFlow] = useState<ScanPreview | null>(null),
     [result, setResult] = useState<Result | null>(null),
-    [scanMode, setScanMode] = useState<"manual" | "automatic">("manual"),
+    [flowMode, setFlowMode] = useState<ScanMode>("manual"),
+    [confirmSignal, setConfirmSignal] = useState(0),
     [busy, setBusy] = useState(false);
   const activeFlowId = useRef<string | null>(null);
   const refreshStatus = useCallback(async () => {
@@ -82,9 +83,14 @@ export function ScanWindow() {
         // 新刷卡立即取代结果页或被另一张卡顶替的流程。
         setResult(null);
         setBusy(false);
-        setScanMode(event.scanMode ?? "manual");
+        setFlowMode(event.scanMode);
+        setConfirmSignal(0);
         activeFlowId.current = event.preview.id;
         setFlow(event.preview);
+      } else if (event.type === "confirm") {
+        // 手动模式同卡再刷：main 只发确认信号，不重新查询校园资料。
+        if (activeFlowId.current === event.previewId)
+          setConfirmSignal((value) => value + 1);
       } else if (event.type === "cancel") {
         if (activeFlowId.current === event.previewId) {
           activeFlowId.current = null;
@@ -198,18 +204,20 @@ export function ScanWindow() {
               onDone={done}
               onCancel={closeFlow}
               onBusy={setBusy}
-              autoSubmit={scanMode === "automatic"}
+              autoSubmit={flowMode === "automatic"}
+              confirmSignal={confirmSignal}
             />
           ) : (
             <EndForm
               key={flow.id}
               preview={flow}
-              automatic
+              fullscreen
               online={!!status?.online}
               onDone={() => done()}
               onCancel={closeFlow}
               onBusy={setBusy}
-              autoSubmit={scanMode === "automatic"}
+              autoSubmit={flowMode === "automatic"}
+              confirmSignal={confirmSignal}
             />
           )
         ) : result ? (
@@ -224,8 +232,8 @@ export function ScanWindow() {
               {blocked
                 ? `${blocked}，请联系值班教师。`
                 : status?.scanMode === "automatic"
-                  ? "自动模式：刷卡一次，3 秒后自动登记或结束；倒计时内可取消。"
-                  : "手动模式：刷卡后由教师点击确认，重复刷卡不会提交。"}
+                  ? "自动模式：刷卡一次即直接登记或结束，无需教师确认。"
+                  : "手动模式：刷卡后再次刷同一张卡，或由教师点击右下角确认。"}
             </p>
             <Clock />
             <footer>

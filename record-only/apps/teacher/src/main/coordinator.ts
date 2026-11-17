@@ -14,6 +14,7 @@ import {
   connectionSchema,
   type ActionName,
   type Connection,
+  type ScanMode,
   type TeacherEvent,
   type SafeLog,
   type LocalStatus,
@@ -42,7 +43,7 @@ export class Coordinator {
   private activeCard: { studentId: string; previewId: string } | null = null;
   private scanRevision = 0;
   private scanning = false;
-  private scanMode: "manual" | "automatic" = "manual";
+  private scanMode: ScanMode = "manual";
   private modeChanging = false;
   private completedCard: { id: string; at: number } | null = null;
   private writing = false;
@@ -171,8 +172,19 @@ export class Coordinator {
         this.scanning;
       const current = this.gate.page === "flow" ? this.activeCard : null;
       if (current?.studentId === event.studentId) {
-        // A held card can emit repeated frames throughout the flow. They have
-        // no action to take and must not cover the confirmation button with toasts.
+        // 手动模式下再次刷同一张卡等同点击确认：只发确认信号，不重复查询
+        // 校园资料、不重新建立预览。自动模式由预览就绪后的自动提交负责，
+        // 重复读卡帧不能再次触发，也不能覆盖结果页。
+        if (busy) {
+          this.emit({ type: "notice", code: "SCAN_RETURN_TO_DEVICES" }, "card");
+          return;
+        }
+        if (!this.online || !this.sdk?.authenticated) {
+          this.emit({ type: "notice", code: "OFFLINE_NO_WRITE" }, "card");
+          return;
+        }
+        if (this.scanMode === "manual")
+          this.emit({ type: "confirm", previewId: current.previewId }, "card");
         return;
       }
       if ((!current && this.gate.page !== "devices") || busy) {
@@ -538,8 +550,8 @@ export class Coordinator {
           throw new ApiError("SCAN_MODE_BUSY", 409);
         this.modeChanging = true;
         try {
-          await this.store.set("scanMode", data.mode as string);
-          this.scanMode = data.mode as "manual" | "automatic";
+          await this.store.set("scanMode", data.mode as ScanMode);
+          this.scanMode = data.mode as ScanMode;
           this.emit({ type: "changed" });
           return { mode: this.scanMode };
         } finally {

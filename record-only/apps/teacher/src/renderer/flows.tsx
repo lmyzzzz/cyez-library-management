@@ -24,7 +24,7 @@ import {
   timestamp,
   duration,
 } from "./common.js";
-import { useAutoSubmit } from "./auto-submit.js";
+import { useAutoSubmit, useConfirmSignal } from "./submit-triggers.js";
 import { IdleTimer } from "./timers.js";
 type EndFlow = EndPreview | ScanPreview;
 const clock = (ms: number) =>
@@ -149,26 +149,29 @@ function Ring({
 }
 export function EndForm({
   preview,
-  automatic,
+  fullscreen = false,
   online = true,
   onDone,
   onCancel,
   onBusy,
   autoSubmit = false,
+  confirmSignal = 0,
 }: {
   preview: EndFlow;
-  automatic: boolean;
+  /** false 用于管理后台/悬浮窗的手动结束弹窗；true 用于刷卡窗口全屏流程。 */
+  fullscreen?: boolean;
   online?: boolean;
   onDone: () => void;
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
   autoSubmit?: boolean;
+  confirmSignal?: number;
 }) {
   const record = preview.record!;
   const [notes, setNotes] = useState(record.notes),
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false);
-  const idle = useIdleCancel(automatic, onCancel);
+  const idle = useIdleCancel(fullscreen, onCancel);
   const sent = useRef(false);
   const connected = useRef(online);
   connected.current = online;
@@ -177,7 +180,7 @@ export function EndForm({
   const submit = async () => {
     if (sent.current || !connected.current) return;
     // 已过期的刷卡结束只取消，不提交；提交中不再执行空闲取消。
-    if (automatic && !idle.timer.current?.submit()) return;
+    if (fullscreen && !idle.timer.current?.submit()) return;
     sent.current = true;
     setBusy(true);
     onBusy(true);
@@ -198,13 +201,10 @@ export function EndForm({
       onBusy(false);
     }
   };
-  const { remaining: autoRemaining, stop: stopAutoSubmit } = useAutoSubmit(
-    autoSubmit,
-    automatic,
-    online,
-    submit,
-  );
-  if (!automatic)
+  // 自动模式在预览就绪后立即提交一次；手动模式响应同卡再刷确认。
+  useAutoSubmit(autoSubmit, online, submit);
+  useConfirmSignal(confirmSignal, submit);
+  if (!fullscreen)
     return (
       <>
         <Card className="student-summary">
@@ -231,10 +231,7 @@ export function EndForm({
             value={notes}
             maxLength={8000}
             disabled={busy}
-            onChange={(e) => {
-              stopAutoSubmit();
-              setNotes(e.target.value);
-            }}
+            onChange={(e) => setNotes(e.target.value)}
           />
         </label>
         <Failure error={error} />
@@ -327,7 +324,7 @@ export function EndForm({
             <p className="bflow-eyebrow">结束使用 · CHECK OUT</p>
             <h1>刷卡结束使用</h1>
             <p className="bflow-sub">
-              请确认本次使用信息，登记模式决定提交方式。
+              请核对本次使用信息；再次刷卡或点击右下角按钮结束。
             </p>
           </div>
           <span className="bflow-terminal">
@@ -373,10 +370,7 @@ export function EndForm({
             value={notes}
             maxLength={8000}
             disabled={busy}
-            onChange={(e) => {
-              stopAutoSubmit();
-              setNotes(e.target.value);
-            }}
+            onChange={(e) => setNotes(e.target.value)}
           />
           <p className="bflow-hint">
             确认后本条记录结束并写入历史，历史记录只读。
@@ -390,17 +384,11 @@ export function EndForm({
           <Failure error={error} />
         </div>
         <RescanPrompt
-          title={
-            !autoSubmit
-              ? "请教师确认结束使用"
-              : autoRemaining === null
-                ? "请教师确认结束使用"
-                : `${Math.ceil(autoRemaining / 1000)} 秒后自动结束使用`
-          }
+          title={autoSubmit ? "自动模式：正在结束使用" : "请再次刷卡确认结束"}
           detail={
-            !autoSubmit
-              ? `将结束 ${record.device.code}，请点击“确认结束”。`
-              : `将结束 ${record.device.code}。可点击取消；编辑备注会停止自动提交。`
+            autoSubmit
+              ? `将结束 ${record.device.code}，无需教师确认；未完成时可点击右下角重试。`
+              : `再刷一次同一张卡，或点击右下角“确认结束”，将结束 ${record.device.code}。`
           }
         />
         <footer className="bflow-foot">
@@ -436,6 +424,7 @@ export function Registration({
   onCancel,
   onBusy,
   autoSubmit = false,
+  confirmSignal = 0,
 }: {
   preview: ScanPreview;
   online?: boolean;
@@ -443,6 +432,7 @@ export function Registration({
   onCancel: () => void;
   onBusy: (busy: boolean) => void;
   autoSubmit?: boolean;
+  confirmSignal?: number;
 }) {
   const [notes, setNotes] = useState(""),
     [selected, setSelected] = useState<DeviceDTO | null>(null),
@@ -547,12 +537,13 @@ export function Registration({
       onBusy(false);
     }
   };
-  const { remaining: autoRemaining, stop: stopAutoSubmit } = useAutoSubmit(
+  // 自动模式在预览就绪后立即提交一次；手动模式响应同卡再刷确认。
+  useAutoSubmit(
     autoSubmit,
-    ready && !!selected && !release && !error,
-    online,
+    ready && !!selected && !release && !error && online,
     submit,
   );
+  useConfirmSignal(confirmSignal, submit);
   const startRelease = async (device: DeviceDTO) => {
     if (!device.active || releaseBusy) return;
     setReleaseBusy(true);
@@ -693,7 +684,6 @@ export function Registration({
             placeholder="搜索设备编号或名称"
             value={search}
             onChange={(e) => {
-              stopAutoSubmit();
               setSearch(e.target.value);
               setPage(1);
             }}
@@ -702,10 +692,7 @@ export function Registration({
             type="button"
             className="bflow-btn small"
             disabled={busy}
-            onClick={() => {
-              stopAutoSubmit();
-              void load();
-            }}
+            onClick={() => void load()}
           >
             刷新设备
           </button>
@@ -740,10 +727,7 @@ export function Registration({
                     aria-label={`释放 ${d.code}`}
                     title="释放设备"
                     disabled={busy || releaseBusy}
-                    onClick={() => {
-                      stopAutoSubmit();
-                      void startRelease(d);
-                    }}
+                    onClick={() => void startRelease(d)}
                   >
                     <LockOpen size={15} aria-hidden="true" />
                   </button>
@@ -760,10 +744,9 @@ export function Registration({
                       selected?.id === d.id ? "取消选择" : "选择"
                     } ${d.code}`}
                     disabled={busy}
-                    onClick={() => {
-                      stopAutoSubmit();
-                      setSelected(selected?.id === d.id ? null : d);
-                    }}
+                    onClick={() =>
+                      setSelected(selected?.id === d.id ? null : d)
+                    }
                   >
                     {selected?.id === d.id ? (
                       <Check size={13} aria-hidden="true" />
@@ -796,25 +779,16 @@ export function Registration({
           value={notes}
           maxLength={8000}
           disabled={busy}
-          onChange={(e) => {
-            stopAutoSubmit();
-            setNotes(e.target.value);
-          }}
+          onChange={(e) => setNotes(e.target.value)}
         />
         <Failure error={error} />
         {selected ? (
           <RescanPrompt
-            title={
-              !autoSubmit
-                ? "请教师确认登记"
-                : autoRemaining === null
-                  ? "请教师确认登记"
-                  : `${Math.ceil(autoRemaining / 1000)} 秒后自动登记`
-            }
+            title={autoSubmit ? "自动模式：正在登记" : "请再次刷卡确认登记"}
             detail={
-              !autoSubmit
-                ? `将登记使用 ${selected.code} ${selected.displayName}，请点击“确认登记”。`
-                : `将登记使用 ${selected.code} ${selected.displayName}。更换设备或编辑备注后，请点击“确认登记”。`
+              autoSubmit
+                ? `将登记使用 ${selected.code} ${selected.displayName}，无需教师确认；未完成时可点击右下角重试。`
+                : `再刷一次同一张卡，或点击右下角“确认登记”，将登记使用 ${selected.code} ${selected.displayName}。`
             }
           />
         ) : (

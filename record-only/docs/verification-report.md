@@ -391,3 +391,18 @@ Docker 全链路本轮构建了真实 Nginx/TLS/API/PostgreSQL/log-ingest 镜像
 新增门禁后的 Release 作业，复用本次 Windows 正式包验收后的独立制品，校验版本、提交和 SHA-256，再以草稿上传并公开 `v<版本>`。已发布同版本跳过；未公开草稿可在同一提交重试；不同提交的标签/草稿冲突拒绝覆盖。正式发布只接受 `main` 的 push 或手动 CI 运行，依赖服务端、全链路和 Windows 三个作业成功。构建工具本身使用 `--publish never`，避免绕过最终门禁。
 
 本地实际验证：发布脚本 10 项回归通过（使用临时文件与 GitHub API 替身，覆盖上传和公开失败重试、重复版本、损坏制品、标签冲突、权限错误与来源限制）；真实的 119696780 字节 `0.1.8` 安装包完成制品准备，SHA-256 与原包一致；Node 语法、TypeScript、Prettier、`git diff --check` 和 actionlint 1.7.12 均通过。API 替身不代表 GitHub 已发布成功；对应提交的四个 CI 作业和真实 Release 附件是线上验收依据，可从仓库 Actions/Releases 查询。此改动不涉及业务代码，学校数据源、实卡、目标机器和签名的外部验收边界不变。
+
+## 2026-11-17 交互修订：同卡二刷确认、自动模式即时提交与前端结构整理
+
+本轮按用户反馈修订 Issue #1 的交互并整理教师端前端结构：手动模式恢复“同卡再次刷卡确认”，main 只发送确认信号、不重复查询校园资料，1.2 秒内的重复硬件帧仍由 CardReader 去重，教师也可继续点击右下角确认按钮；自动模式删除 3 秒倒计时，预览就绪后立即提交一次，失败只显示错误并保留按钮重试；登记模式在管理后台与状态悬浮窗改为 `@record/ui` 的 `Switch` 开关；设备快捷停用/恢复改为 `Ban`/`RotateCcw` 无文字图标按钮，使用中设备不可停用。
+
+前端结构同步整理：`device-controls.tsx` 按职责拆为 `scan-mode.tsx` 与 `device-toggle.tsx`；`auto-submit.ts` 改为 `submit-triggers.ts`，只保留“立即自动提交一次”和“确认信号提交”两个单次钩子；`flows.tsx` 删除散落在输入/刷新/选择事件里的 `stopAutoSubmit` 调用，把布局参数 `automatic` 更名为 `fullscreen`；`common.tsx` 的图标导入归位；`addons.tsx` 不再按加载项 ID 硬编码计划时间，改为从 cron 派生，启用/禁用改为开关；`style.css` 新增样式全部使用主题 token；状态悬浮窗把停用/恢复并入行操作，修复新增按钮造成的三列网格换行。`LocalStatus.scanMode` 由可选改为必填，确认事件重新加入受限的 `TeacherEvent`，仍只经 main 发送给刷卡窗口。
+
+| 本轮检查 | 实际结果 |
+| --- | --- |
+| TypeScript / 格式 | `yarn typecheck`、`yarn format:check`、`git diff --check` 通过 |
+| 客户端单元/组件与覆盖率 | 11 个文件、134 项通过；statements 91.68%、branches 86.20%、functions 87.28%、lines 92.98%，覆盖率门禁通过。新增/更新覆盖同卡二刷确认、确认信号只提交一次、非当前预览确认无效、自动模式立即提交与失败不自动重试、模式开关成功/失败行为、设备图标按钮与占用禁用、加载项 cron 展示/开关/失败路径、悬浮窗 3 秒轮询与隐藏暂停 |
+| 前端构建 | `yarn build:shared`、`yarn build:client:integration` 通过 |
+| UI 走查 | 本地 Vite + Playwright（mock bridge，不启动 Electron）走查主窗口手动/自动模式开关、设置-加载项、刷卡窗口手动等待页/登记/结束/自动模式直接登记结果页、状态悬浮窗行操作与布局；截图输出在容器目录 `runtime/ui-screens/controls/`（`runtime/` 不入库） |
+
+本机为 Linux 容器：客户端单元套件中依赖 Rust GUI 进程的 reader-process 用例，临时用等价的 ready/scan/shutdown 脚本替代 Windows GUI mock 进程后运行（`target/` 为不入库构建产物，测试后已恢复原 Windows 可执行文件）；真实 Rust GUI 进程、Windows 安装包、真实 Electron/TLS/SQLite 集成和 Docker 全链路仍由 Windows/Linux CI 作业执行，本轮未在容器内重跑服务端、Electron 集成和全链路套件，外部验收边界（学校校园库、实卡、签名、目标机器）不变。
