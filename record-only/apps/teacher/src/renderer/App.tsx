@@ -62,6 +62,8 @@ import {
   BulkDeviceImport,
   History,
   ProviderSettingsForm,
+  ExperimentGroupSettings,
+  LayoutSettingsForm,
 } from "./settings.js";
 import { EndForm, BatchForm, NotesEditor } from "./flows.js";
 import { ScanModeSwitch } from "./scan-mode.js";
@@ -823,6 +825,8 @@ export function App() {
                   ["windows", "窗口管理"],
                   ["provider", "校园数据源"],
                   ["devices", "设备管理"],
+                  ["experiment", "相邻试验组"],
+                  ["layout", "座位布局"],
                   ["history", "历史记录"],
                   ["addons", "加载项"],
                   ...(__CYEZ_TEST_FEATURES__ ? [["diagnostics", "诊断"]] : []),
@@ -870,6 +874,18 @@ export function App() {
                 />
               )}
               {tab === "devices" && table}
+              {tab === "experiment" && (
+                <ExperimentGroupSettings
+                  authenticated={!!status?.authenticated}
+                  canWrite={canWrite}
+                />
+              )}
+              {tab === "layout" && (
+                <LayoutSettingsForm
+                  authenticated={!!status?.authenticated}
+                  canWrite={canWrite}
+                />
+              )}
               {tab === "history" && (
                 <History
                   authenticated={!!status?.authenticated}

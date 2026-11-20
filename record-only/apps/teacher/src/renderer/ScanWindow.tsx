@@ -2,12 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CircleCheck, CreditCard, Maximize, Minimize } from "lucide-react";
 import { AppToaster, IconButton, toast } from "@record/ui";
-import type { DeviceDTO, ScanPreview } from "@record/protocol";
+import type {
+  BatchAssignment,
+  BatchSession,
+  DeviceDTO,
+  ScanPreview,
+} from "@record/protocol";
 import type { LocalStatus, ScanMode } from "../shared/bridge.js";
 import type { WindowState } from "../shared/windows.js";
 import { errorText, useClock } from "./common.js";
 import { AuxTitleBar, auxCommand, closedWindows } from "./aux-window.js";
 import { Registration, EndForm } from "./flows.js";
+import { BatchAssigned, BatchCollecting } from "./batch.js";
 function Clock() {
   const now = new Date(useClock());
   return (
@@ -63,10 +69,20 @@ export function ScanWindow() {
     [windows, setWindows] = useState<WindowState>(closedWindows),
     [flow, setFlow] = useState<ScanPreview | null>(null),
     [result, setResult] = useState<Result | null>(null),
+    [batch, setBatch] = useState<BatchSession | null>(null),
+    [assignment, setAssignment] = useState<BatchAssignment | null>(null),
     [flowMode, setFlowMode] = useState<ScanMode>("manual"),
     [confirmSignal, setConfirmSignal] = useState(0),
     [busy, setBusy] = useState(false);
-  const activeFlowId = useRef<string | null>(null);
+  const activeFlowId = useRef<string | null>(null),
+    activeBatchId = useRef<string | null>(null),
+    /**
+     * 已结束的批次号：同一 tick 内 batchClosed 先到、batchAssigned 后到时，
+     * 据此抑制“回到等待页 + 提示”，让分配结果优先展示。
+     */
+    settlingBatchId = useRef<string | null>(null),
+    /** 同一 tick 内 batchAssigned 已先到：随后的 batchClosed 直接忽略。 */
+    assignedBatchId = useRef<string | null>(null);
   const refreshStatus = useCallback(async () => {
     setStatus(await window.library.call<LocalStatus>("status", {}));
   }, []);
@@ -80,13 +96,62 @@ export function ScanWindow() {
     const timer = setInterval(poll, 3000);
     const unsubscribe = window.library.subscribe((event) => {
       if (event.type === "scan") {
-        // 新刷卡立即取代结果页或被另一张卡顶替的流程。
+        // 批次收集期间的新刷卡由 main 拦下（重复卡即结束批次），本窗口不改变批次界面。
+        if (activeBatchId.current) return;
+        /*
+         * 新刷卡立即取代结果页、分配结果页，或被另一张卡顶替的流程。
+         * 分配结果页优先级高于单人流程，若不清掉 `assignment`，学生刷卡后
+         * 界面仍停在上一批的座位分配页，要等 5 秒自动关闭才出现新流程。
+         */
         setResult(null);
+        setAssignment(null);
         setBusy(false);
         setFlowMode(event.scanMode);
         setConfirmSignal(0);
         activeFlowId.current = event.preview.id;
         setFlow(event.preview);
+      } else if (event.type === "batch") {
+        // main 已确认进入批次：退出单人流程与结果页，门控切换为 batch。
+        activeFlowId.current = null;
+        settlingBatchId.current = null;
+        assignedBatchId.current = null;
+        activeBatchId.current = event.session.id;
+        setFlow(null);
+        setResult(null);
+        setAssignment(null);
+        setBusy(false);
+        setConfirmSignal(0);
+        setFlowMode(event.scanMode);
+        setBatch(event.session);
+      } else if (event.type === "batchUpdate") {
+        if (activeBatchId.current !== event.session.id) return;
+        setBatch(event.session);
+      } else if (event.type === "batchAssigned") {
+        // 优先级最高：同一 tick 先收到 batchClosed 也要直接展示分配结果。
+        activeBatchId.current = null;
+        settlingBatchId.current = null;
+        assignedBatchId.current = event.assignment.batchId;
+        setBatch(null);
+        setFlow(null);
+        setResult(null);
+        setBusy(false);
+        setAssignment(event.assignment);
+      } else if (event.type === "batchClosed") {
+        if (assignedBatchId.current === event.batchId) return;
+        settlingBatchId.current = event.batchId;
+        // 同一 tick 随后可能还有 batchAssigned：延后一拍再决定是否回到等待页，
+        // 避免先闪一下等待页再跳回分配结果。
+        setTimeout(() => {
+          if (settlingBatchId.current !== event.batchId) return;
+          settlingBatchId.current = null;
+          activeBatchId.current = null;
+          setBatch(null);
+          toast.info(
+            event.reason === "duplicate"
+              ? "批次已结束，正在分配座位…"
+              : "批次已结束，请重新刷卡。",
+          );
+        }, 0);
       } else if (event.type === "confirm") {
         // 手动模式同卡再刷：main 只发确认信号，不重新查询校园资料。
         if (activeFlowId.current === event.previewId)
@@ -96,8 +161,15 @@ export function ScanWindow() {
           activeFlowId.current = null;
           setFlow(null);
         }
-      } else if (event.type === "notice") toast.error(errorText(event.code));
-      else if (event.type === "windows") setWindows(event.state);
+      } else if (event.type === "notice") {
+        // “正在分配”这类进行中提示不是错误，不要用错误样式吓教师。
+        const informational =
+          event.code === "BATCH_TIMEOUT_CONFIRMING" ||
+          event.code === "BATCH_CLOSING";
+        const text = errorText(event.code);
+        if (informational) toast.info(text);
+        else toast.error(text);
+      } else if (event.type === "windows") setWindows(event.state);
       else if (event.type === "changed") poll();
     });
     return () => {
@@ -108,23 +180,47 @@ export function ScanWindow() {
   useEffect(() => {
     void window.library
       .call("gate", {
-        page: flow ? "flow" : "devices",
+        page: batch ? "batch" : flow ? "flow" : "devices",
         modal: false,
         submitting: busy,
       })
       .catch(() => {});
-  }, [!!flow, busy]);
+  }, [!!flow, !!batch, busy]);
   useEffect(() => {
     if (!result) return;
     const timer = setTimeout(() => setResult(null), RESULT_MS);
     return () => clearTimeout(timer);
   }, [result]);
   useEffect(() => {
-    // 登录失效后正在进行的流程不能再提交。
+    // 登录失效后正在进行的流程不能再提交，批次也一并退出（main 会撤销服务端预览）。
     if (status === null || status.authenticated) return;
     activeFlowId.current = null;
+    activeBatchId.current = null;
+    settlingBatchId.current = null;
+    assignedBatchId.current = null;
     setFlow(null);
+    setBatch(null);
   }, [status?.authenticated]);
+
+  /** 教师主动结束：main 负责关闭服务端批次并分配，结果以 batchAssigned 事件推送。 */
+  const confirmBatch = async () => {
+    if (!batch || !status?.online) return;
+    await window.library.call("batchClose", { batchId: batch.id });
+  };
+  const cancelBatch = () => {
+    const id = batch?.id;
+    activeBatchId.current = null;
+    settlingBatchId.current = null;
+    assignedBatchId.current = null;
+    setBatch(null);
+    if (id)
+      void window.library
+        .call("batchAbandon", { batchId: id })
+        .catch((error) => {
+          // 撤销失败必须告知教师：服务端批次仍在收集，后续刷卡会并入它。
+          toast.error(errorText(error));
+        });
+  };
   const closeFlow = () => {
     const id = flow?.id;
     activeFlowId.current = null;
@@ -168,7 +264,17 @@ export function ScanWindow() {
       <AuxTitleBar
         title="刷卡登记"
         subtitle={
-          blocked ?? (flow ? "正在办理" : result ? "办理完成" : "等待刷卡")
+          blocked
+            ? blocked
+            : assignment
+              ? "分配完成"
+              : batch
+                ? "批次收集中"
+                : flow
+                  ? "正在办理"
+                  : result
+                    ? "办理完成"
+                    : "等待刷卡"
         }
       >
         <label className="aux-check">
@@ -195,7 +301,22 @@ export function ScanWindow() {
         />
       </AuxTitleBar>
       <div className="aux-body">
-        {flow ? (
+        {assignment ? (
+          <BatchAssigned
+            key={assignment.batchId}
+            assignment={assignment}
+            onDone={() => setAssignment(null)}
+          />
+        ) : batch ? (
+          <BatchCollecting
+            key={batch.id}
+            session={batch}
+            online={!!status?.online}
+            onConfirm={confirmBatch}
+            onCancel={cancelBatch}
+            onBusy={setBusy}
+          />
+        ) : flow ? (
           flow.mode === "start" ? (
             <Registration
               key={flow.id}
@@ -235,6 +356,11 @@ export function ScanWindow() {
                   ? "自动模式：刷卡一次即直接登记或结束，无需教师确认。"
                   : "手动模式：刷卡后再次刷同一张卡，或由教师点击右下角确认。"}
             </p>
+            {!blocked && (
+              <p className="scan-idle-note">
+                相邻试验组成员刷卡会进入“多人相邻分配”：同学依次刷卡后自动配对座位。
+              </p>
+            )}
             <Clock />
             <footer>
               <span>学校图书馆 · 自助登记终端</span>

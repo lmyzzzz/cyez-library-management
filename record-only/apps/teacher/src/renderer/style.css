@@ -2662,3 +2662,132 @@ input[type="checkbox"] {
   color: var(--color-text-muted);
   font-size: 11px;
 }
+
+/* 座位布局的相邻关系预览：每行一对编号 + 等级标签，保持表格般的节奏。 */
+.adj-preview {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adj-preview-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.adj-preview-row:first-child {
+  padding-top: 0;
+}
+
+.adj-preview-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.adj-preview-seats {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.adj-preview-seats b {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--color-surface-sunken, #f4efe7);
+  color: var(--color-text-strong);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.adj-preview-note {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.adj-preview-grade {
+  min-width: 96px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.adj-preview-grade.is-excellent {
+  color: #2f7d4f;
+}
+
+.adj-preview-grade.is-good {
+  color: #2f6f9e;
+}
+
+.adj-preview-grade.is-fair {
+  color: #9a6b12;
+}
+
+.adj-preview-grade.is-degraded,
+.adj-preview-grade.is-none {
+  color: #a0491f;
+}
+
+/* 批次收集的倒计时条：与刷卡流程一致的窄带，压在标题下方。 */
+.batch-countdown {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--color-surface-sunken, #f7f2ea);
+  color: var(--color-text);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.batch-countdown > b {
+  color: var(--color-text-strong);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.batch-countdown > b.is-closed {
+  font-size: 13px;
+}
+
+.batch-countdown-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--bf-accent, #ffa924);
+  transition: width 1s linear;
+}
+
+/* 结果页的等级标签比姓名短，用更小的字号避免在左栏被截断。 */
+.bflow-value.is-compact {
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+/* 分配结果里座位号是主信息：等宽、加大，设备名不再出现在这一行。 */
+.bflow-dev .bflow-seat {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* 分配结果行没有序号列：座位号本身即标识，因此只排两列。 */
+.bflow-row.is-assigned {
+  grid-template-columns: minmax(0, 1fr) 70px;
+}

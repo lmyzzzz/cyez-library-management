@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Badge,
   Banner,
@@ -26,8 +26,20 @@ import type {
   TagDTO,
   Page as PageData,
   RecordDTO,
+  StudentDTO,
+  LayoutSettings,
+  LayoutDTO,
 } from "@record/protocol";
-import { createDeviceSchema } from "@record/protocol";
+import {
+  createDeviceSchema,
+  DEFAULT_LAYOUT_SETTINGS,
+  adjacencyGradeOf,
+  GRADE_LABELS,
+  isValidSection1End,
+  isValidSection1Start,
+  isValidSection2Start,
+  isValidSection3Start,
+} from "@record/protocol";
 import type { LocalStatus } from "../shared/bridge.js";
 import type { IdentityConfig } from "@record/protocol/identity";
 import type { ReaderProcessConfig } from "../shared/reader-config.js";
@@ -35,9 +47,11 @@ import {
   Dialog,
   EditIcon,
   Failure,
+  FieldError,
   Empty,
   LoginIcon,
   Pager,
+  PlusIcon,
   RefreshIcon,
   ResetIcon,
   TrashIcon,
@@ -1586,6 +1600,670 @@ export function History({
           </div>
         </Dialog>
       )}
+    </Card>
+  );
+}
+
+/* ---------------------------------------------------------------- 相邻试验组 */
+
+const HEX_ID = /^[0-9a-f]{64}$/;
+/**
+ * 有界整数校验：清空输入在浏览器里读成 0、在 jsdom 里读成 NaN，两种都判为不合法。
+ * S1/S3 的判定与服务端共用 protocol 的 `isValidSection1End` / `isValidSection3Start`。
+ */
+function isValidRange(value: number, min: number, max: number) {
+  return Number.isInteger(value) && value >= min && value <= max;
+}
+/** 数字输入框的受控值：空输入（Number("") = 0 或 NaN）统一以 0 呈现。 */
+const finit = (value: number) => (Number.isFinite(value) ? value : 0);
+const EXPERIMENT_PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
+/** 一个示例：两个编号 + 它们之间的相邻等级。 */
+type PreviewPair = {
+  codes: readonly [string, string];
+  label: string;
+};
+
+/**
+ * 预览示例按当前起点生成（docs §1.2 的优先序）。
+ *
+ * - 区域一/三：四人桌按 `起点 + 0..3` 递增，`1 2`、`3 4` 肩并肩，`3 5` 是相邻两桌的角。
+ * - 区域二：`adjacencyGradeOf` 取“第一个有归属的段”作主段落，所以第 1 段写 `0`
+ *   才能让这一对只由区域二决定。
+ * - 标签取自 `GRADE_LABELS`，不硬编码。
+ */
+function previewPairs(settings: LayoutSettings): PreviewPair[] {
+  const s1 = settings.section1Start;
+  const s2 = settings.section2Start;
+  const desk = (offset: number) => `${s1 + offset}-0-0`;
+  const row = (offset: number) => `0-${s2 + offset}-0`;
+  return [
+    { codes: [desk(0), desk(1)] as const, label: "并排" },
+    { codes: [desk(2), desk(4)] as const, label: "相邻两桌" },
+    { codes: [desk(0), desk(2)] as const, label: "面对面" },
+    { codes: [row(0), row(1)] as const, label: "长排正对" },
+  ];
+}
+
+/**
+ * 座位布局设置。设置以服务端为准（读写都要求登录），写入带 expectedVersion。
+ * 说明文字只给“填什么”，几何规则放在预览里用实际编号展示，不写成段落。
+ */
+export function LayoutSettingsForm({
+  authenticated,
+  canWrite,
+}: {
+  authenticated: boolean;
+  canWrite: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false),
+    [version, setVersion] = useState(0),
+    [section1Start, setSection1Start] = useState(
+      DEFAULT_LAYOUT_SETTINGS.section1Start,
+    ),
+    [section1End, setSection1End] = useState(
+      DEFAULT_LAYOUT_SETTINGS.section1End,
+    ),
+    [section2Start, setSection2Start] = useState(
+      DEFAULT_LAYOUT_SETTINGS.section2Start,
+    ),
+    [section3Start, setSection3Start] = useState(
+      DEFAULT_LAYOUT_SETTINGS.section3Start,
+    ),
+    [allowCrossArea, setAllowCrossArea] = useState(
+      DEFAULT_LAYOUT_SETTINGS.allowCrossArea,
+    ),
+    [batchWindowSec, setBatchWindowSec] = useState(
+      DEFAULT_LAYOUT_SETTINGS.batchWindowSec,
+    ),
+    [batchStudentLimit, setBatchStudentLimit] = useState(
+      DEFAULT_LAYOUT_SETTINGS.batchStudentLimit,
+    ),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState<unknown>(),
+    [message, setMessage] = useState("");
+  const revision = useRef(0);
+  const load = useCallback(async () => {
+    if (!authenticated) return;
+    const current = ++revision.current;
+    try {
+      const dto = await window.library.call<LayoutDTO>("layout", {});
+      if (current !== revision.current) return;
+      const s: LayoutSettings = dto.settings;
+      setSection1Start(
+        s.section1Start ?? DEFAULT_LAYOUT_SETTINGS.section1Start,
+      );
+      setSection1End(s.section1End);
+      setSection2Start(
+        s.section2Start ?? DEFAULT_LAYOUT_SETTINGS.section2Start,
+      );
+      setSection3Start(s.section3Start);
+      setAllowCrossArea(s.allowCrossArea);
+      setBatchWindowSec(s.batchWindowSec);
+      setBatchStudentLimit(s.batchStudentLimit);
+      setVersion(dto.version);
+      setError(undefined);
+      setLoaded(true);
+    } catch (e) {
+      if (current === revision.current) setError(e);
+    }
+  }, [authenticated]);
+  useEffect(() => {
+    if (!authenticated) {
+      revision.current++;
+      setLoaded(false);
+      return;
+    }
+    void load();
+    return () => {
+      revision.current++;
+    };
+  }, [authenticated, load]);
+  // 就地校验：每项一条提示，挂在对应输入框下方；任一不合法即禁用保存。
+  const s1StartProblem = !isValidSection1Start(section1Start)
+    ? "需为 1–1000 的整数。"
+    : "";
+  const s1Problem = !isValidSection1End(section1End)
+    ? "需为 4 的倍数，8–96。"
+    : "";
+  const s2StartProblem = !isValidSection2Start(section2Start)
+    ? "需为 2–1000 的整数。"
+    : "";
+  const s3Problem = !isValidSection3Start(section3Start)
+    ? "需为 41 + 4n（41、45、49…），41–9960。"
+    : "";
+  const windowProblem = !isValidRange(batchWindowSec, 10, 600)
+    ? "需为 10–600 的整数。"
+    : "";
+  const limitProblem = !isValidRange(batchStudentLimit, 2, 12)
+    ? "需为 2–12 的整数。"
+    : "";
+  const problems = [
+    s1StartProblem,
+    s1Problem,
+    s2StartProblem,
+    s3Problem,
+    windowProblem,
+    limitProblem,
+  ].filter(Boolean);
+  const editable = authenticated && canWrite && loaded;
+  const save = async () => {
+    if (!editable || problems.length || busy) return;
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      const dto = await window.library.call<LayoutDTO>("saveLayout", {
+        expectedVersion: version,
+        section1Start,
+        section1End,
+        section2Start,
+        section3Start,
+        allowCrossArea,
+        batchWindowSec,
+        batchStudentLimit,
+      });
+      setVersion(dto.version);
+      setMessage("已保存。");
+    } catch (e) {
+      // 版本冲突时以服务端为准重新读取，避免教师继续编辑过期数据；
+      // 必须在这之后设置错误，否则 load() 的成功路径会把提示清掉。
+      if (e instanceof Error && e.message === "LAYOUT_VERSION_CONFLICT")
+        await load();
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const reset = () => {
+    const s = DEFAULT_LAYOUT_SETTINGS;
+    setSection1Start(s.section1Start);
+    setSection1End(s.section1End);
+    setSection2Start(s.section2Start);
+    setSection3Start(s.section3Start);
+    setAllowCrossArea(s.allowCrossArea);
+    setBatchWindowSec(s.batchWindowSec);
+    setBatchStudentLimit(s.batchStudentLimit);
+    setError(undefined);
+    setMessage("已填入默认值，保存后生效。");
+  };
+  return (
+    <SettingsContent>
+      {!authenticated ? (
+        <Banner tone="warning">请先登录服务器后再读写座位布局。</Banner>
+      ) : !loaded ? (
+        <p className="muted">正在读取座位布局…</p>
+      ) : null}
+      <SettingsSection
+        title="编号"
+        description="设备编号的三段分别对应三个区域。"
+      >
+        <SettingsRow label="第一组起始编号" description="默认 1">
+          <div className="settings-field-stack">
+            <Input
+              aria-label="第一组起始编号"
+              aria-invalid={!!s1StartProblem}
+              className="settings-number"
+              type="number"
+              min={1}
+              max={1000}
+              disabled={!editable || busy}
+              value={finit(section1Start)}
+              onChange={(e) => setSection1Start(Number(e.target.value))}
+            />
+            {s1StartProblem ? <FieldError>{s1StartProblem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+        <SettingsRow label="第一组编号个数" description="4 的倍数，8–96">
+          <div className="settings-field-stack">
+            <Input
+              aria-label="第一组编号个数"
+              aria-invalid={!!s1Problem}
+              className="settings-number"
+              type="number"
+              min={8}
+              max={96}
+              step={4}
+              disabled={!editable || busy}
+              value={finit(section1End)}
+              onChange={(e) => setSection1End(Number(e.target.value))}
+            />
+            {s1Problem ? <FieldError>{s1Problem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+        <SettingsRow label="第二组起始编号" description="默认 31">
+          <div className="settings-field-stack">
+            <Input
+              aria-label="第二组起始编号"
+              aria-invalid={!!s2StartProblem}
+              className="settings-number"
+              type="number"
+              min={2}
+              max={1000}
+              disabled={!editable || busy}
+              value={finit(section2Start)}
+              onChange={(e) => setSection2Start(Number(e.target.value))}
+            />
+            {s2StartProblem ? <FieldError>{s2StartProblem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+        <SettingsRow
+          label="第三组起始编号"
+          description="默认 41，按 41 + 4n 递增"
+        >
+          <div className="settings-field-stack">
+            <Input
+              aria-label="第三组起始编号"
+              aria-invalid={!!s3Problem}
+              className="settings-number"
+              type="number"
+              min={41}
+              max={9960}
+              step={4}
+              disabled={!editable || busy}
+              value={finit(section3Start)}
+              onChange={(e) => setSection3Start(Number(e.target.value))}
+            />
+            {s3Problem ? <FieldError>{s3Problem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+        <SettingsRow
+          label="允许跨区域分配"
+          description="关闭后只在同一区域内排座位"
+        >
+          <Switch
+            label=""
+            aria-label="允许跨区域分配"
+            checked={allowCrossArea}
+            disabled={!editable || busy}
+            onChange={(e) => setAllowCrossArea(e.target.checked)}
+          />
+        </SettingsRow>
+      </SettingsSection>
+      <SettingsSection
+        title="批次"
+        description="相邻试验组成员刷卡后的收集窗口。"
+      >
+        <SettingsRow label="收集窗口（秒）" description="10–600，默认 10">
+          <div className="settings-field-stack">
+            <Input
+              aria-label="批次窗口（秒）"
+              aria-invalid={!!windowProblem}
+              className="settings-number"
+              type="number"
+              min={10}
+              max={600}
+              disabled={!editable || busy}
+              value={finit(batchWindowSec)}
+              onChange={(e) => setBatchWindowSec(Number(e.target.value))}
+            />
+            {windowProblem ? <FieldError>{windowProblem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+        <SettingsRow label="单批人数上限" description="2–12，默认 8">
+          <div className="settings-field-stack">
+            <Input
+              aria-label="单批人数上限"
+              aria-invalid={!!limitProblem}
+              className="settings-number"
+              type="number"
+              min={2}
+              max={12}
+              disabled={!editable || busy}
+              value={finit(batchStudentLimit)}
+              onChange={(e) => setBatchStudentLimit(Number(e.target.value))}
+            />
+            {limitProblem ? <FieldError>{limitProblem}</FieldError> : null}
+          </div>
+        </SettingsRow>
+      </SettingsSection>
+      <LayoutPreview
+        settings={{
+          section1Start,
+          section1End,
+          section2Start,
+          section3Start,
+          allowCrossArea,
+          batchWindowSec,
+          batchStudentLimit,
+        }}
+      />
+      <Failure error={error} retry={() => void load()} />
+      {message && <Banner tone="success">{message}</Banner>}
+      {!canWrite && authenticated && (
+        <p className="muted">当前不可写入，只能查看。</p>
+      )}
+      <div className="form-actions">
+        <Button
+          size="small"
+          icon={ResetIcon}
+          disabled={!editable || busy}
+          onClick={reset}
+        >
+          填入默认值
+        </Button>
+        <Button
+          size="small"
+          icon={RefreshIcon}
+          disabled={!authenticated || busy}
+          onClick={() => {
+            setMessage("");
+            setError(undefined);
+            void load();
+          }}
+        >
+          重新读取
+        </Button>
+        <Button
+          size="small"
+          variant="primary"
+          disabled={!editable || busy || problems.length > 0}
+          onClick={() => void save()}
+        >
+          {busy ? "保存中…" : "保存"}
+        </Button>
+      </div>
+    </SettingsContent>
+  );
+}
+
+/**
+ * 相邻关系预览：每个示例一行，左边两个编号，右边等级标签。
+ * 不写成规则段落——教师看编号和标签就能判断现场能否讨论。
+ */
+function LayoutPreview({ settings }: { settings: LayoutSettings }) {
+  return (
+    <SettingsSection
+      title="相邻关系"
+      description="按当前编号，两人坐下后能否看到对方屏幕。"
+    >
+      <ul className="adj-preview">
+        {previewPairs(settings).map((pair) => {
+          const relation = adjacencyGradeOf(
+            pair.codes[0],
+            pair.codes[1],
+            settings,
+          );
+          return (
+            <li className="adj-preview-row" key={pair.codes.join("/")}>
+              <span className="adj-preview-seats">
+                <b>{pair.codes[0]}</b>
+                <b>{pair.codes[1]}</b>
+              </span>
+              <span className="adj-preview-note">{pair.label}</span>
+              <span className={`adj-preview-grade is-${relation}`}>
+                {relation === "none" ? "不相邻" : GRADE_LABELS[relation]}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </SettingsSection>
+  );
+}
+
+/** 相邻试验组：成员列表 + 按 64 位学生 ID 加入 / 移出。 */
+export function ExperimentGroupSettings({
+  authenticated,
+  canWrite,
+}: {
+  authenticated: boolean;
+  canWrite: boolean;
+}) {
+  const [data, setData] = useState<PageData<StudentDTO>>({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: EXPERIMENT_PAGE_SIZE,
+    }),
+    [loaded, setLoaded] = useState(false),
+    [page, setPage] = useState(1),
+    [search, setSearch] = useState(""),
+    [debounced, setDebounced] = useState(""),
+    [studentId, setStudentId] = useState(""),
+    [removing, setRemoving] = useState<StudentDTO | null>(null),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState<unknown>(),
+    [formError, setFormError] = useState<string>(),
+    [message, setMessage] = useState("");
+  const revision = useRef(0);
+  useEffect(() => {
+    // 搜索输入防抖 300ms，避免每次按键都打一次学生列表接口。
+    const timer = setTimeout(
+      () => setDebounced(search.trim()),
+      SEARCH_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [search]);
+  useEffect(() => {
+    setPage(1);
+  }, [debounced]);
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!authenticated) return;
+      const current = ++revision.current;
+      if (!quiet) setBusy(true);
+      try {
+        const value = await window.library.call<PageData<StudentDTO>>(
+          "experimentStudents",
+          {
+            page,
+            pageSize: EXPERIMENT_PAGE_SIZE,
+            ...(debounced ? { search: debounced } : {}),
+          },
+        );
+        if (current !== revision.current) return;
+        setData(value);
+        setError(undefined);
+        setLoaded(true);
+      } catch (e) {
+        if (current === revision.current) setError(e);
+      } finally {
+        if (current === revision.current && !quiet) setBusy(false);
+      }
+    },
+    [authenticated, page, debounced],
+  );
+  useEffect(() => {
+    if (!authenticated) {
+      revision.current++;
+      setData({ items: [], total: 0, page: 1, pageSize: EXPERIMENT_PAGE_SIZE });
+      setLoaded(false);
+      setMessage("");
+      setFormError(undefined);
+      return;
+    }
+    void load();
+    return () => {
+      revision.current++;
+    };
+  }, [authenticated, load]);
+  useEffect(() => {
+    // 登录失效后不再保留学生姓名。
+    if (authenticated) return;
+    setData({ items: [], total: 0, page: 1, pageSize: EXPERIMENT_PAGE_SIZE });
+    setRemoving(null);
+  }, [authenticated]);
+  const writable = authenticated && canWrite;
+  const normalized = studentId.trim().toLowerCase();
+  const idValid = HEX_ID.test(normalized);
+  const add = async () => {
+    if (!writable || !idValid || busy) return;
+    setBusy(true);
+    setError(undefined);
+    setFormError(undefined);
+    setMessage("");
+    try {
+      await window.library.call("setExperiment", {
+        studentId: normalized,
+        enabled: true,
+      });
+      setStudentId("");
+      setMessage("已加入。");
+      await load(true);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const remove = async () => {
+    if (!removing || !writable || busy) return;
+    setBusy(true);
+    setError(undefined);
+    setMessage("");
+    try {
+      await window.library.call("setExperiment", {
+        studentId: removing.id,
+        enabled: false,
+      });
+      setMessage(`已将 ${removing.name} 移出。`);
+      setRemoving(null);
+      await load(true);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card>
+      <div className="card-header">
+        <h2>相邻试验组</h2>
+        <span className="muted">{data.total} 人</span>
+      </div>
+      <Banner tone="info">
+        本组成员刷卡后进入批次收集，再刷一次已刷过的卡即结束并分配座位。
+      </Banner>
+      {!authenticated ? (
+        <Banner tone="warning">请先登录服务器后再管理相邻试验组。</Banner>
+      ) : null}
+      <Toolbar className="history-filters">
+        <Input
+          aria-label="搜索试验组学生"
+          placeholder="姓名、班级、校内学号"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <IconButton
+          size="small"
+          variant="ghost"
+          label="刷新"
+          icon={RefreshIcon}
+          onClick={() => void load()}
+        />
+      </Toolbar>
+      <Failure error={error} retry={() => void load()} />
+      {message && <Banner tone="success">{message}</Banner>}
+      <div className="tag-checks">
+        <label className="block-label" htmlFor="experiment-student-id">
+          添加学生到相邻试验组
+        </label>
+        <Input
+          id="experiment-student-id"
+          aria-label="学生 ID"
+          aria-invalid={!!studentId.trim() && !idValid}
+          placeholder="64 位小写十六进制学生 ID"
+          autoComplete="off"
+          spellCheck={false}
+          disabled={!writable || busy}
+          value={studentId}
+          onChange={(e) => {
+            setStudentId(e.target.value);
+            setFormError(undefined);
+          }}
+        />
+        {studentId.trim() && !idValid && (
+          <FieldError>需为 64 位小写十六进制。</FieldError>
+        )}
+        {formError && <FieldError>{formError}</FieldError>}
+        <p className="muted">学生 ID 可从“历史记录”的记录详情复制。</p>
+        <div className="form-actions">
+          <Button
+            size="small"
+            variant="primary"
+            icon={PlusIcon}
+            disabled={!writable || busy || !idValid}
+            onClick={() => void add()}
+          >
+            {busy ? "提交中…" : "加入"}
+          </Button>
+        </div>
+      </div>
+      <TableContainer className="table-scroll" aria-busy={busy}>
+        <table>
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>班级</th>
+              <th>校内学号</th>
+              <th>学生 ID</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {busy && !data.items.length
+              ? Array.from({ length: 3 }, (_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5}>
+                      <span className="skeleton" />
+                    </td>
+                  </tr>
+                ))
+              : data.items.map((s) => (
+                  <tr key={s.id}>
+                    <td>
+                      <strong>{s.name}</strong>
+                    </td>
+                    <td>{s.className || "—"}</td>
+                    <td>{s.schoolNumber || "—"}</td>
+                    <td className="mono truncate" title={s.id}>
+                      {s.id}
+                    </td>
+                    <td>
+                      <div className="row-actions">
+                        <Button
+                          size="small"
+                          variant="ghost"
+                          disabled={!writable || busy}
+                          onClick={() => {
+                            setError(undefined);
+                            setMessage("");
+                            setRemoving(s);
+                          }}
+                        >
+                          移出
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+          </tbody>
+        </table>
+      </TableContainer>
+      {loaded && !data.items.length && (
+        <Empty
+          text={
+            debounced
+              ? "没有匹配的试验组成员。"
+              : "相邻试验组还没有成员，可用上方输入框添加。"
+          }
+        />
+      )}
+      <Pager {...data} page={page} setPage={setPage} />
+      <ConfirmModal
+        open={!!removing}
+        title="移出相邻试验组？"
+        message={`${removing?.name ?? ""} 将不再触发多人批次，之后刷卡按普通单人流程处理。`}
+        confirmLabel="确认移出"
+        busy={busy}
+        closeOnConfirm={false}
+        error={error ? errorText(error) : null}
+        onCancel={() => {
+          if (!busy) setRemoving(null);
+        }}
+        onConfirm={() => void remove()}
+      />
     </Card>
   );
 }
