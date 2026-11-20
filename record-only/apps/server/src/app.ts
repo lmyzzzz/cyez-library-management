@@ -96,6 +96,9 @@ export async function createApp(
     auth.require(request.headers.authorization);
   const id = (params: unknown) =>
     P.parse(z.object({ id: P.uuid }).strict(), params).id;
+  /** 学生主键是 64 位小写 hex（加盐哈希），不是 UUID。 */
+  const studentKey = (params: unknown) =>
+    P.parse(z.object({ id: P.hashId }).strict(), params).id;
   app.addHook("onRequest", async (request) => {
     const route = request.routeOptions.url;
     if (
@@ -233,6 +236,66 @@ export async function createApp(
     service.previews.delete(id(req.params), ctx(req));
     return { ok: true };
   });
+  /** 批次窗口内继续刷卡：与 scan-previews 相同的卡号校验与资料刷新语义。 */
+  app.post("/api/v1/scan-previews/:id/join", async (req, reply) => {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    req.raw.once("aborted", abort);
+    reply.raw.once("close", () => {
+      if (!reply.raw.writableFinished) controller.abort();
+    });
+    try {
+      const previewId = id(req.params);
+      return await service.batchJoin(
+        ctx(req),
+        previewId,
+        P.parse(P.batchJoinSchema, req.body),
+        controller.signal,
+      );
+    } finally {
+      req.raw.removeListener("aborted", abort);
+      req.body = undefined;
+    }
+  });
+  /** 教师主动结束批次并分配；close 与 confirm 等价且共用 intentId 消费约束。 */
+  app.post("/api/v1/scan-previews/:id/close", async (req) => {
+    const previewId = id(req.params);
+    return service.batchAssign(
+      ctx(req),
+      `batch.close:${previewId}`,
+      previewId,
+      P.parse(P.batchCloseSchema, req.body),
+    );
+  });
+  app.post("/api/v1/batches/:id/confirm", async (req) => {
+    const batchId = id(req.params);
+    return service.batchAssign(
+      ctx(req),
+      `batch.confirm:${batchId}`,
+      batchId,
+      P.parse(P.batchCloseSchema, req.body),
+    );
+  });
+  app.get("/api/v1/batches/:id", async (req) =>
+    service.batchStatus(ctx(req), id(req.params)),
+  );
+  app.get("/api/v1/layout", async () => service.layoutDTO());
+  app.put("/api/v1/layout", async (req) =>
+    service.updateLayout(ctx(req), P.parse(P.layoutUpdateSchema, req.body)),
+  );
+  app.get("/api/v1/students/experiment", async (req) =>
+    service.listExperiment(
+      ctx(req),
+      P.parse(P.experimentListSchema, req.query),
+    ),
+  );
+  app.put("/api/v1/students/:id/experiment", async (req) =>
+    service.setExperiment(
+      ctx(req),
+      studentKey(req.params),
+      P.parse(P.experimentToggleSchema, req.body),
+    ),
+  );
   app.get("/api/v1/devices", async (req) =>
     service.listDevices(P.parse(P.listSchema, req.query)),
   );

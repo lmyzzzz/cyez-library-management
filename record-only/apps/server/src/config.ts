@@ -18,6 +18,11 @@ export const configSchema = z
     previewTtlMs: z.number().int().positive(),
     previewLimit: z.number().int().positive(),
     batchLimit: z.number().int().min(1).max(5000),
+    /** docs/adjacent-layout.md §3/§4：相邻试验组批次的默认窗口（秒）与单批人数上限。
+     * Optional so existing deployments keep working; the layout setting in the
+     * database wins once a teacher saved one. */
+    batchWindowSec: z.number().int().min(10).max(600).optional(),
+    batchStudentLimit: z.number().int().min(2).max(12).optional(),
     sessionTtlMs: z.number().int().positive(),
     spoolDir: z.string().min(1),
     capacity: z.object({
@@ -73,6 +78,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     previewTtlMs: n("PREVIEW_TTL_MS", 120000),
     previewLimit: n("PREVIEW_LIMIT", 10000),
     batchLimit: n("BATCH_LIMIT", 500),
+    batchWindowSec:
+      env.BATCH_WINDOW_SEC === undefined ? 10 : n("BATCH_WINDOW_SEC", 10),
+    batchStudentLimit:
+      env.BATCH_STUDENT_LIMIT === undefined ? 8 : n("BATCH_STUDENT_LIMIT", 8),
     sessionTtlMs: n("SESSION_TTL_MS", 3600000),
     spoolDir: env.SPOOL_DIR ?? "runtime/spool",
     capacity: {

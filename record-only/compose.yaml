@@ -135,6 +135,8 @@ services:
       BATCH_LIMIT: ${BATCH_LIMIT:-500}
       SESSION_TTL_MS: ${SESSION_TTL_MS:-3600000}
       CAPACITY_OLDEST_WARN_MS: ${CAPACITY_OLDEST_WARN_MS:-3600000}
+      BATCH_WINDOW_SEC: ${BATCH_WINDOW_SEC:-10}
+      BATCH_STUDENT_LIMIT: ${BATCH_STUDENT_LIMIT:-8}
     secrets: [runtime_database_url, provider_config_key]
     volumes:
       [
