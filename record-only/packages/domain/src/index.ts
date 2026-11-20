@@ -1,5 +1,30 @@
 import { ApiError } from "@record/protocol";
 import { createHash } from "node:crypto";
+export type {
+  ParsedDeviceCode,
+  DeviceSegment,
+  DeviceCells,
+  ArrangementScore,
+  SeatPlan,
+} from "./adjacency.js";
+export {
+  GRADE_LABELS,
+  GRADE_RANK,
+  adjacencyGradeOf,
+  deviceArea,
+  deviceCells,
+  isValidSection1End,
+  isValidSection1Start,
+  isValidSection2Start,
+  isValidSection3Start,
+  parseDeviceCode,
+  planSeats,
+  resolveSeat,
+  runOf,
+  scoreArrangement,
+  seatNumberFromName,
+  spanOf,
+} from "./adjacency.js";
 export function assertInterval(start: number, end: number): void {
   if (
     !Number.isSafeInteger(start) ||
