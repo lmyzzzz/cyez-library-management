@@ -1,4 +1,23 @@
 import { z } from "zod";
+import {
+  ADJACENCY_GRADES,
+  isValidSection1End,
+  isValidSection1Start,
+  isValidSection2Start,
+  isValidSection3Start,
+  type AdjacencyGrade,
+  type AdjacencyRelation,
+  type LayoutSettings,
+} from "./adjacency.js";
+
+/**
+ * 相邻几何与座位规划的唯一实现（纯函数，无 Node API 依赖），
+ * 放在 protocol 便于教师端 renderer 直接使用。
+ */
+// 几何算法、等级常量与 LayoutSettings 等类型都来自 ./adjacency.js（单一实现）。
+export * from "./adjacency.js";
+export type { AdjacencyGrade, AdjacencyRelation };
+export { ADJACENCY_GRADES };
 export const uuid = z.string().uuid();
 export const hashId = z.string().regex(/^[0-9a-f]{64}$/);
 export const notes = z.string().max(8000);
@@ -78,6 +97,16 @@ export interface RecordDTO {
   endReason: string | null;
   version: number;
 }
+export const adjacencyGradeSchema = z.enum(ADJACENCY_GRADES);
+export interface BatchSession {
+  id: string;
+  mode: "batch";
+  atMs: number;
+  closesAtMs: number;
+  students: StudentDTO[];
+  duplicates: StudentDTO[];
+  state: "collecting" | "closed" | "assigned";
+}
 export interface ScanPreview {
   id: string;
   mode: "start" | "end";
@@ -85,6 +114,23 @@ export interface ScanPreview {
   atMs: number;
   expiresAtMs: number;
   record: RecordDTO | null;
+  /** 相邻试验组成员刷卡时携带的批次快照；普通学生为 null/缺省。 */
+  batch?: BatchSession | null;
+}
+export interface BatchAssignment {
+  batchId: string;
+  atMs: number;
+  grade: AdjacencyGrade;
+  gradeLabel: string;
+  assigned: {
+    studentId: string;
+    deviceId: string;
+    code: string;
+    displayName: string;
+  }[];
+  busy: string[];
+  unresolved: string[];
+  span: number;
 }
 export interface EndPreview {
   id: string;
@@ -222,6 +268,83 @@ export const batchPreviewSchema = z
 export const batchConfirmSchema = z
   .object({ requestId: uuid, previewId: uuid, notes })
   .strict();
+/**
+ * docs/adjacent-layout.md §4：布局与批次设置。
+ * 三个区域的起点与宽度规则复用 ./adjacency.js 的 `isValidSection1Start` /
+ * `isValidSection1End` / `isValidSection2Start` / `isValidSection3Start`，
+ * 保证 schema 与纯函数判据完全一致。
+ */
+export const layoutSettingsSchema = z
+  .object({
+    /**
+     * 区域一的第一个编号，默认 1（现场可改）。区域一占
+     * `[section1Start, section1Start + section1End − 1)`。
+     */
+    section1Start: z.number().refine(isValidSection1Start, {
+      message: "SECTION1_START_INVALID",
+    }),
+    /**
+     * 区域一边界宽度 S1 = 区域一桌数 × 4：4 的倍数且 8 ≤ S1 ≤ 96
+     * （至少两张完整四角桌）。起点为 1、S1=8 时可用 1..7。
+     */
+    section1End: z.number().refine(isValidSection1End, {
+      message: "SECTION1_END_INVALID",
+    }),
+    /**
+     * 区域二的第一个编号，默认 31（现场可改）。两排从同一起点编号：
+     * `start` 与 `start + 1` 正对，`start + 2` 回到上一排的下一列。
+     */
+    section2Start: z.number().refine(isValidSection2Start, {
+      message: "SECTION2_START_INVALID",
+    }),
+    /**
+     * 区域三起点 S3：41 ≤ S3 ≤ 9960 且 `(S3 − 41) % 4 === 0`（41、45、49…），
+     * 保证区域三从一张完整桌子的第一个角开始编号。
+     * 42 会让第一张桌子只剩 3 个角，因此非法。
+     */
+    section3Start: z.number().refine(isValidSection3Start, {
+      message: "SECTION3_START_INVALID",
+    }),
+    allowCrossArea: z.boolean(),
+    batchWindowSec: z.number().int().min(10).max(600),
+    batchStudentLimit: z.number().int().min(2).max(12),
+  })
+  .strict();
+export const DEFAULT_LAYOUT_SETTINGS: LayoutSettings = {
+  section1Start: 1,
+  section1End: 8,
+  section2Start: 31,
+  section3Start: 41,
+  allowCrossArea: true,
+  batchWindowSec: 10,
+  batchStudentLimit: 8,
+};
+export const layoutUpdateSchema = z
+  .object({
+    requestId: uuid,
+    expectedVersion: version,
+    ...layoutSettingsSchema.shape,
+  })
+  .strict();
+export type LayoutUpdate = z.infer<typeof layoutUpdateSchema>;
+export interface LayoutDTO {
+  settings: LayoutSettings;
+  version: number;
+}
+export const batchJoinSchema = scanSchema;
+export const batchCloseSchema = z.object({ requestId: uuid }).strict();
+export const batchAssignConfirmSchema = z.object({ requestId: uuid }).strict();
+export const experimentToggleSchema = z
+  .object({ requestId: uuid, enabled: z.boolean() })
+  .strict();
+export const experimentListSchema = z
+  .object({
+    search: z.string().max(100).optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(30),
+  })
+  .strict();
+export type ExperimentListQuery = z.infer<typeof experimentListSchema>;
 export const logCodes = [
   "APP_STARTED",
   "APP_STOPPED",

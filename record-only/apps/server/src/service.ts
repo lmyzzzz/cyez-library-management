@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import {
   ApiError,
+  batchJoinSchema,
   scanSchema,
   startSchema,
   endSchema,
@@ -20,10 +21,18 @@ import {
   editTagSchema,
   batchPreviewSchema,
   batchConfirmSchema,
+  experimentToggleSchema,
+  experimentListSchema,
+  batchCloseSchema,
+  layoutUpdateSchema,
   type StudentDTO,
   type RecordDTO,
   type DeviceDTO,
   type ListQuery,
+  type LayoutSettings,
+  type LayoutDTO,
+  type BatchAssignment,
+  type BatchSession,
   type Action,
 } from "@record/protocol";
 import { studentId } from "@record/protocol/identity";
@@ -42,6 +51,15 @@ import {
   type UsageRow,
 } from "./database.js";
 import { Previews, type Context, type Intent } from "./previews.js";
+import {
+  Batches,
+  defaultLayout,
+  parseLayout,
+  pickLayoutSettings,
+  serializeLayout,
+  LAYOUT_KEY,
+  type ServerAssignment,
+} from "./batches.js";
 import { refreshProfile, type CampusProvider } from "./provider.js";
 import { Capacity } from "./storage.js";
 /** Business identifiers attached to the generic command audit. Only entity IDs
@@ -73,7 +91,11 @@ export class Service {
     private now = Date.now,
   ) {
     this.previews = new Previews(config.previewTtlMs, config.previewLimit, now);
+    this.batches = new Batches(this, now);
   }
+  /** 布局设置的内存缓存；写库成功后才更新，读请求不落库。 */
+  private layoutCache: LayoutDTO | undefined;
+  readonly batches: Batches;
   student(s: StudentRow): StudentDTO {
     return {
       id: s.id,
@@ -125,6 +147,238 @@ export class Service {
     };
     await this.db.audits.create(values, { transaction, returning: false });
   }
+  /** 布局设置（含批次窗口/上限）。内存缓存，缺省回落到默认值。 */
+  layout(): LayoutSettings {
+    // 库内没有布局行时，用环境变量里配置的批次参数作为初始值。
+    return (
+      this.layoutCache?.settings ??
+      defaultLayout({
+        batchWindowSec: this.config.batchWindowSec,
+        batchStudentLimit: this.config.batchStudentLimit,
+      })
+    );
+  }
+  batchWindowSec(): number {
+    return this.layout().batchWindowSec;
+  }
+  async layoutDTO(): Promise<LayoutDTO> {
+    if (this.layoutCache) return this.layoutCache;
+    const row = await this.db.settings.findByPk(LAYOUT_KEY);
+    this.layoutCache = parseLayout(row?.get().value);
+    return this.layoutCache;
+  }
+  /** 单实例内的内存缓存；测试/运维改了库里的行时可显式丢弃。 */
+  invalidateLayout() {
+    this.layoutCache = undefined;
+  }
+  /** PUT /api/v1/layout：完整覆盖，走既有幂等/审计/日志管线。
+   * 设置是全局的（不是 per-client），所以只有版本号做并发保护。 */
+  async updateLayout(ctx: Context, data: z.infer<typeof layoutUpdateSchema>) {
+    const result = await this.operation(
+      ctx,
+      "layout.update",
+      { requestId: data.requestId },
+      "modify",
+      async (tx) => {
+        const row = await this.db.settings.findByPk(LAYOUT_KEY, {
+          transaction: tx,
+          lock: tx.LOCK.UPDATE,
+        });
+        const current = parseLayout(row?.get().value);
+        if (current.version !== data.expectedVersion)
+          throw new ApiError("LAYOUT_VERSION_CONFLICT", 409);
+        // 从已校验的更新载荷里挑出全部设置键（新增字段只需在 schema 加一次）。
+        const settings: LayoutSettings = pickLayoutSettings(data);
+        const value = serializeLayout({
+          settings,
+          version: current.version + 1,
+        });
+        if (value.length > 256) throw new ApiError("INPUT_INVALID", 422);
+        if (row) await row.update({ value }, { transaction: tx });
+        else
+          await this.db.settings.create(
+            { key: LAYOUT_KEY, value },
+            { transaction: tx },
+          );
+        return { settings, version: current.version + 1 };
+      },
+    );
+    this.layoutCache = result as LayoutDTO;
+    return result;
+  }
+  /** 相邻试验组学生列表：只读已刷卡的缓存资料，不发校园 API。 */
+  async listExperiment(
+    ctx: Context,
+    query: z.infer<typeof experimentListSchema>,
+  ) {
+    const conditions: WhereOptions<StudentRow>[] = [{ experimentGroup: true }];
+    if (query.search) {
+      const q = `%${query.search.replace(/[\\%_]/g, "\\$&")}%`;
+      conditions.push({
+        [Op.or]: [
+          { name: { [Op.iLike]: q } },
+          { className: { [Op.iLike]: q } },
+          { schoolNumber: { [Op.iLike]: q } },
+        ],
+      });
+    }
+    const { rows, count } = await this.db.students.findAndCountAll({
+      where: { [Op.and]: conditions },
+      order: [
+        ["name", "ASC"],
+        ["id", "ASC"],
+      ],
+      limit: query.pageSize,
+      offset: (query.page - 1) * query.pageSize,
+    });
+    return {
+      items: rows.map((row) => ({
+        ...this.student(row.get()),
+        experimentGroup: true as const,
+      })),
+      total: count,
+      page: query.page,
+      pageSize: query.pageSize,
+    };
+  }
+  /** 只允许修改 experimentGroup 一个字段；students 是校园 API 的缓存。 */
+  async setExperiment(
+    ctx: Context,
+    id: string,
+    data: z.infer<typeof experimentToggleSchema>,
+  ) {
+    const auditIds: AuditIds = { studentId: id };
+    return this.operation(
+      ctx,
+      `student.experiment:${id.slice(0, 16)}`,
+      data,
+      "modify",
+      async (tx) => {
+        const student = await this.db.students.findByPk(id, {
+          transaction: tx,
+          lock: tx.LOCK.UPDATE,
+        });
+        if (!student) throw new ApiError("NOT_FOUND", 404);
+        if (student.get().experimentGroup !== data.enabled)
+          await student.update(
+            { experimentGroup: data.enabled },
+            { transaction: tx },
+          );
+        return { studentId: id, experimentGroup: data.enabled };
+      },
+      () => auditIds,
+    );
+  }
+  /** 试验组成员刷卡的批次分支：并入本机 collecting 批次或新建一个。
+   * 返回结构沿用 ScanPreview，`mode` 为 "batch" 且附带 batch 快照。 */
+  private async enterBatch(
+    ctx: Context,
+    input: z.infer<typeof scanSchema>,
+    student: StudentRow,
+    atMs: number,
+  ) {
+    const current = this.batches.collecting(ctx);
+    const intent =
+      current ??
+      this.previews.create(ctx, {
+        mode: "batch",
+        atMs,
+        records: [],
+        students: [],
+        duplicates: [],
+        closesAtMs: atMs + this.batchWindowSec() * 1000,
+        state: "collecting",
+      });
+    const { duplicate } = this.batches.join(intent, this.student(student));
+    if (duplicate) {
+      // 同一批次又刷到已收集的卡：这是“批次结束”信号，立即分配并返回结果。
+      const { assignment, session } = await this.batches.assign(ctx, intent);
+      return {
+        id: intent.id,
+        mode: "end" as const,
+        atMs,
+        expiresAtMs: intent.expiresAtMs,
+        student: this.student(student),
+        record: null,
+        batch: { ...session, state: "assigned" as const },
+        assignment,
+      };
+    }
+    return {
+      id: intent.id,
+      mode: "batch" as const,
+      atMs,
+      expiresAtMs: intent.expiresAtMs,
+      student: this.student(student),
+      record: null,
+      batch: this.batches.session(intent),
+    };
+  }
+  /** 每次有效刷卡都要重查校园 API 并刷新缓存（含批次加入）。
+   * 与 scan 共用 providerHealthy、版本校验与锁顺序语义。 */
+  private async refreshCache(
+    ctx: Context,
+    input: z.infer<typeof scanSchema>,
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<StudentRow> {
+    const before = await this.db.students.findByPk(id);
+    let profile;
+    try {
+      profile = await refreshProfile(
+        this.provider,
+        input.card,
+        this.config.providerTimeoutMs,
+        signal,
+      );
+      this.providerHealthy = true;
+    } catch (e) {
+      if (
+        e instanceof ApiError &&
+        (e.code === "STUDENT_NOT_ALLOWED" || e.code === "PROFILE_MISMATCH")
+      )
+        this.providerHealthy = true;
+      else if (!signal?.aborted) this.providerHealthy = false;
+      throw e;
+    }
+    await this.capacity.require("scan");
+    signal?.throwIfAborted();
+    return this.db.sequelize.transaction(async (transaction) => {
+      const current = await this.db.students.findByPk(id, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      if (current?.get().version !== before?.get().version)
+        throw new ApiError("PROFILE_VERSION_CONFLICT", 409);
+      const values = {
+        ...profile,
+        hashVersion: input.hashVersion,
+        profileRefreshedAt: new Date(this.now()),
+        version: (current?.get().version ?? 0) + 1,
+      };
+      // 缓存覆盖不得触碰 experimentGroup（由教师显式设置）。
+      const cached = current
+        ? await current.update(values, { transaction })
+        : await this.db.students.create(
+            {
+              id,
+              ...values,
+              isEnabled: null,
+              seedDigest: null,
+              experimentGroup: false,
+            },
+            { transaction },
+          );
+      await this.audit(
+        ctx,
+        current ? "profile.refresh" : "profile.cached",
+        Object.keys(profile),
+        transaction,
+        { studentId: id, scanId: input.scanId },
+      );
+      return cached.get();
+    });
+  }
   async scan(
     ctx: Context,
     input: z.infer<typeof scanSchema>,
@@ -171,64 +425,13 @@ export class Service {
           entry.result = await this.serial.run("student:" + id, async () => {
             await this.capacity.require("scan");
             signal?.throwIfAborted();
-            const before = await this.db.students.findByPk(id);
-            let profile;
-            try {
-              profile = await refreshProfile(
-                this.provider,
-                input.card,
-                this.config.providerTimeoutMs,
-                signal,
-              );
-              this.providerHealthy = true;
-            } catch (e) {
-              // A rejection or malformed profile response still proves the
-              // provider is reachable; only transport/timeout failures are an
-              // outage. Client cancellation leaves the previous state alone.
-              if (
-                e instanceof ApiError &&
-                (e.code === "STUDENT_NOT_ALLOWED" ||
-                  e.code === "PROFILE_MISMATCH")
-              )
-                this.providerHealthy = true;
-              else if (!signal?.aborted) this.providerHealthy = false;
-              throw e;
-            }
-            await this.capacity.require("scan");
-            signal?.throwIfAborted();
-            const s = await this.db.sequelize.transaction(
-              async (transaction) => {
-                const current = await this.db.students.findByPk(id, {
-                  transaction,
-                  lock: transaction.LOCK.UPDATE,
-                });
-                if (current?.get().version !== before?.get().version)
-                  throw new ApiError("PROFILE_VERSION_CONFLICT", 409);
-                const values = {
-                  ...profile,
-                  hashVersion: input.hashVersion,
-                  profileRefreshedAt: new Date(this.now()),
-                  version: (current?.get().version ?? 0) + 1,
-                };
-                const cached = current
-                  ? await current.update(values, { transaction })
-                  : await this.db.students.create(
-                      { id, ...values, isEnabled: null, seedDigest: null },
-                      { transaction },
-                    );
-                await this.audit(
-                  ctx,
-                  current ? "profile.refresh" : "profile.cached",
-                  Object.keys(profile),
-                  transaction,
-                  { studentId: id, scanId: input.scanId },
-                );
-                return cached.get();
-              },
-            );
+            const s = await this.refreshCache(ctx, input, id, signal);
             const active = await this.db.records.findOne({
               where: { studentId: id, endedAt: null },
             });
+            // 试验组成员且当前不在座：不分配设备，进批次收集（或并入本机窗口内的批次）。
+            if (s.experimentGroup && !active)
+              return await this.enterBatch(ctx, input, s, atMs);
             const record = active ? await this.record(active.get()) : null;
             const p = this.previews.create(ctx, {
               mode: record ? "end" : "start",
@@ -257,6 +460,171 @@ export class Service {
       input.card.uidHex = "";
       input.card.issuer = "";
     }
+  }
+  /** POST /api/v1/scan-previews/:id/join：批次窗口内继续刷卡。
+   * 每次有效刷卡都重算 studentId、重查校园资料并刷新缓存。 */
+  async batchJoin(
+    ctx: Context,
+    previewId: string,
+    input: z.infer<typeof batchJoinSchema>,
+    signal?: AbortSignal,
+  ) {
+    const atMs = this.now();
+    try {
+      if (input.hashVersion !== this.config.identity.hashVersion)
+        throw new ApiError("HASH_VERSION_UNSUPPORTED", 422);
+      let id: string;
+      try {
+        id = studentId(input.card, this.config.identity);
+      } catch {
+        throw new ApiError("CARD_FORMAT_INVALID", 422);
+      }
+      if (id !== input.studentId) throw new ApiError("CARD_ID_MISMATCH", 422);
+      if (
+        input.source === "integration" &&
+        this.config.environment === "production"
+      )
+        throw new ApiError("INPUT_INVALID", 422);
+      return await this.serial.run("batch:" + previewId, async () => {
+        if (!this.previews.entries.has(previewId))
+          throw new ApiError("BATCH_NOT_FOUND", 404);
+        const intent = this.previews.get(previewId, ctx);
+        if (intent.mode !== "batch") throw new ApiError("BATCH_NOT_FOUND", 404);
+        if (intent.state === "assigned" && intent.assignment)
+          return {
+            id: intent.id,
+            mode: "end" as const,
+            atMs: intent.assignment.atMs,
+            expiresAtMs: intent.expiresAtMs,
+            batch: this.batches.session(intent),
+            assignment: intent.assignment,
+          };
+        // 惰性过期：now ≥ closesAtMs 即视为关闭（先确认状态再判定）。
+        const expired = this.batches.expired(intent);
+        if (expired) this.batches.close(intent);
+        /*
+         * 重复卡只是“批次结束信号”：规格明确它不重新查询校园资料。
+         * 这里先按 studentId 判定，命中就直接分配并返回；只有新成员才查
+         * 校园 API，避免校园接口抖动导致“刷重复卡结束不了批次”。
+         */
+        const repeated = (intent.students ?? []).find((s) => s.id === id);
+        if (repeated && !expired && intent.state === "collecting") {
+          // 记录“这次刷卡是重复卡”，教师端据此说明批次为何结束。
+          intent.duplicates = [repeated];
+          const { assignment, session } = await this.batches.assign(
+            ctx,
+            intent,
+          );
+          return {
+            id: intent.id,
+            mode: "end" as const,
+            atMs,
+            expiresAtMs: intent.expiresAtMs,
+            student: repeated,
+            batch: { ...session, state: "assigned" as const },
+            assignment,
+          };
+        }
+        await this.capacity.require("scan");
+        signal?.throwIfAborted();
+        const s = await this.serial.run("student:" + id, () =>
+          this.refreshCache(ctx, input, id, signal),
+        );
+        // 只有“本次开始时窗口还没过”才允许继续加入；过期一律 410。
+        if (expired || intent.state !== "collecting")
+          throw new ApiError("BATCH_CLOSED", 410);
+        if (!s.experimentGroup)
+          throw new ApiError("EXPERIMENT_GROUP_DISABLED", 422);
+        const { duplicate, session } = this.batches.join(
+          intent,
+          this.student(s),
+        );
+        if (duplicate) {
+          const { assignment } = await this.batches.assign(ctx, intent);
+          return {
+            id: intent.id,
+            mode: "end" as const,
+            atMs: atMs,
+            expiresAtMs: intent.expiresAtMs,
+            batch: { ...session, state: "assigned" as const },
+            assignment,
+          };
+        }
+        return {
+          id: intent.id,
+          mode: "batch" as const,
+          atMs,
+          expiresAtMs: intent.expiresAtMs,
+          student: this.student(s),
+          batch: this.batches.session(intent),
+        };
+      });
+    } finally {
+      input.card.uidHex = "";
+      input.card.issuer = "";
+    }
+  }
+  /** 批次当前状态；过期即视为 closed（惰性判定，无后台调度）。 */
+  async batchStatus(ctx: Context, id: string): Promise<BatchSession> {
+    const intent = this.previews.get(id, ctx);
+    if (intent.mode !== "batch") throw new ApiError("BATCH_NOT_FOUND", 404);
+    // 已分配的批次保持 assigned；只有还在收集的批次会被惰性标成 closed。
+    if (this.batches.expired(intent)) this.batches.close(intent);
+    return this.batches.session(intent);
+  }
+  /** 教师结束批次并分配。close 与 confirm 等价，共用 operations.intentId
+   * 唯一约束：同一预览只能分配一次（换 requestId 也是 PREVIEW_ALREADY_USED）。 */
+  async batchAssign(
+    ctx: Context,
+    route: string,
+    id: string,
+    data: z.infer<typeof batchCloseSchema>,
+  ): Promise<ServerAssignment> {
+    if (!this.previews.entries.has(id))
+      throw new ApiError("BATCH_NOT_FOUND", 404);
+    const result = (await this.operation(
+      ctx,
+      route,
+      { requestId: data.requestId, previewId: id },
+      "modify",
+      async (tx) => {
+        const intent = this.previews.get(id, ctx);
+        if (intent.mode !== "batch")
+          throw new ApiError("PREVIEW_MODE_INVALID", 409);
+        if (intent.state === "assigned" && intent.assignment)
+          return intent.assignment;
+        /*
+         * 已过期或已被判关闭的批次不能再分配：`specification.md` 规定
+         * “结束后的批次再结束返回 BATCH_CLOSED”。以前这里会继续走 assign，
+         * 教师拿到的是 DEVICE_CAPACITY_INSUFFICIENT 之类的误导性错误。
+         */
+        if (this.batches.expired(intent)) this.batches.close(intent);
+        if (intent.state !== "collecting")
+          throw new ApiError("BATCH_CLOSED", 410);
+        const { assignment } = await this.batches.assign(
+          ctx,
+          intent,
+          tx,
+          data.requestId,
+        );
+        return assignment;
+      },
+      (value) => ({
+        requestId: data.requestId,
+        studentId: (value as ServerAssignment).assigned[0]?.studentId,
+        deviceId: (value as ServerAssignment).assigned[0]?.deviceId,
+      }),
+    )) as ServerAssignment;
+    return result;
+  }
+  /** 批次分配成功后的结果快照（供前端在 assigned 后刷新活动记录）。 */
+  async batchAssignment(ctx: Context, id: string) {
+    const intent = this.previews.get(id, ctx);
+    if (intent.mode !== "batch") throw new ApiError("BATCH_NOT_FOUND", 404);
+    return {
+      session: this.batches.session(intent),
+      assignment: intent.assignment ?? null,
+    };
   }
   async operation(
     ctx: Context,

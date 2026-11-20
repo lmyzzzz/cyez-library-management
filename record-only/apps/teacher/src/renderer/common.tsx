@@ -38,6 +38,17 @@ const messages: Record<string, string> = {
   STUDENT_NOT_ALLOWED:
     "校园资料服务未确认该学生的登记资格。请联系学校数据负责人。",
   CARD_ID_MISMATCH: "卡号与学生标识不一致，请重新刷卡。",
+  BATCH_CLOSING: "这张卡已经在本批里，正在结束批次并分配座位…",
+  BATCH_EMPTY: "本批还没有学生，无法分配座位。",
+  BATCH_TIMEOUT_CONFIRMING: "收集窗口已结束，正在分配座位…",
+  DEVICE_CAPACITY_INSUFFICIENT:
+    "空闲设备不足，请先结束一些使用中的记录再重试。",
+  SECTION1_START_INVALID: "第一组起始编号超出允许范围。",
+  SECTION1_END_INVALID: "第一组编号个数必须是 4 的倍数且在 8–96 之间。",
+  SECTION2_START_INVALID: "第二组起始编号超出允许范围。",
+  SECTION3_START_INVALID: "第三组起始编号必须是 41 + 4n。",
+  BATCH_EXPIRED: "批次已结束，请重新刷卡。",
+  BATCH_NOT_ACTIVE: "当前没有进行中的批次。",
   PROVIDER_UNAVAILABLE: "校园资料服务暂不可用。已有使用记录仍可手动结束。",
   PROVIDER_CONFIGURATION_INVALID:
     "校园数据源连接、TLS 或视图字段校验失败，原配置未变。",
@@ -125,6 +136,13 @@ const messages: Record<string, string> = {
   PERSISTENCE_BOUNDARY_VIOLATION:
     "本地数据校验失败，操作已停止，请联系维护人员。",
   INTEGRATION_DISABLED: "当前环境未启用集成测试入口。",
+  LAYOUT_VERSION_CONFLICT: "设置已被其他教师修改，请刷新后重试。",
+  LAYOUT_INVALID: "座位布局设置不符合编号规则，请检查分界点。",
+  DEVICE_GEOMETRY_INVALID: "设备编号无法按三段解析，请检查设备编号。",
+  EXPERIMENT_GROUP_DISABLED: "该学生不在相邻试验组，请先加入试验组。",
+  BATCH_FULL: "本批次人数已达上限，请先结束并分配。",
+  BATCH_CLOSED: "批次已结束，请重新刷卡。",
+  BATCH_NOT_FOUND: "批次不存在或已被撤销，请重新刷卡。",
 };
 export function errorText(error: unknown) {
   const code = error instanceof Error ? error.message : String(error);
@@ -204,6 +222,20 @@ export function Failure({
 }
 export function Empty({ text = "没有符合条件的记录" }: { text?: string }) {
   return <EmptyState icon={LibraryIcon} title={text} />;
+}
+/** 输入框内的就地校验提示：表单按钮禁用时始终有一个可见的原因。 */
+export function FieldError({
+  id,
+  children,
+}: {
+  id?: string;
+  children: ReactNode;
+}) {
+  return (
+    <p className="field-error" id={id} role="alert">
+      {children}
+    </p>
+  );
 }
 export function Pager({
   page,

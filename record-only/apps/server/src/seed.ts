@@ -71,6 +71,7 @@ export async function seedStudents(
           profileRefreshedAt: null,
           version: 1,
           seedDigest: digest,
+          experimentGroup: false,
         },
         { transaction },
       );

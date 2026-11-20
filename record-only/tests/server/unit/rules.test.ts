@@ -218,3 +218,40 @@ describe("S-U provider 边界", () => {
     expect(cancelled.uidHex).toBe("");
   });
 });
+describe("S-U 相邻布局设置与文档取舍", () => {
+  it("默认设置合法；S3 必须落在四角桌起点网格上", async () => {
+    const { DEFAULT_LAYOUT_SETTINGS, layoutSettingsSchema } =
+      await import("@record/protocol");
+    // docs §4：section1End 是区域一桌数 × 4（≥ 8），section3Start 满足
+    // (x − 41) % 4 === 0（41、45、49…），保证区域三从完整桌子的第一个角开始。
+    // 三个区域起点都可现场修改：区域一默认 1、区域二 31、区域三 41。
+    expect(DEFAULT_LAYOUT_SETTINGS).toEqual({
+      section1Start: 1,
+      section1End: 8,
+      section2Start: 31,
+      section3Start: 41,
+      allowCrossArea: true,
+      batchWindowSec: 10,
+      batchStudentLimit: 8,
+    });
+    expect(
+      layoutSettingsSchema.safeParse(DEFAULT_LAYOUT_SETTINGS).success,
+    ).toBe(true);
+    // 41、45、49… 与 41 + 4k；≤ 9960 的最大网格值是 9957。
+    for (const value of [41, 45, 49, 101, 9957])
+      expect(
+        layoutSettingsSchema.safeParse({
+          ...DEFAULT_LAYOUT_SETTINGS,
+          section3Start: value,
+        }).success,
+      ).toBe(true);
+    // 42 会让第一张桌子只剩 3 个角，与“完整桌子”矛盾。
+    for (const value of [39, 40, 42, 43, 44, 46, 47, 9962])
+      expect(
+        layoutSettingsSchema.safeParse({
+          ...DEFAULT_LAYOUT_SETTINGS,
+          section3Start: value,
+        }).success,
+      ).toBe(false);
+  });
+});

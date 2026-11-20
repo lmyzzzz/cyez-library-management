@@ -79,6 +79,34 @@ Actions 的 `windows-client-results` 继续保留测试报告；`windows-install
 
 文件式 Compose secrets 不是 Swarm secrets，只是把宿主文件绑定挂载到 `/run/secrets/<名称>`，宿主属主和权限原样保留。`secrets/` 目录必须为 `0700`，每个 secret 文件为 `0444`：这样宿主其他用户不能穿透目录，而容器内非 root UID（db 999、gateway/nginx 101、api/log-ingest/migrate 的 node 1000）可以读取。`scripts/prepare-integration.ts` 与 `scripts/prepare-provider-key.ts` 已按此创建新文件。已有 `0600` 文件的部署须由运维修正：`chmod 0700 secrets && find secrets -maxdepth 1 -type f -exec chmod 0444 {} +`；不改宿主文件属主、不把容器改为 root。文件内容本身未加密，仍须宿主访问控制；已废弃的 `secrets/provider-credential` 可直接删除。
 
+## 相邻试验组运维说明
+
+2026-11-19 新增相邻试验组与批次相邻座位分配，业务语义见 [specification](specification.md#相邻试验组与批次分配2026-11-19)，实现契约见[相邻试验组冻结稿](adjacent-layout.md)。本节只写部署、配置与升级动作。
+
+**新增环境变量**（代码默认值与 `.env` / `apps/server/src/config.ts` 一致）：
+
+| 变量                  | 默认 | 允许范围 | 含义                                                                                                               |
+| --------------------- | ---- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `BATCH_WINDOW_SEC`    | 10   | 10–600   | 批次收集窗口长度（秒）。首位试验组成员刷卡起算，每次成功加入成员不延长。默认 10 秒：多人连刷等待过久会被误判为超时 |
+| `BATCH_STUDENT_LIMIT` | 8    | 2–12     | 单批人数上限。达到上限后继续刷卡返回 `BATCH_FULL`                                                                  |
+
+两者是**新建部署的初始默认值**：教师在设置页保存过布局设置后，`settings` 表里的值优先，环境变量不再覆盖它。改 `.env` 后执行 `docker compose --env-file .env up -d --force-recreate api` 生效；`migrate`/`log-ingest` 不继承这两个变量，与上节的既有约定一致。超出范围的值在启动时被 config schema 拒绝，API 不会带错误区间运行。
+
+**布局设置在教师端配置**：设置 →“座位布局”（分区为编号几何与批次两组）填写区域一分界 `S1`、区域三起点 `S3`、是否允许跨区域、批次窗口与单批上限，页面提供实时分界预览与关系标注。设置经 `PUT /api/v1/layout` 完整覆盖写入，存于 PostgreSQL `settings` 表、键 `layout`，值为 `{ settings, version }` 的 JSON；读取为 `GET /api/v1/layout`。写入必须带 `expectedVersion`，版本不符返回 `LAYOUT_VERSION_CONFLICT`（409），须重新读取后再保存。设置的校验规则与默认值见冻结稿 §4；不合法值由 schema 拒绝并返回 `INPUT_INVALID`（422），版本不符返回 `LAYOUT_VERSION_CONFLICT`（409），两者都不会落库。运行账号对 `settings` 行的 upsert 权限由 005 角色迁移补齐，缺权限时保存会失败，须重跑 migrate 作业而不是手工 GRANT。
+
+**试验组成员标记**：在设置 →“相邻试验组”里按 64 位学生 ID 搜索或加入、移出成员，标记存在 `students.experiment_group`（布尔列，默认 `false`）。它是本地业务标记，**校园资料刷新不会覆盖它**：刷卡时 provider 只会更新姓名/班级/校内学号等白名单字段与 `version`，与试验组标记无关；移出成员不删除学生缓存，也不影响其历史记录。本版没有批量导入试验组的接口，也没有学生客户端，座位结果由教师引导/屏幕展示。
+
+**升级步骤（新增迁移 005）**：
+
+```bash
+# 1. 先在临时数据副本上验证，再动生产
+docker compose --env-file .env pull
+docker compose --env-file .env run --rm --no-deps migrate node apps/server/dist/cli.js migrate
+docker compose --env-file .env up -d --no-build --force-recreate api
+```
+
+沿用既有 `migrate` 编排，不要手工执行 SQL，也不要 `down -v`。005 由两部分组成：`005-experiment-group` 之类的 schema 迁移（`students.experiment_group` 列、`settings` 表布局行所需结构）走既有的 QueryInterface/Umzug 路径；`005-experiment-settings` 属于运营角色迁移，只在设置 `RUNTIME_DATABASE_URL_FILE` 时执行，为运行账号补 `settings` 的 INSERT/UPDATE 与 `students.experiment_group` 的 UPDATE 权限。Compose 已注入该 secret；在 Compose 外直接跑 CLI 时必须显式提供，否则 api 会在保存布局或标记试验组成员时报权限错误。迁移失败的批次不产生业务数据，重启 api 后批次状态按内存语义失效，教师重新刷卡即可。旧库升级前已存在的学生一律 `experiment_group = false`，单人流程不受影响。
+
 `api` 由 Compose 转发以下可调参数，默认值与 `apps/server/src/config.ts` 一致，可在宿主 `.env` 覆盖：`PREVIEW_TTL_MS=120000`、`PREVIEW_LIMIT=10000`、`BATCH_LIMIT=500`、`SESSION_TTL_MS=3600000`、`PROVIDER_TIMEOUT_MS=5000`、`CAPACITY_OLDEST_WARN_MS=3600000`。改值后 `docker compose up -d --force-recreate api` 生效。`migrate`/`log-ingest` 不继承这些可调值，避免把业务/预览配置扩到日志归集进程。
 
 生产环境不运行学生 seed。`seed` CLI 在生产配置下直接拒绝；学生缓存由每次成功的校园 API 查询新增或覆盖。`migrate` 作业包含 `002-student-cache` 和 `002-student-cache-insert`，并首次写入固定盐等身份配置的指纹；API 要求该指纹存在且匹配，防止在不再运行 seed 后意外更改身份参数。升级既有库时保留旧学生资料和历史，只放宽旧预置列并赋予运行账号学生插入权限。真实 API 对“不存在/无资格”和故障的响应映射须在 TBD-02 输入后完成。

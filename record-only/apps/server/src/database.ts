@@ -19,6 +19,8 @@ export interface StudentRow extends Profile {
   profileRefreshedAt: Date | null;
   version: number;
   seedDigest: string | null;
+  /** 相邻试验组成员标记；只有教师显式设置时才为 true。 */
+  experimentGroup: boolean;
 }
 export interface DeviceRow {
   id: string;
@@ -106,6 +108,17 @@ const fk = (model: string, type = D.UUID) => ({
   onDelete: "RESTRICT",
   onUpdate: "RESTRICT",
 });
+const omit = <T extends object>(value: T, keys: string[]): Partial<T> => {
+  const copy = { ...value } as Record<string, unknown>;
+  for (const key of keys) delete copy[key];
+  return copy as Partial<T>;
+};
+/** Schema migrations the process needs before it may serve traffic. `ready()`
+ * accepts this migration or any later one, so adding 005+ never breaks it while
+ * an un-migrated database still reports SCHEMA_NOT_READY. */
+const REQUIRED_MIGRATION = "004-builtin-addons";
+const LATEST_MIGRATION = "005-experiment-group";
+const migrationNumber = (name: string) => Number(name.slice(0, 3)) || 0;
 function definitions() {
   return {
     students: {
@@ -118,6 +131,11 @@ function definitions() {
       profileRefreshedAt: date(true),
       version: integer(),
       seedDigest: str(64, true),
+      experimentGroup: {
+        type: D.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     devices: {
       id: pk(),
@@ -244,7 +262,8 @@ export class Database {
                 const initialAttributes =
                   name === "students"
                     ? {
-                        ...attributes,
+                        // 005 adds experimentGroup; keep this migration historic.
+                        ...omit(attributes, ["experimentGroup"]),
                         isEnabled: { type: D.BOOLEAN, allowNull: false },
                         seedDigest: str(64),
                       }
@@ -348,6 +367,22 @@ export class Database {
             });
           },
         },
+        {
+          name: LATEST_MIGRATION,
+          up: async () => {
+            await this.sequelize.transaction(async (transaction) => {
+              // QueryInterface only; existing rows take the default false.
+              await this.sequelize
+                .getQueryInterface()
+                .addColumn(
+                  "students",
+                  "experimentGroup",
+                  { type: D.BOOLEAN, allowNull: false, defaultValue: false },
+                  { transaction },
+                );
+            });
+          },
+        },
       ],
     });
   }
@@ -369,8 +404,19 @@ export class Database {
         { name: { type: D.STRING, primaryKey: true } },
         { tableName: "SequelizeMeta", timestamps: false },
       );
-    const completed = await metadata.findAll();
-    if (!completed.some((row) => row.get("name") === "004-builtin-addons"))
+    const completed = (await metadata.findAll()).map((row) =>
+      String(row.get("name")),
+    );
+    // 004 or any later migration counts as ready: acceptance is by migration
+    // number, so adding 005+ never breaks this check while a database stopped
+    // at 003 (or older) still reports SCHEMA_NOT_READY.
+    const required = migrationNumber(REQUIRED_MIGRATION);
+    if (
+      !completed.some(
+        (name) =>
+          migrationNumber(name) >= required && name >= REQUIRED_MIGRATION,
+      )
+    )
       throw new Error("SCHEMA_NOT_READY");
   }
   async close() {

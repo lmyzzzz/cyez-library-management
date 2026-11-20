@@ -20,6 +20,8 @@ export function testConfig(databaseUrl: string, spoolDir: string): Config {
     previewTtlMs: 120000,
     previewLimit: 10000,
     batchLimit: 2,
+    batchWindowSec: 10,
+    batchStudentLimit: 8,
     sessionTtlMs: 3600000,
     spoolDir,
     capacity: {

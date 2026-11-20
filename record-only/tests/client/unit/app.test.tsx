@@ -8,7 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import type { DeviceDTO, ScanPreview } from "@record/protocol";
+import type { DeviceDTO, LayoutDTO, ScanPreview } from "@record/protocol";
 import type {
   TeacherEvent,
   LocalStatus,
@@ -97,12 +97,28 @@ let listener: ((event: TeacherEvent) => void) | undefined;
 let local = { ...status };
 let devices = [device, free];
 let tags = [{ id: "tag-1", name: "阅览区", version: 1 }];
+let experimentStudents: (typeof student)[] = [];
+let layout: LayoutDTO;
 beforeEach(() => {
   call.mockReset();
   listener = undefined;
   local = { ...status };
   devices = [device, free];
   tags = [{ id: "tag-1", name: "阅览区", version: 1 }];
+  experimentStudents = [];
+  // 新口径默认值：S1 = 8、S2 = 31、S3 = 41（三个区域各自独立起点）。
+  layout = {
+    settings: {
+      section1Start: 1,
+      section1End: 8,
+      section2Start: 31,
+      section3Start: 41,
+      allowCrossArea: true,
+      batchWindowSec: 10,
+      batchStudentLimit: 8,
+    },
+    version: 3,
+  };
   call.mockImplementation(async (action, input) => {
     if (action === "status") return local;
     if (action === "devices")
@@ -147,6 +163,32 @@ beforeEach(() => {
       };
     if (action === "history")
       return { items: [], total: 0, page: 1, pageSize: 30 };
+    if (action === "experimentStudents")
+      return {
+        items: experimentStudents,
+        total: experimentStudents.length,
+        page: 1,
+        pageSize: 20,
+      };
+    if (action === "layout") return structuredClone(layout);
+    if (action === "saveLayout")
+      return {
+        settings: (() => {
+          const { expectedVersion: _v, ...rest } = input as {
+            expectedVersion: number;
+          };
+          return rest;
+        })(),
+        version: layout.version + 1,
+      };
+    if (action === "setExperiment") {
+      const target = (input as { studentId: string; enabled: boolean })
+        .studentId;
+      experimentStudents = (input as { enabled: boolean }).enabled
+        ? [...experimentStudents, { ...student, id: target }]
+        : experimentStudents.filter((s) => s.id !== target);
+      return {};
+    }
     return {};
   });
   Object.defineProperty(window, "library", {
@@ -813,5 +855,147 @@ describe("C-U-01/05 主页面门控和状态", () => {
     fireEvent.click(screen.getByRole("button", { name: "未授权测试卡" }));
     for (const fixture of ["allowed-1", "allowed-2", "unknown"])
       expect(call).toHaveBeenCalledWith("integrationScan", { fixture });
+  });
+});
+
+describe("相邻试验组与座位布局设置", () => {
+  it("设置页可打开相邻试验组与座位布局两个页签", async () => {
+    experimentStudents = [student];
+    show("/settings");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "设备管理" })).toBeTruthy(),
+    );
+    expect(screen.getByRole("button", { name: "相邻试验组" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "座位布局" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "相邻试验组" }));
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "experimentStudents",
+        expect.objectContaining({ page: 1, pageSize: 20 }),
+      ),
+    );
+    expect(await screen.findByText("测试学生")).toBeTruthy();
+    expect(screen.getByText(/本组成员刷卡后进入批次收集/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "座位布局" }));
+    await waitFor(() => expect(call).toHaveBeenCalledWith("layout", {}));
+    const s1 = await screen.findByLabelText<HTMLInputElement>("第一组编号个数");
+    expect(s1.value).toBe("8");
+    expect(
+      screen.getByLabelText<HTMLInputElement>("第三组起始编号").value,
+    ).toBe("41");
+    expect(
+      screen.getByLabelText<HTMLInputElement>("批次窗口（秒）").value,
+    ).toBe("10");
+    expect(screen.getByLabelText<HTMLInputElement>("单批人数上限").value).toBe(
+      "8",
+    );
+    // 相邻关系预览用 protocol 纯函数算出的等级，至少覆盖“并排”与“看不见屏幕”两端。
+    for (const label of ["完全相邻", "勉强相邻"])
+      expect(
+        screen.getAllByText(new RegExp(`^${label}`), { selector: "span" })
+          .length,
+      ).toBeGreaterThan(0);
+  });
+
+  it("座位布局第一组编号个数不是 4 的倍数时禁用保存并就地提示", async () => {
+    show("/settings");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "座位布局" })).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "座位布局" }));
+    const s1 = await screen.findByLabelText<HTMLInputElement>("第一组编号个数");
+    const save = screen.getByRole("button", { name: "保存" });
+    // 读取完成前不允许写入；读取后按钮只受校验结果约束。
+    await waitFor(() =>
+      expect(call.mock.calls.filter(([a]) => a === "layout")).toHaveLength(1),
+    );
+    await waitFor(() => expect(save.hasAttribute("disabled")).toBe(false));
+    fireEvent.change(s1, { target: { value: "6" } });
+    expect(save.hasAttribute("disabled")).toBe(true);
+    expect(screen.getByText(/需为 4 的倍数，8–96/)).toBeTruthy();
+    expect(s1.getAttribute("aria-invalid")).toBe("true");
+    // 8 是最小合法值（至少两张桌子），回到合法后按钮恢复可用。
+    fireEvent.change(s1, { target: { value: "8" } });
+    expect(save.hasAttribute("disabled")).toBe(false);
+    expect(screen.queryByText(/需为 4 的倍数，8–96/)).toBeNull();
+    fireEvent.change(s1, { target: { value: "12" } });
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "saveLayout",
+        expect.objectContaining({ expectedVersion: 3, section1End: 12 }),
+      ),
+    );
+  });
+
+  it("座位布局第三段起点必须是 41 + 4n：42 禁用、45 允许", async () => {
+    show("/settings");
+    fireEvent.click(screen.getByRole("button", { name: "座位布局" }));
+    const s3 = await screen.findByLabelText<HTMLInputElement>("第三组起始编号");
+    const save = screen.getByRole("button", { name: "保存" });
+    await waitFor(() => expect(save.hasAttribute("disabled")).toBe(false));
+    expect(s3.value).toBe("41");
+    fireEvent.change(s3, { target: { value: "42" } });
+    expect(save.hasAttribute("disabled")).toBe(true);
+    expect(s3.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByText(/需为 41 \+ 4n/)).toBeTruthy();
+    fireEvent.change(s3, { target: { value: "45" } });
+    expect(save.hasAttribute("disabled")).toBe(false);
+    expect(s3.getAttribute("aria-invalid")).toBe("false");
+    expect(screen.queryByText(/需为 41 \+ 4n/)).toBeNull();
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith(
+        "saveLayout",
+        expect.objectContaining({ expectedVersion: 3, section3Start: 45 }),
+      ),
+    );
+  });
+
+  it("座位布局提示保存版本冲突时要求刷新", async () => {
+    const original = call.getMockImplementation()!;
+    call.mockImplementation((action, input) => {
+      if (action === "saveLayout")
+        return Promise.reject(new Error("LAYOUT_VERSION_CONFLICT"));
+      // 冲突后组件会重新读取布局；让这次读取带上其他教师的改动。
+      if (action === "layout")
+        return Promise.resolve({
+          settings: { ...layout.settings, batchWindowSec: 90 },
+          version: 4,
+        });
+      return original(action, input);
+    });
+    show("/settings");
+    fireEvent.click(screen.getByRole("button", { name: "座位布局" }));
+    const save = await screen.findByRole("button", { name: "保存" });
+    await waitFor(() => expect(save.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(save);
+    // 失败反馈是页面内错误横幅，不是一次性 toast。
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toContain(
+        "设置已被其他教师修改，请刷新后重试",
+      ),
+    );
+  });
+
+  it("相邻试验组无成员时显示空态并可加入成员", async () => {
+    show("/settings");
+    fireEvent.click(screen.getByRole("button", { name: "相邻试验组" }));
+    expect(await screen.findByText(/相邻试验组还没有成员/)).toBeTruthy();
+    const add = screen.getByRole("button", { name: "加入" });
+    expect(add.hasAttribute("disabled")).toBe(true);
+    const input = screen.getByLabelText<HTMLInputElement>("学生 ID");
+    fireEvent.change(input, { target: { value: "not-a-hash" } });
+    expect(screen.getByText(/64 位小写十六进制/)).toBeTruthy();
+    fireEvent.change(input, { target: { value: "b".repeat(64) } });
+    expect(add.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(add);
+    await waitFor(() =>
+      expect(call).toHaveBeenCalledWith("setExperiment", {
+        studentId: "b".repeat(64),
+        enabled: true,
+      }),
+    );
+    expect(await screen.findByText("测试学生")).toBeTruthy();
   });
 });
