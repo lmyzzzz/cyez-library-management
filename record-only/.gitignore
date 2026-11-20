@@ -15,3 +15,7 @@ runtime/
 *.log
 *.sqlite*
 secrets/
+
+# 手工 UI 截图预览产物与一次性演示脚本的临时输出
+docs/ui-preview/
+scripts/demo/
