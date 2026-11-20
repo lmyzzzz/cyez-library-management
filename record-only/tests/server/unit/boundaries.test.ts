@@ -21,7 +21,13 @@ import { FileCollector } from "../../../apps/server/src/file-collector.js";
 import { cardMatches } from "../../../apps/server/src/provider-sqlserver.js";
 import { errorResponse } from "../../../apps/server/src/app.js";
 import { Service } from "../../../apps/server/src/service.js";
-import { ApiError } from "@record/protocol";
+import {
+  ADJACENCY_GRADES,
+  ApiError,
+  DEFAULT_LAYOUT_SETTINGS,
+  adjacencyGradeSchema,
+  layoutSettingsSchema,
+} from "@record/protocol";
 import { studentId } from "@record/protocol/identity";
 import type { Database } from "../../../apps/server/src/database.js";
 import { testConfig, identity } from "../../helpers/config.js";
@@ -526,5 +532,110 @@ describe("通用操作审计与 provider 健康", () => {
       code: "PROVIDER_UNAVAILABLE",
     });
     expect(serviceUnderTest.providerHealthy).toBe(false);
+  });
+});
+
+describe("相邻试验组：布局设置 schema 边界", () => {
+  // 纯 protocol 校验：不连数据库、不依赖 domain 算法，判断只看 safeParse().success，
+  // 不断言任何具体错误文案。
+  const valid = {
+    section1Start: 1,
+    section1End: 8,
+    section2Start: 31,
+    section3Start: 41,
+    allowCrossArea: true,
+    batchWindowSec: 10,
+    batchStudentLimit: 8,
+  };
+  // 同一份底盘，逐项替换某个字段；section3Start 保持 41 这个合法值，
+  // 使每次 safeParse 的成败只由被测字段决定。
+  const cases = (patch: Record<string, unknown>) =>
+    layoutSettingsSchema.safeParse({ ...valid, ...patch });
+  it("默认值常量与冻结稿的分界点、批次默认值一致", () => {
+    expect(DEFAULT_LAYOUT_SETTINGS).toEqual(valid);
+  });
+  it("冻结稿 §4 的默认分界点 S3=41 被 schema 接受", () => {
+    // S3 必须落在四角桌起点网格 (x − 41) % 4 === 0 上，41 是网格起点。
+    expect(cases({ section3Start: 41 }).success).toBe(true);
+    expect(cases({ section3Start: 45 }).success).toBe(true);
+  });
+  it("非法分界点、窗口与人数上限被拒绝", () => {
+    // 6 不是 4 的倍数；40 不是偶数且低于 41 下限；9 秒短于 10 秒下限。
+    expect(cases({ section1End: 6 }).success).toBe(false);
+    expect(cases({ section3Start: 40 }).success).toBe(false);
+    expect(cases({ batchWindowSec: 9 }).success).toBe(false);
+    expect(cases({ batchStudentLimit: 1 }).success).toBe(false);
+  });
+  it("合法边界值被接受", () => {
+    for (const patch of [
+      { section1End: 8 },
+      // 42 曾是“偶数即可”下的合法值，但区域三必须从完整桌子的第一个角开始，
+      // 42 会让第一张桌只剩 42/43/44 三个角；网格改为 (x − 41) % 4 === 0 后
+      // 最近的合法邻值是 45，因此这里用 45 覆盖“非默认合法值”这一维度。
+      { section3Start: 45 },
+      { batchWindowSec: 600 },
+      { batchStudentLimit: 12 },
+      { section1Start: 11 },
+      { section2Start: 51 },
+    ])
+      expect(cases(patch).success).toBe(true);
+    // 42 现为非法值，单独固定，防止回退到旧规则。
+    expect(cases({ section3Start: 42 }).success).toBe(false);
+  });
+  it("非整数、超出区间、类型不符与未知字段被拒绝", () => {
+    for (const patch of [
+      { section1End: 6.5 },
+      { section1End: 2 },
+      { section1End: 4 },
+      { section1End: 100 },
+      { section3Start: 9962 },
+      { section3Start: 43 },
+      { batchWindowSec: 601 },
+      { batchWindowSec: 10.5 },
+      { batchStudentLimit: 13 },
+      { batchStudentLimit: 2.5 },
+      { section1Start: 0 },
+      { section1Start: 1001 },
+      { section2Start: 1 },
+      { section2Start: 1001 },
+      { allowCrossArea: "true" },
+      { uid: "00000001" },
+    ])
+      expect(cases(patch).success).toBe(false);
+  });
+});
+describe("相邻试验组：错误码与等级常量", () => {
+  it("等级数组顺序即优先序，枚举只接受六个固定值", () => {
+    // docs/adjacent-layout.md §1.2/§2 最终版：degraded（面对面/斜对角/绕到对面，
+    // 都看不见对方屏幕）落在 fair 与 clustered 之间。
+    expect(ADJACENCY_GRADES).toEqual([
+      "excellent",
+      "good",
+      "fair",
+      "degraded",
+      "clustered",
+      "scattered",
+    ]);
+    for (const grade of ADJACENCY_GRADES)
+      expect(adjacencyGradeSchema.safeParse(grade).success).toBe(true);
+    for (const value of ["best", "Excellent", ""])
+      expect(adjacencyGradeSchema.safeParse(value).success).toBe(false);
+  });
+  it("新增错误码原样透出 HTTP 映射，不夹带卡号字段", () => {
+    for (const [code, status] of [
+      ["DEVICE_CAPACITY_INSUFFICIENT", 409],
+      ["EXPERIMENT_GROUP_DISABLED", 422],
+      ["BATCH_FULL", 409],
+      ["BATCH_CLOSED", 409],
+      ["BATCH_NOT_FOUND", 404],
+      ["LAYOUT_VERSION_CONFLICT", 409],
+      ["DEVICE_GEOMETRY_INVALID", 422],
+    ] as const) {
+      const error = new ApiError(code, status);
+      expect(error.code).toBe(code);
+      expect(error.status).toBe(status);
+      expect(errorResponse(error)).toEqual({ status, code });
+      expect(JSON.stringify(errorResponse(error))).not.toContain("uidHex");
+    }
   });
 });
