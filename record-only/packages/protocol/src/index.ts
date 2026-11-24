@@ -160,7 +160,11 @@ export const disableDeviceSchema = z
     isDisabled: z.boolean(),
   })
   .strict();
-export const addonIdSchema = z.enum(["end-grade-1-2", "end-grade-3"]);
+export const addonIdSchema = z.enum([
+  "end-grade-1-2",
+  "end-grade-3",
+  "end-all-evening",
+]);
 export type AddonId = z.infer<typeof addonIdSchema>;
 export const configureAddonSchema = z
   .object({
@@ -175,6 +179,8 @@ export interface AddonDTO {
   name: string;
   cron: string;
   timezone: string;
+  /** Absent on servers before 0.1.10, which only have grade-based tasks. */
+  scope?: "all" | "grades";
   enabled: boolean;
   version: number;
   lastRun: { atMs: number; trigger: "cron" | "manual"; count: number } | null;

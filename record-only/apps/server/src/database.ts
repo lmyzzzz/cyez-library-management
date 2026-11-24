@@ -11,7 +11,6 @@ import { ApiError, type Profile, type AppLog } from "@record/protocol";
 import type { IdentityConfig } from "@record/protocol/identity";
 import { payloadDigest } from "@record/domain";
 import { defineAddons, addonAttributes } from "./addons/model.js";
-import { builtins } from "./addons/catalog.js";
 export interface StudentRow extends Profile {
   id: string;
   hashVersion: string;
@@ -335,14 +334,32 @@ export class Database {
                   transaction,
                 });
               await this.addons.bulkCreate(
-                builtins.map((addon) => ({
-                  id: addon.id,
+                (["end-grade-1-2", "end-grade-3"] as const).map((id) => ({
+                  id,
                   enabled: false,
                   version: 1,
                   enabledAt: null,
                   lastSlot: null,
                   lastRun: null,
                 })),
+                { transaction },
+              );
+            });
+          },
+        },
+        {
+          name: "005-evening-addon",
+          up: async () => {
+            await this.sequelize.transaction(async (transaction) => {
+              await this.addons.create(
+                {
+                  id: "end-all-evening",
+                  enabled: false,
+                  version: 1,
+                  enabledAt: null,
+                  lastSlot: null,
+                  lastRun: null,
+                },
                 { transaction },
               );
             });
@@ -370,7 +387,7 @@ export class Database {
         { tableName: "SequelizeMeta", timestamps: false },
       );
     const completed = await metadata.findAll();
-    if (!completed.some((row) => row.get("name") === "004-builtin-addons"))
+    if (!completed.some((row) => row.get("name") === "005-evening-addon"))
       throw new Error("SCHEMA_NOT_READY");
   }
   async close() {

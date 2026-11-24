@@ -105,7 +105,7 @@ export function AddonSettings({
     <Card>
       <h2>内置加载项</h2>
       <p className="muted">
-        由服务器独立执行，教师端关闭后仍有效。按北京时间运行，默认禁用。仅结束符合年级的活动记录，保留历史和备注。
+        由服务器独立执行，教师端关闭后仍有效。按北京时间运行，默认禁用。按各加载项范围结束活动记录，保留历史和备注。
       </p>
       {!confirm && (
         <Failure
@@ -133,6 +133,11 @@ export function AddonSettings({
               </h3>
               <p>
                 每天 {cronClock(addon.cron)}（{addon.timezone}）
+              </p>
+              <p>
+                {addon.scope === "all"
+                  ? "范围：全部正在使用的记录，不限班级和年级。"
+                  : "范围：名称中指定年级的正在使用记录。"}
               </p>
               <small>
                 {addon.lastRun
@@ -164,7 +169,7 @@ export function AddonSettings({
         ))
       )}
       <p className="muted">
-        重启或恢复后只补执行当天已启用的到期任务；不影响计划时间后新登记的记录。无法识别或有冲突的年级不会结束。
+        重启或恢复后只补执行当天已启用的到期任务；不影响计划时间后新登记的记录。按年级执行的任务会跳过无法识别或有冲突的年级；全部结束任务不受此限制。
       </p>
       {confirm && (
         <Dialog
@@ -175,7 +180,9 @@ export function AddonSettings({
         >
           <p>
             {confirm.name}
-            ：立即结束当前符合年级的使用记录，历史保留，结束后不可撤销。
+            {confirm.scope === "all"
+              ? "：立即结束全部正在使用的记录，不限班级和年级。历史和备注保留，结束后不可撤销。"
+              : "：立即结束当前符合年级的使用记录，历史保留，结束后不可撤销。"}
           </p>
           <Failure error={error} />
           <div className="form-actions">

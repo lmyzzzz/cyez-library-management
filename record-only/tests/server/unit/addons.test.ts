@@ -37,4 +37,13 @@ describe("内置加载项年级与北京时间 cron", () => {
       latestSlot(builtins[1], Date.parse("2026-11-16T13:30:00+08:00")),
     ).toBe(Date.parse("2026-11-16T13:30:00+08:00"));
   });
+  it("晚间任务在北京时间 18:15 到期，前一秒尚未到期", () => {
+    const addon = builtins.find((item) => item.id === "end-all-evening")!;
+    expect(latestSlot(addon, Date.parse("2026-11-24T18:14:59+08:00"))).toBe(
+      Date.parse("2026-11-23T18:15:00+08:00"),
+    );
+    expect(latestSlot(addon, Date.parse("2026-11-24T18:15:00+08:00"))).toBe(
+      Date.parse("2026-11-24T18:15:00+08:00"),
+    );
+  });
 });

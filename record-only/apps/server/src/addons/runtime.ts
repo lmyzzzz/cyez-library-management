@@ -3,7 +3,7 @@ import { ApiError, type AddonId, type AddonDTO } from "@record/protocol";
 import type { Context } from "../previews.js";
 import type { Service } from "../service.js";
 import { builtins, latestSlot, SCHEDULER_CLIENT_ID } from "./catalog.js";
-import { endGradeRecords } from "./executors.js";
+import { endRecords } from "./executors.js";
 
 const schedulerContext: Context = {
   clientId: SCHEDULER_CLIENT_ID,
@@ -36,6 +36,8 @@ export class AddonRuntime {
           id: definition.id,
           name: definition.name,
           ...definition.trigger,
+          scope:
+            definition.executor.kind === "end-all-records" ? "all" : "grades",
           enabled: state.enabled,
           version: state.version,
           lastRun: state.lastRun,
@@ -97,11 +99,11 @@ export class AddonRuntime {
             slot <= (row.get().lastSlot?.getTime() ?? 0))
         )
           return { count: 0, skipped: true };
-        const result = await endGradeRecords(
+        const result = await endRecords(
           this.service,
           ctx,
           tx,
-          definition.executor.grades,
+          definition.executor,
           cutoff,
           requestId,
         );

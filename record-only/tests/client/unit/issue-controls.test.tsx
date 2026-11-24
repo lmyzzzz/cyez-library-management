@@ -181,6 +181,56 @@ it("未登录只显示提示；登录后立即读取并按 10 秒轮询加载项
   }
 });
 
+it("18:15 全部结束展示真实范围，启用与确认执行传递新任务 ID", async () => {
+  let state: AddonDTO = {
+    ...addon,
+    id: "end-all-evening",
+    name: "每日晚间全部结束",
+    cron: "15 18 * * *",
+    scope: "all",
+  };
+  call.mockImplementation(async (action) => {
+    if (action === "addons") return { items: [state] };
+    if (action === "configureAddon") {
+      state = { ...state, enabled: true, version: 2 };
+      return state;
+    }
+    if (action === "runAddon") return { count: 4 };
+    throw Error("Unexpected action");
+  });
+  render(<AddonSettings authenticated canWrite />);
+  expect(await screen.findByText(/每天 18:15（Asia\/Shanghai）/)).toBeTruthy();
+  expect(
+    screen.getByText("范围：全部正在使用的记录，不限班级和年级。"),
+  ).toBeTruthy();
+  fireEvent.click(
+    screen.getByRole("switch", { name: "启用 每日晚间全部结束" }),
+  );
+  await waitFor(() =>
+    expect(call).toHaveBeenCalledWith("configureAddon", {
+      addonId: "end-all-evening",
+      expectedVersion: 1,
+      enabled: true,
+    }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "立即执行" })
+        .disabled,
+    ).toBe(false),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "立即执行" }));
+  expect(
+    screen.getByText(/立即结束全部正在使用的记录，不限班级和年级/),
+  ).toBeTruthy();
+  expect(
+    call.mock.calls.filter(([action]) => action === "runAddon"),
+  ).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "确认执行" }));
+  expect(await screen.findByText("已结束 4 条使用记录。")).toBeTruthy();
+  expect(call).toHaveBeenCalledWith("runAddon", { addonId: "end-all-evening" });
+});
+
 it("加载项切换失败保留原状态；立即执行失败保留确认弹窗", async () => {
   const state: AddonDTO = { ...addon, enabled: true };
   call.mockImplementation(async (action) => {

@@ -7,7 +7,9 @@ export interface BuiltinAddon {
   id: AddonId;
   name: string;
   trigger: { cron: string; timezone: string };
-  executor: { kind: "end-grade-records"; grades: readonly number[] };
+  executor:
+    | { kind: "end-grade-records"; grades: readonly number[] }
+    | { kind: "end-all-records" };
 }
 export const builtins: readonly BuiltinAddon[] = [
   {
@@ -21,6 +23,12 @@ export const builtins: readonly BuiltinAddon[] = [
     name: "高三午间结束",
     trigger: { cron: "30 13 * * *", timezone: "Asia/Shanghai" },
     executor: { kind: "end-grade-records", grades: [3] },
+  },
+  {
+    id: "end-all-evening",
+    name: "每日晚间全部结束",
+    trigger: { cron: "15 18 * * *", timezone: "Asia/Shanghai" },
+    executor: { kind: "end-all-records" },
   },
 ];
 /** NFKC normalizes Ⅰ/Ⅱ/Ⅲ; Roman markers must be complete tokens. */

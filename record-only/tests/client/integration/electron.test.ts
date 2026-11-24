@@ -544,6 +544,42 @@ test("C-I-15: 自动模式单次刷卡立即登记和结束，无倒计时", asy
     .toBe("manual");
 });
 
+test("C-I-17: 晚间全部结束加载项经真实 IPC/HTTPS 启用、确认执行和禁用", async () => {
+  await login();
+  await page.getByRole("link", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "加载项", exact: true }).click();
+  const addon = page
+    .locator(".addon-row")
+    .filter({ hasText: "每日晚间全部结束" });
+  await expect(addon).toContainText("18:15");
+  await expect(addon).toContainText("不限班级和年级");
+  await expect(addon.getByRole("switch")).not.toBeChecked();
+  await addon.getByRole("switch").click();
+  await expect(addon.getByRole("switch")).toBeChecked();
+  expect((await api.db.addons.findByPk("end-all-evening"))!.get().enabled).toBe(
+    true,
+  );
+  await addon.getByRole("button", { name: "立即执行", exact: true }).click();
+  await expect(
+    page.getByText(/立即结束全部正在使用的记录，不限班级和年级/),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "确认执行", exact: true }).click();
+  await expect(page.getByText(/已结束 \d+ 条使用记录/)).toBeVisible();
+  expect(
+    (await api.db.addons.findByPk("end-all-evening"))!.get().lastRun?.trigger,
+  ).toBe("manual");
+  await page.screenshot({
+    path: "test-results/electron/evening-addon.png",
+    fullPage: true,
+  });
+  await addon.getByRole("switch").click();
+  await expect(addon.getByRole("switch")).not.toBeChecked();
+  expect((await api.db.addons.findByPk("end-all-evening"))!.get().enabled).toBe(
+    false,
+  );
+  await page.getByRole("link", { name: "使用登记", exact: true }).click();
+});
+
 test("C-I-10/04/05: OS 加密保存与真实 SQLite 跨重启，origin 隔离", async () => {
   await login();
   await desktop.close();

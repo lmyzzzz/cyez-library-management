@@ -234,6 +234,7 @@ describe("全链路：网关 TLS、路由白名单与部署隔离", () => {
             "002-student-cache",
             "003-provider-config",
             "004-builtin-addons",
+            "005-evening-addon",
           ]),
         );
         expect(snapshot.roles).toEqual([

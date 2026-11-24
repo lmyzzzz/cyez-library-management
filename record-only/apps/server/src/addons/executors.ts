@@ -1,15 +1,15 @@
 import { Op, type Transaction } from "sequelize";
 import type { Service } from "../service.js";
 import type { Context } from "../previews.js";
-import { classGrade } from "./catalog.js";
+import { classGrade, type BuiltinAddon } from "./catalog.js";
 
 /** Snapshot active candidates at the trigger cutoff; lock in the existing
  * device/student/record order, recheck under locks, and reuse normal ending. */
-export async function endGradeRecords(
+export async function endRecords(
   service: Service,
   ctx: Context,
   tx: Transaction,
-  grades: readonly number[],
+  executor: BuiltinAddon["executor"],
   cutoff: number,
   requestId: string,
 ) {
@@ -34,7 +34,10 @@ export async function endGradeRecords(
     const row = await db.records.findByPk(initial.id, { transaction: tx });
     if (!row || row.get().endedAt) continue; // Concurrent manual end already won.
     const record = await service.record(row.get(), tx);
-    if (grades.includes(classGrade(record.student.className) ?? 0))
+    if (
+      executor.kind === "end-all-records" ||
+      executor.grades.includes(classGrade(record.student.className) ?? 0)
+    )
       records.push(record);
   }
   await service.finish(

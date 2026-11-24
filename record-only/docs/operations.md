@@ -89,6 +89,24 @@ Actions 的 `windows-client-results` 继续保留测试报告；`windows-install
 
 ## 升级与故障
 
+### 0.1.10 晚间全部结束任务
+
+**服务端与教师端都要升级，只换教师端安装包不够。** 调度器与使用记录在服务端，新增 `005-evening-addon` 数据迁移；新教师端允许操作该任务 ID 并准确显示“全部”范围。推荐先升级服务端，再安装 [0.1.10 教师端](https://github.com/lmyzzzz/cyez-library-management/releases/tag/v0.1.10)。服务端升级无需重建数据卷，不需要重新录入校园 SQL 配置。
+
+使用本仓库 Compose/GHCR 的既有部署，在部署目录保留 `.env`、secrets、`DATA_PREFIX` 和卷；将 `.env` 的 `API_IMAGE` 设为 `ghcr.io/lmyzzzz/cyez-record-only-api`，`RELEASE_TAG` 更新为 0.1.10 Release 的 `release-manifest.json` 中 `commit` 对应的 `sha-<完整提交号>`，然后执行（迁移失败时先排查，不启动新版 API）：
+
+```bash
+docker compose --env-file .env pull api migrate log-ingest
+docker compose --env-file .env stop api log-ingest
+docker compose --env-file .env run --rm --no-deps migrate
+# 上一步输出 MIGRATIONS_COMPLETE 并成功退出后才继续
+docker compose --env-file .env up -d --no-deps --no-build api log-ingest
+```
+
+以上命令只升级 API 同镜像的三个服务；已有 db/gateway 继续运行。源码本地构建部署则用 `docker compose --env-file .env build api` 代替 pull，`.env` 保持原本地镜像设置，后续迁移/启动顺序相同。不要执行 `down -v`。
+
+安装新教师端后，登录并进入“设置 → 加载项”，打开“每日晚间全部结束”的启用开关，确认显示每天 18:15、全部范围。新任务默认禁用；已有午间任务状态不变。18:15 之后才首次启用时，从次日开始执行；已启用但服务停机的任务仅补执行当天到期的一次，并跳过 18:15 以后新登记的记录。任务由服务器执行，教师端可以关闭；手动“立即执行”会结束当下全部活动记录，勿作为无影响的连接检查。
+
 升级时保留 `DATA_PREFIX`、所有命名卷、身份参数和 secrets；用同版镜像执行单个 `migrate` 作业，再重建 API（仅在 nginx/证书/网关镜像变更时才重建 gateway）。正常升级不得使用 `down -v`。先在临时数据副本上验证扩展迁移。`init-volumes` 会在 db/api/gateway/log-ingest 启动前幂等执行卷属主初始化；若宿主或卷驱动已预置正确属主，可用 `INIT_VOLUMES_MODE=skip` 跳过。改共享密码需要编辑 `.env` 后 `docker compose up -d --force-recreate api`，旧内存会话失效，教师重新登录可查原请求结果。gateway 不再缓存 api 容器 IP：nginx 每 10 秒重新解析 Docker DNS，重建 api 后无需重建 gateway，最多约 10 秒内可能出现短暂 502。固定盐、版本或卡身份变化属于延期的 NEXT-01，不能当普通配置升级。
 
 角色迁移与运行角色口令：`migrate` 只有在设置 `RUNTIME_DATABASE_URL_FILE` 时才执行 `apps/server/src/roles` 下的角色/授权迁移；Compose 已注入 `/run/secrets/runtime_database_url`。在 Compose 外直接运行 `node apps/server/dist/cli.js migrate` 时必须显式提供该变量，否则 runtime 角色不会创建或更新，随后 api/log-ingest 会因认证失败而不可用。运行角色口令轮换不是自动的：修改 `secrets/runtime-database-url` 不会 `ALTER ROLE`（已记录的迁移不会重跑）。轮换须由迁移账号手工 `ALTER ROLE cyez_runtime PASSWORD ...`（或删除角色后重建并重新授权），按 URL 编码规则把新口令写入 `secrets/runtime-database-url` 并重建 api/log-ingest；如权限被重置，按 `apps/server/src/roles/001-runtime-role.ts` 的授权重新 GRANT，不要删除 `role_migrations` 或业务表来强迫迁移重跑。

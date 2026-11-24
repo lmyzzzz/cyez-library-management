@@ -7,6 +7,65 @@ import { AddonRuntime } from "../../../apps/server/src/addons/runtime.js";
 import { studentId } from "@record/protocol/identity";
 import type { AddonId } from "@record/protocol";
 import { SCHEDULER_CLIENT_ID } from "../../../apps/server/src/addons/catalog.js";
+import { Database } from "../../../apps/server/src/database.js";
+
+it("旧库新增晚间任务，保留午间任务的启用状态和执行历史；重复迁移不重置", async () => {
+  const adminUrl =
+    process.env.TEST_RUNTIME_ADMIN_URL ??
+    process.env.TEST_DATABASE_URL ??
+    "postgres://cyez_test:integration-only@127.0.0.1:55432/cyez_test";
+  const admin = new Database(adminUrl);
+  const name = "cyez_addon_upgrade_" + randomUUID().replaceAll("-", "");
+  const url = new URL(adminUrl);
+  url.pathname = "/" + name;
+  const db = new Database(url.toString());
+  let created = false;
+  try {
+    await admin.sequelize.getQueryInterface().createDatabase(name);
+    created = true;
+    await db.migrator.up({ to: "004-builtin-addons" });
+    expect(await db.addons.count()).toBe(2);
+    const prior = {
+      enabled: true,
+      version: 7,
+      enabledAt: new Date("2026-11-23T01:00:00Z"),
+      lastSlot: new Date("2026-11-23T04:40:00Z"),
+      lastRun: {
+        atMs: Date.parse("2026-11-23T04:40:00Z"),
+        trigger: "cron" as const,
+        count: 2,
+      },
+    };
+    await db.addons.update(prior, { where: { id: "end-grade-1-2" } });
+    await expect(db.ready()).rejects.toThrow("SCHEMA_NOT_READY");
+    await db.migrator.up();
+    await db.ready();
+    expect((await db.addons.findByPk("end-grade-1-2"))!.get()).toMatchObject(
+      prior,
+    );
+    expect((await db.addons.findByPk("end-all-evening"))!.get()).toMatchObject({
+      enabled: false,
+      version: 1,
+      enabledAt: null,
+      lastSlot: null,
+      lastRun: null,
+    });
+    await db.addons.update(
+      { enabled: true, version: 2 },
+      { where: { id: "end-all-evening" } },
+    );
+    expect(await db.migrator.up()).toEqual([]);
+    expect(await db.addons.count()).toBe(3);
+    expect((await db.addons.findByPk("end-all-evening"))!.get()).toMatchObject({
+      enabled: true,
+      version: 2,
+    });
+  } finally {
+    await db.close();
+    if (created) await admin.sequelize.getQueryInterface().dropDatabase(name);
+    await admin.close();
+  }
+});
 
 describe("真实 PG 受限角色：快捷禁用与内置加载项", () => {
   let fixture: Awaited<ReturnType<typeof runtimeDatabase>>,
@@ -34,18 +93,21 @@ describe("真实 PG 受限角色：快捷禁用与内置加载项", () => {
   beforeAll(async () => {
     now = at("12:00:00");
     fixture = await runtimeDatabase();
-    server = await createApp(testConfig(fixture.url, fixture.directory), {
-      database: fixture.db,
-      now: () => now,
-      probe: async () => ({ freeBytes: 100000, writable, oldestAgeMs: 0 }),
-      provider: {
-        lookup: async () => ({
-          name: "加载项测试学生",
-          className: grade,
-          schoolNumber: "",
-        }),
+    server = await createApp(
+      { ...testConfig(fixture.url, fixture.directory), sessionTtlMs: 86400000 },
+      {
+        database: fixture.db,
+        now: () => now,
+        probe: async () => ({ freeBytes: 100000, writable, oldestAgeMs: 0 }),
+        provider: {
+          lookup: async () => ({
+            name: "加载项测试学生",
+            className: grade,
+            schoolNumber: "",
+          }),
+        },
       },
-    });
+    );
     const login = await server.app.inject({
       method: "POST",
       url: "/api/v1/auth/login",
@@ -229,6 +291,100 @@ describe("真实 PG 受限角色：快捷禁用与内置加载项", () => {
     expect((await row(records[2].recordId)).endedAt).toEqual(new Date(now));
     expect((await row(records[3].recordId)).endedAt).toBeNull();
     expect((await row(records[4].recordId)).endedAt).toBeNull();
+  });
+  it("18:15 结束全部年级和未识别班级，保留历史；并发与重启仅执行一次", async () => {
+    const list = (await api("GET", "/addons")).body.items;
+    expect(list).toHaveLength(3);
+    expect(
+      list.find((item: { id: string }) => item.id === "end-all-evening"),
+    ).toMatchObject({
+      enabled: false,
+      scope: "all",
+      cron: "15 18 * * *",
+      timezone: "Asia/Shanghai",
+    });
+    const records = [];
+    for (const label of ["I（1）", "Ⅱ（2）", "III（3）", "其他班级", "I II"])
+      records.push(await start(label));
+    await enable("end-all-evening");
+    now = at("18:14:59");
+    await server.addons.tick();
+    expect(await fixture.db.records.count({ where: { endedAt: null } })).toBe(
+      5,
+    );
+    now = at("18:15:00");
+    await Promise.all([
+      server.addons.tick(),
+      new AddonRuntime(server.service, () => now).tick(),
+    ]);
+    for (const record of records) {
+      expect(await row(record.recordId)).toMatchObject({
+        endedAt: new Date(now),
+        version: 2,
+        notes: "保留原备注",
+        endReason: "batch",
+      });
+      expect(
+        await fixture.owner.audits.count({
+          where: { recordId: record.recordId, action: "usage.ended" },
+        }),
+      ).toBe(1);
+    }
+    now = at("18:16:00");
+    const later = await start("未知班级");
+    await new AddonRuntime(server.service, () => now).tick();
+    expect((await row(later.recordId)).endedAt).toBeNull();
+    expect(
+      (await fixture.db.addons.findByPk("end-all-evening"))!.get().lastRun,
+    ).toMatchObject({ trigger: "cron", count: 5 });
+  });
+  it("晚间任务失败回滚、当天恢复补执行；截止后才提交的旧预览不被结束", async () => {
+    await enable("end-all-evening");
+    const earlier = await start("未知班级");
+    now = at("18:14:59");
+    const previewId = await preview("I II"),
+      device = await createDevice();
+    now = at("18:15:00");
+    writable = false;
+    await server.addons.tick();
+    expect((await row(earlier.recordId)).endedAt).toBeNull();
+    expect(
+      (await fixture.db.addons.findByPk("end-all-evening"))!.get().lastSlot,
+    ).toBeNull();
+    now = at("18:15:30");
+    writable = true;
+    const late = await api("POST", "/usage-records/start", {
+      requestId: randomUUID(),
+      previewId,
+      deviceId: device.id,
+      notes: "",
+    });
+    expect(late.status).toBe(200);
+    await new AddonRuntime(server.service, () => now).tick();
+    expect((await row(earlier.recordId)).endedAt).toEqual(
+      new Date(at("18:15:00")),
+    );
+    expect((await row(late.body.recordId)).endedAt).toBeNull();
+    const requestId = randomUUID();
+    expect(
+      (await api("POST", "/addons/end-all-evening/run", { requestId })).body,
+    ).toEqual({ count: 1 });
+    expect(
+      (await api("POST", "/addons/end-all-evening/run", { requestId })).body,
+    ).toEqual({ count: 1 });
+    expect((await row(late.body.recordId)).version).toBe(2);
+    await api("POST", "/addons/end-all-evening/configure", {
+      requestId: randomUUID(),
+      expectedVersion: 2,
+      enabled: false,
+    });
+    expect(
+      (
+        await api("POST", "/addons/end-all-evening/run", {
+          requestId: randomUUID(),
+        })
+      ).body.code,
+    ).toBe("ADDON_DISABLED");
   });
   it("容量失败全回滚；恢复后当天补执行只处理截止前已经提交的记录", async () => {
     await enable();
