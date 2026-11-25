@@ -276,7 +276,9 @@ describe("刷卡窗口", () => {
     await screen.findByRole("button", { name: "取消选择 PC-02" });
     fireEvent.click(screen.getByRole("button", { name: "取消登记" }));
     const next = { ...preview, id: "preview-2" };
-    act(() => listener?.({ type: "scan", preview: next, scanMode: "manual" }));
+    await act(async () => {
+      listener?.({ type: "scan", preview: next, scanMode: "manual" });
+    });
     await screen.findByRole("button", { name: "取消选择 PC-02" });
     expect(calls("start")).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "确认登记" }));

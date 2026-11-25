@@ -51,7 +51,17 @@ export class FullChainClient {
   }
 
   async reauthenticate() {
-    const response = await this.login();
+    // Test clients share a gateway IP. Its 10 logins/minute budget refills
+    // one slot every six seconds. Only wait for rate limits during setup.
+    let response = await this.login();
+    for (let retry = 0; retry < 2; retry++) {
+      const gatewayBusy =
+        response.status === 503 &&
+        response.headers["content-type"]?.includes("text/html");
+      if (!gatewayBusy && response.status !== 429) break;
+      await new Promise((resolve) => setTimeout(resolve, 6500));
+      response = await this.login();
+    }
     if (response.status !== 200)
       throw new Error(
         `FULL_CHAIN_LOGIN_FAILED: ${response.status} ${response.text}`,
@@ -282,10 +292,6 @@ export function reportCode(response: GatewayResponse) {
 
 export async function loginClient(connection: FullChainConnection) {
   const client = new FullChainClient(connection);
-  const response = await client.login();
-  if (response.status !== 200)
-    throw new Error(
-      `FULL_CHAIN_LOGIN_FAILED: ${response.status} ${response.text}`,
-    );
+  await client.reauthenticate();
   return client;
 }
