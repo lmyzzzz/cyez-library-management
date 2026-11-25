@@ -36,6 +36,7 @@ const status = {
   connectionConfigured: true,
   authenticated: false,
   online: false,
+  reconnecting: false,
   savedCredentials: true,
   autoLogin: false,
   pendingLogs: 0,
@@ -120,7 +121,7 @@ describe("C-U-05 设置和只读历史", () => {
       (screen.getByLabelText("叶证书 SHA-256 指纹") as HTMLTextAreaElement)
         .value,
     ).toBe("");
-    const auto = screen.getByLabelText<HTMLInputElement>("启动时自动登录");
+    const auto = screen.getByLabelText<HTMLInputElement>("自动登录");
     expect(auto.disabled).toBe(true);
     fireEvent.click(screen.getByLabelText("保存密码"));
     expect(auto.disabled).toBe(false);

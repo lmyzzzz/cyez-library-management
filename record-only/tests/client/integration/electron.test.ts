@@ -31,6 +31,11 @@ const dbName = "cyez_electron_" + randomUUID().replaceAll("-", ""),
   cert = certificate();
 let requests = 0,
   scans = 0;
+let offline = false,
+  dropTagReply = false,
+  clockOffset = 0,
+  logins = 0;
+let teacherAddress = "127.0.0.1";
 test.beforeAll(async () => {
   const adminUrl =
     process.env.TEST_DATABASE_URL ??
@@ -47,12 +52,14 @@ test.beforeAll(async () => {
   await db.migrator.up();
   await db.initializeIdentity(identity);
   expect(await db.students.count()).toBe(0);
-  api = await createApp(config);
+  api = await createApp(config, { now: () => Date.now() + clockOffset });
   await api.app.listen({ host: "127.0.0.1", port: 0 });
   const address = api.app.server.address();
   if (!address || typeof address === "string") throw Error("port");
   tls = createServer(cert, (incoming, response) => {
     requests++;
+    if (offline) return incoming.socket.destroy();
+    if (incoming.url === "/api/v1/auth/login") logins++;
     if (incoming.url === "/api/v1/scan-previews") scans++;
     const proxy = request(
       {
@@ -60,9 +67,21 @@ test.beforeAll(async () => {
         port: address.port,
         path: incoming.url,
         method: incoming.method,
-        headers: incoming.headers,
+        headers: { ...incoming.headers, "x-forwarded-for": teacherAddress },
       },
       (upstream) => {
+        if (
+          dropTagReply &&
+          incoming.method === "POST" &&
+          incoming.url === "/api/v1/tags" &&
+          upstream.statusCode === 200
+        ) {
+          dropTagReply = false;
+          offline = true;
+          upstream.resume();
+          incoming.socket.destroy();
+          return;
+        }
         response.writeHead(upstream.statusCode ?? 503, upstream.headers);
         upstream.pipe(response);
       },
@@ -668,7 +687,13 @@ test("C-I-08: 自动局部更新保留真实滚动、焦点与编辑草稿", asy
   await page.getByRole("button", { name: "设备管理", exact: true }).click();
   await page.getByLabel("搜索设备").fill("SCROLL-");
   await expect(page.locator("tbody tr")).toHaveCount(24);
+  // The auxiliary windows also start visible. Establish real main-window focus
+  // before checking that a background refresh preserves it.
+  await (
+    await desktop.browserWindow(page)
+  ).evaluate((window) => window.focus());
   await page.getByLabel("搜索设备").focus();
+  await expect(page.getByLabel("搜索设备")).toBeFocused();
   const scroll = page.locator(".table-scroll");
   const initial = await scroll.evaluate((element) => {
     const node = element as HTMLElement;
@@ -799,6 +824,57 @@ test("C-I-10: 加密保存后自动登录，读卡进程切换失败保留原配
   await store.close();
   await call("clearSaved");
   expect((await call<{ autoLogin: boolean }>("status")).autoLogin).toBe(false);
+});
+
+test("C-I-10: 断网丢失提交响应、会话到期后由 main 自动重登并核对原提交", async () => {
+  // The trusted TLS proxy supplies the client address, as the deployed gateway
+  // does. Give this teacher its own real server-side login rate limit window.
+  teacherAddress = "127.0.0.2";
+  const name = "恢复-" + randomUUID().slice(0, 8);
+  await call("configure", { ip: "127.0.0.1", port, pin: cert.pin });
+  await call("login", {
+    username: "teacher-test",
+    password: "integration-password-only",
+    remember: true,
+    autoLogin: true,
+  });
+  const before = logins;
+  try {
+    await page.getByRole("link", { name: "设置", exact: true }).click();
+    await page.getByRole("button", { name: "连接配置", exact: true }).click();
+    await call("setAuxWindow", { window: "status", open: false });
+    dropTagReply = true;
+    await expect(call("createTag", { name })).rejects.toThrow(
+      "COMMAND_PENDING",
+    );
+    expect(await call("status")).toMatchObject({
+      online: false,
+      pendingCommands: 1,
+      reconnecting: true,
+    });
+    expect(await api.db.tags.count({ where: { name } })).toBe(1);
+    clockOffset += 3600001;
+    offline = false;
+    await expect
+      .poll(() => call("status"), { timeout: 30000 })
+      .toMatchObject({
+        online: true,
+        authenticated: true,
+        pendingCommands: 0,
+        reconnecting: false,
+      });
+    expect(logins).toBe(before + 1);
+    expect(await call("tags")).toMatchObject({
+      items: expect.arrayContaining([expect.objectContaining({ name })]),
+    });
+    expect(await api.db.tags.count({ where: { name } })).toBe(1);
+  } finally {
+    teacherAddress = "127.0.0.1";
+    offline = dropTagReply = false;
+    clockOffset = 0;
+    await call("logout");
+    await call("setAuxWindow", { window: "status", open: true });
+  }
 });
 
 test("C-I-13: 生产客户端可在设置页启动手动输入", async () => {

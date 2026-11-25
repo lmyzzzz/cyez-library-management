@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { IdleTimer } from "../../../apps/teacher/src/renderer/timers.js";
 import { CardReader } from "../../../apps/teacher/src/main/reader.js";
 import { ClientSDK } from "@record/client-sdk";
@@ -115,6 +115,31 @@ describe("C-U 计时和读卡边界", () => {
         pin: "ab".repeat(32),
       }),
     ).toBe(false);
+  });
+  it("旧会话迟到的 401 不撤销新令牌", async () => {
+    let reject!: (error: Error) => void,
+      seq = 0;
+    const expired = vi.fn();
+    const sdk = new ClientSDK(
+      {
+        request: async (_m, p) =>
+          p.endsWith("/login")
+            ? { token: String(++seq) }
+            : new Promise((_, r) => {
+                reject = r;
+              }),
+        close: async () => {},
+      },
+      "test-client",
+      expired,
+    );
+    await sdk.login("t", "p");
+    const pending = sdk.call("GET", "/api/v1/tags");
+    await sdk.login("t", "p");
+    reject(new ApiError("AUTH_REQUIRED", 401));
+    await expect(pending).rejects.toThrow("AUTH_REQUIRED");
+    expect(sdk.authenticated).toBe(true);
+    expect(expired).not.toHaveBeenCalled();
   });
   it("SDK 不向 renderer 返回 token，401 清会话，关闭传输", async () => {
     let fail = false,

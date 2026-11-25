@@ -261,12 +261,12 @@ export function ConnectionForm({
           />
         </SettingsRow>
         <SettingsRow
-          label="启动时自动登录"
-          description="需要先保存密码；已保存账号属于其他服务器时不会自动登录。"
+          label="自动登录"
+          description="保存密码后，启动或会话失效时会自动登录原服务器。"
         >
           <Switch
             label=""
-            aria-label="启动时自动登录"
+            aria-label="自动登录"
             checked={remember && autoLogin}
             disabled={!remember || busy}
             onChange={(e) => setAutoLogin(e.target.checked)}

@@ -49,6 +49,12 @@ export class Coordinator {
   private writing = false;
   private recovering = false;
   private flushing = false;
+  private sessionTask?: Promise<unknown>;
+  private closing = false;
+  private autoLoginAllowed = false;
+  private recoveryNeeded = false;
+  private retryAt = 0;
+  private retryDelay = 3000;
   readonly reader: CardReader;
   readerState = "未连接读卡器";
   constructor(
@@ -78,13 +84,59 @@ export class Coordinator {
     await this.log({ source: "main", level: "info", code: "APP_STARTED" });
   }
   async autoLoginOnStartup() {
-    if ((await this.store.get("autoLogin")) === "true") {
+    await this.withSession(async () => {
+      this.autoLoginAllowed = (await this.store.get("autoLogin")) === "true";
+    });
+    await this.maintainConnection();
+  }
+  // Serialize credential use with explicit login, logout, clear and destination changes.
+  private withSession<T>(work: () => Promise<T>) {
+    const run = (this.sessionTask ?? Promise.resolve()).then(work, work);
+    this.sessionTask = run;
+    return run.finally(() => {
+      if (this.sessionTask === run) this.sessionTask = undefined;
+    });
+  }
+  async maintainConnection() {
+    const sdk = this.sdk;
+    if (!sdk || this.closing || this.sessionTask || Date.now() < this.retryAt)
+      return;
+    if (!sdk.authenticated && !this.autoLoginAllowed) return;
+    const probe =
+      !this.online || Date.now() - (this.lastSuccessMs ?? 0) >= 30000;
+    if (sdk.authenticated && !probe && !this.recoveryNeeded) return;
+    await this.withSession(async () => {
       try {
-        await this.loginSaved();
-      } catch {
-        this.emit({ type: "notice", code: "AUTO_LOGIN_FAILED" });
+        if (!sdk.authenticated) {
+          await this.loginSaved();
+        } else {
+          if (probe)
+            await this.network(() => sdk.call("GET", "/api/v1/service-status"));
+          if (this.recoveryNeeded) await this.recoverAfterConnection();
+        }
+        this.resetRetry();
+      } catch (e) {
+        if (
+          e instanceof ApiError &&
+          [
+            "LOGIN_FAILED",
+            "SAVED_LOGIN_UNAVAILABLE",
+            "SAVED_LOGIN_ORIGIN_MISMATCH",
+          ].includes(e.code)
+        ) {
+          this.autoLoginAllowed = false;
+          this.emit({ type: "notice", code: "AUTO_LOGIN_FAILED" });
+          this.emit({ type: "changed" });
+        } else {
+          this.retryAt = Date.now() + this.retryDelay;
+          this.retryDelay = Math.min(60000, this.retryDelay * 2);
+        }
       }
-    }
+    });
+  }
+  private resetRetry() {
+    this.retryAt = 0;
+    this.retryDelay = 3000;
   }
   async log(entry: SafeLog) {
     await this.store.append({
@@ -95,14 +147,28 @@ export class Coordinator {
     });
   }
   async configure(connection: Connection) {
+    this.autoLoginAllowed = false;
+    this.recoveryNeeded = false;
+    this.resetRetry();
     this.activeCard = null;
     this.scanRevision++;
-    await this.sdk?.close();
+    const previous = this.sdk;
     this.sdk = undefined;
+    await previous?.close();
     this.online = false;
+    this.lastSuccessMs = null;
     this.connection = connection;
     const transport = new PinnedTransport(connection);
-    this.sdk = new ClientSDK(transport, this.clientId);
+    const sdk = new ClientSDK(transport, this.clientId, () => {
+      if (sdk !== this.sdk) return;
+      const previewId = this.activeCard?.previewId;
+      this.activeCard = null;
+      this.scanRevision++;
+      this.recoveryNeeded = true;
+      if (previewId) this.emit({ type: "cancel", previewId }, "card");
+      this.emit({ type: "changed" });
+    });
+    this.sdk = sdk;
     await this.store.set("connection", JSON.stringify(connection));
     this.emit({ type: "changed" });
     return { ok: true };
@@ -122,6 +188,9 @@ export class Coordinator {
       connectionConfigured: !!this.connection,
       authenticated: !!this.sdk?.authenticated,
       online: this.online,
+      reconnecting: this.sdk?.authenticated
+        ? !this.online
+        : this.autoLoginAllowed,
       savedCredentials: !!(await this.store.get("credentials")),
       autoLogin: (await this.store.get("autoLogin")) === "true",
       ...metrics,
@@ -138,16 +207,26 @@ export class Coordinator {
     return this.sdk;
   }
   private async network<T>(work: () => Promise<T>): Promise<T> {
+    const sdk = this.sdk;
     try {
       const value = await work();
-      this.online = true;
-      this.lastSuccessMs = Date.now();
+      if (sdk === this.sdk) {
+        const restored = !this.online;
+        this.online = true;
+        this.lastSuccessMs = Date.now();
+        if (restored) this.emit({ type: "changed" });
+      }
       return value;
     } catch (e) {
       // Reachable-server business errors (401/4xx/5xx responses) stay online;
       // only transport-level failures mean the connection is gone.
-      if (!(e instanceof ApiError) || TRANSPORT_FAILURE_CODES.has(e.code)) {
+      if (
+        sdk === this.sdk &&
+        this.online &&
+        (!(e instanceof ApiError) || TRANSPORT_FAILURE_CODES.has(e.code))
+      ) {
         this.online = false;
+        if (sdk?.authenticated) this.recoveryNeeded = true;
         this.emit({ type: "changed" });
       }
       throw e;
@@ -254,14 +333,15 @@ export class Coordinator {
         .catch(() => {});
   }
   async command(method: string, path: string, body: Record<string, unknown>) {
-    if (!this.online || !this.requireSdk().authenticated)
+    const sdk = this.requireSdk();
+    if (!this.online || !sdk.authenticated)
       throw new ApiError("OFFLINE_NO_WRITE", 503);
     if (this.writing || this.recovering)
       throw new ApiError("COMMAND_BUSY", 409);
     this.writing = true;
     try {
       const pending = await this.store.pending(
-        (this.sdk!.transport as PinnedTransport).origin,
+        (sdk.transport as PinnedTransport).origin,
       );
       if (pending.length) throw new ApiError("COMMAND_PENDING", 409);
       const requestId = randomUUID(),
@@ -274,7 +354,7 @@ export class Coordinator {
       });
       await this.store.saveIntent({
         requestId,
-        origin: (this.sdk!.transport as PinnedTransport).origin,
+        origin: (sdk.transport as PinnedTransport).origin,
         method,
         path,
         body: payload,
@@ -283,7 +363,7 @@ export class Coordinator {
       });
       try {
         const result = await this.network(() =>
-          this.sdk!.call(method, path, payload),
+          sdk.call(method, path, payload),
         );
         await this.store.write(() =>
           this.store.intents.update(
@@ -387,10 +467,9 @@ export class Coordinator {
     try {
       const logs = await this.store.logBatch();
       if (logs.length) {
-        const result = await this.sdk.call<{ acked: string[] }>(
-          "POST",
-          "/api/v1/logs/batch",
-          { logs },
+        const sdk = this.requireSdk();
+        const result = await this.network(() =>
+          sdk.call<{ acked: string[] }>("POST", "/api/v1/logs/batch", { logs }),
         );
         await this.store.ack(
           result.acked.filter((id) => logs.some((l) => l.logId === id)),
@@ -409,6 +488,8 @@ export class Coordinator {
     if (autoLogin && !remember)
       throw new ApiError("AUTO_LOGIN_REQUIRES_SAVED_PASSWORD", 422);
     const sdk = this.requireSdk();
+    this.autoLoginAllowed = false;
+    this.resetRetry();
     await this.network(() => sdk.login(username, password));
     let saved = false;
     if (remember && safeStorage.isEncryptionAvailable()) {
@@ -430,6 +511,7 @@ export class Coordinator {
       if (remember)
         this.emit({ type: "notice", code: "SECURE_STORAGE_UNAVAILABLE" });
     }
+    this.autoLoginAllowed = saved && autoLogin;
     return saved;
   }
   private async saveLoginSettings(
@@ -455,9 +537,15 @@ export class Coordinator {
       }),
     );
   }
+  private async recoverAfterConnection() {
+    this.recoveryNeeded = true;
+    const recovery = await this.recover();
+    this.recoveryNeeded = !!recovery.busy;
+    return recovery;
+  }
   private async finishLogin(saved: boolean) {
     const sdk = this.requireSdk();
-    const recovery = await this.recover();
+    const recovery = await this.recoverAfterConnection();
     await sdk.call("POST", "/api/v1/clients/startup", {
       version: this.version,
     });
@@ -472,26 +560,22 @@ export class Coordinator {
     let credentials: { origin: string; username: string; password: string };
     try {
       credentials = JSON.parse(safeStorage.decryptString(encrypted));
+    } catch {
+      throw new ApiError("SAVED_LOGIN_UNAVAILABLE", 401);
     } finally {
       encrypted.fill(0);
     }
-    let saved: boolean;
+    const sdk = this.requireSdk();
     try {
-      if (
-        credentials.origin !==
-        (this.requireSdk().transport as PinnedTransport).origin
-      )
+      if (credentials.origin !== (sdk.transport as PinnedTransport).origin)
         throw new ApiError("SAVED_LOGIN_ORIGIN_MISMATCH", 401);
-      saved = await this.login(
-        credentials.username,
-        credentials.password,
-        true,
-        (await this.store.get("autoLogin")) === "true",
+      await this.network(() =>
+        sdk.login(credentials.username, credentials.password),
       );
     } finally {
       credentials.password = "";
     }
-    return this.finishLogin(saved);
+    return this.finishLogin(true);
   }
   async call(action: ActionName, input: unknown): Promise<unknown> {
     if (!(action in actions)) throw new ApiError("IPC_ACTION_INVALID", 422);
@@ -536,7 +620,10 @@ export class Coordinator {
     }
     switch (action) {
       case "configure":
-        return this.configure(data as Connection);
+        return this.withSession(async () => {
+          await this.store.set("autoLogin", "false");
+          return this.configure(data as Connection);
+        });
       case "status":
         return this.status();
       case "setScanMode":
@@ -568,34 +655,49 @@ export class Coordinator {
         if (this.gate.page !== "flow") this.activeCard = null;
         return { ok: true };
       case "login":
-        let saved: boolean;
-        try {
-          saved = await this.login(
-            data.username as string,
-            data.password as string,
-            data.remember as boolean,
-            data.autoLogin as boolean,
-          );
-        } finally {
-          data.password = "";
-        }
-        return this.finishLogin(saved);
+        return this.withSession(async () => {
+          let saved: boolean;
+          try {
+            saved = await this.login(
+              data.username as string,
+              data.password as string,
+              data.remember as boolean,
+              data.autoLogin as boolean,
+            );
+          } finally {
+            data.password = "";
+          }
+          return this.finishLogin(saved);
+        });
       case "loginSaved":
-        return this.loginSaved();
+        return this.withSession(async () => {
+          this.resetRetry();
+          this.autoLoginAllowed =
+            (await this.store.get("autoLogin")) === "true";
+          return this.loginSaved();
+        });
       case "clearSaved":
-        await this.saveLoginSettings(null, false);
-        return { ok: true };
+        return this.withSession(async () => {
+          this.autoLoginAllowed = false;
+          await this.saveLoginSettings(null, false);
+          this.emit({ type: "changed" });
+          return { ok: true };
+        });
       case "logout":
-        this.activeCard = null;
-        this.scanRevision++;
-        try {
-          await this.sdk?.logout();
-        } finally {
-          // Local logout state must not depend on the server acknowledging it.
-          this.online = false;
-          await this.store.set("autoLogin", "false");
-        }
-        return { ok: true };
+        return this.withSession(async () => {
+          this.autoLoginAllowed = false;
+          this.activeCard = null;
+          this.scanRevision++;
+          try {
+            await this.sdk?.logout();
+          } finally {
+            // Local logout state must not depend on the server acknowledging it.
+            this.online = false;
+            await this.store.set("autoLogin", "false");
+            this.emit({ type: "changed" });
+          }
+          return { ok: true };
+        });
       case "testConnection":
         return this.network(() =>
           this.requireSdk().transport.request("GET", "/health/ready"),
@@ -723,7 +825,9 @@ export class Coordinator {
     return result;
   }
   async close() {
+    this.closing = true;
     await this.sdk?.close();
+    await this.sessionTask?.catch(() => {});
     const deadline = Date.now() + 10000;
     while (
       (this.writing || this.scanning || this.recovering || this.flushing) &&

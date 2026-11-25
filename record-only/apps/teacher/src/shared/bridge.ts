@@ -122,6 +122,7 @@ export interface LocalStatus {
   connectionConfigured: boolean;
   authenticated: boolean;
   online: boolean;
+  reconnecting: boolean;
   savedCredentials: boolean;
   autoLogin: boolean;
   pendingCommands: number;

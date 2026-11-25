@@ -13,6 +13,7 @@ export class ClientSDK {
   constructor(
     readonly transport: Transport,
     readonly clientId: string,
+    private readonly onSessionExpired?: () => void,
   ) {}
   get authenticated() {
     return !!this.token;
@@ -30,16 +31,16 @@ export class ClientSDK {
     path: string,
     body?: unknown,
   ): Promise<T> {
-    if (!this.token) throw new ApiError("AUTH_REQUIRED", 401);
+    const token = this.token;
+    if (!token) throw new ApiError("AUTH_REQUIRED", 401);
     try {
-      return (await this.transport.request(
-        method,
-        path,
-        body,
-        this.token,
-      )) as T;
+      return (await this.transport.request(method, path, body, token)) as T;
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) this.token = undefined;
+      // A request from the expired session can finish after a new login.
+      if (e instanceof ApiError && e.status === 401 && this.token === token) {
+        this.token = undefined;
+        this.onSessionExpired?.();
+      }
       throw e;
     }
   }

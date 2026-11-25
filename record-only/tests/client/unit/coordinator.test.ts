@@ -89,6 +89,140 @@ const cardEvent = () => ({
 const devicesGate = { page: "devices", modal: false, submitting: false };
 
 describe("C-U main 协调器", () => {
+  it("网络恢复沿用原会话，认证失效且未授权自动登录时等待教师", async () => {
+    await login();
+    const initial = response;
+    response = () => {
+      throw new ApiError("NETWORK_TIMEOUT", 503);
+    };
+    await expect(coordinator.call("tags", {})).rejects.toThrow(
+      "NETWORK_TIMEOUT",
+    );
+    response = initial;
+    await coordinator.maintainConnection();
+    expect(await coordinator.status()).toMatchObject({
+      authenticated: true,
+      online: true,
+      reconnecting: false,
+    });
+    response = () => {
+      throw new ApiError("AUTH_REQUIRED", 401);
+    };
+    await expect(coordinator.call("tags", {})).rejects.toThrow("AUTH_REQUIRED");
+    await coordinator.maintainConnection();
+    expect(await coordinator.status()).toMatchObject({
+      authenticated: false,
+      reconnecting: false,
+    });
+    expect(traffic.filter((r) => r.path.endsWith("/auth/login"))).toHaveLength(
+      1,
+    );
+  });
+
+  it("启动时断网退避重试，重叠的维护周期只登录一次，被拒绝的密码不会持续重试", async () => {
+    await login();
+    await store.set("autoLogin", "true");
+    const fresh = new Coordinator(
+      store,
+      coordinator.clientId,
+      "integration",
+      identity,
+      (e) => events.push(e),
+    );
+    await fresh.init();
+    const initial = response;
+    const now = vi.spyOn(Date, "now");
+    try {
+      const at = Date.now();
+      now.mockReturnValue(at);
+      response = () => {
+        throw new ApiError("NETWORK_TIMEOUT", 503);
+      };
+      await fresh.autoLoginOnStartup();
+      const count = () =>
+        traffic.filter((r) => r.path.endsWith("/auth/login")).length;
+      const failed = count();
+      response = initial;
+      await fresh.maintainConnection();
+      expect(count()).toBe(failed);
+      now.mockReturnValue(at + 3001);
+      await Promise.all([
+        fresh.maintainConnection(),
+        fresh.maintainConnection(),
+      ]);
+      expect(count()).toBe(failed + 1);
+      expect(await fresh.status()).toMatchObject({
+        authenticated: true,
+        online: true,
+      });
+      response = (_method, path) => {
+        throw new ApiError(
+          path.endsWith("/auth/login") ? "LOGIN_FAILED" : "AUTH_REQUIRED",
+          401,
+        );
+      };
+      await expect(fresh.call("tags", {})).rejects.toThrow("AUTH_REQUIRED");
+      await fresh.maintainConnection();
+      now.mockReturnValue(at + 120000);
+      await fresh.maintainConnection();
+      expect(count()).toBe(failed + 2);
+      expect(await fresh.status()).toMatchObject({
+        authenticated: false,
+        reconnecting: false,
+      });
+    } finally {
+      now.mockRestore();
+    }
+  });
+
+  it.each(["logout", "clearSaved", "configure"] as const)(
+    "在自动登录途中执行 %s 后停止自动登录",
+    async (action) => {
+      await login();
+      await coordinator.call("login", {
+        username: "teacher",
+        password: "secret",
+        remember: true,
+        autoLogin: true,
+      });
+      const initial = response;
+      let release!: (value: unknown) => void;
+      response = (m, p, b) => {
+        if (p.endsWith("/tags")) throw new ApiError("AUTH_REQUIRED", 401);
+        if (p.endsWith("/auth/login"))
+          return new Promise((r) => {
+            release = r;
+          });
+        return initial(m, p, b);
+      };
+      await expect(coordinator.call("tags", {})).rejects.toThrow(
+        "AUTH_REQUIRED",
+      );
+      const attempt = coordinator.maintainConnection();
+      await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+      const userAction = coordinator.call(
+        action,
+        action === "configure"
+          ? { ip: "127.0.0.1", port: 8443, pin: "cd".repeat(32) }
+          : {},
+      );
+      release({ token: "renewed" });
+      await Promise.all([attempt, userAction]);
+      if (action === "clearSaved")
+        await expect(coordinator.call("tags", {})).rejects.toThrow(
+          "AUTH_REQUIRED",
+        );
+      const before = traffic.length;
+      await coordinator.maintainConnection();
+      expect(traffic).toHaveLength(before);
+      expect(await coordinator.status()).toMatchObject({
+        autoLogin: false,
+        authenticated: false,
+        reconnecting: false,
+      });
+    },
+  );
+
   it.each([
     "offline",
     "expired-auth",

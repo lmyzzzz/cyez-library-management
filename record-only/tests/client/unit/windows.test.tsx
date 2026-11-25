@@ -77,6 +77,7 @@ const status: LocalStatus = {
   connectionConfigured: true,
   authenticated: true,
   online: true,
+  reconnecting: false,
   savedCredentials: false,
   autoLogin: false,
   pendingLogs: 0,

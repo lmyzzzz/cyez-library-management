@@ -123,13 +123,15 @@ export function StatusWindow() {
   // 全部设备都在当前页时可以直接数出使用中的数量，无需额外请求。
   const complete = filter === "all" && devices.total <= devices.items.length;
   const activeCount = devices.items.filter((d) => d.active).length;
-  const summary = !status?.authenticated
-    ? "未登录"
-    : !status.online
-      ? "连接中断"
-      : complete
-        ? `使用中 ${activeCount} / ${devices.total}`
-        : `${devices.total} 台`;
+  const summary = status?.reconnecting
+    ? "正在重新连接"
+    : !status?.authenticated
+      ? "未登录"
+      : !status.online
+        ? "连接中断"
+        : complete
+          ? `使用中 ${activeCount} / ${devices.total}`
+          : `${devices.total} 台`;
   return (
     <div className="aux-window status-window">
       <AuxTitleBar title="使用状态" subtitle={summary} />

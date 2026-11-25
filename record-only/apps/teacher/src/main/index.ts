@@ -428,6 +428,7 @@ void app.whenReady().then(async () => {
           ? "原读卡配置无效，请重新选择"
           : "未配置读卡进程";
     interval = setInterval(() => {
+      void coordinator!.maintainConnection().catch(() => {});
       void coordinator!.flush().catch(() => {});
     }, 3000);
     window.on("closed", () => app.quit());

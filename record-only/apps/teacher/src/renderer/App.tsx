@@ -734,11 +734,13 @@ export function App() {
       routes={routes}
       title="图书馆使用登记"
       subtitle={
-        status?.authenticated
-          ? status.online
-            ? "已连接"
-            : "连接中断"
-          : "未登录"
+        status?.reconnecting
+          ? "正在重新连接"
+          : status?.authenticated
+            ? status.online
+              ? "已连接"
+              : "连接中断"
+            : "未登录"
       }
       windowControls={window.windowControls}
     >
@@ -765,9 +767,9 @@ export function App() {
                 当前使用测试适配器与测试数据；真实校园接口、读卡器和发布验收尚待完成。
               </Banner>
             )}
-          {status?.authenticated && !status.online && (
-            <Banner tone="error">
-              连接已中断，当前显示数据已过期。禁止新业务写入，未确认提交将在重新登录后恢复。
+          {status?.reconnecting && (
+            <Banner tone="warning">
+              正在重新连接服务器。连接恢复后将核对待确认的提交。
             </Banner>
           )}
           {status?.pendingCommands ? (

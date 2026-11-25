@@ -158,11 +158,13 @@ export function ScanWindow() {
     ? "正在启动…"
     : !status.identityConfigured
       ? "尚未完成首次配置"
-      : !status.authenticated
-        ? "尚未登录服务器"
-        : !status.online
-          ? "服务器连接中断"
-          : null;
+      : status.reconnecting
+        ? "正在重新连接服务器"
+        : !status.authenticated
+          ? "尚未登录服务器"
+          : !status.online
+            ? "服务器连接中断"
+            : null;
   return (
     <div className="aux-window scan-window">
       <AuxTitleBar
