@@ -572,6 +572,46 @@ describe("C-U main 协调器", () => {
     );
   });
 
+  it("网关 HTML 拒绝保留晚间任务原意图，路由修复后用相同请求 ID 恢复", async () => {
+    await login();
+    const initial = response;
+    const path = "/api/v1/addons/end-all-evening/configure";
+    let repaired = false;
+    response = (method, target, body) => {
+      if (target.startsWith("/api/v1/operations/"))
+        throw new ApiError("OPERATION_NOT_FOUND", 404);
+      if (target === path) {
+        if (!repaired) throw new ApiError("RESPONSE_INVALID", 503);
+        return { id: "end-all-evening", enabled: true, version: 2 };
+      }
+      return initial(method, target, body);
+    };
+    await expect(
+      coordinator.call("configureAddon", {
+        addonId: "end-all-evening",
+        enabled: true,
+        expectedVersion: 1,
+      }),
+    ).rejects.toThrow("COMMAND_PENDING");
+    const [original] = await store.pending("https://127.0.0.1:8443");
+    await expect(coordinator.recover()).rejects.toThrow("RESPONSE_INVALID");
+    expect(await store.pending("https://127.0.0.1:8443")).toHaveLength(1);
+    repaired = true;
+    expect(await coordinator.recover()).toEqual({
+      outcomes: [
+        {
+          requestId: original.requestId,
+          state: "committed",
+          result: { id: "end-all-evening", enabled: true, version: 2 },
+        },
+      ],
+    });
+    expect(await store.pending("https://127.0.0.1:8443")).toHaveLength(0);
+    const attempts = traffic.filter((request) => request.path === path);
+    expect(attempts).toHaveLength(3);
+    for (const attempt of attempts) expect(attempt.body).toEqual(original.body);
+  });
+
   it("仅传输层失败才离线，业务 4xx/5xx 响应保持在线", async () => {
     await login();
     expect(coordinator.online).toBe(true);

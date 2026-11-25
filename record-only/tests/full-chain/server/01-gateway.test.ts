@@ -1,5 +1,9 @@
 import { request as httpRequest } from "node:http";
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import type { AddonDTO } from "@record/protocol";
+import { builtins } from "../../../apps/server/src/addons/catalog.js";
+import { loginClient, mustBe } from "../harness/api.js";
 import { loadConnection } from "../harness/connection.js";
 import { createStack } from "../harness/stack.js";
 import { Gateway } from "../harness/gateway.js";
@@ -89,6 +93,8 @@ describe("全链路：网关 TLS、路由白名单与部署隔离", () => {
       "/api/v1/students",
       "/api/v1/administrators",
       "/api/v1/logs/batch/read",
+      "/api/v1/addons/not-a-builtin/configure",
+      "/api/v1/addons/end-all-evening/delete",
       "/internal/debug",
     ]) {
       const response = await gateway.request("GET", path, {
@@ -108,6 +114,87 @@ describe("全链路：网关 TLS、路由白名单与部署隔离", () => {
         status: 200,
       },
     );
+  });
+
+  it("全部内置加载项的配置/执行路由均穿过真实 Nginx，未登录返回 JSON 401", async () => {
+    for (const { id } of builtins) {
+      for (const action of ["configure", "run"]) {
+        const path = `/api/v1/addons/${id}/${action}`;
+        const response = await gateway.request("POST", path, { body: {} });
+        expect(response.status, path).toBe(401);
+        expect(response.headers["content-type"], path).toContain(
+          "application/json",
+        );
+        expect(response.json, path).toEqual({ code: "AUTH_REQUIRED" });
+      }
+    }
+  });
+
+  it("晚间任务启用、查询原提交、同 ID 重试和手动执行经真实 TLS 网关完成", async () => {
+    const client = await loginClient(connection);
+    const list = mustBe(
+      await client.request("GET", "/addons"),
+      200,
+      "list addons",
+    );
+    const addon = (list.json as { items: AddonDTO[] }).items.find(
+      (item) => item.id === "end-all-evening",
+    )!;
+    expect(addon).toMatchObject({ enabled: false, scope: "all" });
+    const requestId = randomUUID();
+    const body = { requestId, expectedVersion: addon.version, enabled: true };
+    const pending = await client.operation(requestId);
+    expect(pending.status).toBe(404);
+    expect(pending.json).toEqual({ code: "OPERATION_NOT_FOUND" });
+    const configured = mustBe(
+      await client.request("POST", `/addons/${addon.id}/configure`, body),
+      200,
+      "enable evening addon",
+    );
+    try {
+      expect(configured.json).toMatchObject({
+        id: addon.id,
+        enabled: true,
+        version: addon.version + 1,
+      });
+      // Once a response is lost, the original request is queryable, with no second mutation.
+      const recovered = mustBe(
+        await client.operation(requestId),
+        200,
+        "recover original configure",
+      );
+      expect(recovered.json).toEqual({
+        committed: true,
+        result: configured.json,
+      });
+      expect(
+        (await client.request("POST", `/addons/${addon.id}/configure`, body))
+          .json,
+      ).toEqual(configured.json);
+      const runId = randomUUID();
+      const executed = mustBe(
+        await client.request("POST", `/addons/${addon.id}/run`, {
+          requestId: runId,
+        }),
+        200,
+        "manually run evening addon",
+      );
+      expect(executed.json).toMatchObject({ count: expect.any(Number) });
+      expect((await client.operation(runId)).json).toEqual({
+        committed: true,
+        result: executed.json,
+      });
+    } finally {
+      mustBe(
+        await client.request("POST", `/addons/${addon.id}/configure`, {
+          requestId: randomUUID(),
+          expectedVersion: addon.version + 1,
+          enabled: false,
+        }),
+        200,
+        "disable evening addon after test",
+      );
+    }
   });
 
   it("超过网关请求体上限的刷卡/登录正文被拒绝", async () => {
