@@ -38,6 +38,7 @@ export class AppWindows {
   private autoFocus = true;
   constructor(
     private options: {
+      icon: string;
       preload: string;
       renderer: string;
       devTools: boolean;
@@ -184,6 +185,7 @@ export class AppWindows {
           }
         : {}),
       title: titles[role],
+      icon: this.options.icon,
       show: false,
       frame: false,
       backgroundColor: "#fffaf3",

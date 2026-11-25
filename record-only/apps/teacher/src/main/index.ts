@@ -94,6 +94,11 @@ void app.whenReady().then(async () => {
       renderer = devUrl.href;
     }
     const appWindows = new AppWindows({
+      icon: join(
+        app.isPackaged ? process.resourcesPath : app.getAppPath(),
+        "artwork",
+        "icon.png",
+      ),
       preload: join(location, "../preload/index.cjs"),
       renderer,
       devTools: __CYEZ_TEST_FEATURES__,

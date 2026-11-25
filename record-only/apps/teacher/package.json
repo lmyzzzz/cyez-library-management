@@ -1,6 +1,6 @@
 {
   "name": "@record/teacher",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "type": "module",
   "main": "out/main/index.js",
@@ -46,6 +46,14 @@
     ],
     "extraResources": [
       {
+        "from": "artwork",
+        "to": "artwork",
+        "filter": [
+          "icon.png",
+          "material-symbols-LICENSE.txt"
+        ]
+      },
+      {
         "from": "../../target/release/cyez-reader-mock.exe",
         "to": "readers/cyez-reader-mock.exe"
       },
@@ -60,12 +68,15 @@
     ],
     "asar": true,
     "win": {
+      "icon": "artwork/icon.ico",
       "target": [
         "nsis"
       ],
       "artifactName": "cyez-library-${version}-${arch}-setup.${ext}"
     },
     "nsis": {
+      "installerIcon": "artwork/icon.ico",
+      "uninstallerIcon": "artwork/icon.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": false

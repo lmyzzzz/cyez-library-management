@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Library card and reader</title>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0.85" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#f1f4fa"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0.27" y1="0" x2="0.73" y2="1">
+      <stop stop-color="#ffcc55"/>
+      <stop offset="0.52" stop-color="#ffa924"/>
+      <stop offset="1" stop-color="#f58e16"/>
+    </linearGradient>
+    <linearGradient id="deck" x1="0.24" y1="0" x2="0.82" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#dfe7f4"/>
+    </linearGradient>
+    <radialGradient id="shadow">
+      <stop stop-color="#425579" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#425579" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="signal">
+      <stop stop-color="#ffad3d" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#ffad3d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="well" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#dce5f2"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="24" y="29" width="976" height="976" rx="214" fill="#a8b6cd" opacity=".22"/>
+  <rect x="24" y="19" width="976" height="976" rx="214" fill="url(#tile)" stroke="#d7deea" stroke-width="5"/>
+  <ellipse cx="512" cy="819" rx="404" ry="99" fill="url(#shadow)"/>
+
+  <!-- Reader base -->
+  <path d="M124 676 512 847 900 676v56L523 898q-11 5-22 0L124 732Z" fill="#a6b5cb"/>
+  <path d="M124 676 512 847v53q-5 0-11-2L124 732Z" fill="#c2cee1"/>
+  <path d="M135 666 500 504q12-5 24 0l365 162q22 10 0 20L524 848q-12 5-24 0L135 686q-22-10 0-20Z" fill="url(#deck)" stroke="#aebed3" stroke-width="7"/>
+  <path d="m156 676 356 158 356-158" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>
+  <ellipse cx="512" cy="552" rx="224" ry="48" fill="url(#signal)"/>
+  <ellipse cx="512" cy="682" rx="207" ry="99" fill="url(#well)" stroke="#bbc9de" stroke-width="6"/>
+  <ellipse cx="512" cy="679" rx="195" ry="89" fill="#f9fbfe"/>
+
+  <!-- Central school emblem, traced from the school website. No lettering. -->
+  <g transform="translate(512 679) matrix(.46 .079 -.145 .246 0 0) translate(-373 -333)">
+    <path fill="#f04422" d="M590 148C520 84 461 54 369 53 241 51 143 131 130 246c-10 91 35 181 114 220 68 33 132 15 161-38 10-18 13-33 15-49-20 49-48 76-92 79-52 3-87-46-87-108 0-115 68-214 166-241 63-18 128-4 183 39Z"/>
+    <path fill="#f8a823" d="M246 319c30-82 91-125 156-119 31 3 49 18 77 32 27 14 49 4 71-13-2 19-7 34-15 46 18 29 26 63 25 101-1 121-86 226-237 248 112 8 208-42 271-124 83-106 82-234 13-310-51-55-111-73-167-62-93 16-169 89-194 201Z"/>
+    <path fill="#eb252f" d="M109 228c-17 44-24 94-17 145 17 121 118 218 248 212 91-4 161-61 163-152 3-94-69-166-163-141 46 11 75 39 78 81 5 67-42 129-112 131-102 3-194-82-195-210Z"/>
+    <path fill="#46a94c" d="M431 291c24 0 25-30 54-33 17-2 32-1 50-12-12 31-29 52-50 56-19 4-31-5-54-11Z"/>
+    <path fill="#98d27c" d="M456 288c12-12 31-17 55-20-17 13-35 19-55 20Z"/>
+  </g>
+
+  <!-- Floating ID card -->
+  <path d="M185 299 512 450 839 299v37L523 481q-11 5-22 0L185 336Z" fill="#c85b11"/>
+  <path d="M185 299 512 450v33q-5 0-11-2L185 336Z" fill="#e47719"/>
+  <path d="m196 289 304-140q12-5 24 0l304 140q22 10 0 20L524 449q-12 5-24 0L196 309q-22-10 0-20Z" fill="url(#card)" stroke="#e7851d" stroke-width="6"/>
+  <path d="m204 298 308 142 308-142" fill="none" stroke="#fff1c3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Google Material Symbols Rounded: id_card -->
+  <g transform="translate(512 300) matrix(.32 .146 -.24 .11 0 0) translate(-480 480)" fill="#fffdf5">
+    <path d="M730-450q12.75 0 21.38-8.68 8.62-8.67 8.62-21.5 0-12.82-8.62-21.32-8.63-8.5-21.38-8.5H610q-12.75 0-21.37 8.68-8.63 8.67-8.63 21.5 0 12.82 8.63 21.32 8.62 8.5 21.37 8.5h120Zm0-120q12.75 0 21.38-8.68 8.62-8.67 8.62-21.5 0-12.82-8.62-21.32-8.63-8.5-21.38-8.5H610q-12.75 0-21.37 8.68-8.63 8.67-8.63 21.5 0 12.82 8.63 21.32 8.62 8.5 21.37 8.5h120ZM360-434q-38 0-66.64 6.5Q264.73-421 243-407q-20 11-31 28.13-11 17.14-11 36.87 0 9.43 6.68 15.71Q214.35-320 224-320h272q9.65 0 16.32-6.52Q519-333.03 519-343q0-17.69-10.5-34.35Q498-394 478-407q-22-14-51-20.5t-67-6.5Zm51.5-81.42q21.5-21.42 21.5-51.5t-21.42-51.58q-21.42-21.5-51.5-21.5t-51.58 21.42q-21.5 21.42-21.5 51.5t21.42 51.58q21.42 21.5 51.5 21.5t51.58-21.42ZM140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h680v-520H140v520Zm0 0v-520 520Z"/>
+  </g>
+</svg>
